@@ -1,0 +1,37 @@
+local default_gui = data.raw["gui-style"].default
+
+default_gui["fcpu_program_input"] = {
+  type = "textbox_style",
+  parent = "textbox",
+  graphical_set =
+  {
+    type = "none",
+    opacity = 0
+  },
+  font = "default-mono",
+  selection_font_color = {r=1, g=1, b=1},
+  selection_background_color = {r=0.3, g=0.3, b=0.3},
+  minimal_width = 300,
+  maximal_width = 300,
+  minimal_height = 776,
+  maximal_height = 776,
+  word_wrap = false,
+  padding = 0,
+}
+
+default_gui["fcpu_notice_textbox"] = {
+  type = "textbox_style",
+  parent = "textbox",
+  graphical_set =
+  {
+    type = "none",
+    opacity = 0
+  },
+  font = "default-mono",
+  font_color={r=0.8, g=0.9, b=0.8},
+  minimal_width=40,
+  maximal_width=40,
+  minimal_height = 776,
+  maximal_height = 776,
+  padding = 0,
+}
