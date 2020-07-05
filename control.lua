@@ -1,13 +1,14 @@
 Entity = require('__stdlib__/stdlib/entity/entity')
 Surface = require('__stdlib__/stdlib/area/surface')
 require('__stdlib__/stdlib/area/tile')
+table = require('__stdlib__/stdlib/utils/table')
 
 if false then
   Profiler = require('__profiler__/profiler')
 end
 
-Controller = require('src/controller')
 require('src/constants')
+Controller = require('src/controller')
 require('src/gui')
 require('src/fcpu_entity')
 
@@ -199,9 +200,11 @@ script.on_event(defines.events.on_tick, function(event)
         end
         -- Update the inspector GUI.
         if state.gui_inspector and state.gui_inspector.valid then
-          for i = 1, 4 do
-            state.gui_inspector['mem'..i..'-inspect'].sprite = signalToSpritePath( state.memory[i].signal)
-            state.gui_inspector['mem'..i..'-inspect'].number = state.memory[i].count
+          for i = 1, MC_MEMORY do
+            if state.memory[i] then
+              state.gui_inspector['mem'..i..'-inspect'].sprite = signalToSpritePath( state.memory[i].signal)
+              state.gui_inspector['mem'..i..'-inspect'].number = state.memory[i].count
+            end
           end
         end
         -- Tick the Controller.

@@ -1,21 +1,23 @@
-table = require('__stdlib__/stdlib/utils/table')
-
 -- require('constants')
 -- {
 OP_NOP = {type = 'nop'}
+REG_IPT = MC_MEMORY + 1
+REG_CNR = MC_MEMORY + 2
+REG_CNG = MC_MEMORY + 3
+REG_CLK = MC_MEMORY + 4
 -- }
 
 -- Split a string in to tokens using whitespace as a seperator.
-local function split( str )
+local function split(str)
   local result = {}
-  for sub in string.gmatch( str, "%S+" ) do
-    table.insert( result, sub )
+  for sub in string.gmatch(str, "%S+") do
+    table.insert(result, sub)
   end
   return result
 end
 
 -- Parse tokens in to an AST we can store and evaluate later.
-local function parse( tokens )
+local function parse(tokens)
   if #tokens == 0 then
     return OP_NOP
   end
@@ -36,7 +38,7 @@ local function parse( tokens )
     while(peek()) do
       local expr = parseExpr()
       if expr then
-        table.insert( node.expr, expr )
+        table.insert(node.expr, expr)
       else
         break
       end
@@ -61,7 +63,7 @@ local function parse( tokens )
     local address = parseAddress(name)
     return { type = "register", location = name, val = address.val, pointer = address.pointer }
   end
-  local parseReadOnlyRegister = function( name, index )
+  local parseReadOnlyRegister = function(name, index)
     consume()
     return { type = "register", location = "mem", val = tonumber(index) }
   end
@@ -91,13 +93,13 @@ local function parse( tokens )
       elseif string.find(peek(), "out") then
         return parseOutput("out")
       elseif string.find(peek(), "ipt") then
-        return parseReadOnlyRegister("ipt", 5)
+        return parseReadOnlyRegister("ipt", REG_IPT)
       elseif string.find(peek(), "cnr") then
-        return parseReadOnlyRegister("cnr", 6)
+        return parseReadOnlyRegister("cnr", REG_CNR)
       elseif string.find(peek(), "cng") then
-        return parseReadOnlyRegister("cng", 7)
+        return parseReadOnlyRegister("cng", REG_CNG)
       elseif string.find(peek(), "clk") then
-        return parseReadOnlyRegister("clk", 8)
+        return parseReadOnlyRegister("clk", REG_CLK)
       else
         return parseOp()
       end
@@ -109,74 +111,74 @@ end
 --- Throws an exception, the exception has a control character prepended to that
 --- we can substring the message to only display the error message and not the stack-trace
 --- to the user.
-local function exception( val )
+local function exception(val)
   error("@"..val, 2)
 end
 
 --- Evaluates an AST.
-local function eval( ast, control, memory, program_counter, clock )
+local function eval(ast, control, memory, program_counter, clock)
   local wires = {}
   wires.red = control.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_input)
   wires.green = control.get_circuit_network(defines.wire_type.green, defines.circuit_connector_id.combinator_input)
 
   local node, num
   -- Assertion Helper Functions
-  local assert_inout = function( _ )
+  local assert_inout = function(_)
     if #_ ~= 2 then
       exception("Expecting two parameters after opcode")
     end
   end
-  local assert_in = function( _ )
+  local assert_in = function(_)
     if #_ ~= 1 then
       exception("Expecting one parameter after opcode")
     end
   end
-  local assert_in_register = function( _ )
+  local assert_in_register = function(_)
     if _.type ~= "register" then
       exception("Expecting 1st parameter to be a memory or output register")
     end
   end
-  local assert_in_mem = function( _ )
+  local assert_in_mem = function(_)
     if _.type ~= "register" or _.location ~= "mem" then
       exception("Expecting 1st parameter to be a memory register")
     end
   end
-  local assert_in_register_or_wire = function( _ )
+  local assert_in_register_or_wire = function(_)
     if not (_.type == "register" or _.type == "wire") then
       exception("Expecting 1st parameter to be a register or wire input")
     end
   end
-  local assert_in_mem_or_val = function( _ )
+  local assert_in_mem_or_val = function(_)
     if not ((_.type == "register" and _.location == "mem") or _.type == "num") then
       exception("Expecting 1st parameter to be an integer or memory register")
     end
   end
-  local assert_in_mem_or_val_or_label = function( _ )
+  local assert_in_mem_or_val_or_label = function(_)
     if not ((_.type == "register" and _.location == "mem") or _.type == "num" or _.type == "label") then
       exception("Expecting 1st parameter to be an integer, memory register or label")
     end
   end
-  local assert_in_wire = function( _ )
+  local assert_in_wire = function(_)
     if _.type ~= "wire" then
       exception("Expecting 1st parameter to be a wire input")
     end
   end
-  local assert_out_mem = function( _ )
+  local assert_out_mem = function(_)
     if _.type ~= "register" or _.location ~= "mem" then
       exception("Expecting 2nd parameter to be a memory register")
     end
   end
-  local assert_out_register = function( _ )
+  local assert_out_register = function(_)
     if _.type ~= "register" then
       exception("Expecting 2nd parameter to be a memory or output register")
     end
   end
-  local assert_out_mem_or_val = function( _ )
+  local assert_out_mem_or_val = function(_)
     if not ((_.type == "register" and _.location == "mem") or _.type == "num") then
       exception("Expecting 2nd parameter to be an integer or memory register")
     end
   end
-  local assert_memory_index_range = function( index, max )
+  local assert_memory_index_range = function(index, max)
     if index == nil then
       exception("No register address specified.")
     end
@@ -187,57 +189,57 @@ local function eval( ast, control, memory, program_counter, clock )
   -- Memory Register Helper Functions
   -- Read only registers
   local getmem, setmem
-  local function readOnlyRegister( index )
-    if index == 5 then
+  local function readOnlyRegister(index)
+    if index == REG_IPT then
       return program_counter
-    elseif index == 6 then
+    elseif index == REG_CNR then
       if wires.red and wires.red.signals then
         return #wires.red.signals
       else
         return 0
       end
-    elseif index == 7 then
+    elseif index == REG_CNG then
       if wires.green and wires.green.signals then
         return #wires.green.signals
       else
         return 0
       end
-    elseif index == 8 then
+    elseif index == REG_CLK then
       return clock
     end
   end
-  local memindex = function( _ )
+  local memindex = function(_)
     if _.pointer then
-      --assert_memory_index_range(_.val, 8)
+      --assert_memory_index_range(_.val, MC_MEMORY + 4)
       return getmem(_, true).count
     else
       return _.val
     end
   end
-  getmem = function( index_expr, ignore_pointer )
+  getmem = function(index_expr, ignore_pointer)
     local index
     if not ignore_pointer then
       index = memindex(index_expr)
     else
       index = index_expr.val
     end
-    if index > 4 then
-      assert_memory_index_range(index, 8)
+    if MC_MEMORY < index then
+      assert_memory_index_range(index, MC_MEMORY + 4)
       local result = table.deepcopy(NULL_SIGNAL)
       result.count = readOnlyRegister(index)
       return result
     else
-      assert_memory_index_range(index, 4)
+      assert_memory_index_range(index, MC_MEMORY)
       return table.deepcopy(memory[index])
     end
   end
-  setmem = function( index_expr, value )
+  setmem = function(index_expr, value)
     local index = memindex(index_expr)
     local signal = table.deepcopy(value)
-    assert_memory_index_range(index, 4)
+    assert_memory_index_range(index, MC_MEMORY)
     memory[index] = signal
   end
-  local setmem_count = function( index_expr, count )
+  local setmem_count = function(index_expr, count)
     local value = getmem(index_expr)
     value.count = count
     setmem(index_expr, value)
@@ -248,43 +250,43 @@ local function eval( ast, control, memory, program_counter, clock )
     local value = control.parameters.parameters.first_constant
     return {signal = signalID, count = value}
   end
-  local setout = function( value )
+  local setout = function(value)
     local params = control.parameters
     params.parameters.first_constant = value.count
     params.parameters.output_signal = value.signal
     control.parameters = params
   end
-  local setout_count = function( count )
+  local setout_count = function(count)
     local params = control.parameters
     params.parameters.first_constant = count
     control.parameters = params
   end
   -- Multiplex Helper Functions
-  local function getregister( index_expr )
+  local function getregister(index_expr)
     if index_expr.location == 'mem' then
       return getmem(index_expr)
     elseif index_expr.location == 'out' then
       return getout()
     end
   end
-  local function setregister( index_expr, value )
+  local function setregister(index_expr, value)
     if index_expr.location == 'mem' then
       setmem(index_expr, value)
     elseif index_expr.location == 'out' then
       setout(value)
     end
   end
-  local function setregister_count( index_expr, count )
+  local function setregister_count(index_expr, count)
     if index_expr.location == 'mem' then
       setmem_count(index_expr, count)
     elseif index_expr.location == 'out' then
       setout_count(count)
     end
   end
-  local function const_num( number )
+  local function const_num(number)
     return {type = "num", val = number}
   end
-  local function memcount_or_val( _ )
+  local function memcount_or_val(_)
     if _.type == 'num' then
       return num(_)
     elseif _.type == 'register' and _.location == 'mem' then
@@ -292,7 +294,7 @@ local function eval( ast, control, memory, program_counter, clock )
     end
   end
   -- Wire Helper Functions
-  local function getwire( _ )
+  local function getwire(_)
     local index = memindex(_)
     if not wires[_.color] then
       exception("Tried to access ".._.color.." wire when input not present.")
@@ -302,7 +304,7 @@ local function eval( ast, control, memory, program_counter, clock )
     end
     return NULL_SIGNAL
   end
-  local function find_signal_in_wire( wire, signal_to_find )
+  local function find_signal_in_wire(wire, signal_to_find)
     if signal_to_find and wire.signals then
       for index, wire_signal in pairs(wire.signals) do
         if wire_signal and wire_signal.signal.name == signal_to_find.signal.name then
@@ -313,7 +315,7 @@ local function eval( ast, control, memory, program_counter, clock )
     return NULL_SIGNAL
   end
   -- Setup Helper Functions
-  local standard_op = function( _ )
+  local standard_op = function(_)
     assert_inout(_)
     local _in = _[1]
     assert_in_mem_or_val(_in)
@@ -321,7 +323,7 @@ local function eval( ast, control, memory, program_counter, clock )
     assert_out_mem_or_val(_out)
     return _in, _out
   end
-  local test_op = function( _ )
+  local test_op = function(_)
     assert_inout(_)
     local _in = _[1]
     assert_in_mem_or_val(_in)
@@ -593,10 +595,10 @@ local function eval( ast, control, memory, program_counter, clock )
 
   -- TODO: Tidy this up, we've got functions being declared in two different ways here
   -- and also some before the op codes and some after.
-  num = function( _ )
+  num = function(_)
     return _.val
   end
-  node = function( _ )
+  node = function(_)
     if _.type == 'num' then
       return num(_)
     elseif _.type == 'op' then
@@ -623,7 +625,7 @@ end
 
 local compiler = {}
 
-function compiler.compile( lines )
+function compiler.compile(lines)
   local ast = {}
   for i, line in ipairs(lines) do
     ast[i] = parse(split(line))
@@ -631,7 +633,7 @@ function compiler.compile( lines )
   return ast
 end
 
-function compiler.eval( ast, control, state )
+function compiler.eval(ast, control, state)
   local status, results = pcall(eval, ast, control, state.memory, state.program_counter, state.clock)
   if not status then
     local start_index = string.find(results, "@") or 1

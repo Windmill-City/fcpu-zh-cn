@@ -1,4 +1,3 @@
-local Entity = require('__stdlib__/stdlib/entity/entity')
 local Compiler = require('compiler')
 
 --require('src/constants')
@@ -12,7 +11,7 @@ RUN_SIGNAL = {signal = { type = "virtual", name = "signal-fcpu-run"}, count = 1}
 STEP_SIGNAL = {signal = { type = "virtual", name = "signal-fcpu-step"}, count = 1}
 SLEEP_SIGNAL = {signal = { type = "virtual", name = "signal-fcpu-sleep"}, count = 1}
 JUMP_SIGNAL = {signal = { type = "virtual", name = "signal-fcpu-jump"}, count = 1}
--- } constants
+-- }
 
 function linepairs(s)
   if s:sub(-1)~="\n" then s=s.."\n" end

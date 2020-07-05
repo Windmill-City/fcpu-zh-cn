@@ -3,8 +3,6 @@
 local string = require('__stdlib__/stdlib/utils/string')
 local gui = require("__flib__.gui")
 
-require('src/constants')
-
 -------------------------------------------------------------------------------------------------------
 
 function mixPlayerData(event, proc)
@@ -123,6 +121,11 @@ function CreateWidget(player)
     rootGui["fcpu-widget"].destroy()
   end
 
+  local memslots = {}
+  for i = 1, MC_MEMORY do
+    table.insert(memslots, gui.templates.slot_button("mem"..i))
+  end
+
   local elems = gui.build(rootGui, {
     {type="frame", save_as="gui_fcpu", name="fcpu-widget", style="inner_frame_in_outer_frame", direction="vertical", children={
       {type="flow", name="titlebar", children={
@@ -145,12 +148,7 @@ function CreateWidget(player)
         {template="heading_2", caption={"gui-fcpu.memory"}},
         {type="flow", save_as="gui_inspector", direction="horizontal",
           children={
-            gui.templates.slot_button("mem1"),
-            gui.templates.slot_button("mem2"),
-            gui.templates.slot_button("mem3"),
-            gui.templates.slot_button("mem4"),
-            gui.templates.slot_button("mem5"),
-            gui.templates.slot_button("mem6"),
+            table.unpack(memslots)
           },
           style_mods={horizontally_stretchable=true, horizontal_align="center"},
         },
