@@ -196,7 +196,7 @@ function fcpuOpenWidget(player, entity)
   local state = Entity.get_data(entity)
 
   local elems = CreateWidget(player)
-  if debug_enabled then
+  if fcpu_debug_enabled then
     elems.gui_fcpu.titlebar.label.caption = elems.gui_fcpu.titlebar.label.caption.." #"..entity.unit_number
   end
   state = table.merge(state, elems)

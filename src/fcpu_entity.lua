@@ -146,7 +146,7 @@ function handle_fcpu_create(ent)
       local imposter_state = get_imposter_fcpu_state(imposter_fcpu)
       local target = imposter_state.target or imposter_state.fcpu
       if target then
-        if debug_enabled then
+        if fcpu_debug_enabled then
           if imposter_state.target then
             debug_print("- got target")
           elseif imposter_state.fcpu then

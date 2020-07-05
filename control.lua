@@ -2,6 +2,10 @@ Entity = require('__stdlib__/stdlib/entity/entity')
 Surface = require('__stdlib__/stdlib/area/surface')
 require('__stdlib__/stdlib/area/tile')
 
+if false then
+  Profiler = require('__profiler__/profiler')
+end
+
 Controller = require('src/controller')
 require('src/constants')
 require('src/gui')
@@ -14,26 +18,41 @@ require('src/fcpu_entity')
 [entity] imposter_fcpu      = state.imposter_fcpu
 --]]
 
-local debug_enabled = 0
-
 local function debug_print_real(...)
   local s = ""
   for _,v in ipairs({...}) do
     s = s .. tostring(v)
   end
-  if (debug_enabled % 2) == 1 then
+  if (fcpu_debug_enabled % 2) == 1 then
     game.print(s)
   end
-  if (debug_enabled / 2 % 2) == 1 then
+  if (fcpu_debug_enabled / 2 % 2) == 1 then
     log(s)
   end
 end
 
-if debug_enabled and 0 < debug_enabled then
-  debug_print = debug_print_real
-else
-  debug_print = function()end
+local function update_debug_enabled()
+  if fcpu_debug_enabled and 0 < fcpu_debug_enabled then
+    debug_print = debug_print_real
+  else
+    debug_print = function()end
+  end
 end
+
+local log_format_map = {d=0, c=1, l=2, b=3}
+fcpu_debug_enabled = log_format_map[settings.global["fcpu-debug-enabled"].value]
+fcpu_maximum_updates_per_tick = settings.global["fcpu-maximum-updates-per-tick"].value
+update_debug_enabled()
+
+script.on_event(defines.events.on_runtime_mod_setting_changed, function(event)
+  if event.setting == "fcpu-debug-enabled" then
+    fcpu_debug_enabled = log_format_map[settings.global[event.setting].value]
+    update_debug_enabled()
+  end
+  if event.setting == "fcpu-maximum-updates-per-tick" then
+    fcpu_maximum_updates_per_tick = settings.global[event.setting].value
+  end
+end)
 
 local function signalToSpritePath(signal)
   if signal.type == "virtual" then
@@ -139,6 +158,8 @@ local function on_marked_for_deconstruction(event)
   end
 end
 
+global.profile = false
+
 script.on_event(defines.events.on_tick, function(event)
   -- Ensure we have a table to store fcpus in the global state.
   if not global.fcpus then
@@ -146,7 +167,9 @@ script.on_event(defines.events.on_tick, function(event)
   end
 
   global.last_index = global.last_index or #global.fcpus
-  for i = 1, 200 do
+  if global.profile_ticks and Profiler then Profiler.Start(true) end
+
+  for i = 1, math.min(#global.fcpus, global.profile_ticks or fcpu_maximum_updates_per_tick) do
     global.last_index = (global.last_index + #global.fcpus - 2) % #global.fcpus + 1
 
     -- Iterate through stored fcpus.
@@ -192,6 +215,8 @@ script.on_event(defines.events.on_tick, function(event)
       table.remove(global.fcpus, i)
     end
   end
+
+  if global.profile_ticks and Profiler then Profiler.Stop(false, "") global.profile_ticks = nil end
 end)
 
 script.on_event(Controller.event_error, function(event)

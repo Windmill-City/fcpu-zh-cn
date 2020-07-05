@@ -149,7 +149,7 @@ function Controller.tick(mc, state)
       Controller.set_program_counter(mc, state, value)
     end
   end
-  
+
   -- Run Controller code.
   if state.program_state == PSTATE_RUNNING then
     local ast = state.program_ast[state.program_counter]

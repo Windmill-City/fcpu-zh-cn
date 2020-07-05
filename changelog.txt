@@ -1,0 +1,8 @@
+---------------------------------------------------------------------------------------------------
+Version: 0.0.0
+Date: 00. 07. 2020
+  New:
+    - Initial release.
+  Features:
+    - Added blueprint save.
+    - Added copy & paste ability.
