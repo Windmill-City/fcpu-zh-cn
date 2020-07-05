@@ -177,6 +177,7 @@ function Controller.tick(mc, state)
       elseif result.type == 'skip' then
         Controller.set_program_counter(mc, state, state.program_counter + 2)
       elseif result.type == 'block' then
+        -- FIXME: should take into account the fcpu_maximum_updates_per_tick limit!
         -- Do nothing, keeping the program_counter the same.
       end
     else
