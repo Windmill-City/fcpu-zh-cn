@@ -5,5 +5,5 @@
     "author": "KonStg & Krul",
     "factorio_version": "0.18",
     "dependencies": ["base >= 0.18", "stdlib", "flib"],
-    "description": "Factorio Customizable Processing Unit"
+    "description": "Factorio Customizable Processing Unit.\nThanks to StickyNotes mod and https://forums.factorio.com/viewtopic.php?f=28&t=49709#p288672 for great blueprint save storage, Microcontroller mod for good starting point."
   }

@@ -12,7 +12,7 @@ data:extend{
       icon = "__fcpu__/graphics/icons/signal_halt.png",
       icon_size = 32,
       subgroup = "virtual-signal-letter",
-      order = "c[microcntroller]-[A]"
+      order = "d[fcpu]-[A]"
   },
   {
       type = "virtual-signal",
@@ -20,7 +20,7 @@ data:extend{
       icon = "__fcpu__/graphics/icons/signal_run.png",
       icon_size = 32,
       subgroup = "virtual-signal-letter",
-      order = "c[microcntroller]-[B]"
+      order = "d[fcpu]-[B]"
   },
   {
       type = "virtual-signal",
@@ -28,7 +28,7 @@ data:extend{
       icon = "__fcpu__/graphics/icons/signal_step.png",
       icon_size = 32,
       subgroup = "virtual-signal-letter",
-      order = "c[microcntroller]-[C]"
+      order = "d[fcpu]-[C]"
   },
   {
       type = "virtual-signal",
@@ -36,7 +36,7 @@ data:extend{
       icon = "__fcpu__/graphics/icons/signal_sleep.png",
       icon_size = 32,
       subgroup = "virtual-signal-letter",
-      order = "c[microcntroller]-[D]"
+      order = "d[fcpu]-[D]"
   },
   {
       type = "virtual-signal",
@@ -44,6 +44,6 @@ data:extend{
       icon = "__fcpu__/graphics/icons/signal_jump.png",
       icon_size = 32,
       subgroup = "virtual-signal-letter",
-      order = "c[microcntroller]-[E]"
+      order = "d[fcpu]-[E]"
   },
 }
