@@ -144,9 +144,13 @@ script.on_event(defines.events.on_tick, function(event)
   if not global.fcpus then
     global.fcpus = {}
   end
-  -- Iterate through all stored fcpus.
-  for i = #global.fcpus, 1, -1 do
-    local mc = global.fcpus[i]
+
+  global.last_index = global.last_index or #global.fcpus
+  for i = 1, 200 do
+    global.last_index = (global.last_index + #global.fcpus - 2) % #global.fcpus + 1
+
+    -- Iterate through stored fcpus.
+    local mc = global.fcpus[global.last_index]
     if mc.valid then
       local state = Entity.get_data(mc)
       if state then
