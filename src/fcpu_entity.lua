@@ -41,7 +41,7 @@ local function encode_fcpu(entity)
   write_to_combinator(state.imposter_fcpu, {
     t=state.program_text,
     i=state.program_counter,
-    r=controller.is_running(entity)
+    r=Controller.is_running(entity)
   })
 end
 
@@ -70,12 +70,12 @@ local function update_fcpu_target(imposter_fcpu, new_fcpu)
   Entity.set_data(new_fcpu, state)
 
   if imposter_state.target_program then
-    controller.update_program_text(new_fcpu, imposter_state.target_program)
+    Controller.update_program_text(new_fcpu, imposter_state.target_program)
 
-    controller.compile(new_fcpu, state)
-    controller.set_program_counter(new_fcpu, state, imposter_state.ip)
+    Controller.compile(new_fcpu, state)
+    Controller.set_program_counter(new_fcpu, state, imposter_state.ip)
     if imposter_state.run then
-      controller.run(new_fcpu, state)
+      Controller.run(new_fcpu, state)
     end
   else
     debug_print('--- can not update program')
@@ -216,6 +216,6 @@ function fcpu_destroy_imposter(entity)
 end
 
 function fcpu_update_program(fcpu, program_text)
-  controller.update_program_text(fcpu, program_text)
+  Controller.update_program_text(fcpu, program_text)
   encode_fcpu(fcpu)
 end

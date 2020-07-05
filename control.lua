@@ -2,7 +2,7 @@ Entity = require('__stdlib__/stdlib/entity/entity')
 Surface = require('__stdlib__/stdlib/area/surface')
 require('__stdlib__/stdlib/area/tile')
 
-controller = require('src/controller')
+Controller = require('src/controller')
 require('src/constants')
 require('src/gui')
 require('src/fcpu_entity')
@@ -70,7 +70,7 @@ local function on_build_fcpu(event)
   if not (entity and entity.valid) then return end
 
   if entity.name == "fcpu" then
-    controller.init(entity, {})
+    Controller.init(entity, {})
     local didFind = false
     for _, mc in ipairs(global.fcpus) do
       if mc == entity then
@@ -107,7 +107,7 @@ local function on_destroy_fcpu(event)
               debug_print("moved to imposter "..imposter_fcpu.unit_number)
               imposter_state.target_program = state.program_text
               imposter_state.ip = state.program_counter
-              imposter_state.run = controller.is_running(entity)
+              imposter_state.run = Controller.is_running(entity)
               Entity.set_data(imposter_fcpu, imposter_state)
               return
             end
@@ -156,7 +156,7 @@ script.on_event(defines.events.on_tick, function(event)
       if state then
         -- Enable/Disable the run/step button.
         if state.gui_run_button and state.gui_run_button.valid then
-          if controller.is_running(mc) then
+          if Controller.is_running(mc) then
             state.gui_halt_button.enabled = true
             state.gui_run_button.enabled = false
             state.gui_enable_switch.switch_state = "right"
@@ -168,7 +168,7 @@ script.on_event(defines.events.on_tick, function(event)
         end
         -- Make text read-only while running
         if state.gui_program_input and state.gui_program_input.valid then
-          state.gui_program_input.read_only = controller.is_running(mc)
+          state.gui_program_input.read_only = Controller.is_running(mc)
         end
         -- Update the program lines in the GUI.
         if state.gui_line_numbers and state.gui_line_numbers.valid then
@@ -181,9 +181,9 @@ script.on_event(defines.events.on_tick, function(event)
             state.gui_inspector['mem'..i..'-inspect'].number = state.memory[i].count
           end
         end
-        -- Tick the controller.
+        -- Tick the Controller.
         if mc.active and mc.is_connected_to_electric_network() then
-          controller.tick(mc, state)
+          Controller.tick(mc, state)
         end
       end
     else
@@ -194,7 +194,7 @@ script.on_event(defines.events.on_tick, function(event)
   end
 end)
 
-script.on_event(controller.event_error, function(event)
+script.on_event(Controller.event_error, function(event)
   local entity = event.entity
   for _, player in pairs(game.players) do
     local player_data = get_player_data(player.index)
@@ -222,10 +222,10 @@ local function on_entity_settings_pasted(event)
 
       if src_state and dst_state then
         fcpu_update_program(dst_entity, src_state.program_text)
-        controller.compile(dst_entity, dst_state)
-        controller.set_program_counter(dst_entity, dst_state, 1) -- src_state.program_counter)
-        if controller.is_running(src_entity) then
-          controller.run(dst_entity, dst_state)
+        Controller.compile(dst_entity, dst_state)
+        Controller.set_program_counter(dst_entity, dst_state, 1) -- src_state.program_counter)
+        if Controller.is_running(src_entity) then
+          Controller.run(dst_entity, dst_state)
         end
       end
     end

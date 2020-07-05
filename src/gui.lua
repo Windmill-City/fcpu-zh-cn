@@ -54,10 +54,10 @@ gui.add_handlers{
         if event.element then
           if event.element.switch_state == "right" then
             player_data.current_fcpu_gui.outer.error_message.caption = ""
-            controller.compile(player_data.current_fcpu, state)
-            controller.run(player_data.current_fcpu, state)
+            Controller.compile(player_data.current_fcpu, state)
+            Controller.run(player_data.current_fcpu, state)
           else
-            controller.halt(player_data.current_fcpu, state)
+            Controller.halt(player_data.current_fcpu, state)
           end
         end
       end)
@@ -66,22 +66,22 @@ gui.add_handlers{
       on_gui_click = mixPlayerData(event, function(player_data)
         local state = Entity.get_data(player_data.current_fcpu)
         player_data.current_fcpu_gui.outer.error_message.caption = ""
-        controller.compile(player_data.current_fcpu, state)
-        controller.run(player_data.current_fcpu, state)
+        Controller.compile(player_data.current_fcpu, state)
+        Controller.run(player_data.current_fcpu, state)
       end)
     },
     halt_program = {
       on_gui_click = mixPlayerData(event, function(player_data)
         local state = Entity.get_data(player_data.current_fcpu)
-        controller.halt(player_data.current_fcpu, state)
+        Controller.halt(player_data.current_fcpu, state)
       end)
     },
     step_program = {
       on_gui_click = mixPlayerData(event, function(player_data)
         local state = Entity.get_data(player_data.current_fcpu)
         player_data.current_fcpu_gui.outer.error_message.caption = ""
-        controller.compile(player_data.current_fcpu, state)
-        controller.step(player_data.current_fcpu, state)
+        Controller.compile(player_data.current_fcpu, state)
+        Controller.step(player_data.current_fcpu, state)
       end)
     },
     copy_program = {
@@ -204,7 +204,7 @@ function fcpuOpenWidget(player, entity)
   state.gui_program_input.text = state.program_text
   updateLines(state.gui_line_numbers, state)
 
-  if controller.is_running(entity) then
+  if Controller.is_running(entity) then
     state.gui_run_button.enabled = false
     state.gui_enable_switch.switch_state = "right"
   else
