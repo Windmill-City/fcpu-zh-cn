@@ -203,6 +203,15 @@ function fcpu_destroy_imposter(entity)
       Entity.set_data(imposter_state.fcpu, state)
     end
     entity.destroy()
+  elseif entity.name == "entity-ghost" and entity.ghost_name == "fcpu" then
+    debug_print("destroyed fcpu ghost")
+    local imposter_fcpus = entity.surface.find_entities_filtered{name = "imposter-fcpu", position = entity.position, force = entity.force, limit = 1}
+    if #imposter_fcpus > 0 then
+      local imposter_fcpu = imposter_fcpus[1]
+      if imposter_fcpu.valid then
+        imposter_fcpu.destroy()
+      end
+    end
   end
 end
 

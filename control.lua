@@ -14,7 +14,7 @@ require('src/fcpu_entity')
 [entity] imposter_fcpu      = state.imposter_fcpu
 --]]
 
-local debug_enabled = 2
+local debug_enabled = 0
 
 local function debug_print_real(...)
   local s = ""
@@ -86,7 +86,7 @@ local function on_build_fcpu(event)
 end
 
 local function on_destroy_fcpu(event)
-  debug_print("entity destroyed "..event.entity.unit_number)
+  debug_print("entity destroyed #"..event.entity.unit_number)
   close_entity_gui(event.entity)
 
   -- after entity die there will be ghost leaved for entity reviving, so do not remove fcpu imposter
@@ -103,7 +103,7 @@ local function on_destroy_fcpu(event)
           if imposter_state ~= nil then
             local state = get_fcpu_state(entity)
             if state ~= nil then
-              rendering.draw_line{from={entity.position.x+0.1, entity.position.y}, to=imposter_fcpu, width=5, color={b = 1, a = 0.8}, surface=entity.surface }
+              -- rendering.draw_line{from={entity.position.x+0.1, entity.position.y}, to=imposter_fcpu, width=5, color={b = 1, a = 0.8}, surface=entity.surface }
               debug_print("moved to imposter "..imposter_fcpu.unit_number)
               imposter_state.target_program = state.program_text
               imposter_state.ip = state.program_counter
