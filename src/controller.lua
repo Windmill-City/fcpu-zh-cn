@@ -4,14 +4,6 @@ local Compiler = require('compiler')
 PSTATE_HALTED = 0
 PSTATE_RUNNING = 1
 PSTATE_SLEEPING = 2
--- {
-NULL_SIGNAL = {signal = { type = "virtual", name = "signal-black" }, count = 0}
-HALT_SIGNAL = {signal = { type = "virtual", name = "signal-fcpu-halt"}, count = 1}
-RUN_SIGNAL = {signal = { type = "virtual", name = "signal-fcpu-run"}, count = 1}
-STEP_SIGNAL = {signal = { type = "virtual", name = "signal-fcpu-step"}, count = 1}
-SLEEP_SIGNAL = {signal = { type = "virtual", name = "signal-fcpu-sleep"}, count = 1}
-JUMP_SIGNAL = {signal = { type = "virtual", name = "signal-fcpu-jump"}, count = 1}
--- }
 
 function linepairs(s)
   if s:sub(-1)~="\n" then s=s.."\n" end
@@ -29,7 +21,6 @@ function Controller.init(mc, state)
   state.program_counter = 1
   state.program_ast = {}
   state.program_state = PSTATE_HALTED
-  Entity.set_data(mc, state)
 
   local control = mc.get_or_create_control_behavior()
   control.parameters = {
@@ -43,13 +34,14 @@ function Controller.init(mc, state)
     }
   }
   Controller.init_memory(mc, state)
+  Entity.set_data(mc, state)
   return state
 end
 
 function Controller.init_memory(mc, state)
   if state.memory == nil then
     state.memory = {}
-    for i = 1, 4 do
+    for i = 1, MC_MEMORY do
       state.memory[i] = NULL_SIGNAL
     end
   end

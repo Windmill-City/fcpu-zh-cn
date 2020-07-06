@@ -51,12 +51,17 @@ gui.add_handlers{
         local state = Entity.get_data(player_data.current_fcpu)
         if event.element then
           if event.element.switch_state == "right" then
-            player_data.current_fcpu_gui.outer.error_message.caption = ""
-            Controller.compile(player_data.current_fcpu, state)
-            Controller.run(player_data.current_fcpu, state)
+            if not Controller.is_running(player_data.current_fcpu) then
+              player_data.current_fcpu_gui.outer.error_message.caption = ""
+              Controller.compile(player_data.current_fcpu, state)
+              Controller.run(player_data.current_fcpu, state)
+            end
+            state.disabled = nil
           else
             Controller.halt(player_data.current_fcpu, state)
+            state.disabled = true
           end
+          Entity.set_data(player_data.current_fcpu, state)
         end
       end)
     },
@@ -143,7 +148,7 @@ function CreateWidget(player)
           gui.templates.control_button("step", "next"),
           gui.templates.control_button("run", "play", "green"),
           {template="pushers.horizontal"},
-          {type="switch", style_mods={}, left_label_caption={"gui-constant.off"}, right_label_caption={"gui-constant.on"}, save_as="gui_enable_switch", handlers="widget.enable_program"},
+          {type="switch", style_mods={ right_margin=10 }, left_label_caption={"gui-constant.off"}, right_label_caption={"gui-constant.on"}, save_as="gui_enable_switch", handlers="widget.enable_program"},
         }},
         {template="heading_2", caption={"gui-fcpu.memory"}},
         {type="flow", save_as="gui_inspector", direction="horizontal",
@@ -202,12 +207,16 @@ function fcpuOpenWidget(player, entity)
   state.gui_program_input.text = state.program_text
   updateLines(state.gui_line_numbers, state)
 
+  if state.disabled then
+    state.gui_enable_switch.switch_state = "left"
+  else
+    state.gui_enable_switch.switch_state = "right"
+  end
+
   if Controller.is_running(entity) then
     state.gui_run_button.enabled = false
-    state.gui_enable_switch.switch_state = "right"
   else
     state.gui_run_button.enabled = true
-    state.gui_enable_switch.switch_state = "left"
   end
 
   player_data.current_fcpu_gui = state.gui_fcpu

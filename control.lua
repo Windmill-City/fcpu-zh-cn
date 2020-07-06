@@ -56,10 +56,12 @@ script.on_event(defines.events.on_runtime_mod_setting_changed, function(event)
 end)
 
 local function signalToSpritePath(signal)
-  if signal.type == "virtual" then
-    return "virtual-signal/" .. signal.name
-  else
-    return signal.type .. '/' .. signal.name
+  if signal then
+    if signal.type == "virtual" then
+      return "virtual-signal/" .. signal.name
+    elseif signal.name then
+      return signal.type .. '/' .. signal.name
+    end
   end
 end
 
@@ -170,35 +172,37 @@ script.on_event(defines.events.on_tick, function(event)
   global.last_index = global.last_index or #global.fcpus
   if global.profile_ticks and Profiler then Profiler.Start(true) end
 
-  for i = 1, math.min(#global.fcpus, global.profile_ticks or fcpu_maximum_updates_per_tick) do
+  local limit = math.min(#global.fcpus, global.profile_ticks or fcpu_maximum_updates_per_tick)
+  local i = 1
+  local c = 1
+  while i <= limit and c <= #global.fcpus do
     global.last_index = (global.last_index + #global.fcpus - 2) % #global.fcpus + 1
+    c = c + 1
 
-    -- Iterate through stored fcpus.
+    -- Iterate through stored fcpus
     local mc = global.fcpus[global.last_index]
     if mc.valid then
       local state = Entity.get_data(mc)
-      if state then
-        -- Enable/Disable the run/step button.
+      if state and not state.disabled then
+        -- Enable/Disable the run/step button
         if state.gui_run_button and state.gui_run_button.valid then
           if Controller.is_running(mc) then
             state.gui_halt_button.enabled = true
             state.gui_run_button.enabled = false
-            state.gui_enable_switch.switch_state = "right"
           else
             state.gui_halt_button.enabled = (state.program_counter ~= 1)
             state.gui_run_button.enabled = true
-            state.gui_enable_switch.switch_state = "left"
           end
         end
         -- Make text read-only while running
         if state.gui_program_input and state.gui_program_input.valid then
           state.gui_program_input.read_only = Controller.is_running(mc)
         end
-        -- Update the program lines in the GUI.
+        -- Update the program lines in the GUI
         if state.gui_line_numbers and state.gui_line_numbers.valid then
           updateLines(state.gui_line_numbers, state)
         end
-        -- Update the inspector GUI.
+        -- Update the inspector GUI
         if state.gui_inspector and state.gui_inspector.valid then
           for i = 1, MC_MEMORY do
             if state.memory[i] then
@@ -207,15 +211,15 @@ script.on_event(defines.events.on_tick, function(event)
             end
           end
         end
-        -- Tick the Controller.
+        -- Tick the Controller
         if mc.active and mc.is_connected_to_electric_network() then
           Controller.tick(mc, state)
+          i = i + 1
         end
       end
     else
-      -- Microcontroller no longer exists, remove from global state.
       close_entity_gui(mc)
-      table.remove(global.fcpus, i)
+      table.remove(global.fcpus, global.last_index)
     end
   end
 

@@ -10,8 +10,12 @@ Controller = require('../src/controller')
 
 ----------------------------------------------------------------------------------------------------------------
 
+unit_number = 0
+
 function createFCPU(input)
   local fcpu = require('__stdlib__/faketorio/raw/arithmetic-combinator')['arithmetic-combinator']
+  unit_number = unit_number + 1
+  fcpu.unit_number = unit_number
   fcpu.name = 'fcpu'
   fcpu.get_control_behavior = function()
     return fcpu._control_behavior
@@ -50,8 +54,8 @@ function createFCPU(input)
   return fcpu
 end
 
-function executeTest(inputSignals, program_text, max_ticks)
-  local fcpu = createFCPU(inputSignals)
+function executeTest(test_title, program_text, input_signals, probe_result, max_ticks)
+  local fcpu = createFCPU(input_signals)
   local state = Controller.init(fcpu, {})
   
   Controller.update_program_text(fcpu, program_text)
@@ -73,24 +77,46 @@ function executeTest(inputSignals, program_text, max_ticks)
   if state.error_message then
     error(state.error_message[3])
   end
+  if probe_result then
+    local output = fcpu.get_control_behavior().parameters.parameters
+    local ret = probe_result(state, output)
+    if ret ~= true and ret ~= nil then
+      print(serpent.block(state.memory, {comment=true}))
+      print(serpent.block(output, {comment=true}))
+      error(ret or ("Test '"..test_title.."' failed"), 2)
+    end
+  end
   return fcpu, state
 end
 
 ----------------------------------------------------------------------------------------------------------------
 
 local fcpu, state = executeTest(
-  {
-    [defines.wire_type.green] = {
-      ['signal-white'] = 10,
-      ['recipe-copper-plate'] = 1000
-    },
-    [defines.wire_type.red] = nil
-  },
+  'check output',
   [[
     mov green1 out
-    mov green2 out
-  ]]
+  ]],
+  {
+    [defines.wire_type.green] = {
+      ['recipe-copper-plate'] = 1000,
+    },
+    [defines.wire_type.red] = nil,
+  },
+  function(state, output)
+    return output.output_signal == 'recipe-copper-plate' and output.first_constant == 1000
+  end
 )
 
---print(serpent.block(state.memory))
-print(serpent.block(fcpu.get_control_behavior().parameters.parameters))
+local fcpu, state = executeTest(
+  'add dst src [dst != mem1]',
+  [[
+    add mem2 1
+  ]],
+  {},
+  function(state, output)
+    return state.memory[2].count == 1
+  end
+)
+
+print(serpent.block(state.memory, {comment=true}))
+print("\nAll tests completed successfully")
