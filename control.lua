@@ -128,7 +128,7 @@ local function on_destroy_fcpu(event)
               -- rendering.draw_line{from={entity.position.x+0.1, entity.position.y}, to=imposter_fcpu, width=5, color={b = 1, a = 0.8}, surface=entity.surface }
               debug_print("moved to imposter "..imposter_fcpu.unit_number)
               imposter_state.target_program = state.program_text
-              imposter_state.ip = state.program_counter
+              imposter_state.ip = state.instruction_pointer
               imposter_state.run = Controller.is_running(entity)
               Entity.set_data(imposter_fcpu, imposter_state)
               return
@@ -190,7 +190,7 @@ script.on_event(defines.events.on_tick, function(event)
             state.gui_halt_button.enabled = true
             state.gui_run_button.enabled = false
           else
-            state.gui_halt_button.enabled = (state.program_counter ~= 1)
+            state.gui_halt_button.enabled = (state.instruction_pointer ~= 1)
             state.gui_run_button.enabled = true
           end
         end
@@ -255,7 +255,7 @@ local function on_entity_settings_pasted(event)
       if src_state and dst_state then
         fcpu_update_program(dst_entity, src_state.program_text)
         Controller.compile(dst_entity, dst_state)
-        Controller.set_program_counter(dst_entity, dst_state, 1) -- src_state.program_counter)
+        Controller.set_program_counter(dst_entity, dst_state, 1) -- src_state.instruction_pointer)
         if Controller.is_running(src_entity) then
           Controller.run(dst_entity, dst_state)
         end

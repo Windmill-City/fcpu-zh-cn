@@ -18,7 +18,7 @@ Controller.event_halt = script.generate_event_name()
 function Controller.init(mc, state)
   state.program_lines = {}
   state.program_text = ""
-  state.program_counter = 1
+  state.instruction_pointer = 1
   state.program_ast = {}
   state.program_state = PSTATE_HALTED
 
@@ -66,28 +66,28 @@ function Controller.compile(mc, state)
 end
 
 function Controller.set_error_message(mc, state, error_message)
-  state.error_message = {"gui-fcpu.program_error", state.program_counter, error_message}
-  state.error_line = state.program_counter
+  state.error_message = {"gui-fcpu.program_error", state.instruction_pointer, error_message}
+  state.error_line = state.instruction_pointer
   script.raise_event(Controller.event_error, {entity = mc, ['state'] = state, message = state.error_message})
 end
 
 function Controller.set_program_counter(mc, state, value)
-  state.program_counter = value
-  if #state.program_ast == 0 or state.program_counter > #state.program_ast then
-    state.program_counter = 1
+  state.instruction_pointer = value
+  if #state.program_ast == 0 or state.instruction_pointer > #state.program_ast then
+    state.instruction_pointer = 1
     state.program_state = PSTATE_HALTED
     state.do_step = false
     script.raise_event(Controller.event_halt, {entity = mc, ['state'] = state})
   else
-    local next_ast = state.program_ast[state.program_counter]
+    local next_ast = state.program_ast[state.instruction_pointer]
     while(next_ast and (next_ast.type == 'nop' or next_ast.type == 'label')) do
-      state.program_counter = state.program_counter + 1
-      if state.program_counter > #state.program_ast then
+      state.instruction_pointer = state.instruction_pointer + 1
+      if state.instruction_pointer > #state.program_ast then
         break
       end
-      next_ast = state.program_ast[state.program_counter]
+      next_ast = state.program_ast[state.instruction_pointer]
     end
-    if state.program_counter > #state.program_ast then
+    if state.instruction_pointer > #state.program_ast then
       state.program_state = PSTATE_HALTED
       state.do_step = false
       script.raise_event(Controller.event_halt, {entity = mc, ['state'] = state})
@@ -122,7 +122,7 @@ function Controller.tick(mc, state)
     Controller.halt(mc, state)
   end
   if state.program_state == PSTATE_HALTED and get_signal(RUN_SIGNAL) > 0 then
-    Controller.run(mc, state, state.program_counter)
+    Controller.run(mc, state, state.instruction_pointer)
   end
   if state.program_state == PSTATE_HALTED and get_signal(STEP_SIGNAL) > 0 then
     Controller.step(mc, state)
@@ -143,7 +143,7 @@ function Controller.tick(mc, state)
 
   -- Run Controller code.
   if state.program_state == PSTATE_RUNNING then
-    local ast = state.program_ast[state.program_counter]
+    local ast = state.program_ast[state.instruction_pointer]
     local success, result = Compiler.eval(ast, control, state)
     if not success then
       Controller.set_error_message(mc, state, result)
@@ -151,7 +151,7 @@ function Controller.tick(mc, state)
     elseif result then
       if result.type == 'halt' then
         Controller.halt(mc, state)
-        Controller.set_program_counter(mc, state, state.program_counter + 1)
+        Controller.set_program_counter(mc, state, state.instruction_pointer + 1)
       elseif result.type == 'sleep' then
         state.program_state = PSTATE_SLEEPING
         state.sleep_time = result.val
@@ -167,19 +167,19 @@ function Controller.tick(mc, state)
           Controller.set_program_counter(mc, state, result.val)
         end
       elseif result.type == 'skip' then
-        Controller.set_program_counter(mc, state, state.program_counter + 2)
+        Controller.set_program_counter(mc, state, state.instruction_pointer + 2)
       elseif result.type == 'block' then
         -- FIXME: should take into account the fcpu_maximum_updates_per_tick limit!
-        -- Do nothing, keeping the program_counter the same.
+        -- Do nothing, keeping the instruction_pointer the same.
       end
     else
-      Controller.set_program_counter(mc, state, state.program_counter + 1)
+      Controller.set_program_counter(mc, state, state.instruction_pointer + 1)
     end
   elseif state.program_state == PSTATE_SLEEPING then
     state.sleep_time = state.sleep_time - 1
     if state.sleep_time <= 1 then
       state.program_state = PSTATE_RUNNING
-      Controller.set_program_counter(mc, state, state.program_counter + 1)
+      Controller.set_program_counter(mc, state, state.instruction_pointer + 1)
     end
   end
 
@@ -200,7 +200,7 @@ function Controller.run(mc, state)
 end
 
 function Controller.step(mc, state)
-  if state.program_counter > #state.program_ast then
+  if state.instruction_pointer > #state.program_ast then
     Controller.set_program_counter(mc, state, 1)
   end
   state.program_state = PSTATE_RUNNING

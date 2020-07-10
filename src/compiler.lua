@@ -47,6 +47,10 @@ local function parse(tokens)
     end
     return node
   end
+  local parseLabel = function()
+    local label = consume()
+    return { type = "label", label = label }
+  end
   local parseAddress = function(name)
     local token = consume()
     if string.find(token, "@%d") then
@@ -73,10 +77,6 @@ local function parse(tokens)
     consume()
     return { type = "register", location = "out" }
   end
-  local parseLabel = function()
-    local label = consume()
-    return { type = "label", label = label }
-  end
 
   parseExpr = function()
     if peek() then
@@ -95,7 +95,7 @@ local function parse(tokens)
       elseif string.find(peek(), "out") then
         return parseOutput("out")
       elseif string.find(peek(), "ipt") then
-        return parseReadOnlyRegister("ipt", REG_IPT)
+        return parseReadOnlyRegister("ip", REG_IP)
       elseif string.find(peek(), "cnr") then
         return parseReadOnlyRegister("cnr", REG_CNR)
       elseif string.find(peek(), "cng") then
@@ -118,13 +118,13 @@ local function exception(val)
 end
 
 --- Evaluates an AST.
-local function eval(ast, control, memory, program_counter, clock)
+local function eval(ast, control, memory, instruction_pointer, clock)
   local wires = {}
   wires.red = control.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_input)
   wires.green = control.get_circuit_network(defines.wire_type.green, defines.circuit_connector_id.combinator_input)
 
   assert.bind(exception)
-  addr.bind(assert, control, wires, memory, program_counter, clock)
+  addr.bind(assert, control, wires, memory, instruction_pointer, clock)
   ops.bind(assert, addr)
 
   local node = function(_)
@@ -163,7 +163,7 @@ function compiler.compile(lines)
 end
 
 function compiler.eval(ast, control, state)
-  local status, results = pcall(eval, ast, control, state.memory, state.program_counter, state.clock)
+  local status, results = pcall(eval, ast, control, state.memory, state.instruction_pointer, state.clock)
   if not status then
     local start_index = string.find(results, "@") or 1
     results = string.sub(results, start_index+1, -1)

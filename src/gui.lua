@@ -236,7 +236,7 @@ function updateLines(element, state)
     if i < 10 then line = "  "..i end
     if i == state.error_line then
       line = line..'!'
-    elseif i == state.program_counter then
+    elseif i == state.instruction_pointer then
       line = line..'>'
     else
       line = line..' '

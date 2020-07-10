@@ -2,7 +2,7 @@ local assert
 local control
 local wires
 local memory
-local program_counter
+local instruction_pointer
 local clock
 local address = {}
 
@@ -16,7 +16,7 @@ local address = {}
   SLEEP_SIGNAL = {signal = { type = "virtual", name = "signal-fcpu-sleep"}, count = 1}
   JUMP_SIGNAL = {signal = { type = "virtual", name = "signal-fcpu-jump"}, count = 1}
 --
-  REG_IPT = MC_MEMORY + 1
+  REG_IP = MC_MEMORY + 1
   REG_CNR = MC_MEMORY + 2
   REG_CNG = MC_MEMORY + 3
   REG_CLK = MC_MEMORY + 4
@@ -24,8 +24,8 @@ local address = {}
 
 
 local function readOnlyRegister(index)
-  if index == REG_IPT then
-    return program_counter
+  if index == REG_IP then
+    return instruction_pointer
   elseif index == REG_CNR then
     if wires.red and wires.red.signals then
       return #wires.red.signals
@@ -180,12 +180,12 @@ function address.find_signal_in_wire(wire, signal_to_find)
 end
 
 
-function address.bind(assert_, control_, wires_, memory_, program_counter_, clock_)
+function address.bind(assert_, control_, wires_, memory_, instruction_pointer_, clock_)
   assert = assert_
   control = control_
   wires = wires_
   memory = memory_
-  program_counter = program_counter_
+  instruction_pointer = instruction_pointer_
   clock = clock_
 end
 return address

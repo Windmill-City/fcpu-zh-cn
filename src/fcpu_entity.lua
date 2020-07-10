@@ -40,7 +40,7 @@ local function encode_fcpu(entity)
   end
   write_to_combinator(state.imposter_fcpu, {
     t=state.program_text,
-    i=state.program_counter,
+    i=state.instruction_pointer,
     r=Controller.is_running(entity)
   })
 end
