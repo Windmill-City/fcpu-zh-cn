@@ -59,7 +59,13 @@ end
 
 function assert.is_register(_)
   if _.type ~= "register" then
-    exception("Expecting 1st parameter to be an integer or memory register")
+    exception("Expecting 1st parameter to be a register")
+  end
+end
+
+function assert.is_reg_or_val(_)
+  if _.type ~= "register" and _.type ~= 'value' then
+    exception("Expecting 1st parameter to be an integer or register")
   end
 end
 

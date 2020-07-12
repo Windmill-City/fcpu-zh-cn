@@ -8,7 +8,7 @@ local standard_op = function(_)
   assert.is_register(_dst)
   local _src = _[2]
   assert.is_input_or_reg_or_val(_src)
-  return _src, _dst
+  return _dst, _src
 end
 local test_op = function(_)
   assert.two(_)
@@ -55,27 +55,27 @@ local opcodes = {
   end,
 
   add = function(_)
-    local _src, _dst = standard_op(_)
+    local _dst, _src = standard_op(_)
     io.register_set_count(_dst, io.getcount(_dst) + io.getcount(_src))
   end,
   sub = function(_)
-    local _src, _dst = standard_op(_)
+    local _dst, _src = standard_op(_)
     io.register_set_count(_dst, io.getcount(_dst) - io.getcount(_src))
   end,
   mul = function(_)
-    local _src, _dst = standard_op(_)
+    local _dst, _src = standard_op(_)
     io.register_set_count(_dst, io.getcount(_dst) * io.getcount(_src))
   end,
   div = function(_)
-    local _src, _dst = standard_op(_)
+    local _dst, _src = standard_op(_)
     io.register_set_count(_dst, io.getcount(_dst) / io.getcount(_src))
   end,
   mod = function(_)
-    local _src, _dst = standard_op(_)
+    local _dst, _src = standard_op(_)
     io.register_set_count(_dst, io.getcount(_dst) % io.getcount(_src))
   end,
   pow = function(_)
-    local _src, _dst = standard_op(_)
+    local _dst, _src = standard_op(_)
     io.register_set_count(_dst, io.getcount(_dst) ^ io.getcount(_src))
   end,
 }

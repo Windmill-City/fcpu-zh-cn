@@ -122,7 +122,7 @@ local function parse(tokens)
         return parseLabel()
       elseif string.find(peek(), '%[') then
         return parseSignal()
-      elseif string.find(peek(), '%d') == 1 then
+      elseif string.find(peek(), '[%-]?%d') == 1 then
         return parseConstant()
 
       elseif string.find(peek(), 'red') then

@@ -135,13 +135,21 @@ local fcpu, state = executeTest(
   'Arithmetics',
   [[
     add reg2 2
+    # 2
     sub reg2 4
+    # -2
     mul reg2 6
+    # -12
     div reg2 3
+    # -4
+    pow reg2 3
+    # -64
+    mod reg2 -3
+    # -1
   ]],
   {},
   function(state, output)
-    return state.regs[2].count == -4
+    return state.regs[2].count == -1
   end
 )
 
