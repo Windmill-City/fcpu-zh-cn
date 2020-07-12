@@ -17,17 +17,17 @@ jmp 2
 
 # fASM
 
-- **S**: **S**ignal (consists of **T**ype and **V**alue)
-  - **T**: signal type
-  - **V**: signal value, same as **C**
+- **S**, signal: **S**ignal (consists of **T**ype and **V**alue)
+  - **T**, type: signal type
+  - **V**, value: signal value, same as **C**
 
-* **C**: integer constant [-2^31..2^31), same as **V**
-* **M**: memory
-* **I**: input wire (**R**ed, **G**reen)
-* **O**: output wire
+* **C**, value: integer constant [-2^31..2^31), same as **V**
+* **R**, register: register
+* **I**, wire: input wire (**R**ed, **G**reen)
+* **O**, wire: output wire
 
-- **A**: instruction address
-- **L**: instruction label
+- **A**, address: instruction address
+- **L**, label: instruction label
 
 `...` - one or more, could be specified multiple times with space separator.  
 `?` - optional, may be specified.  
@@ -41,130 +41,139 @@ No operation.
 ### clr
 Clear all memory and output.
 
-### clr reg...[**M**/**O**]
+### clr reg...[**R**/**O**]
 Clear specified registers.
 
-### mov dst...[M/O] src[S/M/I]
+### mov dst...[R/O] src[S/R/I]
 Copy signal from source to destination.  
 *dst... = src*
 
-### ssv dst...[M] val[V/M/I]
+### ssv dst...[R] val[V/R/I]
 Set signal value.  
 *dst... = val*
 
-### sst dst...[M] type[T/M/I]
+### sst dst...[R] type[T/R/I]
 Set signal type.  
 *dst... = type*
 
-### fir type[T/M/I]
-### fig type[T/M/I]
+### fir type[T/R/I]
+### fig type[T/R/I]
 Find type in red/green input wire.
 
 
 ## Swap
 
-### swp mem1[M] mem2[M]
+### swp mem1[R] mem2[R]
 Swap signals in memory cells.  
-### swpt mem1[M] mem2[M]
+### swpt mem1[R] mem2[R]
 Swap signal types in memory cells.  
-### swpv mem1[M] mem2[M]
+### swpv mem1[R] mem2[R]
 Swap signal values in memory cells.  
-### dig dst[M/I] num[C/M/I]
+### dig dst[R/I] num[C/R/I]
 Get digit *num*ber from *dest*inatination and write to dst.  
 *dst = dst / 10^num % 10*
-### dis dst[M] num[C/M/I] val[C/M/I]
+### dis dst[R] num[C/R/I] val[C/R/I]
 Set digit to *val*ue at *num*ber in *dest*inatination.  
 *dst = dst + (val % 10 - dst / 10^num % 10) * 10^num*
 
 
 ## Arithmetic
 
-### inc dst[M]
+### inc dst[R]
 *dst = dst + 1*
-### dec dst[M]
+### dec dst[R]
 *dst = dst - 1*
-### add dst[M] src[C/I/M]
+### add dst[R] src[C/I/R]
 *dst = dst + src*
-### sub dst[M] src[C/I/M]
+### sub dst[R] src[C/I/R]
 *dst = dst - src*
-### mul dst[M] src[C/I/M]
+### mul dst[R] src[C/I/R]
 *dst = dst * src*
-### div dst[M] src[C/I/M]
+### div dst[R] src[C/I/R]
 *dst = dst / src*
-### mod dst[M] src[C/I/M]
+### mod dst[R] src[C/I/R]
 *dst = dst % src*
-### pow dst[M] src[C/I/M]
+### pow dst[R] src[C/I/R]
 *dst = dst ^ src*
+
+### subi dst[R] src[C/I/R]
+*dst = src - dst*
+### divi dst[R] src[C/I/R]
+*dst = src / dst*
+### modi dst[R] src[C/I/R]
+*dst = src % dst*
+### powi dst[R] src[C/I/R]
+*dst = src ^ dst*
 
 
 ## Bitwise
 
-### band dst[M] src[C/I/M]
+### band dst[R] src[C/I/R]
 AND.  
 *dst = dst & src*
 
-### bor dst[M] src[C/I/M]
+### bor dst[R] src[C/I/R]
 OR.  
 *dst = dst | src*
 
-### bxor dst[M] src[C/I/M]
+### bxor dst[R] src[C/I/R]
 XOR.  
 *dst = dst ^ src*
 
-### ban dst[M] src[C/I/M]
+### ban dst[R] src[C/I/R]
 AND NOT.  
 *dst = dst & ~src*
 
-### bsl dst[M] src[C/I/M]
+### bsl dst[R] src[C/I/R]
 Shift left.  
 *dst = dst << src*
 
-### bsr dst[M] src[C/I/M]
+### bsr dst[R] src[C/I/R]
 Shift right.  
 *dst = dst >> src*
 
-### brl dst[M] src[C/I/M]
+### brl dst[R] src[C/I/R]
 Rotate left.  
 *dst = dst rot<< src*
 
-### brr dst[M] src[C/I/M]
+### brr dst[R] src[C/I/R]
 Rotate right.  
 *dst = dst rot>> src*
 
 
 ## Testing operands values
 
-### teq a[C/I/M] b[I/M]
+### teq a[C/I/R] b[I/R]
 Equal.  
 *a == b*
 
-### tne a[C/I/M] b[I/M]
+### tne a[C/I/R] b[I/R]
 Not equal.  
 *a != b*
 
-### tgt a[C/I/M] b[I/M]
+### tgt a[C/I/R] b[I/R]
 Greater than.  
 *a > b*
 
-### tlt a[C/I/M] b[I/M]
+### tlt a[C/I/R] b[I/R]
 Less than.  
 *a < b*
 
-### tge a[C/I/M] b[I/M]
+### tge a[C/I/R] b[I/R]
 Greater or equal than.  
 *a >= b*
 
-### tle a[C/I/M] b[I/M]
+### tle a[C/I/R] b[I/R]
 Less or equal than.  
 *a <= b*
 
 
 ## Testing operands types
 
-### tas a[T/I/M] b[I/M]
+### tas a[T/I/R] b[I/R]
 Types are same.  
 
-### tad a[T/I/M] b[I/M]
+### tad a[T/I/R] b[I/R]
 Types are different.  
 
 

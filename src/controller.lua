@@ -1,4 +1,4 @@
-local Compiler = require('compiler')
+local Compiler = require('cpu/compiler')
 
 --require('src/constants')
 PSTATE_HALTED = 0
@@ -33,16 +33,16 @@ function Controller.init(mc, state)
       output_signal = nil
     }
   }
-  Controller.init_memory(mc, state)
+  Controller.init_registers(mc, state)
   Entity.set_data(mc, state)
   return state
 end
 
-function Controller.init_memory(mc, state)
-  if state.memory == nil then
-    state.memory = {}
-    for i = 1, MC_MEMORY do
-      state.memory[i] = NULL_SIGNAL
+function Controller.init_registers(mc, state)
+  if state.regs == nil then
+    state.regs = {}
+    for i = 1, MC_REGS do
+      state.regs[i] = NULL_SIGNAL
     end
   end
   if not state.clock then
@@ -96,7 +96,7 @@ function Controller.set_program_counter(mc, state, value)
 end
 
 function Controller.tick(mc, state)
-  Controller.init_memory(mc, state)
+  Controller.init_registers(mc, state)
   state.clock = state.clock + 1
 
   -- Interrupts

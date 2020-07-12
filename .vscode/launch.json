@@ -5,14 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "launch",
             "type": "lua",
             "request": "launch",
-            "name": "Launch",
-            "program": "${workspaceFolder}/tests/fcpu.lua",
-            "path": "?;?.lua;${workspaceFolder}/?.lua;${workspaceFolder}/tests/?.lua;${workspaceFolder}/src/?.lua",
             "luaVersion": "5.2",
             "stopOnEntry": false,
-            "stopOnThreadEntry": false
+            "stopOnThreadEntry": false,
+            "program": "${workspaceFolder}/tests/fcpu.lua",
+            "cwd": "${workspaceFolder}",
+            "path": "?;?.lua;${workspaceFolder}/?.lua;${workspaceFolder}/tests/?.lua;${workspaceFolder}/src/?.lua",
+            "cpath": "${workspaceFolder}/?.dll",
+            "arg": [],
+            "consoleCoding": "utf8"
         }
     ]
 }

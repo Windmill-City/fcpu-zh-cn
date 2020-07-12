@@ -1,283 +1,274 @@
 local assert
-local addr
+local io
 
 
 local standard_op = function(_)
   assert.two(_)
-  local _in = _[1]
-  assert.in_mem_or_val(_in)
-  local _out = _[2]
-  assert.out_mem_or_val(_out)
-  return _in, _out
+  local _dst = _[1]
+  assert.is_register(_dst)
+  local _src = _[2]
+  assert.is_input_or_reg_or_val(_src)
+  return _src, _dst
 end
 local test_op = function(_)
   assert.two(_)
   local _in = _[1]
-  assert.in_mem_or_val(_in)
+  assert.reg_or_val(_in)
   local _out = _[2]
   assert.out_mem_or_val(_out)
   return _in, _out
 end
 
-
 local opcodes = {
-  -- W = wire
-  -- I = integer constant
-  -- M = memory register
-  -- O = output register
-  -- R = Register (memory or output)
-  -- + = zero, one or more parameters
+-- S: Signal
+-- T: signal type
+-- V: signal value, same as C
+-- C: integer constant, same as V
+-- M: memory
+-- I: input wire (Red, Green)
+-- O: output wire
+-- A: instruction address
+-- L: instruction label
+
   nop = function(_)
   end,
-  mov = function(_) -- MOV W/R R -- Move
-    local _in = _[1]
-    assert.in_register_or_wire(_in)
 
-    local out_val = nil
-    if _in.type == 'wire' then
-      out_val = addr.getwire(_in)
-    elseif _in.type == 'register' then
-      out_val = addr.getregister(_in)
-    end
-
-    if #_ > 2 then
-      for i = 2, #_ do
-        assert.out_register(_[i])
-        addr.setregister(_[i], out_val)
+  clr = function(_)
+    if 0 < #_ then
+      for i, expr in ipairs(_) do
+        io.regsset(_[i], NULL_SIGNAL)
       end
     else
-      local _out = _[2]
-      assert.out_register(_out)
-      addr.setregister(_out, out_val)
+      for i = 1, io.regssize() do
+        io.register_set(i, NULL_SIGNAL)
+      end
+      io.wire_set({type='output'}, NULL_SIGNAL)
     end
   end,
-  set = function(_) -- SET M/I R -- Set Count
+
+  mov = function(_) -- mov dst...[R/O] src[S/R/I]
+    assert.two_or_more(_)
+    local sig = io.getsignal(_[#_], {'signal', 'register', 'wire'})
+    for i = 1, #_ - 1 do
+      io.setsignal(_[i], sig, {'register', 'wire'})
+    end
+  end,
+
+  add = function(_)
+    local _src, _dst = standard_op(_)
+    io.regsset_count(_dst, io.getcount(_dst) + io.getcount(_src))
+  end,
+  sub = function(_)
+    local _src, _dst = standard_op(_)
+    io.regsset_count(_dst, io.getcount(_dst) - io.getcount(_src))
+  end,
+  mul = function(_)
+    local _src, _dst = standard_op(_)
+    io.regsset_count(_dst, io.getcount(_dst) * io.getcount(_src))
+  end,
+  div = function(_)
+    local _src, _dst = standard_op(_)
+    io.regsset_count(_dst, io.getcount(_dst) / io.getcount(_src))
+  end,
+  mod = function(_)
+    local _src, _dst = standard_op(_)
+    io.regsset_count(_dst, io.getcount(_dst) % io.getcount(_src))
+  end,
+  pow = function(_)
+    local _src, _dst = standard_op(_)
+    io.regsset_count(_dst, io.getcount(_dst) ^ io.getcount(_src))
+  end,
+
+  set = function(_)
     assert.two(_)
     local _in = _[1]
-    assert.in_mem_or_val(_in)
+    assert.reg_or_val(_in)
     local _out = _[2]
     assert.out_register(_out)
     if _in.type == 'register' then
-      addr.setregister_count(_out, addr.getregister(_in).count)
-    elseif _in.type == 'num' then
-      addr.setregister_count(_out, address.num(_in))
+      io.setregister_count(_out, io.getregister(_in).count)
+    elseif _in.type == 'value' then
+      io.setregister_count(_out, io.num(_in))
     end
   end,
-  clr = function(_) -- CLR R+ -- Clear
-    if #_ > 0 then
-      for i, expr in ipairs(_) do
-        addr.setregister(_[i], NULL_SIGNAL)
-      end
-    else
-      for i = 1, addr.memsize() do
-        addr.setraw(i, NULL_SIGNAL)
-      end
-      addr.setout(NULL_SIGNAL)
-    end
-  end,
-  fir = function(_) -- FIR R -- Find (from) Red
+  fir = function(_)
     assert.one(_)
     local _in = _[1]
     assert.in_register(_in)
-    local signal = addr.getregister(_in)
-    local wire_signal = addr.find_signal_in_wire(wires.red, signal)
-    addr.setmem(addr.const_num(1), wire_signal)
+    local signal = io.getregister(_in)
+    local wire_signal = io.wire_find_signal('red', signal)
+    io.regsset(io.make_value(1), wire_signal)
   end,
-  fig = function(_) -- FIG R -- Find (from) Green
+  fig = function(_)
     assert.one(_)
     local _in = _[1]
     assert.in_register(_in)
-    local signal = addr.getregister(_in)
-    local wire_signal = addr.find_signal_in_wire(wires.green, signal)
-    addr.setmem(addr.const_num(1), wire_signal)
+    local signal = io.getregister(_in)
+    local wire_signal = io.wire_find_signal('green', signal)
+    io.regsset(io.make_value(1), wire_signal)
   end,
-  swp = function(_) -- SWP R R -- Swap
+  swp = function(_)
     assert.two(_)
     local _in = _[1]
     assert.in_register(_in)
     local _out = _[2]
     assert.out_register(_out)
-    local inSignal = addr.getregister(_in)
-    local outSignal = addr.getregister(_out)
-    addr.setregister(_in, outSignal)
-    addr.setregister(_out, inSignal)
+    local inSignal = io.getregister(_in)
+    local outSignal = io.getregister(_out)
+    io.setregister(_in, outSignal)
+    io.setregister(_out, inSignal)
   end,
-  add = function(_) -- ADD M/I M/I -- Add
+  bnd = function(_)
     local _in, _out = standard_op(_)
-    addr.setmem_count(addr.const_num(1), addr.memcount_or_val(_in) + addr.memcount_or_val(_out))
+    local result = bit32.band(io.getcount(_in), io.getcount(_out))
+    io.regsset_count(io.make_value(1), result)
   end,
-  sub = function(_) -- SUB M/I M/I -- Subtract
+  bor = function(_)
     local _in, _out = standard_op(_)
-    addr.setmem_count(addr.const_num(1), addr.memcount_or_val(_in) - addr.memcount_or_val(_out))
+    local result = bit32.bor(io.getcount(_in), io.getcount(_out))
+    io.regsset_count(io.make_value(1), result)
   end,
-  mul = function(_) -- MUL M/I M/I -- Multiply
+  bxr = function(_)
     local _in, _out = standard_op(_)
-    addr.setmem_count(addr.const_num(1), addr.memcount_or_val(_in) * addr.memcount_or_val(_out))
+    local result = bit32.bxor(io.getcount(_in), io.getcount(_out))
+    io.regsset_count(io.make_value(1), result)
   end,
-  div = function(_) -- DIV M/I M/I -- Divide
+  bls = function(_)
     local _in, _out = standard_op(_)
-    addr.setmem_count(addr.const_num(1), addr.memcount_or_val(_in) / addr.memcount_or_val(_out))
+    local result = bit32.lshift(io.getcount(_in), io.getcount(_out))
+    io.regsset_count(io.make_value(1), result)
   end,
-  mod = function(_) -- MOD M/I M/I -- Modulo
+  brs = function(_)
     local _in, _out = standard_op(_)
-    addr.setmem_count(addr.const_num(1), addr.memcount_or_val(_in) % addr.memcount_or_val(_out))
+    local result = bit32.rshift(io.getcount(_in), io.getcount(_out))
+    io.regsset_count(io.make_value(1), result)
   end,
-  pow = function(_) -- POW M/I M/I -- Exponetiation
+  blr = function(_)
     local _in, _out = standard_op(_)
-    addr.setmem_count(addr.const_num(1), addr.memcount_or_val(_in) ^ addr.memcount_or_val(_out))
+    local result = bit32.lrotate(io.getcount(_in), io.getcount(_out))
+    io.regsset_count(io.make_value(1), result)
   end,
-  bnd = function(_) -- BND M/I M/I -- Bitwise AND
+  brr = function(_)
     local _in, _out = standard_op(_)
-    local result = bit32.band(addr.memcount_or_val(_in), addr.memcount_or_val(_out))
-    addr.setmem_count(addr.const_num(1), result)
+    local result = bit32.rrotate(io.getcount(_in), io.getcount(_out))
+    io.regsset_count(io.make_value(1), result)
   end,
-  bor = function(_) -- BOR M/I M/I -- Bitwise OR
-    local _in, _out = standard_op(_)
-    local result = bit32.bor(addr.memcount_or_val(_in), addr.memcount_or_val(_out))
-    addr.setmem_count(addr.const_num(1), result)
-  end,
-  bxr = function(_) -- BXR M/I M/I -- Bitwise XOR
-    local _in, _out = standard_op(_)
-    local result = bit32.bxor(addr.memcount_or_val(_in), addr.memcount_or_val(_out))
-    addr.setmem_count(addr.const_num(1), result)
-  end,
-  bls = function(_) -- BLS M/I M/I -- Bitwise left shift
-    local _in, _out = standard_op(_)
-    local result = bit32.lshift(addr.memcount_or_val(_in), addr.memcount_or_val(_out))
-    addr.setmem_count(addr.const_num(1), result)
-  end,
-  brs = function(_) -- BRS M/I M/I -- Bitwise right shift
-    local _in, _out = standard_op(_)
-    local result = bit32.rshift(addr.memcount_or_val(_in), addr.memcount_or_val(_out))
-    addr.setmem_count(addr.const_num(1), result)
-  end,
-  blr = function(_) -- BLR M/I M/I -- Bitwise left rotate
-    local _in, _out = standard_op(_)
-    local result = bit32.lrotate(addr.memcount_or_val(_in), addr.memcount_or_val(_out))
-    addr.setmem_count(addr.const_num(1), result)
-  end,
-  brr = function(_) -- BRR M/I M/I -- Bitwise right rotate
-    local _in, _out = standard_op(_)
-    local result = bit32.rrotate(addr.memcount_or_val(_in), addr.memcount_or_val(_out))
-    addr.setmem_count(addr.const_num(1), result)
-  end,
-  bno = function(_) -- BNO M/I M/I -- Bitwise NOT
+  bno = function(_)
     assert.one(_)
     local _in = _[1]
-    assert.in_mem_or_val(_in)
-    local result = bit32.bnot(addr.memcount_or_val(_in))
-    addr.setmem_count(addr.const_num(1), result)
+    assert.reg_or_val(_in)
+    local result = bit32.bnot(io.getcount(_in))
+    io.regsset_count(io.make_value(1), result)
   end,
-  slp = function(_) -- SLP M/I -- Sleep
+  slp = function(_)
     assert.one(_)
     local _in = _[1]
-    assert.in_mem_or_val(_in)
-    return { type = "sleep", val = addr.memcount_or_val(_in) }
+    assert.reg_or_val(_in)
+    return { type = 'sleep', val = io.getcount(_in) }
   end,
-  jmp = function(_) -- JMP M/I/L -- Jump
+  jmp = function(_)
     assert.one(_)
     local _in = _[1]
     assert.in_mem_or_val_or_label(_in)
     if _in.type == 'label' then
-      return { type = "jump", label = _in.label }
+      return { type = 'jump', label = _in.label }
     else
-      return { type = "jump", val = addr.memcount_or_val(_in) }
+      return { type = 'jump', val = io.getcount(_in) }
     end
   end,
-  hlt = function(_) -- HLT -- Halt
-    return { type = "halt" }
+  hlt = function(_)
+    return { type = 'halt' }
   end,
-  tgt = function(_) -- TGT M/I M/I -- Test Greater Than
+  tgt = function(_)
     local _in, _out = test_op(_)
-    if addr.memcount_or_val(_in) > addr.memcount_or_val(_out) then
-      return { type = "skip" }
+    if io.getcount(_in) > io.getcount(_out) then
+      return { type = 'skip' }
     end
   end,
-  tlt = function(_) -- TLT M/I M/I -- Test Less Than
+  tlt = function(_)
     local _in, _out = test_op(_)
-    if addr.memcount_or_val(_in) < addr.memcount_or_val(_out) then
-      return { type = "skip" }
+    if io.getcount(_in) < io.getcount(_out) then
+      return { type = 'skip' }
     end
   end,
-  teq = function(_) -- TEQ M/I M/I -- Test Equal (Signal count)
+  teq = function(_)
     local _in, _out = test_op(_)
-    if addr.memcount_or_val(_in) == addr.memcount_or_val(_out) then
-      return { type = "skip" }
+    if io.getcount(_in) == io.getcount(_out) then
+      return { type = 'skip' }
     end
   end,
-  tnq = function(_) -- TNG M/I M/I -- Test Not Equal (Signal count)
+  tnq = function(_)
     local _in, _out = test_op(_)
-    if addr.memcount_or_val(_in) ~= addr.memcount_or_val(_out) then
-      return { type = "skip" }
+    if io.getcount(_in) ~= io.getcount(_out) then
+      return { type = 'skip' }
     end
   end,
-  tte = function(_) -- TTE M M -- Test Equal (Signal type)
+  tte = function(_)
     assert.two(_)
     local _in = _[1]
     assert.in_mem(_in)
     local _out = _[2]
     assert.out_mem(_out)
-    if addr.getmem(_in).signal.name == addr.getmem(_out).signal.name then
-      return { type = "skip" }
+    if io.regsget(_in).signal.name == io.regsget(_out).signal.name then
+      return { type = 'skip' }
     end
   end,
-  ttn = function(_) -- TTN M M -- Test Not Equal (Signal type)
+  ttn = function(_)
     assert.two(_)
     local _in = _[1]
     assert.in_mem(_in)
     local _out = _[2]
     assert.out_mem(_out)
-    if addr.getmem(_in).signal.name ~= addr.getmem(_out).signal.name then
-      return { type = "skip" }
+    if io.regsget(_in).signal.name ~= io.regsget(_out).signal.name then
+      return { type = 'skip' }
     end
   end,
-  dig = function(_) -- DIG M/I -- Get Digit (from memory1)
+  dig = function(_)
     assert.one(_)
     local _in = _[1]
-    assert.in_mem_or_val(_in)
-    local i = addr.memcount_or_val(_in)
-    local value = addr.getmem(addr.const_num(1)).count
+    assert.reg_or_val(_in)
+    local i = io.getcount(_in)
+    local value = io.regsget(io.make_value(1)).count
     local digit = tonumber(string.sub(tostring(value), -i, -i))
-    addr.setmem_count(addr.const_num(1), digit)
+    io.regsset_count(io.make_value(1), digit)
   end,
-  dis = function(_) -- DIS M/I M/I -- Set Digit (in memory1)
+  dis = function(_)
     assert.two(_)
     local _in = _[1]
-    assert.in_mem_or_val(_in)
+    assert.reg_or_val(_in)
     local _out = _[2]
     assert.out_mem_or_val(_out)
-    local str_value = tostring(addr.getmem(addr.const_num(1)).count)
-    local selector = string.len(str_value) - addr.memcount_or_val(_in) + 1
-    local digit = addr.memcount_or_val(_out)
+    local str_value = tostring(io.regsget(io.make_value(1)).count)
+    local selector = string.len(str_value) - io.getcount(_in) + 1
+    local digit = io.getcount(_out)
     local p1 = string.sub(str_value, 1, selector-1)
     local p2 = string.sub(str_value, selector, selector)
     local p3 = string.sub(str_value, selector+1, -1)
     p2 = string.sub(tostring(digit), -1)
-    addr.setmem_count(addr.const_num(1), tonumber(p1..p2..p3))
+    io.regsset_count(io.make_value(1), tonumber(p1..p2..p3))
   end,
-  bkr = function(_) -- BKR M/I -- Block until there are at least [a] red signals.
+  bkr = function(_)
     assert.one(_)
     local _in = _[1]
-    assert.in_mem_or_val(_in)
-    local count = addr.memcount_or_val(_in)
+    assert.reg_or_val(_in)
+    local count = io.getcount(_in)
     if wires.red.signals == nil or #wires.red.signals < count then
-      return {type = "block"}
+      return {type = 'block'}
     end
   end,
-  bkg = function(_) -- BKG M/I -- Block until there are at least [a] green signals.
+  bkg = function(_)
     assert.one(_)
     local _in = _[1]
-    assert.in_mem_or_val(_in)
-    local count = addr.memcount_or_val(_in)
+    assert.reg_or_val(_in)
+    local count = io.getcount(_in)
     if wires.green.signals == nil or #wires.green.signals < count then
-      return {type = "block"}
+      return {type = 'block'}
     end
   end,
 }
 
-
-function opcodes.bind(assert_, addr_)
+function opcodes.bind(assert_, io_)
   assert = assert_
-  addr = addr_
+  io = io_
 end
 return opcodes

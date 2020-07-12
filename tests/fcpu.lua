@@ -13,7 +13,7 @@ Controller = require('../src/controller')
 unit_number = 0
 
 function createFCPU(input)
-  local fcpu = require('__stdlib__/faketorio/raw/arithmetic-combinator')['arithmetic-combinator']
+  local fcpu = table.deepcopy(require('__stdlib__/faketorio/raw/arithmetic-combinator')['arithmetic-combinator'])
   unit_number = unit_number + 1
   fcpu.unit_number = unit_number
   fcpu.name = 'fcpu'
@@ -30,7 +30,8 @@ function createFCPU(input)
     }
     if bus then
       for k,v in pairs(bus) do
-        table.insert(out.signals, { signal = k, count = v })
+        local t, n = string.match(k, '(%a+)-([%a%-]+)')
+        table.insert(out.signals, { signal = { type = t, name = n }, count = v })
       end
     end
     return out
@@ -81,7 +82,7 @@ function executeTest(test_title, program_text, input_signals, probe_result, max_
     local output = fcpu.get_control_behavior().parameters.parameters
     local ret = probe_result(state, output)
     if ret ~= true and ret ~= nil then
-      print(serpent.block(state.memory, {comment=true}))
+      print(serpent.block(state.regs, {comment=true}))
       print(serpent.block(output, {comment=true}))
       error(ret or ("Test '"..test_title.."' failed"), 2)
     end
@@ -92,9 +93,31 @@ end
 ----------------------------------------------------------------------------------------------------------------
 
 local fcpu, state = executeTest(
+  'MOV',
+  [[
+    mov reg1 10[recipe-iron-plate]
+    mov reg2 green1
+    mov reg3 green2
+  ]],
+  {
+    [defines.wire_type.green] = {
+      ['recipe-copper-plate'] = 1000,
+      ['recipe-steel-plate'] = 200,
+    },
+    [defines.wire_type.red] = nil,
+  },
+  function(state, output)
+    return (state.regs[1].count == 10 and state.regs[1].signal.type == 'recipe' and state.regs[1].signal.name == 'iron-plate')
+    and ((state.regs[2].count == 1000 and state.regs[3].count == 200)
+      or (state.regs[2].count == 200 and state.regs[3].count == 1000))
+  end
+)
+
+
+local fcpu, state = executeTest(
   'check output',
   [[
-    mov green1 out
+    mov out green1
   ]],
   {
     [defines.wire_type.green] = {
@@ -103,20 +126,24 @@ local fcpu, state = executeTest(
     [defines.wire_type.red] = nil,
   },
   function(state, output)
-    return output.output_signal == 'recipe-copper-plate' and output.first_constant == 1000
+    return output.output_signal.type == 'recipe' and output.output_signal.name == 'copper-plate' and output.first_constant == 1000
   end
 )
 
+
 local fcpu, state = executeTest(
-  'add dst src [dst != mem1]',
+  'Arithmetics',
   [[
-    add mem2 1
+    add reg2 2
+    sub reg2 4
+    mul reg2 6
+    div reg2 3
   ]],
   {},
   function(state, output)
-    return state.memory[2].count == 1
+    return state.regs[2].count == -4
   end
 )
 
-print(serpent.block(state.memory, {comment=true}))
+print(serpent.block(state.regs, {comment=true}))
 print("\nAll tests completed successfully")

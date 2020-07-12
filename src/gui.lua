@@ -127,8 +127,8 @@ function CreateWidget(player)
   end
 
   local memslots = {}
-  for i = 1, MC_MEMORY do
-    table.insert(memslots, gui.templates.slot_button("mem"..i))
+  for i = 1, MC_REGS do
+    table.insert(memslots, gui.templates.slot_button('reg'..i))
   end
 
   local elems = gui.build(rootGui, {
@@ -150,7 +150,7 @@ function CreateWidget(player)
           {template="pushers.horizontal"},
           {type="switch", style_mods={ right_margin=10 }, left_label_caption={"gui-constant.off"}, right_label_caption={"gui-constant.on"}, save_as="gui_enable_switch", handlers="widget.enable_program"},
         }},
-        {template="heading_2", caption={"gui-fcpu.memory"}},
+        {template="heading_2", caption={"gui-fcpu.regs"}},
         {type="flow", save_as="gui_inspector", direction="horizontal",
           children={
             table.unpack(memslots)

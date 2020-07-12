@@ -1,2 +1,2 @@
 MC_LINES = 32
-MC_MEMORY = 8
+MC_REGS = 8

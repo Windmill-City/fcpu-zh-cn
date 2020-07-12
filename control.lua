@@ -183,6 +183,16 @@ script.on_event(defines.events.on_tick, function(event)
     local mc = global.fcpus[global.last_index]
     if mc.valid then
       local state = Entity.get_data(mc)
+
+      -- deprecated
+      if not state.instruction_pointer then
+        state.instruction_pointer = state.program_counter or 1
+      end
+      if not state.regs then
+        state.regs = state.memory or {}
+      end
+      -- }
+
       if state and not state.disabled then
         -- Enable/Disable the run/step button
         if state.gui_run_button and state.gui_run_button.valid then
@@ -204,10 +214,10 @@ script.on_event(defines.events.on_tick, function(event)
         end
         -- Update the inspector GUI
         if state.gui_inspector and state.gui_inspector.valid then
-          for i = 1, MC_MEMORY do
-            if state.memory[i] then
-              state.gui_inspector['mem'..i..'-inspect'].sprite = signalToSpritePath( state.memory[i].signal)
-              state.gui_inspector['mem'..i..'-inspect'].number = state.memory[i].count
+          for i = 1, MC_REGS do
+            if state.regs[i] then
+              state.gui_inspector['reg'..i..'-inspect'].sprite = signalToSpritePath( state.regs[i].signal)
+              state.gui_inspector['reg'..i..'-inspect'].number = state.regs[i].count
             end
           end
         end
