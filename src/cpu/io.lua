@@ -56,7 +56,7 @@ function io.make_wire(name, address)
 end
 
 
--- Output Register Helper Functions
+-- Output wire access
 local function output_get()
   local signal_id = control.parameters.parameters.output_signal
   local count = control.parameters.parameters.first_constant
@@ -76,7 +76,7 @@ local function output_set_count(count)
   control.parameters = params
 end
 
--- Wire Helper Functions
+-- General wire manipulation
 function io.wire_get(_)
   if _.type == 'wire' and _.color == 'out' or _.type == 'output' then
     return output_get()
@@ -85,7 +85,7 @@ function io.wire_get(_)
     assert.exception("Tried to access ".._.color.." wire when input not present.")
   end
   if wires[_.color].signals then
-    local index = io.regsindex(_)
+    local index = io.addr_to_index(_)
     return wires[_.color].signals[index] or NULL_SIGNAL
   end
   return NULL_SIGNAL
@@ -113,46 +113,32 @@ function io.wire_find_signal(color, signal_to_find)
   return NULL_SIGNAL
 end
 
---
-function io.value_get(_) -- used
+-- Address, Value and Signal decomposition
+function io.addr_to_index(_)
+  assert.check(_.addr ~= nil and _.pointer ~= nil)
+  if _.pointer then
+    return io.register_get(_, true).count
+  else
+    return _.addr
+  end
+end
+
+function io.value_get(_)
   assert.check(_.type == 'value')
   return _.val
 end
 
 function io.signal_name(_)
   assert.check(_.type == 'signal')
-  return _.name
+  return _.signal.name
 end
 
 function io.signal_count(_)
   assert.check(_.type == 'signal')
-  return _.count
-end
-
-function io.register_get(index)
-  assert.regs_index_range(index, MC_REGS)
-  return regs[index]
-end
-
-function io.register_set(index, signal)
-  assert.regs_index_range(index, MC_REGS)
-  regs[index] = signal
+  return _.signal.count
 end
 
 -- Registers
-function io.regsindex(_)
-  if _.pointer then
-    --assert.regs_index_range(_.addr, MC_REGS + 4)
-    return io.regsget(_, true).count
-  else
-    return _.addr
-  end
-end
-
-function io.regssize() -- used
-  return #regs
-end
-
 local function readOnlyRegister(index)
   if index == REG_IP then
     return instruction_pointer
@@ -175,12 +161,26 @@ local function readOnlyRegister(index)
   end
 end
 
-function io.regsget(index_expr, ignore_pointer)
+function io.register_last_index()
+  return #regs
+end
+
+function io.register_getraw(index)
+  assert.regs_index_range(index, MC_REGS)
+  return regs[index]
+end
+
+function io.register_setraw(index, signal)
+  assert.regs_index_range(index, MC_REGS)
+  regs[index] = signal
+end
+
+function io.register_get(index_expr, ignore_pointer)
   local index
-  if not ignore_pointer then
-    index = io.regsindex(index_expr)
+  if ignore_pointer then
+    index = io.value_get(index_expr)
   else
-    index = index_expr.val
+    index = io.addr_to_index(index_expr)
   end
   if MC_REGS < index then
     assert.regs_index_range(index, MC_REGS + 4)
@@ -188,55 +188,24 @@ function io.regsget(index_expr, ignore_pointer)
     result.count = readOnlyRegister(index)
     return result
   else
-    return table.deepcopy(io.register_get(index))
+    return table.deepcopy(io.register_getraw(index))
   end
 end
 
-function io.regsset(index_expr, value)
-  local index = io.regsindex(index_expr)
+function io.register_set(index_expr, value)
+  local index = io.addr_to_index(index_expr)
   local signal = table.deepcopy(value)
-  io.register_set(index, signal)
+  io.register_setraw(index, signal)
 end
 
-function io.regsset_count(index_expr, count)
-  local value = io.regsget(index_expr)
+function io.register_set_count(index_expr, count)
+  local value = io.register_get(index_expr)
   value.count = count
-  io.regsset(index_expr, value)
+  io.register_set(index_expr, value)
 end
 
 -- Multiplex Helper Functions
-function io.getregister(index_expr)
-  if index_expr.location == 'reg' then
-    return io.regsget(index_expr)
-  elseif index_expr.color == 'out' then
-    return output_get()
-  else
-    assert.exception('unhandler')
-  end
-end
-
-function io.setregister(index_expr, value)
-  if index_expr.location == 'reg' then
-    io.regsset(index_expr, value)
-  elseif index_expr.color == 'out' then
-    output_set(value)
-  else
-    assert.exception('unhandler')
-  end
-end
-
-function io.setregister_count(index_expr, count)
-  if index_expr.location == 'readonly' then
-    io.regsset_count(index_expr, count)
-  elseif index_expr.color == 'out' then
-    output_set_count(count)
-  else
-    assert.exception('unhandler')
-  end
-end
-
--- Signal Functions
-function io.getsignal(_, types) -- used
+function io.getsignal(_, types)
   if not types then
     types = {'signal', 'register', 'wire'}
   end
@@ -245,13 +214,27 @@ function io.getsignal(_, types) -- used
   if _.type == 'wire' or _.type == 'input' then
     signal = io.wire_get(_)
   elseif _.type == 'register' then
-    signal = io.getregister(_)
+    signal = io.register_get(_)
   elseif _.type == 'signal' then
     signal = _
   else
     assert.exception('unhandler')
   end
   return signal
+end
+
+function io.setsignal(_, signal, types)
+  if not types then
+    types = {'register', 'wire'}
+  end
+  assert.type(_, types)
+  if _.type == 'wire' or _.type == 'output' then
+    io.wire_set(_, signal)
+  elseif _.type == 'register' then
+    io.register_set(_, signal)
+  else
+    assert.exception('unhandler')
+  end
 end
 
 function io.getcount(_, types)
@@ -266,18 +249,8 @@ function io.getcount(_, types)
   end
 end
 
-function io.setsignal(_, signal, types) -- used
-  if not types then
-    types = {'register', 'wire'}
-  end
-  assert.type(_, types)
-  if _.type == 'wire' or _.type == 'output' then
-    io.wire_set(_, signal)
-  elseif _.type == 'register' then
-    io.setregister(_, signal)
-  else
-    assert.exception('unhandler')
-  end
+function io.setcount(_, count, types)
+  assert.exception('unhandled')
 end
 
 
