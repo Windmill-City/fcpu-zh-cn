@@ -1,6 +1,6 @@
-local assert = require('cpu/assert')
-local io = require('cpu/io')
-local ops = require('cpu/opcodes')
+local assert = require('assert')
+local io = require('io')
+local ops = require('opcodes')
 
 assert.bind()
 io.bind(assert)
@@ -191,8 +191,8 @@ end
 function compiler.eval(ast, control, state)
   io.setup(control, state)
 
-  --local status, results = pcall(eval, ast)
-  local status, results = true, eval(ast)
+  local status, results = pcall(eval, ast)
+  --local status, results = true, eval(ast)
   if not status then
     local start_index = string.find(results, '@') or 1
     results = string.sub(results, start_index+1, -1)

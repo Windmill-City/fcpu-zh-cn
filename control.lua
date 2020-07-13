@@ -55,16 +55,6 @@ script.on_event(defines.events.on_runtime_mod_setting_changed, function(event)
   end
 end)
 
-local function signalToSpritePath(signal)
-  if signal then
-    if signal.type == "virtual" then
-      return "virtual-signal/" .. signal.name
-    elseif signal.name then
-      return signal.type .. '/' .. signal.name
-    end
-  end
-end
-
 -------------------------------------------------------------------------------------------------------
 
 function get_player_data(player_index)
@@ -194,33 +184,7 @@ script.on_event(defines.events.on_tick, function(event)
       -- }
 
       if state and not state.disabled then
-        -- Enable/Disable the run/step button
-        if state.gui_run_button and state.gui_run_button.valid then
-          if Controller.is_running(mc) then
-            state.gui_halt_button.enabled = true
-            state.gui_run_button.enabled = false
-          else
-            state.gui_halt_button.enabled = (state.instruction_pointer ~= 1)
-            state.gui_run_button.enabled = true
-          end
-        end
-        -- Make text read-only while running
-        if state.gui_program_input and state.gui_program_input.valid then
-          state.gui_program_input.read_only = Controller.is_running(mc)
-        end
-        -- Update the program lines in the GUI
-        if state.gui_line_numbers and state.gui_line_numbers.valid then
-          updateLines(state.gui_line_numbers, state)
-        end
-        -- Update the inspector GUI
-        if state.gui_inspector and state.gui_inspector.valid then
-          for i = 1, MC_REGS do
-            if state.regs[i] then
-              state.gui_inspector['reg'..i..'-inspect'].sprite = signalToSpritePath( state.regs[i].signal)
-              state.gui_inspector['reg'..i..'-inspect'].number = state.regs[i].count
-            end
-          end
-        end
+        fpuUpdateWidget(mc, state)
         -- Tick the Controller
         if mc.active and mc.is_connected_to_electric_network() then
           Controller.tick(mc, state)

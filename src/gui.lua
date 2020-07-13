@@ -5,11 +5,21 @@ local gui = require("__flib__.gui")
 
 -------------------------------------------------------------------------------------------------------
 
-function mixPlayerData(event, proc)
+local function mixPlayerData(event, proc)
   return function(event)
     local player_data, player = get_player_data(event.player_index)
     proc(player_data, player, event)
     set_player_data(event.player_index, player_data)
+  end
+end
+
+local function signalToSpritePath(signal)
+  if signal then
+    if signal.type == "virtual" then
+      return "virtual-signal/" .. signal.name
+    elseif signal.name then
+      return signal.type .. '/' .. signal.name
+    end
   end
 end
 
@@ -150,7 +160,7 @@ function CreateWidget(player)
           {template="pushers.horizontal"},
           {type="switch", style_mods={ right_margin=10 }, left_label_caption={"gui-constant.off"}, right_label_caption={"gui-constant.on"}, save_as="gui_enable_switch", handlers="widget.enable_program"},
         }},
-        {template="heading_2", caption={"gui-fcpu.regs"}},
+        {template="heading_2", caption={"gui-fcpu.registers"}},
         {type="flow", save_as="gui_inspector", direction="horizontal",
           children={
             table.unpack(memslots)
@@ -205,7 +215,7 @@ function fcpuOpenWidget(player, entity)
   state = table.merge(state, elems)
 
   state.gui_program_input.text = state.program_text
-  updateLines(state.gui_line_numbers, state)
+  fpuUpdateWidget(entity, state)
 
   if state.disabled then
     state.gui_enable_switch.switch_state = "left"
@@ -244,6 +254,36 @@ function updateLines(element, state)
     table.insert(lines, line)
   end
   element.text = table.concat(lines, "\n")
+end
+
+function fpuUpdateWidget(mc, state)
+  -- Enable/Disable the run/step button
+  if state.gui_run_button and state.gui_run_button.valid then
+    if Controller.is_running(mc) then
+      state.gui_halt_button.enabled = true
+      state.gui_run_button.enabled = false
+    else
+      state.gui_halt_button.enabled = (state.instruction_pointer ~= 1)
+      state.gui_run_button.enabled = true
+    end
+  end
+  -- Make text read-only while running
+  if state.gui_program_input and state.gui_program_input.valid then
+    state.gui_program_input.read_only = Controller.is_running(mc)
+  end
+  -- Update the program lines in the GUI
+  if state.gui_line_numbers and state.gui_line_numbers.valid then
+    updateLines(state.gui_line_numbers, state)
+  end
+  -- Update the inspector GUI
+  if state.gui_inspector and state.gui_inspector.valid then
+    for i = 1, MC_REGS do
+      if state.regs[i] then
+        state.gui_inspector['reg'..i..'-inspect'].sprite = signalToSpritePath( state.regs[i].signal)
+        state.gui_inspector['reg'..i..'-inspect'].number = state.regs[i].count
+      end
+    end
+  end
 end
 
 function fcpuCloseWidget(player_index, silent)
