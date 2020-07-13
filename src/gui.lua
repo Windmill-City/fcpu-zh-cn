@@ -5,7 +5,7 @@ local gui = require("__flib__.gui")
 
 -------------------------------------------------------------------------------------------------------
 
-local function mixPlayerData(event, proc)
+local function mixPlayerData(proc)
   return function(event)
     local player_data, player = get_player_data(event.player_index)
     proc(player_data, player, event)
@@ -27,11 +27,11 @@ gui.add_handlers{
   widget = {
     close_button = {
       on_gui_click = function(event)
-        fcpuCloseWidget(event.player_index)
+        GuiWidgetClose(event.player_index)
       end
     },
     program_input = {
-      on_gui_text_changed = mixPlayerData(event, function(player_data, player, event)
+      on_gui_text_changed = mixPlayerData(function(player_data, player, event)
         local element = event.element
         local lines = {};
         for m in (element.text..'\n'):gmatch("(.-)\n") do
@@ -57,7 +57,7 @@ gui.add_handlers{
       end)
     },
     enable_program = {
-      on_gui_switch_state_changed = mixPlayerData(event, function(player_data, player, event)
+      on_gui_switch_state_changed = mixPlayerData(function(player_data, player, event)
         local state = Entity.get_data(player_data.current_fcpu)
         if event.element then
           if event.element.switch_state == "right" then
@@ -76,7 +76,7 @@ gui.add_handlers{
       end)
     },
     run_program = {
-      on_gui_click = mixPlayerData(event, function(player_data)
+      on_gui_click = mixPlayerData(function(player_data)
         local state = Entity.get_data(player_data.current_fcpu)
         player_data.current_fcpu_gui.outer.error_message.caption = ""
         Controller.compile(player_data.current_fcpu, state)
@@ -84,13 +84,13 @@ gui.add_handlers{
       end)
     },
     halt_program = {
-      on_gui_click = mixPlayerData(event, function(player_data)
+      on_gui_click = mixPlayerData(function(player_data)
         local state = Entity.get_data(player_data.current_fcpu)
         Controller.halt(player_data.current_fcpu, state)
       end)
     },
     step_program = {
-      on_gui_click = mixPlayerData(event, function(player_data)
+      on_gui_click = mixPlayerData(function(player_data)
         local state = Entity.get_data(player_data.current_fcpu)
         player_data.current_fcpu_gui.outer.error_message.caption = ""
         Controller.compile(player_data.current_fcpu, state)
@@ -98,12 +98,12 @@ gui.add_handlers{
       end)
     },
     copy_program = {
-      on_gui_click = mixPlayerData(event, function(player_data)
+      on_gui_click = mixPlayerData(function(player_data)
         player_data.program_clipboard = player_data.current_fcpu_gui.outer.inner['program-input'].text
       end)
     },
     paste_program = {
-      on_gui_click = mixPlayerData(event, function(player_data)
+      on_gui_click = mixPlayerData(function(player_data)
         if player_data.program_clipboard then
           player_data.current_fcpu_gui.outer.inner['program-input'].text = player_data.program_clipboard
         end
@@ -130,7 +130,7 @@ gui.add_templates{
   end,
 }
 
-function CreateWidget(player)
+local function CreateWidget(player)
   local rootGui = player.gui.screen -- mod_gui.get_frame_flow({gui={left=player.gui.screen}})
   if rootGui["fcpu-widget"] then
     rootGui["fcpu-widget"].destroy()
@@ -169,7 +169,7 @@ function CreateWidget(player)
         },
         {template="heading_2", caption={"gui-fcpu.program"}},
         {type="scroll-pane", style_mods={maximal_height=490}, horizontal_scroll_policy="never", children={
-          {type="flow", name="inner", style_mods={}, direction="horizontal",
+          {type="flow", name="inner", direction="horizontal",
             children={
               {type="text-box", style="fcpu_notice_textbox", save_as="gui_line_numbers",
                 ignored_by_interaction=true,
@@ -204,7 +204,7 @@ function CreateWidget(player)
   return elems
 end
 
-function fcpuOpenWidget(player, entity)
+function GuiWidgetOpen(player, entity)
   local player_data = get_player_data(player.index)
   local state = Entity.get_data(entity)
 
@@ -215,7 +215,7 @@ function fcpuOpenWidget(player, entity)
   state = table.merge(state, elems)
 
   state.gui_program_input.text = state.program_text
-  fpuUpdateWidget(entity, state)
+  GuiWidgetUpdate(entity, state)
 
   if state.error_message then
     state.gui_fcpu.outer.error_message.caption = state.error_message
@@ -243,7 +243,7 @@ function fcpuOpenWidget(player, entity)
   return state.gui_fcpu
 end
 
-function updateLines(element, state)
+local function UpdateLines(element, state)
   local lines = {}
   for i = 1, MC_LINES do
     local line = tostring(i)
@@ -260,7 +260,7 @@ function updateLines(element, state)
   element.text = table.concat(lines, "\n")
 end
 
-function fpuUpdateWidget(mc, state)
+function GuiWidgetUpdate(mc, state)
   -- Enable/Disable the run/step button
   if state.gui_run_button and state.gui_run_button.valid then
     if Controller.is_running(mc) then
@@ -277,7 +277,7 @@ function fpuUpdateWidget(mc, state)
   end
   -- Update the program lines in the GUI
   if state.gui_line_numbers and state.gui_line_numbers.valid then
-    updateLines(state.gui_line_numbers, state)
+    UpdateLines(state.gui_line_numbers, state)
   end
   -- Update the inspector GUI
   if state.gui_inspector and state.gui_inspector.valid and state.regs then
@@ -290,7 +290,7 @@ function fpuUpdateWidget(mc, state)
   end
 end
 
-function fcpuCloseWidget(player_index, silent)
+function GuiWidgetClose(player_index, silent)
   local player_data, player = get_player_data(player_index)
   if player_data and player_data.current_fcpu and player_data.current_fcpu_gui then
     local state = Entity.get_data(player_data.current_fcpu)
@@ -307,7 +307,7 @@ function fcpuCloseWidget(player_index, silent)
   end
 end
 
-function close_entity_gui(entity)
+function GuiEntityCloseWidget(entity)
   for player_index, player in pairs(game.players) do
     local player_data = get_player_data(player_index)
     if Entity._are_equal(entity, player_data.current_fcpu) then
@@ -350,16 +350,16 @@ script.on_event("fcpu-open", function(event)
       player_data.current_fcpu = entity
       set_player_data(event.player_index, player_data)
 
-      fcpuOpenWidget(player, entity)
+      GuiWidgetOpen(player, entity)
     end
   elseif entity then
-    fcpuCloseWidget(event.player_index)
+    GuiWidgetClose(event.player_index)
   end
 end)
 
 -- Handle fCPU GUI Close event.
 script.on_event("fcpu-close", function(event)
-  fcpuCloseWidget(event.player_index)
+  GuiWidgetClose(event.player_index)
 end)
 
 -- Handle player move event to close GUI when out of range.
@@ -367,7 +367,7 @@ script.on_event(defines.events.on_player_changed_position, function(event)
   local player_data, player = get_player_data(event.player_index)
   if player_data and player_data.current_fcpu and player_data.current_fcpu_gui then
     if not player.can_reach_entity(player_data.current_fcpu) then
-      fcpuCloseWidget(event.player_index, true)
+      GuiWidgetClose(event.player_index, true)
     end
   end
 end)

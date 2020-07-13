@@ -1,0 +1,6 @@
+{
+    "Lua.diagnostics.globals": [
+        "data"
+    ],
+    "Lua.runtime.version": "Lua 5.2",
+}

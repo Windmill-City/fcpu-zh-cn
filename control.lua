@@ -3,8 +3,9 @@ Surface = require('__stdlib__/stdlib/area/surface')
 require('__stdlib__/stdlib/area/tile')
 table = require('__stdlib__/stdlib/utils/table')
 
-if false then
-  Profiler = require('__profiler__/profiler')
+local hasProfiler, Profiler = pcall(require, '__profiler__/profiler')
+if not hasProfiler then
+  Profiler = nil
 end
 
 require('src/constants')
@@ -84,8 +85,8 @@ local function on_build_fcpu(event)
   if entity.name == "fcpu" then
     Controller.init(entity, {})
     local didFind = false
-    for _, mc in ipairs(global.fcpus) do
-      if mc == entity then
+    for _, v in ipairs(global.fcpus) do
+      if v == entity then
         didFind = true
       end
     end
@@ -99,7 +100,7 @@ end
 
 local function on_destroy_fcpu(event)
   debug_print("entity destroyed #"..event.entity.unit_number)
-  close_entity_gui(event.entity)
+  GuiEntityCloseWidget(event.entity)
 
   -- after entity die there will be ghost leaved for entity reviving, so do not remove fcpu imposter
   if event.name == defines.events.on_entity_died then
@@ -170,9 +171,9 @@ script.on_event(defines.events.on_tick, function(event)
     c = c + 1
 
     -- Iterate through stored fcpus
-    local mc = global.fcpus[global.last_index]
-    if mc.valid then
-      local state = Entity.get_data(mc)
+    local cpu = global.fcpus[global.last_index]
+    if cpu.valid then
+      local state = Entity.get_data(cpu)
 
       -- deprecated
       if not state.instruction_pointer then
@@ -184,15 +185,15 @@ script.on_event(defines.events.on_tick, function(event)
       -- }
 
       if state and not state.disabled then
-        fpuUpdateWidget(mc, state)
+        GuiWidgetUpdate(cpu, state)
         -- Tick the Controller
-        if mc.active and mc.is_connected_to_electric_network() then
-          Controller.tick(mc, state)
+        if cpu.active and cpu.is_connected_to_electric_network() then
+          Controller.tick(cpu, state)
           i = i + 1
         end
       end
     else
-      close_entity_gui(mc)
+      GuiEntityCloseWidget(cpu)
       table.remove(global.fcpus, global.last_index)
     end
   end
