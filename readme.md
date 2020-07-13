@@ -48,16 +48,16 @@ Clear specified registers.
 Copy signal from source to destination.  
 *dst... = src*
 
-### ssv dst...[R] val[V/R/I]
+### ssv dst...[R] val[V/S/R/I]
 Set signal value.  
 *dst... = val*
 
-### sst dst...[R] type[T/R/I]
+### sst dst...[R] type[T/S/R/I]
 Set signal type.  
 *dst... = type*
 
-### fir type[T/R/I]
-### fig type[T/R/I]
+### fir dst[R/O] type[T/R/I]
+### fig dst[R/O] type[T/R/I]
 Find type in red/green input wire.
 
 
@@ -79,10 +79,6 @@ Set digit to *val*ue at *num*ber in *dest*inatination.
 
 ## Arithmetic
 
-### inc dst[R]
-*dst = dst + 1*
-### dec dst[R]
-*dst = dst - 1*
 ### add dst[R] src[C/I/R]
 *dst = dst + src*
 ### sub dst[R] src[C/I/R]
@@ -95,6 +91,11 @@ Set digit to *val*ue at *num*ber in *dest*inatination.
 *dst = dst % src*
 ### pow dst[R] src[C/I/R]
 *dst = dst ^ src*
+
+### inc dst[R]
+*dst = dst + 1*
+### dec dst[R]
+*dst = dst - 1*
 
 ### subi dst[R] src[C/I/R]
 *dst = src - dst*

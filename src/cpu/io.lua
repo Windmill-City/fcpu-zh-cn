@@ -32,11 +32,16 @@ function io.make_value(number)
 end
 
 function io.make_address(addr, is_ptr)
+  assert.check(addr ~= nil)
   return { type = 'address', addr = tonumber(addr), pointer = is_ptr }
 end
 
 function io.make_signal(signal_id, count)
-  return { type = 'signal', signal = signal_id, count = tonumber(count) }
+  if count == '' then
+    return { type = 'type', signal = signal_id }
+  else
+    return { type = 'signal', signal = signal_id, count = tonumber(count) }
+  end
 end
 
 function io.make_register(name, address)
@@ -215,7 +220,7 @@ function io.getsignal(_, types)
     signal = io.wire_get(_)
   elseif _.type == 'register' then
     signal = io.register_get(_)
-  elseif _.type == 'signal' then
+  elseif _.type == 'signal' or _.type == 'type' or _.type == 'count' then
     signal = _
   else
     assert.exception('unhandler')
@@ -237,6 +242,7 @@ function io.setsignal(_, signal, types)
   end
 end
 
+
 function io.getcount(_, types)
   if _.type == 'value' then
     return io.value_get(_)
@@ -250,17 +256,43 @@ function io.getcount(_, types)
 end
 
 function io.setcount(_, count, types)
-  assert.exception('unhandled')
+  -- TODO: optimize
+  local signal = io.getsignal(_, types)
+  signal.count = count
+  io.setsignal(_, signal, types)
+end
+
+
+function io.gettype(_, types)
+  local signal = io.getsignal(_, types)
+  if type(signal) ~= 'table' or signal.signal == nil then
+    assert.exception('unhandled')
+  end
+  return signal.signal
+end
+
+function io.settype(_, sigtype, types)
+  -- TODO: optimize
+  local signal = io.getsignal(_, types)
+  signal.signal = sigtype
+  io.setsignal(_, signal, types)
 end
 
 
 
-function io.bind(assert_, control_, wires_, regs_, instruction_pointer_, clock_)
+function io.bind(assert_)
   assert = assert_
+end
+function io.setup(control_, state_)
   control = control_
-  wires = wires_
-  regs = regs_
-  instruction_pointer = instruction_pointer_
-  clock = clock_
+
+  wires = {
+    red = control.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_input),
+    green = control.get_circuit_network(defines.wire_type.green, defines.circuit_connector_id.combinator_input),
+  }
+
+  regs = state_.regs
+  instruction_pointer = state_.instruction_pointer
+  clock = state_.clock
 end
 return io

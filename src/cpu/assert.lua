@@ -15,10 +15,10 @@ end
 
 function assert.check(b, ...)
   if not b then
-    if #... then
+    if ... and 0 < #... then
       exception(...)
     else
-      exception('condition not ')
+      exception('Assertion failed: condition not met')
     end
   end
 end
@@ -52,6 +52,15 @@ function assert.type(_, valid)
   for i,v in ipairs(valid) do
     if _.type == v then
       return
+    end
+    if v == 'input' then
+      if _.type == 'wire' and _.color ~= nil then
+        return
+      end
+    elseif v == 'output' then
+      if _.type == 'wire' then
+        return
+      end
     end
   end
   exception("Expecting 1st parameter to be a "..(table.concat(valid, ' or ')))
@@ -123,6 +132,14 @@ function assert.memory_index_range(index, max)
   end
 end
 
+
+function assert.result_signal(reg, signal)
+  return (signal.count == nil or reg.count == signal.count) and
+  (signal.signal == nil or
+    (signal.signal.type == nil or reg.signal.type == signal.signal.type) and
+    (signal.signal.name == nil or reg.signal.name == signal.signal.name)
+  )
+end
 
 function assert.bind()
 end

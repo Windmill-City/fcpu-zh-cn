@@ -7,6 +7,7 @@ table = require('__stdlib__/stdlib/utils/table')
 
 require('../src/constants')
 Controller = require('../src/controller')
+assert = require('../src/cpu/assert')
 
 ----------------------------------------------------------------------------------------------------------------
 
@@ -93,6 +94,23 @@ end
 ----------------------------------------------------------------------------------------------------------------
 
 local fcpu, state = executeTest(
+  'check output',
+  [[
+    mov out green1
+  ]],
+  {
+    [defines.wire_type.green] = {
+      ['recipe-copper-plate'] = 1000,
+    },
+    [defines.wire_type.red] = nil,
+  },
+  function(state, output)
+    return output.output_signal.type == 'recipe' and output.output_signal.name == 'copper-plate' and output.first_constant == 1000
+  end
+)
+
+
+local fcpu, state = executeTest(
   'MOV',
   [[
     mov reg1 10[recipe-iron-plate]
@@ -110,23 +128,6 @@ local fcpu, state = executeTest(
     return (state.regs[1].count == 10 and state.regs[1].signal.type == 'recipe' and state.regs[1].signal.name == 'iron-plate')
     and ((state.regs[2].count == 1000 and state.regs[3].count == 200)
       or (state.regs[2].count == 200 and state.regs[3].count == 1000))
-  end
-)
-
-
-local fcpu, state = executeTest(
-  'check output',
-  [[
-    mov out green1
-  ]],
-  {
-    [defines.wire_type.green] = {
-      ['recipe-copper-plate'] = 1000,
-    },
-    [defines.wire_type.red] = nil,
-  },
-  function(state, output)
-    return output.output_signal.type == 'recipe' and output.output_signal.name == 'copper-plate' and output.first_constant == 1000
   end
 )
 
@@ -152,6 +153,50 @@ local fcpu, state = executeTest(
     return state.regs[2].count == -1
   end
 )
+
+
+local fcpu, state = executeTest(
+  'Set Signal Value/Type',
+  [[
+    sst reg1 [item=iron-plate]
+    ssv reg1 10
+    mov reg2 reg1
+    sst reg2 [recipe=copper-plate]
+  ]],
+  {},
+  function(state, output)
+    return state.regs[1].count == 10 and state.regs[1].signal.type == 'item' and state.regs[1].signal.name == 'iron-plate'
+    and state.regs[2].count == 10 and state.regs[2].signal.type == 'recipe' and state.regs[2].signal.name == 'copper-plate'
+  end
+)
+
+
+local fcpu, state = executeTest(
+  'Find In Red/Green',
+  [[
+    fig reg1 [recipe=copper-plate]
+    fig reg2 [recipe=iron-plate]
+    fir reg3 [recipe=steel-plate]
+    fir reg4 [item=iron-plate]
+  ]],
+  {
+    [defines.wire_type.green] = {
+      ['recipe-copper-plate'] = 1000,
+      ['recipe-steel-plate'] = 200,
+    },
+    [defines.wire_type.red] = {
+      ['item-copper-plate'] = 40,
+      ['item-iron-plate'] = 300,
+    },
+  },
+  function(state, output)
+    return assert.result_signal(state.regs[1], {count=1000, signal={type='recipe', name='copper-plate'}})
+    and assert.result_signal(state.regs[2], {count=0})
+    and assert.result_signal(state.regs[3], {count=0})
+    and assert.result_signal(state.regs[4], {count=300, signal={type='item', name='iron-plate'}})
+  end
+)
+
 
 print(serpent.block(state.regs, {comment=true}))
 print("\nAll tests completed successfully")

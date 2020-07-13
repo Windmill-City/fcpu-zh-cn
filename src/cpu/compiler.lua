@@ -2,6 +2,10 @@ local assert = require('cpu/assert')
 local io = require('cpu/io')
 local ops = require('cpu/opcodes')
 
+assert.bind()
+io.bind(assert)
+ops.bind(assert, io)
+
 
 -- require('constants')
 -- {
@@ -81,7 +85,7 @@ local function parse(tokens)
   end
   local parseSignal = function(name)
     local token = consume()
-    local m = array_build{ string.match(token, '(%d+)%[(%a+)[=%-]([%a%d%-]+)%]') }
+    local m = array_build{ string.match(token, '(%d*)%[(%a+)[=%-]([%a%d%-]+)%]') }
     return io.make_signal({type = m[2], name = m[3]}, m[1])
   end
   local parseRegister = function(name)
@@ -148,15 +152,7 @@ local function parse(tokens)
 end
 
 --- Evaluates an AST.
-local function eval(ast, control, regs, instruction_pointer, clock)
-  local wires = {}
-  wires.red = control.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_input)
-  wires.green = control.get_circuit_network(defines.wire_type.green, defines.circuit_connector_id.combinator_input)
-
-  assert.bind()
-  io.bind(assert, control, wires, regs, instruction_pointer, clock)
-  ops.bind(assert, io)
-
+local function eval(ast)
   local node = function(_)
     if _.type == 'value' then
       return io.num(_)
@@ -193,8 +189,10 @@ function compiler.compile(lines)
 end
 
 function compiler.eval(ast, control, state)
-  --local status, results = pcall(eval, ast, control, state.regs, state.instruction_pointer, state.clock)
-  local status, results = true, eval(ast, control, state.regs, state.instruction_pointer, state.clock)
+  io.setup(control, state)
+
+  --local status, results = pcall(eval, ast)
+  local status, results = true, eval(ast)
   if not status then
     local start_index = string.find(results, '@') or 1
     results = string.sub(results, start_index+1, -1)
