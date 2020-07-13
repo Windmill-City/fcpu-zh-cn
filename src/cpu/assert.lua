@@ -66,9 +66,11 @@ function assert.type(_, valid)
   exception("Expecting 1st parameter to be a "..(table.concat(valid, ' or ')))
 end
 
-function assert.is_register(_)
-  if _.type ~= "register" then
-    exception("Expecting 1st parameter to be a register")
+function assert.is_register(...)
+  for i,v in ipairs(...) do
+    if v.type ~= "register" then
+      exception("Expecting 1st parameter to be a register")
+    end
   end
 end
 

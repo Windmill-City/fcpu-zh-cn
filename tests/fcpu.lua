@@ -125,35 +125,11 @@ local fcpu, state = executeTest(
     [defines.wire_type.red] = nil,
   },
   function(state, output)
-    return (state.regs[1].count == 10 and state.regs[1].signal.type == 'recipe' and state.regs[1].signal.name == 'iron-plate')
+    return assert.result_signal(state.regs[1], {count=10, signal={type='recipe', name='iron-plate'}})
     and ((state.regs[2].count == 1000 and state.regs[3].count == 200)
       or (state.regs[2].count == 200 and state.regs[3].count == 1000))
   end
 )
-
-
-local fcpu, state = executeTest(
-  'Arithmetics',
-  [[
-    add reg2 2
-    # 2
-    sub reg2 4
-    # -2
-    mul reg2 6
-    # -12
-    div reg2 3
-    # -4
-    pow reg2 3
-    # -64
-    mod reg2 -3
-    # -1
-  ]],
-  {},
-  function(state, output)
-    return state.regs[2].count == -1
-  end
-)
-
 
 local fcpu, state = executeTest(
   'Set Signal Value/Type',
@@ -165,8 +141,35 @@ local fcpu, state = executeTest(
   ]],
   {},
   function(state, output)
-    return state.regs[1].count == 10 and state.regs[1].signal.type == 'item' and state.regs[1].signal.name == 'iron-plate'
-    and state.regs[2].count == 10 and state.regs[2].signal.type == 'recipe' and state.regs[2].signal.name == 'copper-plate'
+    return assert.result_signal(state.regs[1], {count=10, signal={type='item', name='iron-plate'}})
+    and assert.result_signal(state.regs[2], {count=10, signal={type='recipe', name='copper-plate'}})
+  end
+)
+
+
+local fcpu, state = executeTest(
+  'Swap signal/Type/Value',
+  [[
+    mov reg1 reg2 reg3 reg4 13[item=iron-plate]
+    mov reg5 reg6 reg7 reg8 61[recipe=copper-plate]
+    swp reg2 reg6
+    swpt reg3 reg7
+    swpv reg4 reg8
+  ]],
+  {},
+  function(state, output)
+    return
+    assert.result_signal(state.regs[1], {count=13, signal={type='item', name='iron-plate'}}) and
+    assert.result_signal(state.regs[5], {count=61, signal={type='recipe', name='copper-plate'}}) and
+
+    assert.result_signal(state.regs[2], {count=61, signal={type='recipe', name='copper-plate'}}) and
+    assert.result_signal(state.regs[6], {count=13, signal={type='item', name='iron-plate'}}) and
+
+    assert.result_signal(state.regs[3], {count=13, signal={type='recipe', name='copper-plate'}}) and
+    assert.result_signal(state.regs[7], {count=61, signal={type='item', name='iron-plate'}}) and
+
+    assert.result_signal(state.regs[4], {count=61, signal={type='item', name='iron-plate'}}) and
+    assert.result_signal(state.regs[8], {count=13, signal={type='recipe', name='copper-plate'}})
   end
 )
 
@@ -194,6 +197,30 @@ local fcpu, state = executeTest(
     and assert.result_signal(state.regs[2], {count=0})
     and assert.result_signal(state.regs[3], {count=0})
     and assert.result_signal(state.regs[4], {count=300, signal={type='item', name='iron-plate'}})
+  end
+)
+
+
+
+local fcpu, state = executeTest(
+  'Arithmetics',
+  [[
+    add reg2 2
+    # 2
+    sub reg2 4
+    # -2
+    mul reg2 6
+    # -12
+    div reg2 3
+    # -4
+    pow reg2 3
+    # -64
+    mod reg2 -3
+    # -1
+  ]],
+  {},
+  function(state, output)
+    return state.regs[2].count == -1
   end
 )
 

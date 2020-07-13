@@ -63,18 +63,12 @@ Find type in red/green input wire.
 
 ## Swap
 
-### swp mem1[R] mem2[R]
+### swp reg1[R] reg2[R]
 Swap signals in memory cells.  
-### swpt mem1[R] mem2[R]
+### swpt reg1[R] reg2[R]
 Swap signal types in memory cells.  
-### swpv mem1[R] mem2[R]
+### swpv reg1[R] reg2[R]
 Swap signal values in memory cells.  
-### dig dst[R/I] num[C/R/I]
-Get digit *num*ber from *dest*inatination and write to dst.  
-*dst = dst / 10^num % 10*
-### dis dst[R] num[C/R/I] val[C/R/I]
-Set digit to *val*ue at *num*ber in *dest*inatination.  
-*dst = dst + (val % 10 - dst / 10^num % 10) * 10^num*
 
 
 ## Arithmetic
@@ -105,6 +99,13 @@ Set digit to *val*ue at *num*ber in *dest*inatination.
 *dst = src % dst*
 ### powi dst[R] src[C/I/R]
 *dst = src ^ dst*
+
+### dig dst[R/I] num[C/R/I]
+Get digit *num*ber from *dest*inatination and write to dst.  
+*dst = dst / 10^num % 10*
+### dis dst[R] num[C/R/I] val[C/R/I]
+Set digit to *val*ue at *num*ber in *dest*inatination.  
+*dst = dst + (val % 10 - dst / 10^num % 10) * 10^num*
 
 
 ## Bitwise

@@ -85,6 +85,31 @@ local opcodes = {
     find_in_wire(_, 'green')
   end,
 
+  swp = function(_) -- swp reg1[R] reg2[R]
+    assert.two(_)
+    assert.is_register(_[1], _[2])
+    local a = io.getsignal(_[1], {'register'})
+    local b = io.getsignal(_[2], {'register'})
+    io.setsignal(_[1], b, {'register'})
+    io.setsignal(_[2], a, {'register'})
+  end,
+  swpt = function(_) -- swpt reg1[R] reg2[R]
+    assert.two(_)
+    assert.is_register(_[1], _[2])
+    local a = io.gettype(_[1], {'register'})
+    local b = io.gettype(_[2], {'register'})
+    io.settype(_[1], b, {'register'})
+    io.settype(_[2], a, {'register'})
+  end,
+  swpv = function(_) -- swpv reg1[R] reg2[R]
+    assert.two(_)
+    assert.is_register(_[1], _[2])
+    local a = io.getcount(_[1], {'register'})
+    local b = io.getcount(_[2], {'register'})
+    io.setcount(_[1], b, {'register'})
+    io.setcount(_[2], a, {'register'})
+  end,
+
   add = function(_)
     local _dst, _src = standard_op(_)
     io.register_set_count(_dst, io.getcount(_dst) + io.getcount(_src))
