@@ -1,5 +1,6 @@
 local assert
 local io
+local bit32 = require('3rdparty/numberlua')
 
 
 local standard_op = function(_)
@@ -195,6 +196,66 @@ local opcodes = {
     io.register_set_count(_[1], tonumber(s:reverse()))
   end,
 
+  band = function(_)
+    local _dst, _src = standard_op(_)
+    local r = bit32.band(io.getcount(_dst), io.getcount(_src))
+    io.register_set_count(_dst, r)
+  end,
+  bor = function(_)
+    local _dst, _src = standard_op(_)
+    local r = bit32.bor(io.getcount(_dst), io.getcount(_src))
+    io.register_set_count(_dst, r)
+  end,
+  bxor = function(_)
+    local _dst, _src = standard_op(_)
+    local r = bit32.bxor(io.getcount(_dst), io.getcount(_src))
+    io.register_set_count(_dst, r)
+  end,
+  bnot = function(_)
+    local _dst = _[1]
+    assert.is_register(_dst)
+    local result = bit32.bnot(io.getcount(_dst))
+    io.register_set_count(io.getcount(_dst), result)
+  end,
+  bsl = function(_)
+    local _dst, _src = standard_op(_)
+    local r = bit32.lshift(io.getcount(_dst), io.getcount(_src))
+    io.register_set_count(_dst, r)
+  end,
+  bsr = function(_)
+    local _dst, _src = standard_op(_)
+    local r = bit32.rshift(io.getcount(_dst), io.getcount(_src))
+    io.register_set_count(_dst, r)
+  end,
+  brl = function(_)
+    local _dst, _src = standard_op(_)
+    local r = bit32.lrotate(io.getcount(_dst), io.getcount(_src))
+    io.register_set_count(_dst, r)
+  end,
+  brr = function(_)
+    local _dst, _src = standard_op(_)
+    local r = bit32.rrotate(io.getcount(_dst), io.getcount(_src))
+    io.register_set_count(_dst, r)
+  end,
+
+  jmp = function(_)
+    assert.one(_)
+    local _in = _[1]
+    assert.type(_in, {'label', 'value', 'register'})
+    if _in.type == 'label' then
+      return { type = 'jump', label = _in.label }
+    else
+      return { type = 'jump', val = io.getcount(_in) }
+    end
+  end,
+  hlt = function(_)
+    return { type = 'halt' }
+  end,
+  slp = function(_)
+    assert.one(_)
+    assert.type(_[1], {'value', 'register'})
+    return { type = 'sleep', val = io.getcount(_[1]) }
+  end,
 }
 
 

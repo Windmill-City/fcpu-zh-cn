@@ -122,9 +122,9 @@ OR.
 XOR.  
 *dst = dst ^ src*
 
-### ban dst[R] src[C/I/R]
-AND NOT.  
-*dst = dst & ~src*
+### bnot dst[R]
+NOT.  
+*dst = ~dst*
 
 ### bsl dst[R] src[C/I/R]
 Shift left.  
