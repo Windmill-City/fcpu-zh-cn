@@ -118,6 +118,10 @@ function io.wire_find_signal(color, signal_to_find)
   return NULL_SIGNAL
 end
 
+function io.wire_count(color)
+  return wires[color] and wires[color].signals and #wires[color].signals or 0
+end
+
 -- Address, Value and Signal decomposition
 function io.addr_to_index(_)
   assert.check(_.addr ~= nil and _.pointer ~= nil)

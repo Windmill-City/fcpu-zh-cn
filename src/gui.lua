@@ -217,6 +217,10 @@ function fcpuOpenWidget(player, entity)
   state.gui_program_input.text = state.program_text
   fpuUpdateWidget(entity, state)
 
+  if state.error_message then
+    state.gui_fcpu.outer.error_message.caption = state.error_message
+  end
+
   if state.disabled then
     state.gui_enable_switch.switch_state = "left"
   else
@@ -276,7 +280,7 @@ function fpuUpdateWidget(mc, state)
     updateLines(state.gui_line_numbers, state)
   end
   -- Update the inspector GUI
-  if state.gui_inspector and state.gui_inspector.valid then
+  if state.gui_inspector and state.gui_inspector.valid and state.regs then
     for i = 1, MC_REGS do
       if state.regs[i] then
         state.gui_inspector['reg'..i..'-inspect'].sprite = signalToSpritePath( state.regs[i].signal)

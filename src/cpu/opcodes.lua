@@ -13,11 +13,9 @@ local standard_op = function(_)
 end
 local test_op = function(_)
   assert.two(_)
-  local _in = _[1]
-  assert.type(_in, {'register', 'value'})
-  local _out = _[2]
-  assert.out_mem_or_val(_out)
-  return _in, _out
+  assert.type(_[1], {'value', 'input', 'register'})
+  assert.type(_[2], {'value', 'input', 'register'})
+  return _[1], _[2]
 end
 
 local find_in_wire = function(_, color)
@@ -238,6 +236,63 @@ local opcodes = {
     io.register_set_count(_dst, r)
   end,
 
+  teq = function(_) -- teq a[C/I/R] b[C/I/R]
+    local a, b = test_op(_)
+    if not (io.getcount(a) == io.getcount(b)) then
+      return { type = 'skip' }
+    end
+  end,
+  tne = function(_) -- tne a[C/I/R] b[C/I/R]
+    local a, b = test_op(_)
+    if not (io.getcount(a) ~= io.getcount(b)) then
+      return { type = 'skip' }
+    end
+  end,
+  tgt = function(_) -- tgt a[C/I/R] b[C/I/R]
+    local a, b = test_op(_)
+    if not (io.getcount(a) > io.getcount(b)) then
+      return { type = 'skip' }
+    end
+  end,
+  tlt = function(_) -- tlt a[C/I/R] b[C/I/R]
+    local a, b = test_op(_)
+    if not (io.getcount(a) < io.getcount(b)) then
+      return { type = 'skip' }
+    end
+  end,
+  tge = function(_) -- tge a[C/I/R] b[C/I/R]
+    local a, b = test_op(_)
+    if not (io.getcount(a) >= io.getcount(b)) then
+      return { type = 'skip' }
+    end
+  end,
+  tle = function(_) -- tle a[C/I/R] b[C/I/R]
+    local a, b = test_op(_)
+    if not (io.getcount(a) <= io.getcount(b)) then
+      return { type = 'skip' }
+    end
+  end,
+  tas = function(_) -- tas a[T/I/R] b[T/I/R]
+    assert.two(_)
+    assert.type(_[1], {'type', 'input', 'register'})
+    assert.type(_[2], {'type', 'input', 'register'})
+    local as = io.register_get(_[1]).signal
+    local bs = io.register_get(_[2]).signal
+    if not (as.type == bs.type and as.name == bs.name) then
+      return { type = 'skip' }
+    end
+  end,
+  tad = function(_) -- tad a[T/I/R] b[T/I/R]
+    assert.two(_)
+    assert.type(_[1], {'type', 'input', 'register'})
+    assert.type(_[2], {'type', 'input', 'register'})
+    local as = io.register_get(_[1]).signal
+    local bs = io.register_get(_[2]).signal
+    if not (as.type ~= bs.type or as.name ~= bs.name) then
+      return { type = 'skip' }
+    end
+  end,
+
   jmp = function(_)
     assert.one(_)
     local _in = _[1]
@@ -256,6 +311,24 @@ local opcodes = {
     assert.type(_[1], {'value', 'register'})
     return { type = 'sleep', val = io.getcount(_[1]) }
   end,
+
+  bkr = function(_)
+    assert.one(_)
+    assert.type(_[1], {'value', 'register'})
+    local count = io.getcount(_[1])
+    if io.wire_count('red') < count then
+      return {type = 'block'}
+    end
+  end,
+  bkg = function(_)
+    assert.one(_)
+    assert.type(_[1], {'value', 'register'})
+    local count = io.getcount(_[1])
+    if io.wire_count('green') < count then
+      return {type = 'block'}
+    end
+  end,
+
 }
 
 

@@ -145,37 +145,37 @@ Rotate right.
 
 ## Testing operands values
 
-### teq a[C/I/R] b[I/R]
+### teq a[C/I/R] b[C/I/R]
 Equal.  
 *a == b*
 
-### tne a[C/I/R] b[I/R]
+### tne a[C/I/R] b[C/I/R]
 Not equal.  
 *a != b*
 
-### tgt a[C/I/R] b[I/R]
+### tgt a[C/I/R] b[C/I/R]
 Greater than.  
 *a > b*
 
-### tlt a[C/I/R] b[I/R]
+### tlt a[C/I/R] b[C/I/R]
 Less than.  
 *a < b*
 
-### tge a[C/I/R] b[I/R]
+### tge a[C/I/R] b[C/I/R]
 Greater or equal than.  
 *a >= b*
 
-### tle a[C/I/R] b[I/R]
+### tle a[C/I/R] b[C/I/R]
 Less or equal than.  
 *a <= b*
 
 
 ## Testing operands types
 
-### tas a[T/I/R] b[I/R]
+### tas a[T/I/R] b[T/I/R]
 Types are same.  
 
-### tad a[T/I/R] b[I/R]
+### tad a[T/I/R] b[T/I/R]
 Types are different.  
 
 
