@@ -155,7 +155,7 @@ end
 local function eval(ast)
   local node = function(_)
     if _.type == 'value' then
-      return io.num(_)
+      return io.value_get(_)
     elseif _.type == 'op' then
       if ops[_.name] then
         return ops[_.name](_.expr)

@@ -44,7 +44,7 @@ Clear all memory and output.
 ### clr reg...[**R**/**O**]
 Clear specified registers.
 
-### mov dst...[R/O] src[S/R/I]
+### mov dst...[R/O] src[V/T/S/R/I]
 Copy signal from source to destination.  
 *dst... = src*
 
@@ -100,7 +100,7 @@ Swap signal values in memory cells.
 ### powi dst[R] src[C/I/R]
 *dst = src ^ dst*
 
-### dig dst[R/I] num[C/R/I]
+### dig dst[R] num[C/R/I]
 Get digit *num*ber from *dest*inatination and write to dst.  
 *dst = dst / 10^num % 10*
 ### dis dst[R] num[C/R/I] val[C/R/I]

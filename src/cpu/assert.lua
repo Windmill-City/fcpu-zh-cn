@@ -74,30 +74,6 @@ function assert.is_register(...)
   end
 end
 
-function assert.is_reg_or_val(_)
-  if _.type ~= "register" and _.type ~= 'value' then
-    exception("Expecting 1st parameter to be an integer or register")
-  end
-end
-
-function assert.is_input_or_reg_or_val(_)
-  if not ((_.type == "register" and _.location == 'readonly') or _.type == 'value') then
-    exception("Expecting 1st parameter to be an integer or memory register")
-  end
-end
-
-function assert.reg_or_val(_)
-  if not ((_.type == "register" and _.location == 'readonly') or _.type == 'value') then
-    exception("Expecting 1st parameter to be an integer or memory register")
-  end
-end
-
-function assert.in_mem_or_val_or_label(_)
-  if not ((_.type == "register" and _.location == 'readonly') or _.type == 'value' or _.type == "label") then
-    exception("Expecting 1st parameter to be an integer, memory register or label")
-  end
-end
-
 function assert.out_mem(_)
   if _.type ~= "register" or _.location ~= 'readonly' then
     exception("Expecting 2nd parameter to be a memory register")

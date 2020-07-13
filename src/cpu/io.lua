@@ -28,7 +28,7 @@ function io.make_label(label)
 end
 
 function io.make_value(number)
-  return { type = 'value', val = tonumber(number) }
+  return { type = 'value', count = tonumber(number) }
 end
 
 function io.make_address(addr, is_ptr)
@@ -130,7 +130,7 @@ end
 
 function io.value_get(_)
   assert.check(_.type == 'value')
-  return _.val
+  return _.count
 end
 
 function io.signal_name(_)
@@ -220,7 +220,7 @@ function io.getsignal(_, types)
     signal = io.wire_get(_)
   elseif _.type == 'register' then
     signal = io.register_get(_)
-  elseif _.type == 'signal' or _.type == 'type' or _.type == 'count' then
+  elseif _.type == 'signal' or _.type == 'type' or _.type == 'value' then
     signal = _
   else
     assert.exception('unhandler')

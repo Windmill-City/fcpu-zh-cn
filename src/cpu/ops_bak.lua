@@ -2,7 +2,7 @@ local ops = {
   set = function(_)
     assert.two(_)
     local _in = _[1]
-    assert.reg_or_val(_in)
+    assert.type(_in, {'register', 'value'})
     local _out = _[2]
     assert.out_register(_out)
     if _in.type == 'register' then
@@ -76,20 +76,20 @@ local ops = {
   bno = function(_)
     assert.one(_)
     local _in = _[1]
-    assert.reg_or_val(_in)
+    assert.type(_in, {'register', 'value'})
     local result = bit32.bnot(io.getcount(_in))
     io.register_set_count(io.make_value(1), result)
   end,
   slp = function(_)
     assert.one(_)
     local _in = _[1]
-    assert.reg_or_val(_in)
+    assert.type(_in, {'register', 'value'})
     return { type = 'sleep', val = io.getcount(_in) }
   end,
   jmp = function(_)
     assert.one(_)
     local _in = _[1]
-    assert.in_mem_or_val_or_label(_in)
+    assert.type(_in, {'register', 'value', 'label'})
     if _in.type == 'label' then
       return { type = 'jump', label = _in.label }
     else
@@ -146,7 +146,7 @@ local ops = {
   dig = function(_)
     assert.one(_)
     local _in = _[1]
-    assert.reg_or_val(_in)
+    assert.type(_in, {'register', 'value'})
     local i = io.getcount(_in)
     local value = io.register_get(io.make_value(1)).count
     local digit = tonumber(string.sub(tostring(value), -i, -i))
@@ -155,7 +155,7 @@ local ops = {
   dis = function(_)
     assert.two(_)
     local _in = _[1]
-    assert.reg_or_val(_in)
+    assert.type(_in, {'register', 'value'})
     local _out = _[2]
     assert.out_mem_or_val(_out)
     local str_value = tostring(io.register_get(io.make_value(1)).count)
@@ -170,7 +170,7 @@ local ops = {
   bkr = function(_)
     assert.one(_)
     local _in = _[1]
-    assert.reg_or_val(_in)
+    assert.type(_in, {'register', 'value'})
     local count = io.getcount(_in)
     if wires.red.signals == nil or #wires.red.signals < count then
       return {type = 'block'}
@@ -179,7 +179,7 @@ local ops = {
   bkg = function(_)
     assert.one(_)
     local _in = _[1]
-    assert.reg_or_val(_in)
+    assert.type(_in, {'register', 'value'})
     local count = io.getcount(_in)
     if wires.green.signals == nil or #wires.green.signals < count then
       return {type = 'block'}

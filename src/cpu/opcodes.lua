@@ -7,13 +7,13 @@ local standard_op = function(_)
   local _dst = _[1]
   assert.is_register(_dst)
   local _src = _[2]
-  assert.is_input_or_reg_or_val(_src)
+  assert.type(_src, {'register', 'value'})
   return _dst, _src
 end
 local test_op = function(_)
   assert.two(_)
   local _in = _[1]
-  assert.reg_or_val(_in)
+  assert.type(_in, {'register', 'value'})
   local _out = _[2]
   assert.out_mem_or_val(_out)
   return _in, _out
@@ -56,9 +56,9 @@ local opcodes = {
     end
   end,
 
-  mov = function(_) -- mov dst...[R/O] src[S/R/I]
+  mov = function(_) -- mov dst...[R/O] src[V/T/S/R/I]
     assert.two_or_more(_)
-    local sig = io.getsignal(_[#_], {'signal', 'register', 'input'})
+    local sig = io.getsignal(_[#_], {'value', 'type', 'signal', 'register', 'input'})
     for i = 1, #_ - 1 do
       io.setsignal(_[i], sig, {'register', 'wire'})
     end
@@ -165,7 +165,38 @@ local opcodes = {
     io.register_set_count(_dst, io.getcount(_src) ^ io.getcount(_dst))
   end,
 
+  dig = function(_) -- dig dst[R] num[C/R/I]
+    assert.two(_)
+    assert.type(_[1], {'register'})
+    assert.type(_[2], {'value', 'register', 'input'})
+    local d = io.getcount(_[1])
+    local n = io.getcount(_[2])
+    n = math.max(0, n)-- + 1
+    -- TODO: optimize
+    local s = tostring(math.floor(math.abs(d))):reverse()
+    io.register_set_count(_[1], tonumber(s:sub(n, n)) or 0)
+  end,
+  dis = function(_) -- dis dst[R] num[C/R/I] val[C/R/I]
+    assert.three(_)
+    assert.type(_[1], {'register'})
+    assert.type(_[2], {'value', 'register', 'input'})
+    assert.type(_[3], {'value', 'register', 'input'})
+    local d = io.getcount(_[1])
+    local n = io.getcount(_[2])
+    local v = io.getcount(_[3])
+    n = math.max(0, n)-- + 1
+    -- TODO: optimize
+    local s = tostring(math.floor(math.abs(d)) or 0):reverse()
+    local r = tostring(math.min(math.floor(math.abs(v)), 9) or 0)
+    s = s:sub(1, n - 1) .. string.rep('0', n-#s-1) ..r.. s:sub(n + 1)
+    if d*v < 0 then
+      s = s..'-'
+    end
+    io.register_set_count(_[1], tonumber(s:reverse()))
+  end,
+
 }
+
 
 function opcodes.bind(assert_, io_)
   assert = assert_

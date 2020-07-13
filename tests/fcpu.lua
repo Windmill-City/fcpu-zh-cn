@@ -220,9 +220,33 @@ local fcpu, state = executeTest(
   ]],
   {},
   function(state, output)
-    return state.regs[2].count == -1
+    return (state.regs[2].count == -1)
   end
 )
+
+
+local fcpu, state = executeTest(
+  'Digit at Index Get/Set',
+  [[
+    mov reg3 1234567890
+    dig reg3 5
+    mov reg4 1234567890
+    dis reg4 5 8
+    mov reg5 1234567890
+    dis reg5 12 8
+    mov reg6 1234567890
+    dis reg6 1 8
+  ]],
+  {},
+  function(state, output)
+    return 
+    (state.regs[3].count == 6) and
+    (state.regs[4].count == 1234587890) and
+    (state.regs[5].count == 801234567890) and
+    (state.regs[6].count == 1234567898)
+  end
+)
+
 
 
 print(serpent.block(state.regs, {comment=true}))
