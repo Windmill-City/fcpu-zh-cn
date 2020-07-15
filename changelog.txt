@@ -1,6 +1,14 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.0.1
+Date: 2020-07-12
+  New:
+    - Added new opcodes.
+    - Added settings widget.
+    - Added english and russian localization.
+    - Added frame handling limit.
+---------------------------------------------------------------------------------------------------
 Version: 0.0.0
-Date: 00. 07. 2020
+Date: 2020-07-01
   New:
     - Initial release.
   Features:

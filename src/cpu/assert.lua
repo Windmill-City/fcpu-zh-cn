@@ -63,32 +63,14 @@ function assert.type(_, valid)
       end
     end
   end
-  exception("Expecting 1st parameter to be a "..(table.concat(valid, ' or ')))
+  exception("Expecting parameter to be a "..(table.concat(valid, ' or ')))
 end
 
 function assert.is_register(...)
   for i,v in ipairs(...) do
     if v.type ~= "register" then
-      exception("Expecting 1st parameter to be a register")
+      exception("Expecting parameter to be a register")
     end
-  end
-end
-
-function assert.out_mem(_)
-  if _.type ~= "register" or _.location ~= 'readonly' then
-    exception("Expecting 2nd parameter to be a memory register")
-  end
-end
-
-function assert.out_register(_)
-  if _.type ~= "register" then
-    exception("Expecting 2nd parameter to be a memory or output register")
-  end
-end
-
-function assert.out_mem_or_val(_)
-  if not ((_.type == "register" and _.location == 'readonly') or _.type == 'value') then
-    exception("Expecting 2nd parameter to be an integer or memory register")
   end
 end
 

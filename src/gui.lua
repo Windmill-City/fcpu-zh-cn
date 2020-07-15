@@ -178,6 +178,7 @@ local function CreateWidget(player)
                 style_mods={
                   vertically_stretchable=false,
                   horizontally_stretchable=true,
+                  rich_text_setting=defines.rich_text_setting.enabled
                 },
                 horizontal_scroll_policy="never",
                 vertical_scroll_policy="never",
@@ -188,7 +189,12 @@ local function CreateWidget(player)
             style_mods={horizontally_stretchable=false, vertically_squashable=true},
           },
         }},
-        {type="label", name="error_message", caption="", style="bold_red_label"},
+        {type="label", name="error_message", caption="", style="bold_red_label", style_mods={
+          top_margin=10,
+          horizontally_stretchable=true,
+          horizontally_squashable=true,
+          single_line=false,
+        }},
       }},
 
       {type="flow", name="footer", children={
