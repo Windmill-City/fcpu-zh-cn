@@ -1,6 +1,6 @@
-local assert = require('assert')
-local io = require('io')
-local ops = require('opcodes')
+local assert = require('src/cpu/assert')
+local io = require('src/cpu/io')
+local ops = require('src/cpu/opcodes')
 
 assert.bind()
 io.bind(assert)

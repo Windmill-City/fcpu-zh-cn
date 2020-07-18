@@ -48,6 +48,10 @@ Clear specified registers.
 Copy signal from source to destination.  
 *dst... = src*
 
+### out src[V/T/S/R/I]
+Copy signal from source to output.  
+Same as `mov out src`.  
+
 ### ssv dst...[R] val[V/S/R/I]
 Set signal value.  
 *dst... = val*

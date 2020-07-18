@@ -4,6 +4,7 @@ data:extend{
     minable = {hardness = 0.2, mining_time = 0.5, result = "fcpu"},
     active_energy_usage = "20KW",
     selection_box = {{-1, -1}, {1, 1}},
+    collision_box = {{-0.75, -0.75}, {0.75, 0.75}},
     additional_pastable_entities = {"fcpu", "arithmetic-combinator", "decider-combinator", "constant-combinator"},
   }),
   {
