@@ -1,11 +1,38 @@
+require('prototypes/entities/pictures')
+
+local empty_picture = {
+  filename = "__fcpu__/graphics/empty.png",
+  x = 0,
+  y = 0,
+  width = 1,
+  height = 1,
+  frame_count = 1,
+  shift = {0, 0},
+}
+
 data:extend{
-  table.merge(table.deepcopy(data.raw['arithmetic-combinator']['arithmetic-combinator']), {
+  table.merge(table.deepcopy(data.raw['arithmetic-combinator']['arithmetic-combinator']), generate_fcpu_combinator
+  {
     name = "fcpu",
     minable = {hardness = 0.2, mining_time = 0.5, result = "fcpu"},
-    active_energy_usage = "20KW",
+    max_health = 300,
+    collision_box = {{-0.65, -0.65}, {0.65, 0.65}},
     selection_box = {{-1, -1}, {1, 1}},
-    collision_box = {{-0.75, -0.75}, {0.75, 0.75}},
     additional_pastable_entities = {"fcpu", "arithmetic-combinator", "decider-combinator", "constant-combinator"},
+
+    active_energy_usage = "20KW",
+
+    and_symbol_sprites = empty_picture,
+    divide_symbol_sprites = empty_picture,
+    left_shift_symbol_sprites = empty_picture,
+    minus_symbol_sprites = empty_picture,
+    modulo_symbol_sprites = empty_picture,
+    multiply_symbol_sprites = empty_picture,
+    or_symbol_sprites = empty_picture,
+    plus_symbol_sprites = empty_picture,
+    power_symbol_sprites = empty_picture,
+    right_shift_symbol_sprites = empty_picture,
+    xor_symbol_sprites = empty_picture,
   }),
   {
     type = "item",
@@ -49,16 +76,6 @@ data:extend{
     },
     order = "a-d-d"
   },
-}
-
-local empty_picture = {
-  filename = "__fcpu__/graphics/empty.png",
-  x = 0,
-  y = 0,
-  width = 1,
-  height = 1,
-  frame_count = 1,
-  shift = {0, 0},
 }
 
 local imposter_fcpu_item ={
