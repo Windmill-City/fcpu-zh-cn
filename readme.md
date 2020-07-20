@@ -1,11 +1,3 @@
-# TODO
-
-
-### Отображать состояние контроллера
-Использовать `first_signal`
-
-
-
 # fASM
 
 - **S**, signal: **S**ignal (consists of **T**ype and **V**alue)
@@ -101,6 +93,17 @@
 * **dis** dst[R] num[C/R/I] val[C/R/I]  
   Set digit to *val*ue at *num*ber in *dest*inatination.  
   *dst = dst + (val % 10 - dst / 10^num % 10) * 10^num*
+
+
+## Trigonometry
+
+* **cos** dst[R] src[C/I/R]  
+* **sin** dst[R] src[C/I/R]  
+* **tan** dst[R] src[C/I/R]  
+* **atn2** dst[R] x[C/I/R] y[C/I/R]  
+* **sqrt** dst[R] src[C/I/R]  
+* **exp** dst[R] src[C/I/R]  
+* **ln** dst[R] src[C/I/R]  
 
 
 ## Bitwise
