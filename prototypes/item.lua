@@ -41,7 +41,8 @@ data:extend{
     icon = "__fcpu__/graphics/icons/fcpu.png",
     icon_size = 64,
     stack_size = 20,
-    subgroup = "circuit-network"
+    subgroup = "circuit-network",
+    order = "c[combinators]-f[fcpu]"
   },
   {
     type = "recipe",
@@ -86,7 +87,7 @@ local imposter_fcpu_item ={
   flags = { "hidden" },
   subgroup = "circuit-network",
   place_result="imposter-fcpu",
-  order = "b[combinators]-c[imposter-fcpu]",
+  order = "c[combinators]-f[imposter-fcpu]",
   stack_size = 1,
 }
 

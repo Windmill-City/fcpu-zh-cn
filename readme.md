@@ -60,17 +60,17 @@
 
 ## Arithmetic
 
-* **add** dst[R] src[C/I/R]  
+* **add** dst[R] src[C/R/I]  
   *dst = dst + src*
-* **sub** dst[R] src[C/I/R]  
+* **sub** dst[R] src[C/R/I]  
   *dst = dst - src*
-* **mul** dst[R] src[C/I/R]  
+* **mul** dst[R] src[C/R/I]  
   *dst = dst * src*
-* **div** dst[R] src[C/I/R]  
+* **div** dst[R] src[C/R/I]  
   *dst = dst / src*
-* **mod** dst[R] src[C/I/R]  
+* **mod** dst[R] src[C/R/I]  
   *dst = dst % src*
-* **pow** dst[R] src[C/I/R]  
+* **pow** dst[R] src[C/R/I]  
   *dst = dst ^ src*
 
 * **inc** dst[R]  
@@ -78,13 +78,13 @@
 * **dec** dst[R]  
   *dst = dst - 1*
 
-* **subi** dst[R] src[C/I/R]  
+* **subi** dst[R] src[C/R/I]  
   *dst = src - dst*
-* **divi** dst[R] src[C/I/R]  
+* **divi** dst[R] src[C/R/I]  
   *dst = src / dst*
-* **modi** dst[R] src[C/I/R]  
+* **modi** dst[R] src[C/R/I]  
   *dst = src % dst*
-* **powi** dst[R] src[C/I/R]  
+* **powi** dst[R] src[C/R/I]  
   *dst = src ^ dst*
 
 * **dig** dst[R] num[C/R/I]  
@@ -97,26 +97,33 @@
 
 ## Trigonometry
 
-* **cos** dst[R] src[C/I/R]  
-* **sin** dst[R] src[C/I/R]  
-* **tan** dst[R] src[C/I/R]  
-* **atn2** dst[R] x[C/I/R] y[C/I/R]  
-* **sqrt** dst[R] src[C/I/R]  
-* **exp** dst[R] src[C/I/R]  
-* **ln** dst[R] src[C/I/R]  
+* **cos** dst[R] src[C/R/I]  
+  *dst = cos(src)*
+* **sin** dst[R] src[C/R/I]  
+  *dst = sin(src)*
+* **tan** dst[R] src[C/R/I]  
+  *dst = tan(src)*
+* **atan2** dst[R] y[C/R/I] x[C/R/I]  
+  *dst = atan2(y, x)*
+* **sqrt** dst[R] src[C/R/I]  
+  *dst = sqrt(src)*
+* **exp** dst[R] src[C/R/I]  
+  *dst = exp(src)*
+* **ln** dst[R] src[C/R/I]  
+  *dst = ln(src)*
 
 
 ## Bitwise
 
-* **band** dst[R] src[C/I/R]  
+* **band** dst[R] src[C/R/I]  
   AND.  
   *dst = dst & src*
 
-* **bor** dst[R] src[C/I/R]  
+* **bor** dst[R] src[C/R/I]  
   OR.  
   *dst = dst | src*
 
-* **bxor** dst[R] src[C/I/R]  
+* **bxor** dst[R] src[C/R/I]  
   XOR.  
   *dst = dst ^ src*
 
@@ -124,56 +131,56 @@
   NOT.  
   *dst = ~dst*
 
-* **bsl** dst[R] src[C/I/R]  
+* **bsl** dst[R] src[C/R/I]  
   Shift left.  
   *dst = dst << src*
 
-* **bsr** dst[R] src[C/I/R]  
+* **bsr** dst[R] src[C/R/I]  
   Shift right.  
   *dst = dst >> src*
 
-* **brl** dst[R] src[C/I/R]  
+* **brl** dst[R] src[C/R/I]  
   Rotate left.  
   *dst = dst rot<< src*
 
-* **brr** dst[R] src[C/I/R]  
+* **brr** dst[R] src[C/R/I]  
   Rotate right.  
   *dst = dst rot>> src*
 
 
 ## Testing operands values
 
-* **teq** a[C/I/R] b[C/I/R]  
+* **teq** a[C/R/I] b[C/R/I]  
   Equal.  
   *a == b*
 
-* **tne** a[C/I/R] b[C/I/R]  
+* **tne** a[C/R/I] b[C/R/I]  
   Not equal.  
   *a != b*
 
-* **tgt** a[C/I/R] b[C/I/R]  
+* **tgt** a[C/R/I] b[C/R/I]  
   Greater than.  
   *a > b*
 
-* **tlt** a[C/I/R] b[C/I/R]  
+* **tlt** a[C/R/I] b[C/R/I]  
   Less than.  
   *a < b*
 
-* **tge** a[C/I/R] b[C/I/R]  
+* **tge** a[C/R/I] b[C/R/I]  
   Greater or equal than.  
   *a >= b*
 
-* **tle** a[C/I/R] b[C/I/R]  
+* **tle** a[C/R/I] b[C/R/I]  
   Less or equal than.  
   *a <= b*
 
 
 ## Testing operands types
 
-* **tas** a[T/I/R] b[T/I/R]  
+* **tas** a[T/R/I] b[T/R/I]  
   Types are same.  
 
-* **tad** a[T/I/R] b[T/I/R]  
+* **tad** a[T/R/I] b[T/R/I]  
   Types are different.  
 
 

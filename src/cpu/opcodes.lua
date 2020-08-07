@@ -8,7 +8,7 @@ local standard_op = function(_)
   local _dst = _[1]
   assert.is_register(_dst)
   local _src = _[2]
-  assert.type(_src, {'register', 'value'})
+  assert.type(_src, {'register', 'value', 'input'})
   return _dst, _src
 end
 local test_op = function(_)
@@ -27,6 +27,20 @@ local find_in_wire = function(_, color)
   local sig = io.wire_find_signal(color, _type)
   io.setsignal(_dst, sig)
 end
+
+local fp = {
+  ifp = 1.0 / MC_FIXEDPOINT,
+
+  to_float = function(fp)
+    return fp * ifp
+  end,
+  from_float = function(f)
+    return math.round(f * MC_FIXEDPOINT)
+  end,
+  val_float = function(f)
+    return f
+  end
+}
 
 local opcodes = {
 -- S: Signal
@@ -199,6 +213,57 @@ local opcodes = {
     io.register_set_count(_[1], tonumber(s:reverse()))
   end,
 
+  _tofp = function(_)
+    assert.two(_)
+    assert.type(_[1], {'register'})
+    assert.type(_[2], {'value'})
+    local _dst = io.getcount(_[1])
+    local _src = io.getcount(_[2])
+    io.register_set_fp(_dst, fp.val_float(io.getcount(_src)))
+  end,
+  _fromfp = function(_)
+    assert.two(_)
+    assert.type(_[1], {'register'})
+    assert.type(_[2], {'value', 'register', 'input'})
+    local _dst = io.getcount(_[1])
+    local _src = io.getcount(_[2])
+    io.register_set_fp(_dst, fp.val_float(io.getcount(_src)))
+  end,
+
+  cos = function(_) -- * **cos** dst[R] src[C/R/I]
+    local _dst, _src = standard_op(_)
+    io.register_set_fp(_dst, math.cos(fp.val_float(io.getcount(_src))))
+  end,
+  sin = function(_) -- * **sin** dst[R] src[C/R/I]
+    local _dst, _src = standard_op(_)
+    io.register_set_fp(_dst, math.sin(fp.val_float(io.getcount(_src))))
+  end,
+  tan = function(_) -- * **tan** dst[R] src[C/R/I]
+    local _dst, _src = standard_op(_)
+    io.register_set_fp(_dst, math.tan(fp.val_float(io.getcount(_src))))
+  end,
+  atan2 = function(_) -- * **atan2** dst[R] x[C/R/I] y[C/R/I]
+    assert.three(_)
+    assert.type(_[1], {'register'})
+    assert.type(_[2], {'value', 'register', 'input'})
+    assert.type(_[3], {'value', 'register', 'input'})
+    local y = fp.val_float(io.getcount(_[2]))
+    local x = fp.val_float(io.getcount(_[3]))
+    io.register_set_fp(_[1], math.atan2(y, x))
+  end,
+  sqrt = function(_) -- * **sqrt** dst[R] src[C/R/I]
+    local _dst, _src = standard_op(_)
+    io.register_set_fp(_dst, math.sqrt(fp.val_float(io.getcount(_src))))
+  end,
+  exp = function(_) -- * **exp** dst[R] src[C/R/I]
+    local _dst, _src = standard_op(_)
+    io.register_set_fp(_dst, math.exp(fp.val_float(io.getcount(_src))))
+  end,
+  ln = function(_) -- * **ln** dst[R] src[C/R/I]
+    local _dst, _src = standard_op(_)
+    io.register_set_fp(_dst, math.ln(fp.val_float(io.getcount(_src))))
+  end,
+
   band = function(_)
     local _dst, _src = standard_op(_)
     local r = bit32.band(io.getcount(_dst), io.getcount(_src))
@@ -241,43 +306,43 @@ local opcodes = {
     io.register_set_count(_dst, r)
   end,
 
-  teq = function(_) -- teq a[C/I/R] b[C/I/R]
+  teq = function(_) -- teq a[C/R/I] b[C/R/I]
     local a, b = test_op(_)
     if not (io.getcount(a) == io.getcount(b)) then
       return { type = 'skip' }
     end
   end,
-  tne = function(_) -- tne a[C/I/R] b[C/I/R]
+  tne = function(_) -- tne a[C/R/I] b[C/R/I]
     local a, b = test_op(_)
     if not (io.getcount(a) ~= io.getcount(b)) then
       return { type = 'skip' }
     end
   end,
-  tgt = function(_) -- tgt a[C/I/R] b[C/I/R]
+  tgt = function(_) -- tgt a[C/R/I] b[C/R/I]
     local a, b = test_op(_)
     if not (io.getcount(a) > io.getcount(b)) then
       return { type = 'skip' }
     end
   end,
-  tlt = function(_) -- tlt a[C/I/R] b[C/I/R]
+  tlt = function(_) -- tlt a[C/R/I] b[C/R/I]
     local a, b = test_op(_)
     if not (io.getcount(a) < io.getcount(b)) then
       return { type = 'skip' }
     end
   end,
-  tge = function(_) -- tge a[C/I/R] b[C/I/R]
+  tge = function(_) -- tge a[C/R/I] b[C/R/I]
     local a, b = test_op(_)
     if not (io.getcount(a) >= io.getcount(b)) then
       return { type = 'skip' }
     end
   end,
-  tle = function(_) -- tle a[C/I/R] b[C/I/R]
+  tle = function(_) -- tle a[C/R/I] b[C/R/I]
     local a, b = test_op(_)
     if not (io.getcount(a) <= io.getcount(b)) then
       return { type = 'skip' }
     end
   end,
-  tas = function(_) -- tas a[T/I/R] b[T/I/R]
+  tas = function(_) -- tas a[T/R/I] b[T/R/I]
     assert.two(_)
     assert.type(_[1], {'type', 'input', 'register'})
     assert.type(_[2], {'type', 'input', 'register'})
@@ -287,7 +352,7 @@ local opcodes = {
       return { type = 'skip' }
     end
   end,
-  tad = function(_) -- tad a[T/I/R] b[T/I/R]
+  tad = function(_) -- tad a[T/R/I] b[T/R/I]
     assert.two(_)
     assert.type(_[1], {'type', 'input', 'register'})
     assert.type(_[2], {'type', 'input', 'register'})

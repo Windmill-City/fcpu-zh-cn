@@ -70,8 +70,8 @@ local function parse(tokens)
   local parseLabel = function()
     return io.make_label(consume())
   end
-  local parseConstant = function()
-    return io.make_value(consume())
+  local parseConstant = function(fp)
+    return io.make_value(consume(), fp)
   end
   local parseAddress = function(name)
     local token = consume()
@@ -126,6 +126,8 @@ local function parse(tokens)
         return parseLabel()
       elseif string.find(peek(), '%[') then
         return parseSignal()
+      --elseif string.find(peek(), '[%-]?%d+%.%d*') == 1 then
+      --  return parseConstant(true)
       elseif string.find(peek(), '[%-]?%d') == 1 then
         return parseConstant()
 
@@ -136,8 +138,8 @@ local function parse(tokens)
       elseif string.find(peek(), 'out') then
         return parseOutput('out')
 
-      elseif string.find(peek(), 'mem') then
-        return parseMemory('mem')
+      --elseif string.find(peek(), 'mem') then
+      --  return parseMemory('mem')
 
       elseif string.find(peek(), 'reg') then
         return parseRegister('reg')
@@ -164,6 +166,8 @@ local function eval(ast)
       end
     elseif _.type == 'nop' or _.type == 'label' then
       -- do nothing
+    elseif _.type == 'error' and _.error ~= nil then
+      assert.exception(_.error)
     else
       assert.exception('Unable to parse code')
     end
@@ -183,7 +187,15 @@ local compiler = {}
 function compiler.compile(lines)
   local ast = {}
   for i, line in ipairs(lines) do
-    ast[i] = parse(split(line))
+    local status, result = pcall(parse, split(line))
+    --local status, result = true, parse(split(line))
+    if not status then
+      local start_index = string.find(result, '@') or 1
+      result = string.sub(result, start_index+1, -1)
+      ast[i] = { type='error', error=result }
+    else
+      ast[i] = result
+    end
   end
   return ast
 end

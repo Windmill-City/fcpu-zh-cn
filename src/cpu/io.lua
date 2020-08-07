@@ -27,8 +27,16 @@ function io.make_label(label)
   return { type = 'label', label = label }
 end
 
-function io.make_value(number)
-  return { type = 'value', count = tonumber(number) }
+function io.make_value(numstr, fixedpoint)
+  number = tonumber(numstr)
+  if number == nil then
+    assert.exception("Can't parse number '".. numstr .."'")
+  end
+  if fixedpoint then
+    return { type = 'value', count = number * MC_FIXEDPOINT, fixedpoint = true }
+  else
+    return { type = 'value', count = number }
+  end
 end
 
 function io.make_address(addr, is_ptr)
@@ -134,7 +142,11 @@ end
 
 function io.value_get(_)
   assert.check(_.type == 'value')
-  return _.count
+  if _.fixedpoint then
+    return _.count / MC_FIXEDPOINT
+  else
+    return _.count
+  end
 end
 
 function io.signal_name(_)
@@ -210,6 +222,13 @@ end
 function io.register_set_count(index_expr, count)
   local value = io.register_get(index_expr)
   value.count = count
+  io.register_set(index_expr, value)
+end
+
+function io.register_set_fp(index_expr, count)
+  local value = io.register_get(index_expr)
+  value.count = count * MC_FIXEDPOINT
+  value.fixedpoint = true
   io.register_set(index_expr, value)
 end
 

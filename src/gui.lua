@@ -288,9 +288,15 @@ function GuiWidgetUpdate(mc, state)
   -- Update the inspector GUI
   if state.gui_inspector and state.gui_inspector.valid and state.regs then
     for i = 1, MC_REGS do
-      if state.regs[i] then
-        state.gui_inspector['reg'..i..'-inspect'].sprite = signalToSpritePath( state.regs[i].signal)
-        state.gui_inspector['reg'..i..'-inspect'].number = state.regs[i].count
+      local reg = state.regs[i]
+      if reg then
+        local button = state.gui_inspector['reg'..i..'-inspect']
+        button.sprite = signalToSpritePath(reg.signal)
+        if reg.fixedpoint then
+          button.number = reg.count / MC_FIXEDPOINT
+        else
+          button.number = reg.count
+        end
       end
     end
   end
