@@ -1,10 +1,13 @@
 {
   "name": "fcpu",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "title": "fCPU",
   "description": "Factorio Customizable Processing Unit.",
   "author": "KonStg & Krul",
   "contact": "https://buymeacoffee.com/konstg",
   "factorio_version": "0.18",
-  "dependencies": ["base >= 0.18", "stdlib", "flib", "(?) profiler"]
+  "dependencies": ["base >= 0.18", "stdlib", "flib", "(?) profiler"],
+  "package": {
+    "ignore": [ "tests/**", "*.psd" ]
+  }
 }

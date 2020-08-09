@@ -219,9 +219,12 @@
 
 
 
-# Limitation
-
-
 # TODOs
-* profiling & optimization
+* examples, demos and docs
 * output multiple signals
+* program library
+* profiling & optimization
+
+
+# Support fCPU
+[![Buy Me A Coffee](https://cdn.buymeacoffee.com/buttons/lato-orange.png)](https://www.buymeacoffee.com/konstg)

@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.1.0
+Date: 2020-08-09
+  New:
+    - Initial release.
+  Features:
+    - Basic documentation.
+---------------------------------------------------------------------------------------------------
 Version: 0.0.1
 Date: 2020-07-12
   New:
@@ -10,7 +17,7 @@ Date: 2020-07-12
 Version: 0.0.0
 Date: 2020-07-01
   New:
-    - Initial release.
+    - First prototype.
   Features:
     - Added blueprint save.
     - Added copy & paste ability.
