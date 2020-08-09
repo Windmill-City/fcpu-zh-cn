@@ -85,7 +85,10 @@ local function parse(tokens)
   end
   local parseSignal = function(name)
     local token = consume()
-    local m = array_build{ string.match(token, '(%d*)%[(%a+)[=%-]([%a%d%-]+)%]') }
+    local m = array_build{ string.match(token, '(%d*)%[([%a%-]+)[=%-]([%a%d%-]+)%]') }
+    if m[2] == 'virtual-signal' then
+      m[2] = 'virtual'
+    end
     return io.make_signal({type = m[2], name = m[3]}, m[1])
   end
   local parseRegister = function(name)
