@@ -221,6 +221,9 @@ end
 
 function io.register_set_count(index_expr, count)
   local value = io.register_get(index_expr)
+  if count ~= count then
+    assert.exception("Not a number")
+  end
   value.count = count
   io.register_set(index_expr, value)
 end

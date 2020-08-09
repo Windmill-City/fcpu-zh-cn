@@ -22,8 +22,8 @@
   - **V**, value: signal value, same as **C**
 
 * **C**, value: integer constant [-2^31..2^31), same as **V**
-* **R**, register: register
-* **I**, wire: input wire (**R**ed, **G**reen)
+* **R**, register: (reg1, reg2, ..., reg8)
+* **I**, wire: input wire (**r**ed, **g**reen)
 * **O**, wire: output wire
 
 - **A**, address: instruction address
