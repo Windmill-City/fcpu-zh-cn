@@ -46,7 +46,7 @@ function Controller.init_registers(mc, state)
     end
   end
   if not state.clock then
-    state.clock = 1
+    state.clock = 0
   end
 end
 
@@ -96,7 +96,7 @@ function Controller.set_program_counter(mc, state, value)
 end
 
 function Controller.tick(mc, state)
-  Controller.init_registers(mc, state)
+  -- Controller.init_registers(mc, state)
   state.clock = state.clock + 1
 
   -- Interrupts

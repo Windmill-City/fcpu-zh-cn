@@ -24,7 +24,7 @@ For example `mov reg2 10[item=iron-plate]`, this instruction assigns to **reg2**
 
 Besides general purpose registers there are some read only registers:
 * `ipt` - current instruction line numer
-* `clk` - clock, increases every tick, same value for all fcpu units
+* `clk` - clock, increases every tick
 * `cnr`, `cng` - signals count on red/green input wire
 
 

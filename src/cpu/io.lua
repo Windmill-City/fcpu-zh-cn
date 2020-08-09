@@ -224,6 +224,7 @@ function io.register_set_count(index_expr, count)
     assert.exception("Division by zero")
   end
   value.count = count
+  value.fixedpoint = false
   io.register_set(index_expr, value)
 end
 

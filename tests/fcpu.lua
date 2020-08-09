@@ -67,14 +67,14 @@ function ExecuteTest(test_title, program_text, input_signals, probe_result, max_
   Controller.run(fcpu, state)
   
   while state.program_state ~= PSTATE_HALTED do
-    Controller.tick(fcpu, state)
-    if max_ticks then
+    if max_ticks ~= nil then
       if 0 < max_ticks then
         max_ticks = max_ticks - 1
       else
         break
       end
     end
+    Controller.tick(fcpu, state)
   end
   if state.error_message then
     error(state.error_message[3])
@@ -245,6 +245,40 @@ local fcpu, state = ExecuteTest(
     (state.regs[5].count == 801234567890) and
     (state.regs[6].count == 1234567898)
   end
+)
+
+
+local fcpu, state = ExecuteTest(
+  'Cycle counter',
+  [[
+    jmp 1
+  ]],
+  {},
+  function(state, output)
+    return 
+    (state.clock == 100)
+  end,
+  100
+)
+
+local fcpu, state = ExecuteTest(
+  'Bug in fixedpoint',
+  [[
+    clr  
+    :loop
+    mov reg2 clk
+    #mul reg2 0.001
+    sin reg1 reg2
+    mul reg1 5
+    add reg1 5
+    jmp :loop
+  ]],
+  {},
+  function(state, output)
+    return 
+    (state.regs[1].count == math.sin(2.0) * 5.0 + 5.0)
+  end,
+  5
 )
 
 
