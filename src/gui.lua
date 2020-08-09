@@ -155,8 +155,8 @@ local function CreateWidget(player)
           --gui.templates.control_button("paste", "paste"),
           --{template="pushers.horizontal"},
           gui.templates.control_button("halt", "stop", "red"),
-          gui.templates.control_button("step", "next"),
           gui.templates.control_button("run", "play", "green"),
+          gui.templates.control_button("step", "next"),
           {template="pushers.horizontal"},
           {type="switch", style_mods={ right_margin=10 }, left_label_caption={"gui-constant.off"}, right_label_caption={"gui-constant.on"}, save_as="gui_enable_switch", handlers="widget.enable_program"},
         }},
@@ -270,9 +270,13 @@ function GuiWidgetUpdate(mc, state)
   -- Enable/Disable the run/step button
   if state.gui_run_button and state.gui_run_button.valid then
     if Controller.is_running(mc) then
+      state.gui_halt_button.style = "highlighted_tool_button"
+      state.gui_halt_button.sprite = "fcpu-pause-sprite"
       state.gui_halt_button.enabled = true
       state.gui_run_button.enabled = false
     else
+      state.gui_halt_button.style = "tool_button_red"
+      state.gui_halt_button.sprite = "fcpu-stop-sprite"
       state.gui_halt_button.enabled = (state.instruction_pointer ~= 1)
       state.gui_run_button.enabled = true
     end

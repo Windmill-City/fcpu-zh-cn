@@ -24,25 +24,32 @@ data:extend{
 
 data:extend{
   {
-      type = "sprite",
-      name = "fcpu-play-sprite",
-      filename = "__fcpu__/graphics/icons/gui/play.png",
-      width = 32,
-      height = 32
+    type = "sprite",
+    name = "fcpu-play-sprite",
+    filename = "__fcpu__/graphics/icons/gui/play.png",
+    width = 32,
+    height = 32
   },
   {
-      type = "sprite",
-      name = "fcpu-stop-sprite",
-      filename = "__fcpu__/graphics/icons/gui/stop.png",
-      width = 32,
-      height = 32
+    type = "sprite",
+    name = "fcpu-stop-sprite",
+    filename = "__fcpu__/graphics/icons/gui/stop.png",
+    width = 32,
+    height = 32
   },
   {
-      type = "sprite",
-      name = "fcpu-next-sprite",
-      filename = "__fcpu__/graphics/icons/gui/next.png",
-      width = 32,
-      height = 32
+    type = "sprite",
+    name = "fcpu-pause-sprite",
+    filename = "__fcpu__/graphics/icons/gui/pause.png",
+    width = 32,
+    height = 32
+  },
+  {
+    type = "sprite",
+    name = "fcpu-next-sprite",
+    filename = "__fcpu__/graphics/icons/gui/next.png",
+    width = 32,
+    height = 32
   },
 }
 
