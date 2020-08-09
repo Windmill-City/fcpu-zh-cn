@@ -56,7 +56,7 @@ function createFCPU(input)
   return fcpu
 end
 
-function executeTest(test_title, program_text, input_signals, probe_result, max_ticks)
+function ExecuteTest(test_title, program_text, input_signals, probe_result, max_ticks)
   local fcpu = createFCPU(input_signals)
   local state = Controller.init(fcpu, {})
   
@@ -93,7 +93,7 @@ end
 
 ----------------------------------------------------------------------------------------------------------------
 
-local fcpu, state = executeTest(
+local fcpu, state = ExecuteTest(
   'check output',
   [[
     mov out green1
@@ -110,7 +110,7 @@ local fcpu, state = executeTest(
 )
 
 
-local fcpu, state = executeTest(
+local fcpu, state = ExecuteTest(
   'MOV',
   [[
     mov reg1 10[recipe-iron-plate]
@@ -131,7 +131,7 @@ local fcpu, state = executeTest(
   end
 )
 
-local fcpu, state = executeTest(
+local fcpu, state = ExecuteTest(
   'Set Signal Value/Type',
   [[
     sst reg1 [item=iron-plate]
@@ -147,7 +147,7 @@ local fcpu, state = executeTest(
 )
 
 
-local fcpu, state = executeTest(
+local fcpu, state = ExecuteTest(
   'Swap signal/Type/Value',
   [[
     mov reg1 reg2 reg3 reg4 13[item=iron-plate]
@@ -174,7 +174,7 @@ local fcpu, state = executeTest(
 )
 
 
-local fcpu, state = executeTest(
+local fcpu, state = ExecuteTest(
   'Find In Red/Green',
   [[
     fig reg1 [recipe=copper-plate]
@@ -202,7 +202,7 @@ local fcpu, state = executeTest(
 
 
 
-local fcpu, state = executeTest(
+local fcpu, state = ExecuteTest(
   'Arithmetics',
   [[
     add reg2 2
@@ -225,7 +225,7 @@ local fcpu, state = executeTest(
 )
 
 
-local fcpu, state = executeTest(
+local fcpu, state = ExecuteTest(
   'Digit at Index Get/Set',
   [[
     mov reg3 1234567890

@@ -5,7 +5,7 @@ PSTATE_HALTED = 0
 PSTATE_RUNNING = 1
 PSTATE_SLEEPING = 2
 
-function linepairs(s)
+local function linepairs(s)
   if s:sub(-1)~="\n" then s=s.."\n" end
   return s:gmatch("(.-)\n")
 end

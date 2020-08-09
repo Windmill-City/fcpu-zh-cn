@@ -28,7 +28,7 @@ function io.make_label(label)
 end
 
 function io.make_value(numstr, fixedpoint)
-  number = tonumber(numstr)
+  local number = tonumber(numstr)
   if number == nil then
     assert.exception("Can't parse number '".. numstr .."'")
   end
@@ -44,11 +44,15 @@ function io.make_address(addr, is_ptr)
   return { type = 'address', addr = tonumber(addr), pointer = is_ptr }
 end
 
-function io.make_signal(signal_id, count)
-  if count == '' then
+function io.make_signal(signal_id, countstr)
+  if countstr == '' then
     return { type = 'type', signal = signal_id }
   else
-    return { type = 'signal', signal = signal_id, count = tonumber(count) }
+    local count = tonumber(countstr)
+    if count == nil then
+      assert.exception("Can't parse count '".. countstr .."'")
+    end
+    return { type = 'signal', signal = signal_id, count = count }
   end
 end
 

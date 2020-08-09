@@ -29,10 +29,8 @@ local find_in_wire = function(_, color)
 end
 
 local fp = {
-  ifp = 1.0 / MC_FIXEDPOINT,
-
   to_float = function(fp)
-    return fp * ifp
+    return fp / MC_FIXEDPOINT
   end,
   from_float = function(f)
     return math.round(f * MC_FIXEDPOINT)
