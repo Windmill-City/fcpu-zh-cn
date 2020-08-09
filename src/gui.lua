@@ -68,8 +68,8 @@ gui.add_handlers{
             end
             state.disabled = nil
           else
+            state.disabled = true -- halt will clear output registers
             Controller.halt(player_data.current_fcpu, state)
-            state.disabled = true
           end
           Entity.set_data(player_data.current_fcpu, state)
         end
@@ -270,12 +270,12 @@ function GuiWidgetUpdate(mc, state)
   -- Enable/Disable the run/step button
   if state.gui_run_button and state.gui_run_button.valid then
     if Controller.is_running(mc) then
-      state.gui_halt_button.style = "highlighted_tool_button"
+      --state.gui_halt_button.style = "highlighted_tool_button"
       state.gui_halt_button.sprite = "fcpu-pause-sprite"
       state.gui_halt_button.enabled = true
       state.gui_run_button.enabled = false
     else
-      state.gui_halt_button.style = "tool_button_red"
+      --state.gui_halt_button.style = "tool_button_red"
       state.gui_halt_button.sprite = "fcpu-stop-sprite"
       state.gui_halt_button.enabled = (state.instruction_pointer ~= 1)
       state.gui_run_button.enabled = true

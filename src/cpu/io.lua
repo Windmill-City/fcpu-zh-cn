@@ -259,7 +259,7 @@ function io.setsignal(_, signal, types)
     types = {'register', 'wire'}
   end
   assert.type(_, types)
-  if _.type == 'wire' or _.type == 'output' then
+  if _.type == 'wire' or _.type == 'output' then 
     io.wire_set(_, signal)
   elseif _.type == 'register' then
     io.register_set(_, signal)

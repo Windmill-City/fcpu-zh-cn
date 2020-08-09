@@ -174,16 +174,6 @@ script.on_event(defines.events.on_tick, function(event)
     local cpu = global.fcpus[global.last_index]
     if cpu.valid then
       local state = Entity.get_data(cpu)
-
-      -- deprecated
-      if not state.instruction_pointer then
-        state.instruction_pointer = state.program_counter or 1
-      end
-      if not state.regs then
-        state.regs = state.memory or {}
-      end
-      -- }
-
       if state and not state.disabled then
         GuiWidgetUpdate(cpu, state)
         -- Tick the Controller
