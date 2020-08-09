@@ -1,11 +1,11 @@
 # fASM
 
 ## Specs
-* support blueprints
-* support copy & paste
-* support multiplayer
+* supports blueprints
+* supports copy & paste
+* supports multiplayer
 * 32 instructions for whole program
-* 8 register which can store signal and value
+* 8 general purpose registers
 * 50+ opcodes
 * rich math instructions
 * two input wires (Red, Green)
@@ -15,25 +15,42 @@
 * made for geeks
 
 
-## Legend
+## Registers
 
-- **S**, signal: **S**ignal (consists of **T**ype and **V**alue)
-  - **T**, type: signal type
+There are 8 generic purpose read/write registers, named **reg1**, ... **reg8**.  
+Each register store signal type and numeric value.  
+For example `mov reg2 10[item=iron-plate]`, this instruction assigns to **reg2**
+*value of 10* and *type of item-plate*.  
+
+Besides general purpose registers there are some read only registers:
+* `ipt` - current instruction line numer
+* `clk` - clock, increases every tick, same value for all fcpu units
+* `cnr`, `cng` - signals count on red/green input wire
+
+
+
+## Opcodes
+
+Instructions which can be executed one by one on per frame basis.  
+Each instruction take one or more operands and modify them or state of fCPU.  
+
+### Legend
+
+- **S**, signal: consists of **V**alue and **T**ype (`123[item=copper-ore]`)
   - **V**, value: signal value, same as **C**
+  - **T**, type: signal type
 
-* **C**, value: integer constant [-2^31..2^31), same as **V**
-* **R**, register: (reg1, reg2, ..., reg8)
-* **I**, wire: input wire (**r**ed, **g**reen)
-* **O**, wire: output wire
+* **C**, value: integer constant [-2^31..2^31), same as **V** (`-3500`)
+* **R**, register: (`reg1`, `reg2`, ..., `reg8`)
+* **I**, wire: input wire (`red`, `green`)
+* **O**, wire: output wire (`out`)
 
-- **A**, address: instruction address
-- **L**, label: instruction label
+- **A**, address: instruction address (`5`)
+- **L**, label: instruction label (`:labelname`)
 
 `...` - one or more, could be specified multiple times with space separator.  
 `?` - optional, may be specified.  
 
-
-## Opcodes
 ### Common
 
 * `nop`  
@@ -49,7 +66,7 @@
   Copy signal from source to destination.  
   *dst... = src*
 
-* `out` src[**V**/**T**/**S**/**R**/**I**]  
+* `emit` src[**V**/**T**/**S**/**R**/**I**]  
   Copy signal from source to output.  
   Same as `mov out src`.  
 
@@ -168,6 +185,8 @@
 
 ### Testing operands values
 
+If test succeeded, then next instruction will be executed.
+
 * `teq` a[**C**/**R**/**I**] b[**C**/**R**/**I**]  
   Equal.  
   *a == b*
@@ -221,6 +240,7 @@
 
 # TODOs
 * examples, demos and docs
+* flags
 * output multiple signals
 * program library
 * profiling & optimization

@@ -131,9 +131,9 @@ function io.wire_count(color)
 end
 
 -- Address, Value and Signal decomposition
-function io.addr_to_index(_)
+function io.addr_to_index(_, ignore_pointer)
   assert.check(_.addr ~= nil and _.pointer ~= nil)
-  if _.pointer then
+  if _.pointer and not ignore_pointer then
     return io.register_get(_, true).count
   else
     return _.addr
@@ -197,12 +197,7 @@ function io.register_setraw(index, signal)
 end
 
 function io.register_get(index_expr, ignore_pointer)
-  local index
-  if ignore_pointer then
-    index = io.value_get(index_expr)
-  else
-    index = io.addr_to_index(index_expr)
-  end
+  local index = io.addr_to_index(index_expr, ignore_pointer)
   if MC_REGS < index then
     assert.regs_index_range(index, MC_REGS + 4)
     local result = table.deepcopy(NULL_SIGNAL)
@@ -222,7 +217,7 @@ end
 function io.register_set_count(index_expr, count)
   local value = io.register_get(index_expr)
   if count ~= count then
-    assert.exception("Not a number")
+    assert.exception("Division by zero")
   end
   value.count = count
   io.register_set(index_expr, value)

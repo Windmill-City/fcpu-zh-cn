@@ -18,7 +18,7 @@ function assert.check(b, ...)
     if ... and 0 < #... then
       exception(...)
     else
-      exception('Assertion failed: condition not met')
+      error('Assertion failed: condition not met', 3)
     end
   end
 end

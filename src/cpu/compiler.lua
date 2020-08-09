@@ -169,7 +169,7 @@ local function eval(ast)
     elseif _.type == 'error' and _.error ~= nil then
       assert.exception(_.error)
     else
-      assert.exception('Unable to parse code')
+      assert.exception('Unable to parse code '.. serpent.block(_))
     end
   end
 
