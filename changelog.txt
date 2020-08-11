@@ -3,6 +3,7 @@ Version: 0.1.4
 Date: ????
   Fixes:
     - Inline comments # freeze a game.
+    - `[virtual-signal=...]` properly handled.
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.3
 Date: 2020-08-09
