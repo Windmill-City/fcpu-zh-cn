@@ -60,7 +60,11 @@ local function parse(tokens)
     while (peek()) do
       local expr = parseExpr()
       if expr then
-        table.insert(node.expr, expr)
+        if expr.type == 'nop' then
+          break
+        else
+          table.insert(node.expr, expr)
+        end
       else
         break
       end

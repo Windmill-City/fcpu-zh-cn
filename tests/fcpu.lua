@@ -113,7 +113,7 @@ local fcpu, state = ExecuteTest(
 local fcpu, state = ExecuteTest(
   'MOV',
   [[
-    mov reg1 10[recipe-iron-plate]
+    mov reg1 10[recipe=iron-plate]
     mov reg2 green1
     mov reg3 green2
   ]],
@@ -279,6 +279,26 @@ local fcpu, state = ExecuteTest(
     (state.regs[1].count == math.sin(2.0) * 5.0 + 5.0)
   end,
   5
+)
+
+local fcpu, state = ExecuteTest(
+  'Inline comments freeze',
+  [[
+    mov reg1 1[virtual-signal=signal-X]
+    mov reg2 2[virtual-signal=signal-Y]
+    mov reg3 3 # one two words, digits: 1 2 3 and some crap: [()[ #
+    mov reg4 4
+  ]],
+  {},
+  function(state, output)
+    return 
+    assert.result_signal(state.regs[1], {count=1, signal={type='virtual', name='signal-X'}}) and
+    assert.result_signal(state.regs[2], {count=2, signal={type='virtual', name='signal-Y'}}) and
+    assert.result_signal(state.regs[3], {count=3}) and
+    assert.result_signal(state.regs[4], {count=4}) and
+    (state.clock == 4)
+  end,
+  5000
 )
 
 
