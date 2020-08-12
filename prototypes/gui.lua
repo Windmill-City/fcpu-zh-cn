@@ -17,7 +17,7 @@ data:extend{
     type = "font",
     name = "default-mono",
     from = "default-mono",
-    size = 16
+    size = 14
   },
 }
 

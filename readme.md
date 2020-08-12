@@ -22,10 +22,10 @@ Each register store signal type and numeric value.
 For example `mov reg2 10[item=iron-plate]`, this instruction assigns to **reg2**
 *value of 10* and *type of item-plate*.  
 
-Besides general purpose registers there are some read only registers:
-* `ipt` - current instruction line numer
-* `clk` - clock, increases every tick
-* `cnr`, `cng` - signals count on red/green input wire
+Besides general purpose registers there are some read only registers:  
+* `ipt` - current instruction line numer  
+* `clk` - clock, increases every tick  
+* `cnr`, `cng` - signals count on red/green input wire  
 
 
 
@@ -239,6 +239,7 @@ If test succeeded, then next instruction will be executed.
 
 
 # TODOs
+* new `min`, `max`, `avg` opcodes
 * examples, demos and docs
 * flags
 * output multiple signals

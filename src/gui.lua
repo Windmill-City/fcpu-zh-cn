@@ -253,7 +253,7 @@ local function UpdateLines(element, state)
   local lines = {}
   for i = 1, MC_LINES do
     local line = tostring(i)
-    if i < 10 then line = "  "..i end
+    if i < 10 then line = " "..i end
     if i == state.error_line then
       line = line..'!'
     elseif i == state.instruction_pointer then
