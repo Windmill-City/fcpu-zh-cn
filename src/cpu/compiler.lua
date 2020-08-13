@@ -49,12 +49,17 @@ local function parse(tokens)
 
   local c = 1
   local parseExpr
+
   local peek = function() return tokens[c] end
   local consume = function()
     local result = peek()
     c = c + 1
     return result
   end
+  local rewriteLower = function()
+    tokens[c] = string.lower(tokens[c])
+  end
+
   local parseOp = function()
     local node = { type = 'op', name = consume(), expr = {} }
     while (peek()) do
@@ -122,7 +127,7 @@ local function parse(tokens)
   end
   local parseOutput = function(name)
     consume()
-    return io.make_wire('out', { addr = 1, pointer = false})
+    return io.make_wire(name, { addr = 1, pointer = false})
   end
 
   parseExpr = function()
@@ -137,23 +142,26 @@ local function parse(tokens)
       --  return parseConstant(true)
       elseif string.find(peek(), '[%-]?%d') == 1 then
         return parseConstant()
-
-      elseif string.find(peek(), 'red') then
-        return parseInput('red')
-      elseif string.find(peek(), 'green') then
-        return parseInput('green')
-      elseif string.find(peek(), 'out') then
-        return parseOutput('out')
-
-      --elseif string.find(peek(), 'mem') then
-      --  return parseMemory('mem')
-
-      elseif string.find(peek(), 'reg') then
-        return parseRegister('reg')
-      elseif has_value(peek(), {'ipt', 'cnr', 'cng', 'clk'}) then
-        return parseReadOnlyRegister(consume())
       else
-        return parseOp()
+        rewriteLower()
+
+        if string.find(peek(), 'red') then
+          return parseInput('red')
+        elseif string.find(peek(), 'green') then
+          return parseInput('green')
+        elseif string.find(peek(), 'out') then
+          return parseOutput('out')
+
+        --elseif string.find(peek(), 'mem') then
+        --  return parseMemory('mem')
+
+        elseif string.find(peek(), 'reg') then
+          return parseRegister('reg')
+        elseif has_value(peek(), {'ipt', 'cnr', 'cng', 'clk'}) then
+          return parseReadOnlyRegister(consume())
+        else
+          return parseOp()
+        end
       end
     end
   end
