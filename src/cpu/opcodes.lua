@@ -346,8 +346,14 @@ local opcodes = {
     assert.type(_[2], {'type', 'input', 'register'})
     local as = io.register_get(_[1]).signal
     local bs = io.register_get(_[2]).signal
-    if not (as.type == bs.type and as.name == bs.name) then
+    local av = (as ~= nil)
+    local bv = (bs ~= nil)
+    if av ~= bv then
       return { type = 'skip' }
+    elseif av and bv then
+      if not (as.type == bs.type and as.name == bs.name) then
+        return { type = 'skip' }
+      end
     end
   end,
   tad = function(_) -- tad a[T/R/I] b[T/R/I]
@@ -356,8 +362,14 @@ local opcodes = {
     assert.type(_[2], {'type', 'input', 'register'})
     local as = io.register_get(_[1]).signal
     local bs = io.register_get(_[2]).signal
-    if not (as.type ~= bs.type or as.name ~= bs.name) then
+    local av = (as ~= nil)
+    local bv = (bs ~= nil)
+    if not (av or bv) then
       return { type = 'skip' }
+    elseif av and bv then
+      if not (as.type ~= bs.type or as.name ~= bs.name) then
+        return { type = 'skip' }
+      end
     end
   end,
 

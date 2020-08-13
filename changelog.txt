@@ -5,6 +5,8 @@ Date: ????
     - Added new comment style `;`.
   Changes:
     - Program size increased up to 64 lines.
+  Fixes:
+    - tas (https://mods.factorio.com/mod/fcpu/discussion/5f3596e989786166f267f2d7)
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.6
 Date: 2020-08-13

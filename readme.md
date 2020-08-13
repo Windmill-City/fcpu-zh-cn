@@ -270,6 +270,7 @@ inc reg1
 * memory editor
 * program library
 * profiling & optimization
+* allow more updates per tick (add to server settings)
 
 
 # Support fCPU
