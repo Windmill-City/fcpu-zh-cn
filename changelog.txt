@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.6
-Date: ????
+Date: 2020-08-13
   New:
     - Registers now support aliases. `mov r1 123` is the same as `mov reg1 123` and so on.
   Changes:
