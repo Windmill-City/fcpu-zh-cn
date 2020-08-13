@@ -1,12 +1,10 @@
 Limited Distribution Only Licence
+https://docs.google.com/document/d/1ngMMo0RHpcQE_u6S1M5jq_rRczpdt3tPkWsWX0dHI0c
 
 Copyright (c) 2020, KonStg
 
-Commercial Use: No.
-You are not allowed to make money off this mod or any of the contained assets.
-You are allowed to feature the mods in other media, such as Twitch or YouTube.
-It would be nice if you mentioned KonStg's BuyMeACoffee https://www.buymeacoffee.com/konstg
-when featuring the mod but this in not a requirement.
+Commercial Use: Yes, but with the following conditions:
+You should specify a direct link to the Factorio Mod Portal page of the mod.
 
 Modification: Restricted.
 You may make alterations for your own private personal use only.
@@ -31,3 +29,4 @@ ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
 WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
