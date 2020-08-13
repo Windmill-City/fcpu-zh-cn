@@ -132,9 +132,10 @@ local function parse(tokens)
 
   parseExpr = function()
     if peek() then
-      if string.sub(peek(), 1, 1) == '#' then
+      local fc = string.sub(peek(), 1, 1)
+      if fc == '#' or fc == ';' then
         return OP_NOP
-      elseif string.sub(peek(), 1, 1) == ':' then
+      elseif fc == ':' then
         return parseLabel()
       elseif string.find(peek(), '%[') then
         return parseSignal()

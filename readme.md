@@ -186,6 +186,15 @@ Each instruction take one or more operands and modify them or state of fCPU.
 ### Testing operands values
 
 If test succeeded, then next instruction will be executed.
+If test not succeeded, then next instruction will be skipped.
+Example:
+```
+tgt 1 2                              # 1 > 2 ?
+mov reg1 [virtual-signal=signal-1]   # will be skipped
+tgt 2 1                              # 2 > 1 ?
+mov reg2 [virtual-signal=signal-2]   # will be handled
+```
+
 
 * `teq` a[**C**/**R**/**I**] b[**C**/**R**/**I**]  
   Equal.  
@@ -237,12 +246,28 @@ If test succeeded, then next instruction will be executed.
   Block until there are at least *cnt* *r*ed/*g*reen signals.
 
 
+## Comments
+Every text after `#` and `;` will be skipped until next line.
+The code:
+```
+; Comment in ASM style
+mov reg1 123
+# Comment in *unix style
+inc reg1
+```
+is equivalent to:
+```
+mov reg1 123
+inc reg1
+```
+
 
 # TODOs
 * new `min`, `max`, `avg` opcodes
 * examples, demos and docs
 * flags
 * output multiple signals
+* memory editor
 * program library
 * profiling & optimization
 
