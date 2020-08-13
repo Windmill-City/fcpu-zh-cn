@@ -17,7 +17,7 @@
 
 ## Registers
 
-There are 8 generic purpose read/write registers, named **reg1**, ... **reg8**.  
+There are 8 generic purpose read/write registers, named **reg1**, ... **reg8** or alias **r1**, ... **r8**.  
 Each register store signal type and numeric value.  
 For example `mov reg2 10[item=iron-plate]`, this instruction assigns to **reg2**
 *value of 10* and *type of item-plate*.  
