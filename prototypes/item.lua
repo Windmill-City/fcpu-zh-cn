@@ -115,7 +115,7 @@ local imposter_fcpu = table.merge(table.deepcopy(data.raw['constant-combinator']
   max_health = 1,
   collision_mask = {"layer-13"},--"not-colliding-with-itself"},
 
-  item_slot_count = 500, --51 -- see https://github.com/NiftyManiac/factorio-stickynotes/blob/master/config.lua
+  item_slot_count = 750, --51 -- see https://github.com/NiftyManiac/factorio-stickynotes/blob/master/config.lua
   sprites =
   {
       north = empty_picture,

@@ -52,7 +52,7 @@ data:extend{
     height = 32
   },
 }
-
+--[[
 for i = 1, MC_LINES do
   local y = ((i-1) * 21)
   if i >= 11 then
@@ -93,3 +93,4 @@ for i = 1, MC_LINES do
       }
   }
 end
+]]
