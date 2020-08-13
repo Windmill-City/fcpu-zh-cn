@@ -100,8 +100,8 @@ local function parse(tokens)
     end
     return io.make_signal({type = m[2], name = m[3]}, m[1])
   end
-  local parseRegister = function(name)
-    local address = parseAddress(name)
+  local parseRegister = function(name, alias)
+    local address = parseAddress(alias or name)
     return io.make_register(name, address)
   end
   local parseReadOnlyRegister = function(name)
@@ -157,6 +157,8 @@ local function parse(tokens)
 
         elseif string.find(peek(), 'reg') then
           return parseRegister('reg')
+        elseif string.find(peek(), 'r%d') == 1 then
+          return parseRegister('reg', 'r')
         elseif has_value(peek(), {'ipt', 'cnr', 'cng', 'clk'}) then
           return parseReadOnlyRegister(consume())
         else
