@@ -122,7 +122,7 @@ function io.wire_find_signal(color, signal_to_find)
   local wire = wires[color]
   if signal_to_find and wire.signals then
     for index, wire_signal in pairs(wire.signals) do
-      if wire_signal and wire_signal.signal.name == signal_to_find.signal.name then
+      if wire_signal and wire_signal.signal.name == signal_to_find.name then
         return wire.signals[index]
       end
     end

@@ -22,8 +22,7 @@ local find_in_wire = function(_, color)
   assert.two(_)
   local _dst = _[1]
   assert.type(_dst, {'register', 'output'})
-  local _type = _[2]
-  assert.type(_type, {'type', 'register', 'input'})
+  local _type = io.gettype(_[2], {'type', 'register', 'input'})
   local sig = io.wire_find_signal(color, _type)
   io.setsignal(_dst, sig)
 end
