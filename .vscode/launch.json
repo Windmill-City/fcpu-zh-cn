@@ -5,6 +5,12 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "type": "factoriomod",
+            "request": "launch",
+            "name": "Factorio Mod Debug",
+            "factorioPath": "G:/SteamLibrary/steamapps/common/Factorio/bin/x64/factorio.exe"
+        },
+        {
             "name": "launch",
             "type": "lua",
             "request": "launch",

@@ -242,6 +242,23 @@ local event_filters = {
 }
 
 event.register({
+  defines.events.script_raised_built,
+  defines.events.script_raised_revive,
+  },
+  function(event)
+    on_build_fcpu({ created_entity = event.entity })
+  end
+)
+
+event.register({
+  defines.events.script_raised_destroy,
+  },
+  function(event)
+    on_destroy_fcpu(event)
+  end
+)
+
+event.register({
   defines.events.on_built_entity,
   defines.events.on_robot_built_entity},
   on_build_fcpu,

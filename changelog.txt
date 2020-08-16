@@ -1,7 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.9
 Date: ????
-  Changes:
+  Fixes:
+    - handling for `script_raised_*` (https://mods.factorio.com/mod/fcpu/discussion/5f36b0d2501de5727f3f1b03), see (https://mods.factorio.com/mod/Construction_Drones/discussion/5e35543fee8592000bbab6ee)
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.8
 Date: 2020-08-14
