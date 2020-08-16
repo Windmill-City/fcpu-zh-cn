@@ -5,6 +5,7 @@
   "description": "Factorio Customizable Processing Unit.",
   "author": "KonStg & Krul",
   "contact": "https://buymeacoffee.com/konstg",
+  "homepage": "https://www.reddit.com/r/factorio/comments/i8e7dh/new_mod_fcpu/",
   "factorio_version": "0.18",
   "dependencies": ["base >= 0.18", "stdlib", "flib", "(?) profiler"],
   "package": {

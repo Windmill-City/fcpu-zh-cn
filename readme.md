@@ -20,12 +20,12 @@
 There are 8 generic purpose read/write registers, named **reg1**, ... **reg8** or alias **r1**, ... **r8**.  
 Each register store signal type and numeric value.  
 For example `mov reg2 10[item=iron-plate]`, this instruction assigns to **reg2**
-*value of 10* and *type of item-plate*.  
+*value of 10* and *type of [item=iron-plate]*.  
 
 Besides general purpose registers there are some read only registers:  
-* `ipt` - current instruction line numer  
-* `clk` - clock, increases every tick  
-* `cnr`, `cng` - signals count on red/green input wire  
+- **ipt**: current instruction line numer  
+- **clk**: clock, increases every tick  
+- **cnr**, **cng**: signals count on red/green input wire  
 
 
 
@@ -186,15 +186,6 @@ Each instruction take one or more operands and modify them or state of fCPU.
 ### Testing operands values
 
 If test succeeded, then next instruction will be executed.
-If test not succeeded, then next instruction will be skipped.
-Example:
-```
-tgt 1 2                              # 1 > 2 ?
-mov reg1 [virtual-signal=signal-1]   # will be skipped
-tgt 2 1                              # 2 > 1 ?
-mov reg2 [virtual-signal=signal-2]   # will be handled
-```
-
 
 * `teq` a[**C**/**R**/**I**] b[**C**/**R**/**I**]  
   Equal.  
@@ -246,20 +237,9 @@ mov reg2 [virtual-signal=signal-2]   # will be handled
   Block until there are at least *cnt* *r*ed/*g*reen signals.
 
 
-## Comments
-Every text after `#` and `;` will be skipped until next line.
-The code:
-```
-; Comment in ASM style
-mov reg1 123
-# Comment in *unix style
-inc reg1
-```
-is equivalent to:
-```
-mov reg1 123
-inc reg1
-```
+
+# Examples
+See: https://mods.factorio.com/mod/fcpu/faq
 
 
 # TODOs
@@ -267,10 +247,8 @@ inc reg1
 * examples, demos and docs
 * flags
 * output multiple signals
-* memory editor
 * program library
 * profiling & optimization
-* allow more updates per tick (add to server settings)
 
 
 # Support fCPU
