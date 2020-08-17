@@ -14,6 +14,7 @@ data:extend{
   table.merge(table.deepcopy(data.raw['arithmetic-combinator']['arithmetic-combinator']), generate_fcpu_combinator
   {
     name = "fcpu",
+    icon = "__fcpu__/graphics/icons/fcpu.png",
     minable = {hardness = 0.2, mining_time = 0.5, result = "fcpu"},
     max_health = 300,
     collision_box = {{-0.65, -0.65}, {0.65, 0.65}},
