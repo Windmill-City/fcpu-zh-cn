@@ -158,7 +158,7 @@ local function parse(tokens)
 
         elseif string.find(peek(), 'reg') then
           return parseRegister('reg')
-        elseif string.find(peek(), 'r%d') == 1 then
+        elseif string.find(peek(), 'r@?%d') == 1 then
           return parseRegister('reg', 'r')
         elseif has_value(peek(), {'ipt', 'cnr', 'cng', 'clk'}) then
           return parseReadOnlyRegister(consume())

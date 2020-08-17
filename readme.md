@@ -28,6 +28,24 @@ Besides general purpose registers there are some read only registers:
 - **cnr**, **cng**: signals count on red/green input wire  
 
 
+## Arrays\indirect addressing
+Each register could be adressed not only by direct name **regN** (**reg1**, **r2**, etc...) but also with indirect pointer **reg@N** (**reg@3**, **r@7**, etc...). This allow you to use them as **array** indices.
+For example:
+```
+mov r1 10[item=iron-plate]
+mov r2 20[item=copper-plate]
+mov r3 300[item=steel-plate]
+
+mov r5 2
+mov r6 r@5 # r6 will be equal to r2, which is 20[item=copper-plate]
+
+mov r5 3
+mov r7 r@5 # r7 will be equal to r3, which is 300[item=steel-plate]
+
+mov r5 5
+mov r8 r@5 # r8 will be equal to r5, which is 5
+```
+
 
 ## Opcodes
 
@@ -243,6 +261,7 @@ See: https://mods.factorio.com/mod/fcpu/faq
 
 
 # TODOs
+* memory
 * new `min`, `max`, `avg` opcodes
 * examples, demos and docs
 * flags
