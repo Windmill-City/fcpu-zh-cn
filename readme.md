@@ -4,7 +4,7 @@
 * supports blueprints
 * supports copy & paste
 * supports multiplayer
-* 32 instructions for whole program
+* 64 instructions for whole program
 * 8 general purpose registers
 * 50+ opcodes
 * rich math instructions
@@ -259,6 +259,11 @@ If test succeeded, then next instruction will be executed.
 # Examples
 See: https://mods.factorio.com/mod/fcpu/faq
 
+
+# Community
+* [Reddit](https://www.reddit.com/r/factorio/comments/i8e7dh/new_mod_fcpu/) for general discussion
+* [Factorio Mod portal](https://mods.factorio.com/mod/fcpu/discussion) for bug reports
+* [Factorio Forum]() for technical details and mod integration
 
 # TODOs
 * memory

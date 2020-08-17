@@ -99,13 +99,14 @@ local function on_build_fcpu(event)
 end
 
 local function on_destroy_fcpu(event)
-  debug_print("entity destroyed #"..event.entity.unit_number)
-  GuiEntityCloseWidget(event.entity)
+  local entity = event.entity
+  if not (entity and entity.valid and entity.unit_number) then return end
+
+  debug_print("entity destroyed #".. entity.unit_number)
+  GuiEntityCloseWidget(entity)
 
   -- after entity die there will be ghost leaved for entity reviving, so do not remove fcpu imposter
   if event.name == defines.events.on_entity_died then
-    local entity = event.entity
-    if not (entity and entity.valid) then return end
     if entity.name == "fcpu" then
       -- move data from fcpu to its imposter so we can revive it later
       local imposter_fcpus = entity.surface.find_entities_filtered{name = "imposter-fcpu", position = entity.position, force = entity.force, limit = 1}
@@ -131,7 +132,7 @@ local function on_destroy_fcpu(event)
   end
   -- }
 
-  fcpu_destroy_imposter(event.entity)
+  fcpu_destroy_imposter(entity)
 end
 
 local function on_marked_for_deconstruction(event)
