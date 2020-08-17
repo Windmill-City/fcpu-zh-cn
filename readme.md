@@ -241,17 +241,17 @@ If test succeeded, then next instruction will be executed.
 
 ### Flow control
 
-* `jmp` addr[**C**/**A**/**L**]  
+* `jmp` addr[**C**/**A**/**L**/**R**]  
   Jump to address or label.
 
 * `hlt`  
   *Halt* program execution until it will be resumed by player or by *Run* signal from any **i**nput wire.
 
-* `slp` cnt[**C**]  
+* `slp` cnt[**C**/**R**]  
   Sleep for specified ticks count.
 
-* `bkr` cnt[**C**]  
-  `bkg` cnt[**C**]  
+* `bkr` cnt[**C**/**R**]  
+  `bkg` cnt[**C**/**R**]  
   Block until there are at least *cnt* *r*ed/*g*reen signals.
 
 
@@ -268,10 +268,11 @@ See: https://mods.factorio.com/mod/fcpu/faq
 # TODOs
 * memory
 * new `min`, `max`, `avg` opcodes
-* examples, demos and docs
 * flags
 * output multiple signals
+* single instruction, multiple data
 * program library
+* examples, demos and docs
 * profiling & optimization
 
 
