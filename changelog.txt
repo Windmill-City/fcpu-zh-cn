@@ -3,6 +3,8 @@ Version: 0.1.13
 Date: ????
   Changes:
     - Updated to 1.0
+  Fixes:
+    - correct header title while not in debug.
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.12
 Date: 2020-08-17

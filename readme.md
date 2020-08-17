@@ -266,7 +266,7 @@ See: https://mods.factorio.com/mod/fcpu/faq
 * [Factorio Forum]() for technical details and mod integration
 
 # TODOs
-* memory
+* memory, memory browser
 * new `min`, `max`, `avg` opcodes
 * flags
 * output multiple signals

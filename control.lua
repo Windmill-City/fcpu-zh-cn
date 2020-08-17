@@ -3,12 +3,8 @@ Surface = require('__stdlib__/stdlib/area/surface')
 require('__stdlib__/stdlib/area/tile')
 table = require('__stdlib__/stdlib/utils/table')
 
-local hasProfiler, Profiler = pcall(require, '__profiler__/profiler')
-if not hasProfiler then
-  Profiler = nil
-end
-
 require('src/constants')
+Profiler = require('src/debug')
 Controller = require('src/controller')
 require('src/gui')
 require('src/fcpu_entity')
@@ -19,42 +15,6 @@ require('src/fcpu_entity')
 [entity] fcpu               = imposter_state.fcpu
 [entity] imposter_fcpu      = state.imposter_fcpu
 --]]
-
-local function debug_print_real(...)
-  local s = ""
-  for _,v in ipairs({...}) do
-    s = s .. tostring(v)
-  end
-  if (fcpu_debug_enabled % 2) == 1 then
-    game.print(s)
-  end
-  if (fcpu_debug_enabled / 2 % 2) == 1 then
-    log(s)
-  end
-end
-
-local function update_debug_enabled()
-  if fcpu_debug_enabled and 0 < fcpu_debug_enabled then
-    debug_print = debug_print_real
-  else
-    debug_print = function()end
-  end
-end
-
-local log_format_map = {d=0, c=1, l=2, b=3}
-fcpu_debug_enabled = log_format_map[settings.global["fcpu-debug-enabled"].value]
-fcpu_maximum_updates_per_tick = settings.global["fcpu-maximum-updates-per-tick"].value
-update_debug_enabled()
-
-script.on_event(defines.events.on_runtime_mod_setting_changed, function(event)
-  if event.setting == "fcpu-debug-enabled" then
-    fcpu_debug_enabled = log_format_map[settings.global[event.setting].value]
-    update_debug_enabled()
-  end
-  if event.setting == "fcpu-maximum-updates-per-tick" then
-    fcpu_maximum_updates_per_tick = settings.global[event.setting].value
-  end
-end)
 
 -------------------------------------------------------------------------------------------------------
 

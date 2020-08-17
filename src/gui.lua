@@ -215,7 +215,7 @@ function GuiWidgetOpen(player, entity)
   local state = Entity.get_data(entity)
 
   local elems = CreateWidget(player)
-  if fcpu_debug_enabled then
+  if 0 < fcpu_debug_enabled then
     elems.gui_fcpu.titlebar.label.caption = elems.gui_fcpu.titlebar.label.caption.." #"..entity.unit_number
   end
   state = table.merge(state, elems)
@@ -387,6 +387,9 @@ script.on_event(defines.events.on_player_changed_position, function(event)
     end
   end
 end)
+
+
+script.on_event(defines.events.on_runtime_mod_setting_changed, UpdateModSetting)
 
 
 script.on_init(function()
