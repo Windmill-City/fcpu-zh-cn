@@ -1,6 +1,5 @@
 -- require('mod-gui')
 
-local string = require('__stdlib__/stdlib/utils/string')
 local gui = require("__flib__.gui")
 
 -------------------------------------------------------------------------------------------------------
@@ -144,7 +143,7 @@ local function CreateWidget(player)
   local elems = gui.build(rootGui, {
     {type="frame", save_as="gui_fcpu", name="fcpu-widget", style="inner_frame_in_outer_frame", direction="vertical", children={
       {type="flow", name="titlebar", children={
-        {template="frame_title", name="label", caption="fcpu"},
+        {template="frame_title", name="label", caption="fCPU"},
         {template="drag_handle", name="drag_handle"},
         {template="close_button", save_as="gui_exit_button", handlers="widget.close_button"},
       }},

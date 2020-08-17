@@ -1,34 +1,4 @@
 -------------------------------------------------------------------------------------------------------
-
-function get_fcpu_state(entity)
-  if not (entity and entity.valid) then return end
-  if entity.name == "fcpu" then
-    local state = Entity.get_data(entity)
-    return state
-  end
-  if entity.name == "imposter-fcpu" then
-    local imposter_state = Entity.get_data(entity)
-    if imposter_state then
-      return get_fcpu_state(imposter_state.fcpu)
-    end
-  end
-end
-
-function get_imposter_fcpu_state(entity)
-  if not (entity and entity.valid) then return end
-  if entity.name == "imposter-fcpu" then
-    local imposter_state = Entity.get_data(entity)
-    return imposter_state
-  end
-  if entity.name == "fcpu" then
-    local state = Entity.get_data(entity)
-    if state then
-      return get_imposter_fcpu_state(state.imposter_fcpu)
-    end
-  end
-end
-
--------------------------------------------------------------------------------------------------------
 require('__fcpu__/3rdparty/blueprintdata')
 
 local function encode_fcpu(entity)
@@ -83,6 +53,19 @@ local function update_fcpu_target(imposter_fcpu, new_fcpu)
 end
 
 function handle_fcpu_create(ent)
+  if ent.name == "fcpu" then
+    Controller.init(ent, {})
+    local didFind = false
+    for _, v in ipairs(global.fcpus) do
+      if v == ent then
+        didFind = true
+      end
+    end
+    if not didFind then
+      table.insert(global.fcpus, ent)
+    end
+  end
+
   if ent.name == "entity-ghost" and ent.ghost_name == "imposter-fcpu" then
     local revived, rev_ent = ent.revive()
     if revived then
@@ -146,7 +129,7 @@ function handle_fcpu_create(ent)
       local imposter_state = get_imposter_fcpu_state(imposter_fcpu)
       local target = imposter_state.target or imposter_state.fcpu
       if target then
-        if fcpu_debug_enabled then
+        if 0 < fcpu_debug_enabled then
           if imposter_state.target then
             debug_print("- got target")
           elseif imposter_state.fcpu then
@@ -172,6 +155,31 @@ function handle_fcpu_create(ent)
     end
   else
     debug_print("skip handling "..ent.name)
+  end
+end
+
+function handle_fcpu_destroy(entity)
+  if entity.name == "fcpu" then
+    -- move data from fcpu to its imposter so we can revive it later
+    local imposter_fcpus = entity.surface.find_entities_filtered{name = "imposter-fcpu", position = entity.position, force = entity.force, limit = 1}
+    if #imposter_fcpus > 0 then
+      local imposter_fcpu = imposter_fcpus[1]
+      if imposter_fcpu.valid then
+        local imposter_state = get_imposter_fcpu_state(imposter_fcpu)
+        if imposter_state ~= nil then
+          local state = get_fcpu_state(entity)
+          if state ~= nil then
+            -- rendering.draw_line{from={entity.position.x+0.1, entity.position.y}, to=imposter_fcpu, width=5, color={b = 1, a = 0.8}, surface=entity.surface }
+            debug_print("moved to imposter ", imposter_fcpu.unit_number)
+            imposter_state.target_program = state.program_text
+            imposter_state.ip = state.instruction_pointer
+            imposter_state.run = Controller.is_running(entity)
+            Entity.set_data(imposter_fcpu, imposter_state)
+            return
+          end
+        end
+      end
+    end
   end
 end
 

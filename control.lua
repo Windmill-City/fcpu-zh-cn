@@ -6,54 +6,16 @@ table = require('__stdlib__/stdlib/utils/table')
 require('src/constants')
 Profiler = require('src/debug')
 Controller = require('src/controller')
+
+require('src/storage')
 require('src/gui')
 require('src/fcpu_entity')
-
---[[
-[table] state               = Entity.get_data([entity name="fcpu"])
-[table] imposter_state      = Entity.get_data([entity name="imposter-fcpu"])
-[entity] fcpu               = imposter_state.fcpu
-[entity] imposter_fcpu      = state.imposter_fcpu
---]]
-
--------------------------------------------------------------------------------------------------------
-
-function get_player_data(player_index)
-  if global.player_data == nil then
-    global.player_data = {}
-  end
-  local player = game.players[player_index]
-  if (player and player.valid) then
-    local player_data = global.player_data[player_index] or {}
-    return player_data, player
-  end
-end
-
-function set_player_data(player_index, data)
-  if global.player_data == nil then
-    global.player_data = {}
-  end
-  global.player_data[player_index] = data
-end
 
 -------------------------------------------------------------------------------------------------------
 
 local function on_build_fcpu(event)
   local entity = event.created_entity
   if not (entity and entity.valid) then return end
-
-  if entity.name == "fcpu" then
-    Controller.init(entity, {})
-    local didFind = false
-    for _, v in ipairs(global.fcpus) do
-      if v == entity then
-        didFind = true
-      end
-    end
-    if not didFind then
-      table.insert(global.fcpus, entity)
-    end
-  end
 
   handle_fcpu_create(entity)
 end
@@ -62,35 +24,13 @@ local function on_destroy_fcpu(event)
   local entity = event.entity
   if not (entity and entity.valid and entity.unit_number) then return end
 
-  debug_print("entity destroyed #".. entity.unit_number)
+  debug_print("entity destroyed #", entity.unit_number)
   GuiEntityCloseWidget(entity)
 
-  -- after entity die there will be ghost leaved for entity reviving, so do not remove fcpu imposter
   if event.name == defines.events.on_entity_died then
-    if entity.name == "fcpu" then
-      -- move data from fcpu to its imposter so we can revive it later
-      local imposter_fcpus = entity.surface.find_entities_filtered{name = "imposter-fcpu", position = entity.position, force = entity.force, limit = 1}
-      if #imposter_fcpus > 0 then
-        local imposter_fcpu = imposter_fcpus[1]
-        if imposter_fcpu.valid then
-          local imposter_state = get_imposter_fcpu_state(imposter_fcpu)
-          if imposter_state ~= nil then
-            local state = get_fcpu_state(entity)
-            if state ~= nil then
-              -- rendering.draw_line{from={entity.position.x+0.1, entity.position.y}, to=imposter_fcpu, width=5, color={b = 1, a = 0.8}, surface=entity.surface }
-              debug_print("moved to imposter "..imposter_fcpu.unit_number)
-              imposter_state.target_program = state.program_text
-              imposter_state.ip = state.instruction_pointer
-              imposter_state.run = Controller.is_running(entity)
-              Entity.set_data(imposter_fcpu, imposter_state)
-              return
-            end
-          end
-        end
-      end
-    end
+    -- after entity die there will be ghost leaved for entity reviving, so do not remove fcpu imposter
+    handle_fcpu_destroy(entity)
   end
-  -- }
 
   fcpu_destroy_imposter(entity)
 end

@@ -1,6 +1,5 @@
 local Compiler = require('cpu/compiler')
 
---require('src/constants')
 PSTATE_HALTED = 0
 PSTATE_RUNNING = 1
 PSTATE_SLEEPING = 2
@@ -16,11 +15,11 @@ Controller.event_error = script.generate_event_name()
 Controller.event_halt = script.generate_event_name()
 
 function Controller.init(mc, state)
-  state.program_lines = {}
   state.program_text = ""
-  state.instruction_pointer = 1
+  state.program_lines = {}
   state.program_ast = {}
   state.program_state = PSTATE_HALTED
+  state.instruction_pointer = 1
 
   local control = mc.get_or_create_control_behavior()
   control.parameters = {
@@ -33,12 +32,12 @@ function Controller.init(mc, state)
       output_signal = nil
     }
   }
-  Controller.init_registers(mc, state)
+  Controller.init_registers(state)
   Entity.set_data(mc, state)
   return state
 end
 
-function Controller.init_registers(mc, state)
+function Controller.init_registers(state)
   if state.regs == nil then
     state.regs = {}
     for i = 1, MC_REGS do
@@ -96,7 +95,6 @@ function Controller.set_program_counter(mc, state, value)
 end
 
 function Controller.tick(mc, state)
-  -- Controller.init_registers(mc, state)
   state.clock = state.clock + 1
 
   -- Interrupts
