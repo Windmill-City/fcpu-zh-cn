@@ -11,7 +11,14 @@
             "factorioPath": "G:/SteamLibrary/steamapps/common/Factorio/bin/x64/factorio.exe"
         },
         {
-            "name": "launch",
+            "type": "factoriomod",
+            "request": "launch",
+            "name": "Factorio Mod Profile",
+            "factorioPath": "G:/SteamLibrary/steamapps/common/Factorio/bin/x64/factorio.exe",
+            "hookMode": "profile"
+        },
+        {
+            "name": "Run Tests",
             "type": "lua",
             "request": "launch",
             "luaVersion": "5.2",
