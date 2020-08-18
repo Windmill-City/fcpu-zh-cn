@@ -401,6 +401,7 @@ local migrations = require("src/migrations.lua")
 script.on_init(function()
   gui.init()
   gui.build_lookup_tables()
+  global.fcpus = {}
 end)
 script.on_load(function()
   gui.build_lookup_tables()

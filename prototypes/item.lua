@@ -48,9 +48,11 @@ data:extend{
   {
     type = "recipe",
     name = "fcpu",
+    enabled = false,
     ingredients = {{"arithmetic-combinator", 10}, {"decider-combinator", 10}, {"processing-unit", 1}},
     energy_required = 20,
-    results = {{"fcpu", 1}}
+    results = {{"fcpu", 1}},
+    unlock_results = true
   },
   {
     type = "technology",

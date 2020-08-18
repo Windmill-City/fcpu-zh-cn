@@ -56,11 +56,6 @@ end
 global.profile = false
 
 script.on_event(defines.events.on_tick, function(event)
-  -- Ensure we have a table to store fcpus in the global state.
-  if not global.fcpus then
-    global.fcpus = {}
-  end
-
   global.last_index = global.last_index or #global.fcpus
   if global.profile_ticks and Profiler then Profiler.Start(true) end
 

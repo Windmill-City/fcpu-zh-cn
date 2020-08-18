@@ -2,9 +2,10 @@
 Version: 0.1.13
 Date: ????
   Changes:
-    - Updated to 1.0
+    - Updated to Factorio v1.0
   Fixes:
     - correct header title while not in debug.
+    - minor fixes and optimizations.
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.12
 Date: 2020-08-17
