@@ -63,8 +63,8 @@ gui.add_handlers{
             if not Controller.is_running(player_data.current_fcpu) then
               player_data.current_fcpu_gui.outer.error_message.caption = ""
               Controller.compile(state)
+              Controller.run(state)
               Entity.set_data(player_data.current_fcpu, state)
-              Controller.run(player_data.current_fcpu, state)
             end
             state.disabled = nil
           else
@@ -80,8 +80,8 @@ gui.add_handlers{
         local state = Entity.get_data(player_data.current_fcpu)
         player_data.current_fcpu_gui.outer.error_message.caption = ""
         Controller.compile(state)
+        Controller.run(state)
         Entity.set_data(player_data.current_fcpu, state)
-        Controller.run(player_data.current_fcpu, state)
       end)
     },
     halt_program = {

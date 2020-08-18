@@ -44,7 +44,8 @@ local function update_fcpu_target(imposter_fcpu, new_fcpu)
     Entity.set_data(new_fcpu, state)
     Controller.set_program_counter(new_fcpu, state, imposter_state.ip)
     if imposter_state.run then
-      Controller.run(new_fcpu, state)
+      Controller.run(state)
+      Entity.set_data(new_fcpu, state)
     end
   else
     Entity.set_data(new_fcpu, state)

@@ -64,8 +64,9 @@ function ExecuteTest(test_title, program_text, input_signals, probe_result, max_
   Controller.compile(state)
   Entity.set_data(fcpu, state)
   Controller.set_program_counter(fcpu, state, 1)
-  Controller.run(fcpu, state)
-  
+  Controller.run(state)
+  Entity.set_data(fcpu, state)
+
   while state.program_state ~= PSTATE_HALTED do
     if max_ticks ~= nil then
       if 0 < max_ticks then

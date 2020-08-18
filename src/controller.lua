@@ -118,7 +118,8 @@ function Controller.tick(mc, state)
     Controller.halt(mc, state)
   end
   if state.program_state == PSTATE_HALTED and get_signal(RUN_SIGNAL) > 0 then
-    Controller.run(mc, state, state.instruction_pointer)
+    Controller.run(state)
+    Entity.set_data(mc, state)
   end
   if state.program_state == PSTATE_HALTED and get_signal(STEP_SIGNAL) > 0 then
     Controller.step(mc, state)
@@ -187,12 +188,11 @@ function Controller.tick(mc, state)
   Entity.set_data(mc, state)
 end
 
-function Controller.run(mc, state)
+function Controller.run(state)
   state.program_state = PSTATE_RUNNING
   state.error_message = nil
   state.error_line = nil
   state.do_step = false
-  Entity.set_data(mc, state)
 end
 
 function Controller.step(mc, state)
