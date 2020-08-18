@@ -60,16 +60,15 @@ gui.add_handlers{
         local state = Entity.get_data(player_data.current_fcpu)
         if event.element then
           if event.element.switch_state == "right" then
-            if not Controller.is_running(player_data.current_fcpu) then
+            if not Controller.is_running(state) then
               player_data.current_fcpu_gui.outer.error_message.caption = ""
               Controller.compile(state)
               Controller.run(state)
-              Entity.set_data(player_data.current_fcpu, state)
             end
             state.disabled = nil
           else
             state.disabled = true -- halt will clear output registers
-            Controller.halt(player_data.current_fcpu, state)
+            Controller.halt(state)
           end
           Entity.set_data(player_data.current_fcpu, state)
         end
@@ -87,7 +86,8 @@ gui.add_handlers{
     halt_program = {
       on_gui_click = mixPlayerData(function(player_data)
         local state = Entity.get_data(player_data.current_fcpu)
-        Controller.halt(player_data.current_fcpu, state)
+        Controller.halt(state)
+        Entity.set_data(player_data.current_fcpu, state)
       end)
     },
     step_program = {
@@ -95,8 +95,8 @@ gui.add_handlers{
         local state = Entity.get_data(player_data.current_fcpu)
         player_data.current_fcpu_gui.outer.error_message.caption = ""
         Controller.compile(state)
+        Controller.step(state)
         Entity.set_data(player_data.current_fcpu, state)
-        Controller.step(player_data.current_fcpu, state)
       end)
     },
     copy_program = {
@@ -153,12 +153,12 @@ local function CreateWidget(player)
 
       {type="frame", name="outer", style="inside_shallow_frame_with_padding", direction="vertical", children={
         {type="flow", name="buttons_row", direction="horizontal", style_mods={vertical_align="center"}, children={
-          --gui.templates.control_button("copy", "copy"),
-          --gui.templates.control_button("paste", "paste"),
-          --{template="pushers.horizontal"},
           gui.templates.control_button("halt", "stop", "red"),
           gui.templates.control_button("run", "play", "green"),
           gui.templates.control_button("step", "next"),
+          --{template="pushers.horizontal"},
+          --gui.templates.control_button("copy", "copy"),
+          --gui.templates.control_button("paste", "paste"),
           {template="pushers.horizontal"},
           {type="switch", style_mods={ right_margin=10 }, left_label_caption={"gui-constant.off"}, right_label_caption={"gui-constant.on"}, save_as="gui_enable_switch", handlers="widget.enable_program"},
         }},
@@ -223,7 +223,7 @@ function GuiWidgetOpen(player, entity)
   state = table.merge(state, elems)
 
   state.gui_program_input.text = state.program_text
-  GuiWidgetUpdate(entity, state)
+  GuiWidgetUpdate(state)
 
   if state.error_message then
     state.gui_fcpu.outer.error_message.caption = state.error_message
@@ -235,7 +235,7 @@ function GuiWidgetOpen(player, entity)
     state.gui_enable_switch.switch_state = "right"
   end
 
-  if Controller.is_running(entity) then
+  if Controller.is_running(state) then
     state.gui_run_button.enabled = false
   else
     state.gui_run_button.enabled = true
@@ -268,10 +268,10 @@ local function UpdateLines(element, state)
   element.text = table.concat(lines, "\n")
 end
 
-function GuiWidgetUpdate(mc, state)
+function GuiWidgetUpdate(state)
   -- Enable/Disable the run/step button
   if state.gui_run_button and state.gui_run_button.valid then
-    if Controller.is_running(mc) then
+    if Controller.is_running(state) then
       --state.gui_halt_button.style = "highlighted_tool_button"
       state.gui_halt_button.sprite = "fcpu-pause-sprite"
       state.gui_halt_button.enabled = true
@@ -285,7 +285,7 @@ function GuiWidgetUpdate(mc, state)
   end
   -- Make text read-only while running
   if state.gui_program_input and state.gui_program_input.valid then
-    state.gui_program_input.read_only = Controller.is_running(mc)
+    state.gui_program_input.read_only = Controller.is_running(state)
   end
   -- Update the program lines in the GUI
   if state.gui_line_numbers and state.gui_line_numbers.valid then
@@ -394,6 +394,10 @@ end)
 script.on_event(defines.events.on_runtime_mod_setting_changed, UpdateModSetting)
 
 
+-------------------------------------------------------------------------------------------------------
+local migration = require("__flib__.migration")
+local migrations = require("src/migrations.lua")
+
 script.on_init(function()
   gui.init()
   gui.build_lookup_tables()
@@ -401,7 +405,8 @@ end)
 script.on_load(function()
   gui.build_lookup_tables()
 end)
-script.on_configuration_changed(function()
-  --  gui.init()
-  gui.check_filter_validity()
+script.on_configuration_changed(function(e)
+  if migration.on_config_changed(e, migrations) then
+    gui.check_filter_validity()
+  end
 end)

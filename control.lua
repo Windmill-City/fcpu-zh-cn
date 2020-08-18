@@ -76,10 +76,11 @@ script.on_event(defines.events.on_tick, function(event)
     if cpu.valid then
       local state = Entity.get_data(cpu)
       if state and not state.disabled then
-        GuiWidgetUpdate(cpu, state)
+        GuiWidgetUpdate(state)
         -- Tick the Controller
         if cpu.active and cpu.is_connected_to_electric_network() then
-          Controller.tick(cpu, state)
+          Controller.tick(state)
+          Entity.set_data(cpu, state)
           i = i + 1
         end
       end
@@ -122,12 +123,11 @@ local function on_entity_settings_pasted(event)
       if src_state and dst_state then
         fcpu_update_program(dst_entity, src_state.program_text)
         Controller.compile(dst_state)
-        Entity.set_data(dst_entity, dst_state)
-        Controller.set_program_counter(dst_entity, dst_state, 1) -- src_state.instruction_pointer)
-        if Controller.is_running(src_entity) then
+        Controller.set_program_counter(dst_state, 1) -- src_state.instruction_pointer)
+        if Controller.is_running(src_state) then
           Controller.run(dst_state)
-          Entity.set_data(dst_entity, dst_state)
         end
+        Entity.set_data(dst_entity, dst_state)
       end
     end
   end

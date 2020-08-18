@@ -31,7 +31,7 @@ function createFCPU(input)
     }
     if bus then
       for k,v in pairs(bus) do
-        local t, n = string.match(k, '(%a+)-([%a%-]+)')
+        local t, n = string.match(k, '(%a+)=([%a%-]+)')
         table.insert(out.signals, { signal = { type = t, name = n }, count = v })
       end
     end
@@ -45,7 +45,14 @@ function createFCPU(input)
   fcpu.get_or_create_control_behavior = function()
     if fcpu._control_behavior == nil then
       fcpu._control_behavior = {
-        parameters = {},
+        parameters = {
+          first_signal = nil,
+          second_signal = nil,
+          first_constant = nil,
+          second_constant = nil,
+          operation = "*",
+          output_signal = nil
+        },
         get_circuit_network = function(wire_type, circuit_connector_id)
           return buses[wire_type]
         end,
@@ -62,10 +69,8 @@ function ExecuteTest(test_title, program_text, input_signals, probe_result, max_
 
   Controller.update_program_text(state, program_text)
   Controller.compile(state)
-  Entity.set_data(fcpu, state)
-  Controller.set_program_counter(fcpu, state, 1)
+  Controller.set_program_counter(state, 1)
   Controller.run(state)
-  Entity.set_data(fcpu, state)
 
   while state.program_state ~= PSTATE_HALTED do
     if max_ticks ~= nil then
@@ -75,14 +80,14 @@ function ExecuteTest(test_title, program_text, input_signals, probe_result, max_
         break
       end
     end
-    Controller.tick(fcpu, state)
+    Controller.tick(state)
   end
   if state.error_message then
     error(state.error_message[3])
   end
   if probe_result then
     local output = fcpu.get_control_behavior().parameters.parameters
-    local ret = probe_result(state, output)
+    local ret = probe_result(state, output, fcpu)
     if ret ~= true and ret ~= nil then
       print(serpent.block(state.regs, {comment=true}))
       print(serpent.block(output, {comment=true}))
@@ -101,7 +106,7 @@ local fcpu, state = ExecuteTest(
   ]],
   {
     [defines.wire_type.green] = {
-      ['recipe-copper-plate'] = 1000,
+      ['recipe=copper-plate'] = 1000,
     },
     [defines.wire_type.red] = nil,
   },
@@ -120,8 +125,8 @@ local fcpu, state = ExecuteTest(
   ]],
   {
     [defines.wire_type.green] = {
-      ['recipe-copper-plate'] = 1000,
-      ['recipe-steel-plate'] = 200,
+      ['recipe=copper-plate'] = 1000,
+      ['recipe=steel-plate'] = 200,
     },
     [defines.wire_type.red] = nil,
   },
@@ -185,12 +190,12 @@ local fcpu, state = ExecuteTest(
   ]],
   {
     [defines.wire_type.green] = {
-      ['recipe-copper-plate'] = 1000,
-      ['recipe-steel-plate'] = 200,
+      ['recipe=copper-plate'] = 1000,
+      ['recipe=steel-plate'] = 200,
     },
     [defines.wire_type.red] = {
-      ['item-copper-plate'] = 40,
-      ['item-iron-plate'] = 300,
+      ['item=copper-plate'] = 40,
+      ['item=iron-plate'] = 300,
     },
   },
   function(state, output)

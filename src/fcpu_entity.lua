@@ -1,3 +1,5 @@
+local assert = require('src/cpu/assert')
+
 -------------------------------------------------------------------------------------------------------
 require('__fcpu__/3rdparty/blueprintdata')
 
@@ -11,7 +13,7 @@ local function encode_fcpu(entity)
   write_to_combinator(state.imposter_fcpu, {
     t=state.program_text,
     i=state.instruction_pointer,
-    r=Controller.is_running(entity)
+    r=Controller.is_running(state)
   })
 end
 
@@ -35,22 +37,21 @@ local function update_fcpu_target(imposter_fcpu, new_fcpu)
   local imposter_state = Entity.get_data(imposter_fcpu)
   Entity.set_data(imposter_fcpu, { fcpu = new_fcpu })
 
-  local state = Entity.get_data(new_fcpu) or {}
+  local state = Entity.get_data(new_fcpu) or { ['entity'] = new_fcpu }
   state.imposter_fcpu = imposter_fcpu
 
   if imposter_state.target_program then
     Controller.update_program_text(state, imposter_state.target_program)
     Controller.compile(state)
-    Entity.set_data(new_fcpu, state)
-    Controller.set_program_counter(new_fcpu, state, imposter_state.ip)
+    Controller.set_program_counter(state, imposter_state.ip)
     if imposter_state.run then
       Controller.run(state)
-      Entity.set_data(new_fcpu, state)
     end
   else
-    Entity.set_data(new_fcpu, state)
     debug_print('--- can not update program')
   end
+
+  Entity.set_data(new_fcpu, state)
 end
 
 function handle_fcpu_create(ent)
@@ -174,7 +175,7 @@ function handle_fcpu_destroy(entity)
             debug_print("moved to imposter ", imposter_fcpu.unit_number)
             imposter_state.target_program = state.program_text
             imposter_state.ip = state.instruction_pointer
-            imposter_state.run = Controller.is_running(entity)
+            imposter_state.run = Controller.is_running(state)
             Entity.set_data(imposter_fcpu, imposter_state)
             return
           end
@@ -235,9 +236,9 @@ end
 -------------------------------------------------------------------------------------------------------
 
 script.on_event(Controller.event_halt, function(event)
-  local entity = event.entity
-  if event.state.disabled then
-    local control = entity.get_or_create_control_behavior()
+  assert.check(event.entity ~= nil)
+  if event.entity and event.state.disabled then
+    local control = event.entity.get_or_create_control_behavior()
     local params = control.parameters
     params.parameters.first_constant = NULL_SIGNAL.count
     params.parameters.output_signal = NULL_SIGNAL.signal
