@@ -62,7 +62,8 @@ gui.add_handlers{
           if event.element.switch_state == "right" then
             if not Controller.is_running(player_data.current_fcpu) then
               player_data.current_fcpu_gui.outer.error_message.caption = ""
-              Controller.compile(player_data.current_fcpu, state)
+              Controller.compile(state)
+              Entity.set_data(player_data.current_fcpu, state)
               Controller.run(player_data.current_fcpu, state)
             end
             state.disabled = nil
@@ -78,7 +79,8 @@ gui.add_handlers{
       on_gui_click = mixPlayerData(function(player_data)
         local state = Entity.get_data(player_data.current_fcpu)
         player_data.current_fcpu_gui.outer.error_message.caption = ""
-        Controller.compile(player_data.current_fcpu, state)
+        Controller.compile(state)
+        Entity.set_data(player_data.current_fcpu, state)
         Controller.run(player_data.current_fcpu, state)
       end)
     },
@@ -92,7 +94,8 @@ gui.add_handlers{
       on_gui_click = mixPlayerData(function(player_data)
         local state = Entity.get_data(player_data.current_fcpu)
         player_data.current_fcpu_gui.outer.error_message.caption = ""
-        Controller.compile(player_data.current_fcpu, state)
+        Controller.compile(state)
+        Entity.set_data(player_data.current_fcpu, state)
         Controller.step(player_data.current_fcpu, state)
       end)
     },

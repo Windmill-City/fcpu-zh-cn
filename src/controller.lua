@@ -54,13 +54,12 @@ function Controller.update_program_text(state, program_text)
   state.program_text = program_text
 end
 
-function Controller.compile(mc, state)
+function Controller.compile(state)
   local program_lines = {}
   for line in linepairs(state.program_text) do
     table.insert(program_lines, line)
   end
   state.program_ast = Compiler.compile(program_lines)
-  Entity.set_data(mc, state)
 end
 
 function Controller.set_error_message(mc, state, error_message)

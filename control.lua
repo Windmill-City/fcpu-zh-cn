@@ -120,7 +120,8 @@ local function on_entity_settings_pasted(event)
 
       if src_state and dst_state then
         fcpu_update_program(dst_entity, src_state.program_text)
-        Controller.compile(dst_entity, dst_state)
+        Controller.compile(dst_state)
+        Entity.set_data(dst_entity, dst_state)
         Controller.set_program_counter(dst_entity, dst_state, 1) -- src_state.instruction_pointer)
         if Controller.is_running(src_entity) then
           Controller.run(dst_entity, dst_state)

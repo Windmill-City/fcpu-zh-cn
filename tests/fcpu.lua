@@ -61,7 +61,8 @@ function ExecuteTest(test_title, program_text, input_signals, probe_result, max_
   local state = Controller.init(fcpu)
 
   Controller.update_program_text(state, program_text)
-  Controller.compile(fcpu, state)
+  Controller.compile(state)
+  Entity.set_data(fcpu, state)
   Controller.set_program_counter(fcpu, state, 1)
   Controller.run(fcpu, state)
   
