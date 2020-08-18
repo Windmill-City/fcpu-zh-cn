@@ -5,7 +5,7 @@ table = require('__stdlib__/stdlib/utils/table')
 
 require('src/constants')
 Profiler = require('src/debug')
-Controller = require('src/controller')
+Controller = require('src/cpu/controller')
 
 require('src/storage')
 require('src/gui')
@@ -69,7 +69,6 @@ script.on_event(defines.events.on_tick, function(event)
   local c = 1
   while i <= limit and c <= #global.fcpus do
     global.last_index = (global.last_index + #global.fcpus - 2) % #global.fcpus + 1
-    c = c + 1
 
     -- Iterate through stored fcpus
     local cpu = global.fcpus[global.last_index]
@@ -88,6 +87,8 @@ script.on_event(defines.events.on_tick, function(event)
       GuiEntityCloseWidget(cpu)
       table.remove(global.fcpus, global.last_index)
     end
+
+    c = c + 1
   end
 
   if global.profile_ticks and Profiler then Profiler.Stop(false, "") global.profile_ticks = nil end

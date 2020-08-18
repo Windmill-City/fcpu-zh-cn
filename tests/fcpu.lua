@@ -6,7 +6,7 @@ Entity = require('__stdlib__/stdlib/entity/entity')
 table = require('__stdlib__/stdlib/utils/table')
 
 require('../src/constants')
-Controller = require('../src/controller')
+Controller = require('../src/cpu/controller')
 assert = require('../src/cpu/assert')
 
 ----------------------------------------------------------------------------------------------------------------

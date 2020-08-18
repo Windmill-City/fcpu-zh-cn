@@ -1,4 +1,4 @@
-local Compiler = require('cpu/compiler')
+local Compiler = require('src/cpu/compiler')
 
 PSTATE_HALTED = 0
 PSTATE_RUNNING = 1
