@@ -1,20 +1,21 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.14
 Date: ????
-  Changes:
+  Fixed:
+    - The program is saved when you destroy the fCPU and then restore it from the ghost.
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.13
 Date: 2020-08-18
   Changes:
-    - Updated to Factorio v1.0
+    - Updated to Factorio v1.0 .
   Fixes:
-    - correct header title while not in debug.
-    - minor fixes and optimizations.
+    - Correct header title while not in debug.
+    - Minor fixes and optimizations.
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.12
 Date: 2020-08-17
   Fixes:
-    - Handle non specified `event.entity` (https://mods.factorio.com/mod/fcpu/discussion/5f3a002784e738a1cc130cd3)
+    - Handle non specified `event.entity` (https://mods.factorio.com/mod/fcpu/discussion/5f3a002784e738a1cc130cd3) .
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.11
 Date: 2020-08-17
@@ -29,12 +30,12 @@ Date: 2020-08-16
 Version: 0.1.9
 Date: 2020-08-16
   Fixes:
-    - handling for `script_raised_*` (https://mods.factorio.com/mod/fcpu/discussion/5f36b0d2501de5727f3f1b03), see (https://mods.factorio.com/mod/Construction_Drones/discussion/5e35543fee8592000bbab6ee)
+    - handling for `script_raised_*` (https://mods.factorio.com/mod/fcpu/discussion/5f36b0d2501de5727f3f1b03), see (https://mods.factorio.com/mod/Construction_Drones/discussion/5e35543fee8592000bbab6ee) .
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.8
 Date: 2020-08-14
   Fixes:
-    - fig, fir (https://mods.factorio.com/mod/fcpu/discussion/5f36a84b9b7aaf3d992d8d8f)
+    - fig, fir (https://mods.factorio.com/mod/fcpu/discussion/5f36a84b9b7aaf3d992d8d8f) .
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.7
 Date: 2020-08-13
@@ -43,7 +44,7 @@ Date: 2020-08-13
   Changes:
     - Program size increased up to 64 lines.
   Fixes:
-    - tas (https://mods.factorio.com/mod/fcpu/discussion/5f3596e989786166f267f2d7)
+    - tas (https://mods.factorio.com/mod/fcpu/discussion/5f3596e989786166f267f2d7) .
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.6
 Date: 2020-08-13

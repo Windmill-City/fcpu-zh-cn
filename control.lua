@@ -27,9 +27,12 @@ local function on_destroy_fcpu(event)
   debug_print("entity destroyed #", entity.unit_number)
   GuiEntityCloseWidget(entity)
 
+
   if event.name == defines.events.on_entity_died then
     -- after entity die there will be ghost leaved for entity reviving, so do not remove fcpu imposter
-    handle_fcpu_destroy(entity)
+    if handle_fcpu_destroy(entity) then
+      return
+    end
   end
 
   fcpu_destroy_imposter(entity)

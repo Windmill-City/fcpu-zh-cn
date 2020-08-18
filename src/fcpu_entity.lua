@@ -175,7 +175,7 @@ function handle_fcpu_destroy(entity)
             imposter_state.ip = state.instruction_pointer
             imposter_state.run = Controller.is_running(state)
             Entity.set_data(imposter_fcpu, imposter_state)
-            return
+            return true
           end
         end
       end
