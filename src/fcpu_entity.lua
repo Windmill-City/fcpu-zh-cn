@@ -231,3 +231,16 @@ function fcpu_update_program(fcpu, program_text)
 
   encode_fcpu(fcpu)
 end
+
+-------------------------------------------------------------------------------------------------------
+
+script.on_event(Controller.event_halt, function(event)
+  local entity = event.entity
+  if event.state.disabled then
+    local control = entity.get_or_create_control_behavior()
+    local params = control.parameters
+    params.parameters.first_constant = NULL_SIGNAL.count
+    params.parameters.output_signal = NULL_SIGNAL.signal
+    control.parameters = params
+  end
+end)

@@ -104,6 +104,7 @@ script.on_event(Controller.event_error, function(event)
   end
 end)
 
+
 local function on_entity_settings_pasted(event)
   local dst_entity = event.destination
   if not (dst_entity and dst_entity.valid) then return end

@@ -214,13 +214,6 @@ function Controller.halt(mc, state)
   state.do_step = false
   Entity.set_data(mc, state)
   script.raise_event(Controller.event_halt, {entity = mc, ['state'] = state})
-  if state.disabled then
-    local control = mc.get_or_create_control_behavior()
-    local params = control.parameters
-    params.parameters.first_constant = NULL_SIGNAL.count
-    params.parameters.output_signal = NULL_SIGNAL.signal
-    control.parameters = params
-  end
 end
 
 function Controller.is_running(mc)
