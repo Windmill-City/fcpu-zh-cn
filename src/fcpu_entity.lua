@@ -37,24 +37,23 @@ local function update_fcpu_target(imposter_fcpu, new_fcpu)
 
   local state = Entity.get_data(new_fcpu) or {}
   state.imposter_fcpu = imposter_fcpu
-  Entity.set_data(new_fcpu, state)
 
   if imposter_state.target_program then
-    Controller.update_program_text(new_fcpu, imposter_state.target_program)
-
+    Controller.update_program_text(state, imposter_state.target_program)
     Controller.compile(new_fcpu, state)
     Controller.set_program_counter(new_fcpu, state, imposter_state.ip)
     if imposter_state.run then
       Controller.run(new_fcpu, state)
     end
   else
+    Entity.set_data(new_fcpu, state)
     debug_print('--- can not update program')
   end
 end
 
 function handle_fcpu_create(ent)
   if ent.name == "fcpu" then
-    Controller.init(ent, {})
+    Entity.set_data(ent, Controller.init(ent))
     local didFind = false
     for _, v in ipairs(global.fcpus) do
       if v == ent then
@@ -224,6 +223,9 @@ function fcpu_destroy_imposter(entity)
 end
 
 function fcpu_update_program(fcpu, program_text)
-  Controller.update_program_text(fcpu, program_text)
+  local state = Entity.get_data(fcpu)
+  Controller.update_program_text(state, program_text)
+  Entity.set_data(fcpu, state)
+
   encode_fcpu(fcpu)
 end

@@ -58,10 +58,9 @@ end
 
 function ExecuteTest(test_title, program_text, input_signals, probe_result, max_ticks)
   local fcpu = createFCPU(input_signals)
-  local state = Controller.init(fcpu, {})
-  
-  Controller.update_program_text(fcpu, program_text)
-  
+  local state = Controller.init(fcpu)
+
+  Controller.update_program_text(state, program_text)
   Controller.compile(fcpu, state)
   Controller.set_program_counter(fcpu, state, 1)
   Controller.run(fcpu, state)

@@ -14,12 +14,14 @@ local Controller = {}
 Controller.event_error = script.generate_event_name()
 Controller.event_halt = script.generate_event_name()
 
-function Controller.init(mc, state)
-  state.program_text = ""
-  state.program_lines = {}
-  state.program_ast = {}
-  state.program_state = PSTATE_HALTED
-  state.instruction_pointer = 1
+function Controller.init(mc)
+  local state = {
+    program_text = "",
+    program_lines = {},
+    program_ast = {},
+    program_state = PSTATE_HALTED,
+    instruction_pointer = 1
+  }
 
   local control = mc.get_or_create_control_behavior()
   control.parameters = {
@@ -33,7 +35,6 @@ function Controller.init(mc, state)
     }
   }
   Controller.init_registers(state)
-  Entity.set_data(mc, state)
   return state
 end
 
@@ -49,10 +50,8 @@ function Controller.init_registers(state)
   end
 end
 
-function Controller.update_program_text(mc, program_text)
-  local state = Entity.get_data(mc)
+function Controller.update_program_text(state, program_text)
   state.program_text = program_text
-  Entity.set_data(mc, state)
 end
 
 function Controller.compile(mc, state)

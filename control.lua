@@ -130,11 +130,6 @@ local function on_entity_settings_pasted(event)
   end
 end
 
---script.on_event(defines.events.on_player_setup_blueprint, function on_player_setup_blueprint(event)
---  debug_print("on_player_setup_blueprint")
---  debug_print(serpent.block(event))
---end)
-
 -------------------------------------------------------------------------------------------------------
 local event = require("__flib__.event")
 local event_filters = {
