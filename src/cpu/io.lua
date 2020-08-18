@@ -249,7 +249,7 @@ function io.getsignal(_, types)
   elseif _.type == 'signal' or _.type == 'type' or _.type == 'value' then
     signal = _
   else
-    assert.exception('unhandler')
+    assert.exception('tryint to retrieve nil signal')
   end
   return signal
 end
@@ -264,7 +264,7 @@ function io.setsignal(_, signal, types)
   elseif _.type == 'register' then
     io.register_set(_, signal)
   else
-    assert.exception('unhandler')
+    assert.exception('unhandled')
   end
 end
 
@@ -275,7 +275,7 @@ function io.getcount(_, types)
   else
     local signal = io.getsignal(_, types)
     if type(signal) ~= 'table' or signal.count == nil then
-      assert.exception('unhandled')
+      assert.exception('tryint to retrieve nil count')
     end
     return signal.count
   end
@@ -292,7 +292,7 @@ end
 function io.gettype(_, types)
   local signal = io.getsignal(_, types)
   if type(signal) ~= 'table' or signal.signal == nil then
-    assert.exception('unhandled')
+    assert.exception('tryint to retrieve nil type')
   end
   return signal.signal
 end
