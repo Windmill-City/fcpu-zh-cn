@@ -1,5 +1,4 @@
 local Compiler = require('cpu/compiler')
-local assert = require('src/cpu/assert')
 
 PSTATE_HALTED = 0
 PSTATE_RUNNING = 1
@@ -95,8 +94,6 @@ function Controller.set_program_counter(state, value)
 end
 
 function Controller.tick(state)
-  assert.check(state.entity ~= nil)
-
   state.clock = state.clock + 1
 
   -- Interrupts
@@ -207,7 +204,6 @@ function Controller.step(state)
 end
 
 function Controller.halt(state)
-  assert.check(state.entity ~= nil)
   if state.program_state == PSTATE_HALTED then
     Controller.set_program_counter(state, 1)
   end

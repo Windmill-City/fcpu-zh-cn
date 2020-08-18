@@ -1,5 +1,3 @@
-local assert = require('src/cpu/assert')
-
 -------------------------------------------------------------------------------------------------------
 require('__fcpu__/3rdparty/blueprintdata')
 
@@ -236,7 +234,6 @@ end
 -------------------------------------------------------------------------------------------------------
 
 script.on_event(Controller.event_halt, function(event)
-  assert.check(event.entity ~= nil)
   if event.entity and event.state.disabled then
     local control = event.entity.get_or_create_control_behavior()
     local params = control.parameters
