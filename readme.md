@@ -19,7 +19,7 @@
 ## Registers
 
 There are 8 generic purpose read/write registers, named **reg1**, ... **reg8** or alias **r1**, ... **r8**.  
-Each register store signal type and numeric value.  
+Each register store signal type and numeric value (floating point numbers are supported).  
 For example `mov reg2 10[item=iron-plate]`, this instruction assigns to **reg2**
 *value of 10* and *type of [item=iron-plate]*.  
 
@@ -27,6 +27,9 @@ Besides general purpose registers there are some read only registers:
 - **ipt**: current instruction line numer  
 - **clk**: clock, increases every tick  
 - **cnr**, **cng**: signals count on red/green input wire  
+
+Output registers, write only:
+- **out1**, ..., **out128**: output registers (only integer values)
 
 
 ## Arrays\indirect addressing
@@ -62,7 +65,7 @@ Each instruction take one or more operands and modify them or state of fCPU.
 * **C**, value: integer constant [-2^31..2^31), same as **V** (`-3500`)
 * **R**, register: (`reg1`, `reg2`, ..., `reg8`)
 * **I**, wire: input wire (`red`, `green`)
-* **O**, wire: output wire (`out`)
+* **O**, wire: output wire (`out1`, `out2`, ..., `out128`)
 
 - **A**, address: instruction address (`5`)
 - **L**, label: instruction label (`:labelname`)
@@ -76,7 +79,10 @@ Each instruction take one or more operands and modify them or state of fCPU.
   No operation.
 
 * `clr`  
-  Clear all memory and output.
+  Clear all registers and output.
+
+* `clr` out  
+  Clear all output values.
 
 * `clr` reg...[**R**/**O**]  
   Clear specified registers.

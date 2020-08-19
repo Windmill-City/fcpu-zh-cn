@@ -56,7 +56,11 @@ local opcodes = {
   clr = function(_)
     if 0 < #_ then
       for i, expr in ipairs(_) do
-        io.setsignal(_[i], NULL_SIGNAL, {'register', 'wire'})
+        if expr == 'out' then
+          io.output_clear()
+        else
+          io.setsignal(_[i], NULL_SIGNAL, {'register', 'wire'})
+        end
       end
     else
       for i = 1, io.register_last_index() do

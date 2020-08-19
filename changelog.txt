@@ -4,6 +4,7 @@ Date: ????
   Features:
     - Added support for output multiple signals simultaneously.
     - Added operation state display in Alt mode.
+    - Added shorthand for clearing outputs `clr out`.
   Changes:
     - `emit` opcode now set `out1` register.
     - `out1` register replaced with `out1` (`out` is deprecated and will be reserved for SIMD instructions later).
