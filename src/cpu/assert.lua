@@ -13,6 +13,14 @@ function assert.exception(...)
   exception(...)
 end
 
+function assert.deprecated(since_ver, ...)
+  -- TODO: implement non fatal warning show to user
+end
+
+function assert.todo(msg)
+  exception("NOT IMPLEMENTED")
+end
+
 function assert.check(b, ...)
   if not b then
     if ... and 0 < #... then
@@ -58,7 +66,10 @@ function assert.type(_, valid)
         return
       end
     elseif v == 'output' then
-      if _.type == 'wire' then
+      if _.type == 'wire' and _.color == 'out' then
+        return
+      elseif _.type == 'output' then
+        assert.todo()
         return
       end
     end

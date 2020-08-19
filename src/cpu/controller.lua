@@ -4,6 +4,12 @@ PSTATE_HALTED = 0
 PSTATE_RUNNING = 1
 PSTATE_SLEEPING = 2
 
+local pstateStr = {
+  [PSTATE_HALTED] = 'signal-fcpu-halt',
+  [PSTATE_RUNNING] = 'signal-fcpu-run',
+  [PSTATE_SLEEPING] = 'signal-fcpu-sleep',
+}
+
 local function linepairs(s)
   if s:sub(-1)~="\n" then s=s.."\n" end
   return s:gmatch("(.-)\n")
@@ -52,7 +58,10 @@ function Controller.init_registers(state)
 end
 
 function Controller.update_program_text(state, program_text)
-  state.program_text = program_text
+  if state.program_text ~= program_text then
+    state.program_text = program_text
+    return true
+  end
 end
 
 function Controller.compile(state)
@@ -73,7 +82,7 @@ function Controller.set_program_counter(state, value)
   state.instruction_pointer = value
   if #state.program_ast == 0 or state.instruction_pointer > #state.program_ast then
     state.instruction_pointer = 1
-    state.program_state = PSTATE_HALTED
+    Controller.update_state(state, PSTATE_HALTED)
     state.do_step = false
     script.raise_event(Controller.event_halt, {['entity'] = state.entity, ['state'] = state})
   else
@@ -86,11 +95,12 @@ function Controller.set_program_counter(state, value)
       next_ast = state.program_ast[state.instruction_pointer]
     end
     if state.instruction_pointer > #state.program_ast then
-      state.program_state = PSTATE_HALTED
+      Controller.update_state(state, PSTATE_HALTED)
       state.do_step = false
       script.raise_event(Controller.event_halt, {['entity'] = state.entity, ['state'] = state})
     end
   end
+  Controller.update_ip(state)
 end
 
 function Controller.tick(state)
@@ -127,7 +137,7 @@ function Controller.tick(state)
   if state.program_state == PSTATE_RUNNING and get_signal(SLEEP_SIGNAL) > 0 then
     local value = get_signal(SLEEP_SIGNAL)
     if value then
-      state.program_state = PSTATE_SLEEPING
+      Controller.update_state(state, PSTATE_SLEEPING)
       state.sleep_time = value
     end
   end
@@ -150,7 +160,7 @@ function Controller.tick(state)
         Controller.halt(state)
         Controller.set_program_counter(state, state.instruction_pointer + 1)
       elseif result.type == 'sleep' then
-        state.program_state = PSTATE_SLEEPING
+        Controller.update_state(state, PSTATE_SLEEPING)
         state.sleep_time = result.val
       elseif result.type == 'jump' then
         if result.label then
@@ -175,7 +185,7 @@ function Controller.tick(state)
   elseif state.program_state == PSTATE_SLEEPING then
     state.sleep_time = state.sleep_time - 1
     if state.sleep_time <= 1 then
-      state.program_state = PSTATE_RUNNING
+      Controller.update_state(state, PSTATE_RUNNING)
       Controller.set_program_counter(state, state.instruction_pointer + 1)
     end
   end
@@ -187,7 +197,7 @@ function Controller.tick(state)
 end
 
 function Controller.run(state)
-  state.program_state = PSTATE_RUNNING
+  Controller.update_state(state, PSTATE_RUNNING)
   state.error_message = nil
   state.error_line = nil
   state.do_step = false
@@ -197,7 +207,7 @@ function Controller.step(state)
   if state.instruction_pointer > #state.program_ast then
     Controller.set_program_counter(state, 1)
   end
-  state.program_state = PSTATE_RUNNING
+  Controller.update_state(state, PSTATE_RUNNING)
   state.do_step = true
   state.error_message = nil
   state.error_line = nil
@@ -207,13 +217,46 @@ function Controller.halt(state)
   if state.program_state == PSTATE_HALTED then
     Controller.set_program_counter(state, 1)
   end
-  state.program_state = PSTATE_HALTED
+  Controller.update_state(state, PSTATE_HALTED)
   state.do_step = false
   script.raise_event(Controller.event_halt, {entity = state.entity, ['state'] = state})
 end
 
 function Controller.is_running(state)
   return state.program_state ~= PSTATE_HALTED
+end
+
+-------------------------------------------------------------------------------------------------------
+
+function Controller.update_ip(state)
+  --local control = state.entity.get_control_behavior()
+  --local param = control.parameters
+  --param.parameters.second_constant = state.instruction_pointer
+  --control.parameters = param
+end
+
+function Controller.update_state(state, pstate)
+  if state.output_fcpu then
+    local control = state.output_fcpu.get_control_behavior()
+    control.enabled = not state.disabled
+  end
+
+  if state.program_state ~= pstate then
+    if pstate ~= nil then
+      state.program_state = pstate
+    end
+
+    local str = pstateStr[state.program_state]
+    if state.error_message and state.program_state == PSTATE_HALTED then
+      str = 'signal-fcpu-error'
+    end
+    if str then
+      local control = state.entity.get_control_behavior()
+      local param = control.parameters
+      param.parameters.first_signal = { type="virtual", name=str }
+      control.parameters = param
+    end
+  end
 end
 
 return Controller

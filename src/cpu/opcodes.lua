@@ -56,13 +56,14 @@ local opcodes = {
   clr = function(_)
     if 0 < #_ then
       for i, expr in ipairs(_) do
-        io.register_set(_[i], NULL_SIGNAL)
+        io.setsignal(_[i], NULL_SIGNAL, {'register', 'wire'})
       end
     else
       for i = 1, io.register_last_index() do
         io.register_setraw(i, table.deepcopy(NULL_SIGNAL))
       end
-      io.wire_set({type='output'}, NULL_SIGNAL)
+      io.wire_set({type='wire', color='out', addr=1, pointer=false}, NULL_SIGNAL)
+      io.output_clear()
     end
   end,
 
@@ -76,7 +77,7 @@ local opcodes = {
   emit = function(_) -- emit src[V/T/S/R/I]
     assert.one(_)
     local sig = io.getsignal(_[1], {'value', 'type', 'signal', 'register', 'input'})
-    io.wire_set({type='output'}, sig)
+    io.wire_set({type='wire', color='out', addr=1, pointer=false}, sig)
   end,
   ssv = function(_) -- ssv dst...[R] val[V/S/R/I]
     assert.two_or_more(_)

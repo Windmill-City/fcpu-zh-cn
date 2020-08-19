@@ -60,12 +60,12 @@ gui.add_handlers{
         local state = Entity.get_data(player_data.current_fcpu)
         if event.element then
           if event.element.switch_state == "right" then
+            state.disabled = nil
             if not Controller.is_running(state) then
               player_data.current_fcpu_gui.outer.error_message.caption = ""
               Controller.compile(state)
               Controller.run(state)
             end
-            state.disabled = nil
           else
             state.disabled = true -- halt will clear output registers
             Controller.halt(state)

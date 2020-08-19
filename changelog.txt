@@ -1,29 +1,39 @@
 ---------------------------------------------------------------------------------------------------
-Version: 0.1.15
+Version: 0.2.0
 Date: ????
+  Features:
+    - Added support for output multiple signals simultaneously.
+    - Added operation state display in Alt mode.
   Changes:
+    - `emit` opcode now set `out1` register.
+    - `out1` register replaced with `out1` (`out` is deprecated and will be reserved for SIMD instructions later).
+    - Updated unit-tests with new output mechanics.
+  Bugfixes:
+    - Use default `chanagelog.txt` sections naming.
+    - Updated `readme.md`.
+    - Minor changes and improvements.
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.14
 Date: 2020-08-18
-  Fixed:
+  Bugfixes:
     - The program is saved when you destroy the fCPU and then restore it from the ghost.
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.13
 Date: 2020-08-18
   Changes:
     - Updated to Factorio v1.0 .
-  Fixes:
+  Bugfixes:
     - Correct header title while not in debug.
     - Minor fixes and optimizations.
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.12
 Date: 2020-08-17
-  Fixes:
+  Bugfixes:
     - Handle non specified `event.entity` (https://mods.factorio.com/mod/fcpu/discussion/5f3a002784e738a1cc130cd3) .
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.11
 Date: 2020-08-17
-  Fixes:
+  Bugfixes:
     - `r@1` aliases now parsed correctly.
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.10
@@ -33,73 +43,72 @@ Date: 2020-08-16
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.9
 Date: 2020-08-16
-  Fixes:
+  Bugfixes:
     - handling for `script_raised_*` (https://mods.factorio.com/mod/fcpu/discussion/5f36b0d2501de5727f3f1b03), see (https://mods.factorio.com/mod/Construction_Drones/discussion/5e35543fee8592000bbab6ee) .
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.8
 Date: 2020-08-14
-  Fixes:
+  Bugfixes:
     - fig, fir (https://mods.factorio.com/mod/fcpu/discussion/5f36a84b9b7aaf3d992d8d8f) .
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.7
 Date: 2020-08-13
-  New:
+  Features:
     - Added new comment style `;`.
   Changes:
     - Program size increased up to 64 lines.
-  Fixes:
+  Bugfixes:
     - tas (https://mods.factorio.com/mod/fcpu/discussion/5f3596e989786166f267f2d7) .
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.6
 Date: 2020-08-13
-  New:
+  Features:
     - Registers now support aliases. `mov r1 123` is the same as `mov reg1 123` and so on.
   Changes:
     - Case insensitive source code.
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.5
 Date: 2020-08-12
-  Fixes:
+  Bugfixes:
     - Correct gui layout for languages with bold monospaced font.
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.4
 Date: 2020-08-11
-  Fixes:
+  Bugfixes:
     - Inline comments # freeze a game.
     - `[virtual-signal=...]` properly handled.
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.3
 Date: 2020-08-09
-  New:
+  Features:
     - Added pause button.
     - New control button graphics.
   Changes:
     - Disabling fCPU will clear its output signals.
-  Fixes:
+  Bugfixes:
     - Fixed fixedpoint operations.
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.2
 Date: 2020-08-09
-  Fixes:
+  Bugfixes:
     - Fixed clr.
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.1
 Date: 2020-08-09
   Changes:
     - Renamed opcode `out` to `emit`.
-  Fixes:
+  Bugfixes:
     - Fixed crash on division by zero.
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.0
 Date: 2020-08-09
-  New:
-    - Initial release.
   Features:
+    - Initial release.
     - Basic documentation.
 ---------------------------------------------------------------------------------------------------
 Version: 0.0.2
 Date: 2020-07-12
-  New:
+  Features:
     - Added new opcodes.
     - Added settings widget.
     - Added english and russian localization.
@@ -107,8 +116,7 @@ Date: 2020-07-12
 ---------------------------------------------------------------------------------------------------
 Version: 0.0.1
 Date: 2020-07-01
-  New:
-    - First prototype.
   Features:
+    - First prototype.
     - Added blueprint save.
     - Added copy & paste ability.

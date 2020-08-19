@@ -27,15 +27,9 @@ local function on_destroy_fcpu(event)
   debug_print("entity destroyed #", entity.unit_number)
   GuiEntityCloseWidget(entity)
 
-
-  if event.name == defines.events.on_entity_died then
-    -- after entity die there will be ghost leaved for entity reviving, so do not remove fcpu imposter
-    if handle_fcpu_destroy(entity) then
-      return
-    end
-  end
-
-  fcpu_destroy_imposter(entity)
+  -- after entity die there will be ghost leaved for entity reviving, so do not remove fcpu imposter
+  local leave_imposter = (event.name == defines.events.on_entity_died)
+  handle_fcpu_destroy(entity, leave_imposter)
 end
 
 local function on_marked_for_deconstruction(event)
@@ -72,10 +66,10 @@ script.on_event(defines.events.on_tick, function(event)
     local cpu = global.fcpus[global.last_index]
     if cpu.valid then
       local state = Entity.get_data(cpu)
-      if state and not state.disabled then
+      if state then
         GuiWidgetUpdate(state)
         -- Tick the Controller
-        if cpu.active and cpu.is_connected_to_electric_network() then
+        if not state.disabled and cpu.active and cpu.is_connected_to_electric_network() then
           Controller.tick(state)
           Entity.set_data(cpu, state)
           i = i + 1

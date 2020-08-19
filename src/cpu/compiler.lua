@@ -126,8 +126,15 @@ local function parse(tokens)
     return io.make_wire(name, address)
   end
   local parseOutput = function(name)
-    consume()
-    return io.make_wire(name, { addr = 1, pointer = false})
+    local address
+    if peek() == 'out' then
+      consume()
+      assert.deprecated('0.2.0', 'You should replace `out` with `out1`')
+      address = { addr = 1, pointer = false}
+    else
+      address = parseAddress(name)
+    end
+    return io.make_wire(name, address)
   end
 
   parseExpr = function()

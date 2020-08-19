@@ -1,4 +1,5 @@
 require('prototypes/entities/pictures')
+require('src/constants')
 
 local empty_picture = {
   filename = "__fcpu__/graphics/empty.png",
@@ -9,6 +10,7 @@ local empty_picture = {
   frame_count = 1,
   shift = {0, 0},
 }
+
 
 data:extend{
   table.merge(table.deepcopy(data.raw['arithmetic-combinator']['arithmetic-combinator']), generate_fcpu_combinator
@@ -82,6 +84,7 @@ data:extend{
   },
 }
 
+
 local imposter_fcpu_item ={
   type = "item",
   name = "imposter-fcpu",
@@ -108,7 +111,7 @@ local imposter_fcpu = table.merge(table.deepcopy(data.raw['constant-combinator']
     "placeable-off-grid",
     "not-repairable",
     "not-on-map",
-    "not-deconstructable", -- can't be deconstructed by 'demolition blueprint'. reducing bounds marker spam
+    --"not-deconstructable", -- can't be deconstructed by 'demolition blueprint'. reducing bounds marker spam
     "hide-alt-info",
     "not-flammable",
     --"no-copy-paste",
@@ -116,9 +119,11 @@ local imposter_fcpu = table.merge(table.deepcopy(data.raw['constant-combinator']
     "not-in-kill-statistics",
   },
   max_health = 1,
+  selection_box = {{-1, -1}, {1, 1}},
+  collision_box = {{-0.65, -0.65}, {0.65, 0.65}},
   collision_mask = {"layer-13"},--"not-colliding-with-itself"},
 
-  item_slot_count = 750, --51 -- see https://github.com/NiftyManiac/factorio-stickynotes/blob/master/config.lua
+  item_slot_count = MC_SAVESLOTS,
   sprites =
   {
       north = empty_picture,
@@ -131,4 +136,65 @@ local imposter_fcpu = table.merge(table.deepcopy(data.raw['constant-combinator']
 data:extend{
   imposter_fcpu_item,
   imposter_fcpu
+}
+
+
+local output_fcpu_item ={
+  type = "item",
+  name = "output-fcpu",
+  icon = "__fcpu__/graphics/icons/fcpu.png",
+  icon_size = 1,
+  flags = { "hidden" },
+  subgroup = "circuit-network",
+  place_result="output-fcpu",
+  order = "c[combinators]-f[imposter-fcpu]",
+  stack_size = 1,
+}
+
+local output_fcpu = table.merge(table.deepcopy(data.raw['constant-combinator']['constant-combinator']), {
+  name = "output-fcpu",
+  icon = "__fcpu__/graphics/icons/fcpu.png",
+  icon_size = 1,
+  icon_mipmaps = 0,
+  allow_copy_paste = false,
+  selectable_in_game = false,
+  draw_circuit_wires = false,
+  create_ghost_on_death = false,
+
+  flags = {
+    "not-rotatable",
+    "player-creation",
+    "placeable-off-grid",
+    "not-repairable",
+    "not-on-map",
+    "not-blueprintable",
+    "not-deconstructable", -- can't be deconstructed by 'demolition blueprint'. reducing bounds marker spam
+    "hidden",
+    "hide-alt-info",
+    "not-flammable",
+    "not-in-kill-statistics",
+  },
+  max_health = 1,
+  collision_mask = {"not-colliding-with-itself"},
+
+  item_slot_count = MC_OUTPUT,
+  sprites =
+  {
+      north = empty_picture,
+      east = empty_picture,
+      south = empty_picture,
+      west = empty_picture,
+  },
+  activity_led_sprites =
+  {
+      north = empty_picture,
+      east = empty_picture,
+      south = empty_picture,
+      west = empty_picture,
+  },
+})
+
+data:extend{
+  output_fcpu_item,
+  output_fcpu
 }

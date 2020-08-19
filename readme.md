@@ -10,6 +10,7 @@
 * rich math instructions
 * two input wires (Red, Green)
 * two output wires (Red, Green) have same output signal and value
+* allow output multiple signals simultaneously (up to 128 signals)
 * cound be controlled through special input signals
 * one tick = one instruction
 * made for geeks
@@ -263,18 +264,22 @@ See: https://mods.factorio.com/mod/fcpu/faq
 # Community
 * [Reddit](https://www.reddit.com/r/factorio/comments/i8e7dh/new_mod_fcpu/) for general discussion
 * [Factorio Mod portal](https://mods.factorio.com/mod/fcpu/discussion) for bug reports
-* [Factorio Forum]() for technical details and mod integration
+* [Factorio Forum](https://forums.factorio.com/viewtopic.php?f=190&t=88141) for technical details and mod integration
 
 # TODOs
+* output multiple signals (DONE in v0.2.0)
 * memory, memory browser
+* single instruction, multiple data
 * new `min`, `max`, `avg` opcodes
 * test result flags
-* output multiple signals
-* modules
-* single instruction, multiple data
+* modules support
 * program library
 * examples, demos and docs
 * profiling & optimization
+
+
+# Dear supporters
+* Lukáš Venhoda (v0.2.0 update)
 
 
 # Support fCPU

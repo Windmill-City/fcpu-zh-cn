@@ -1,13 +1,122 @@
 -------------------------------------------------------------------------------------------------------
+
+local function fcpu_set_imposter(entity, imposter_fcpu)
+  local state = Entity.get_data(entity) or {}
+  state.imposter_fcpu = imposter_fcpu
+  Entity.set_data(entity, state)
+end
+
+function fcpu_create_imposter(entity)
+  local surf = entity.surface
+  local imposter_fcpu = surf.create_entity({
+    name = "imposter-fcpu",
+    position = entity.position,
+    direction = entity.direction,
+    force = entity.force
+  })
+  imposter_fcpu.destructible = false
+  imposter_fcpu.operable = false
+  Entity.set_data(imposter_fcpu, {fcpu = entity})
+  return imposter_fcpu
+end
+
+function fcpu_destroy_imposter(entity)
+  if not (entity and entity.valid) then return end
+  if entity.name == "fcpu" then
+    local state = Entity.get_data(entity)
+    fcpu_destroy_imposter(state.imposter_fcpu)
+  elseif entity.name == "imposter-fcpu" then
+    local imposter_state = Entity.get_data(entity)
+    if imposter_state and imposter_state.fcpu and imposter_state.fcpu.valid then
+      fcpu_set_imposter(imposter_state.fcpu, nil)
+    end
+    debug_print("destroyed fcpu imposter")
+    entity.destroy()
+  elseif entity.name == "entity-ghost" and entity.ghost_name == "fcpu" then
+    local imposter_fcpus = entity.surface.find_entities_filtered{name = "imposter-fcpu", position = entity.position, force = entity.force, limit = 1}
+    if #imposter_fcpus > 0 then
+      fcpu_destroy_imposter(imposter_fcpus[1])
+    end
+  end
+end
+
+-------------------------------------------------------------------------------------------------------
+
+local function fcpu_set_output(entity, output_fcpu)
+  local state = Entity.get_data(entity) or {}
+  state.output_fcpu = output_fcpu
+  Entity.set_data(entity, state)
+end
+
+function fcpu_create_output(entity)
+  local surf = entity.surface
+  local output_fcpu = surf.create_entity({
+    name = "output-fcpu",
+    position = { x = entity.position.x, y = entity.position.y },
+    direction = entity.direction,
+    force = entity.force
+  })
+  output_fcpu.destructible = false
+  output_fcpu.operable = true
+  Entity.set_data(output_fcpu, {fcpu = entity})
+  return output_fcpu
+end
+
+function fcpu_destroy_output(entity)
+  if not (entity and entity.valid) then return end
+  if entity.name == "fcpu" then
+    local state = Entity.get_data(entity)
+    fcpu_destroy_output(state.output_fcpu)
+  elseif entity.name == "output-fcpu" then
+    local output_fcpu = Entity.get_data(entity)
+    if output_fcpu and output_fcpu.fcpu and output_fcpu.fcpu.valid then
+      fcpu_set_output(output_fcpu.fcpu, nil)
+    end
+    debug_print("destroyed fcpu output")
+    entity.destroy()
+  elseif entity.name == "entity-ghost" and entity.ghost_name == "fcpu" then
+    local output_fcpus = entity.surface.find_entities_filtered{name = "output-fcpu", position = { x = entity.position.x, y = entity.position.y }, force = entity.force, limit = 1}
+    if #output_fcpus > 0 then
+      fcpu_destroy_output(output_fcpus[1])
+    end
+  end
+end
+
+-------------------------------------------------------------------------------------------------------
+
 require('__fcpu__/3rdparty/blueprintdata')
 
-local function encode_fcpu(entity)
+function fcpu_verify_utility(entity)
   local state = Entity.get_data(entity)
-  if not state.imposter_fcpu then
-    state.imposter_fcpu = fcpu_create_imposter(entity)
-    Entity.set_data(state.imposter_fcpu, {fcpu = entity})
-    Entity.set_data(entity, state)
+
+  if not (state.imposter_fcpu and state.imposter_fcpu.valid) then
+    local imposter_fcpu = fcpu_create_imposter(entity)
+    fcpu_set_imposter(entity, imposter_fcpu)
   end
+
+  if not (state.output_fcpu and state.output_fcpu.valid) then
+    local output_fcpu = fcpu_create_output(entity)
+    fcpu_set_output(entity, output_fcpu)
+
+    entity.connect_neighbour({
+      wire = defines.wire_type.green,
+      target_entity = output_fcpu,
+      source_circuit_id = defines.circuit_connector_id.combinator_output,
+      target_circuit_id = defines.circuit_connector_id.constant_combinator
+    })
+    entity.connect_neighbour({
+      wire = defines.wire_type.red,
+      target_entity = output_fcpu,
+      source_circuit_id = defines.circuit_connector_id.combinator_output,
+      target_circuit_id = defines.circuit_connector_id.constant_combinator
+    })
+  end
+
+  return state
+end
+
+local function encode_fcpu(entity)
+  local state = fcpu_verify_utility(entity)
   write_to_combinator(state.imposter_fcpu, {
     t=state.program_text,
     i=state.instruction_pointer,
@@ -27,7 +136,7 @@ local function decode_fcpu(imposter_fcpu, target)
     Entity.set_data(imposter_fcpu, imposter_state)
     return imposter_state
   else
-    game.print("fCPU failed to decode a program, as it was made with a newer version of the mod. Please install the newest version of fCPU and try again.")
+    game.print("fCPU failed to decode a program, as it was made with incompatible version of the mod. Please install the newest version of fCPU and try again.")
   end
 end
 
@@ -86,7 +195,7 @@ function handle_fcpu_create(ent)
     local fcpu_targets = ent.surface.find_entities_filtered{name = "entity-ghost", position = ent.position, force = ent.force, limit = 1}
     if #fcpu_targets > 0 then
       local target = fcpu_targets[1]
-      if target.valid and get_fcpu_state(target) == nil then
+      if target.valid and (target.ghost_name == "fcpu") and get_fcpu_state(target) == nil then
         fcpu_target = target
         debug_print("- found fcpu_target among nearby ghosts")
       end
@@ -97,7 +206,7 @@ function handle_fcpu_create(ent)
       fcpu_targets = ent.surface.find_entities_filtered{position = ent.position, force = ent.force}
       for _, target in pairs(fcpu_targets) do
         if target.prototype.has_flag("player-creation") then
-          if target.valid and get_fcpu_state(target) == nil then
+          if target.valid and (target.name == "fcpu") and get_fcpu_state(target) == nil then
             fcpu_target = target
             debug_print("- found fcpu_target, which already revived")
           end
@@ -153,12 +262,15 @@ function handle_fcpu_create(ent)
         end
       end
     end
+    fcpu_verify_utility(ent)
   else
     debug_print("skip handling "..ent.name)
   end
 end
 
-function handle_fcpu_destroy(entity)
+function handle_fcpu_destroy(entity, leave_imposter)
+  fcpu_destroy_output(entity)
+
   if entity.name == "fcpu" then
     -- move data from fcpu to its imposter so we can revive it later
     local imposter_fcpus = entity.surface.find_entities_filtered{name = "imposter-fcpu", position = entity.position, force = entity.force, limit = 1}
@@ -175,70 +287,27 @@ function handle_fcpu_destroy(entity)
             imposter_state.ip = state.instruction_pointer
             imposter_state.run = Controller.is_running(state)
             Entity.set_data(imposter_fcpu, imposter_state)
-            return true
+
+            if leave_imposter then
+              return
+            end
           end
         end
       end
     end
   end
+
+  fcpu_destroy_imposter(entity)
 end
 
 -------------------------------------------------------------------------------------------------------
-
-function fcpu_create_imposter(entity)
-  local surf = entity.surface
-  local imposter_fcpu = surf.create_entity({
-    name = "imposter-fcpu",
-    position = entity.position,
-    direction = entity.direction,
-    force = entity.force
-  })
-  imposter_fcpu.destructible = false
-  imposter_fcpu.operable = false
-  return imposter_fcpu
-end
-
-function fcpu_destroy_imposter(entity)
-  if not (entity and entity.valid) then return end
-  if entity.name == "fcpu" then
-    local state = Entity.get_data(entity)
-    fcpu_destroy_imposter(state.imposter_fcpu)
-  elseif entity.name == "imposter-fcpu" then
-    local imposter_state = Entity.get_data(entity)
-    if imposter_state and imposter_state.fcpu and imposter_state.fcpu.valid then
-      local state = Entity.get_data(imposter_state.fcpu)
-      state.imposter_fcpu = nil
-      Entity.set_data(imposter_state.fcpu, state)
-    end
-    entity.destroy()
-  elseif entity.name == "entity-ghost" and entity.ghost_name == "fcpu" then
-    debug_print("destroyed fcpu ghost")
-    local imposter_fcpus = entity.surface.find_entities_filtered{name = "imposter-fcpu", position = entity.position, force = entity.force, limit = 1}
-    if #imposter_fcpus > 0 then
-      local imposter_fcpu = imposter_fcpus[1]
-      if imposter_fcpu.valid then
-        imposter_fcpu.destroy()
-      end
-    end
-  end
-end
 
 function fcpu_update_program(fcpu, program_text)
   local state = Entity.get_data(fcpu)
-  Controller.update_program_text(state, program_text)
+  local modified = Controller.update_program_text(state, program_text)
   Entity.set_data(fcpu, state)
 
-  encode_fcpu(fcpu)
-end
-
--------------------------------------------------------------------------------------------------------
-
-script.on_event(Controller.event_halt, function(event)
-  if event.entity and event.state.disabled then
-    local control = event.entity.get_or_create_control_behavior()
-    local params = control.parameters
-    params.parameters.first_constant = NULL_SIGNAL.count
-    params.parameters.output_signal = NULL_SIGNAL.signal
-    control.parameters = params
+  if modified then
+    encode_fcpu(fcpu)
   end
-end)
+end

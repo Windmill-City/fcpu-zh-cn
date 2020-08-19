@@ -63,9 +63,45 @@ function createFCPU(input)
   return fcpu
 end
 
+function createFCPU_Output(input)
+  local ent = table.deepcopy(require('__stdlib__/faketorio/raw/constant-combinator')['constant-combinator'])
+  unit_number = unit_number + 1
+  ent.unit_number = unit_number
+  ent.name = 'output-fcpu'
+  ent.get_control_behavior = function()
+    if ent._control_behavior.parameters == nil then
+      ent._control_behavior = nil
+      ent.get_or_create_control_behavior()
+    end
+    return ent._control_behavior
+  end
+
+  ent.get_or_create_control_behavior = function()
+    if ent._control_behavior == nil then
+      ent._control_behavior = {
+        parameters = {
+          parameters = {}
+        },
+      }
+      for i = 1, 100 do
+        ent._control_behavior.parameters.parameters[i] = {
+          signal = {type='virtual', name=''},
+          count = 0,
+          index = i,
+        }
+      end
+    end
+    return ent.get_control_behavior()
+  end
+  return ent
+end
+
 function ExecuteTest(test_title, program_text, input_signals, probe_result, max_ticks)
   local fcpu = createFCPU(input_signals)
   local state = Controller.init(fcpu)
+
+  state.output_fcpu = createFCPU_Output()
+  state.output_fcpu.get_or_create_control_behavior()
 
   Controller.update_program_text(state, program_text)
   Controller.compile(state)
@@ -86,7 +122,8 @@ function ExecuteTest(test_title, program_text, input_signals, probe_result, max_
     error(state.error_message[3])
   end
   if probe_result then
-    local output = fcpu.get_control_behavior().parameters.parameters
+    --local output = fcpu.get_control_behavior().parameters.parameters
+    local output = state.output_fcpu.get_control_behavior().parameters.parameters
     local ret = probe_result(state, output, fcpu)
     if ret ~= true and ret ~= nil then
       print(serpent.block(state.regs, {comment=true}))
@@ -111,7 +148,8 @@ local fcpu, state = ExecuteTest(
     [defines.wire_type.red] = nil,
   },
   function(state, output)
-    return output.output_signal.type == 'recipe' and output.output_signal.name == 'copper-plate' and output.first_constant == 1000
+    return output[1].signal.type == 'recipe' and output[1].signal.name == 'copper-plate' and output[1].count == 1000
+    --return output.output_signal.type == 'recipe' and output.output_signal.name == 'copper-plate' and output.first_constant == 1000
   end
 )
 

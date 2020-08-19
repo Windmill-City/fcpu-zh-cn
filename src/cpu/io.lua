@@ -74,29 +74,37 @@ end
 
 
 -- Output wire access
-local function output_get()
-  local signal_id = control.parameters.parameters.output_signal
-  local count = control.parameters.parameters.first_constant
+local function output_get(index)
+  local params = control.parameters
+  --local signal_id = params.parameters.output_signal
+  --local count = params.parameters.first_constant
+  --return io.make_signal(signal_id, count)
+  local signal_id = params.parameters[index].signal
+  local count = params.parameters[index].count
   return io.make_signal(signal_id, count)
 end
 
-local function output_set(signal)
+local function output_set(index, signal)
   local params = control.parameters
-  params.parameters.first_constant = signal.count
-  params.parameters.output_signal = signal.signal
+  --params.parameters.first_constant = signal.count
+  --params.parameters.output_signal = signal.signal
+  params.parameters[index].signal = signal.signal
+  params.parameters[index].count = signal.count
+  params.parameters[index].index = index
   control.parameters = params
 end
 
-local function output_set_count(count)
-  local params = control.parameters
-  params.parameters.first_constant = count
-  control.parameters = params
+function io.output_clear()
+  control.parameters = nil
 end
 
 -- General wire manipulation
 function io.wire_get(_)
-  if _.type == 'wire' and _.color == 'out' or _.type == 'output' then
-    return output_get()
+  if _.type == 'wire' and _.color == 'out' then
+    local index = io.addr_to_index(_)
+    return output_get(index)
+  elseif _.type == 'output' then
+    assert.todo()
   end
   if not wires[_.color] then
     assert.exception("Tried to access ".._.color.." wire when input not present.")
@@ -109,10 +117,14 @@ function io.wire_get(_)
 end
 
 function io.wire_set(_, signal)
-  if _.type == 'wire' and _.color == 'out' or _.type == 'output' then
-    return output_set(signal)
+  if _.type == 'wire' and _.color == 'out' then
+    local index = io.addr_to_index(_)
+    output_set(index, signal)
+  elseif _.type == 'output' then
+    assert.todo()
+  else
+    assert.todo()
   end
-  assert.exception("NOT IMPLEMENTED")
 end
 
 function io.wire_find_signal(color, signal_to_find)
@@ -259,10 +271,12 @@ function io.setsignal(_, signal, types)
     types = {'register', 'wire'}
   end
   assert.type(_, types)
-  if _.type == 'wire' or _.type == 'output' then 
+  if _.type == 'wire' then 
     io.wire_set(_, signal)
   elseif _.type == 'register' then
     io.register_set(_, signal)
+  elseif _.type == 'output' then
+    assert.todo()
   else
     assert.exception('unhandled')
   end
@@ -310,13 +324,17 @@ function io.bind(assert_)
   assert = assert_
 end
 function io.setup(control_, state_)
-  control = control_
-
   wires = {
-    red = control.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_input),
-    green = control.get_circuit_network(defines.wire_type.green, defines.circuit_connector_id.combinator_input),
+    red = control_.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_input),
+    green = control_.get_circuit_network(defines.wire_type.green, defines.circuit_connector_id.combinator_input),
   }
 
+  if state_.output_fcpu then
+    control = state_.output_fcpu.get_control_behavior()
+  else
+    assert.todo()
+    control = control_
+  end
   regs = state_.regs
   instruction_pointer = state_.instruction_pointer
   clock = state_.clock
