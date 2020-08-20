@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.0
-Date: ????
+Date: 2020-08-20
   Features:
     - Added support for output multiple signals simultaneously.
     - Added operation state display in Alt mode.
