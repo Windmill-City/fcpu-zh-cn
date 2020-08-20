@@ -19,6 +19,20 @@ default_gui["fcpu_program_input"] = {
   padding = 0,
 }
 
+default_gui["fcpu_toolbar_copy"] = {
+  type = "button_style",
+  parent = "shortcut_bar_button_small",
+  hovered_graphical_set = default_gui["slot_sized_button_green"].hovered_graphical_set,
+  clicked_graphical_set = default_gui["slot_sized_button_green"].clicked_graphical_set,
+}
+
+default_gui["fcpu_toolbar_paste"] = {
+  type = "button_style",
+  parent = "shortcut_bar_button_small",
+  hovered_graphical_set = default_gui["slot_sized_button_red"].hovered_graphical_set,
+  clicked_graphical_set = default_gui["slot_sized_button_red"].clicked_graphical_set,
+}
+
 default_gui["fcpu_notice_textbox"] = {
   type = "textbox_style",
   parent = "textbox",

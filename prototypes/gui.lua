@@ -51,6 +51,20 @@ data:extend{
     width = 32,
     height = 32
   },
+  {
+    type = "sprite",
+    name = "fcpu-copy-sprite",
+    filename = "__base__/graphics/icons/shortcut-toolbar/mip/copy-x24.png",
+    width = 24,
+    height = 24
+  },
+  {
+    type = "sprite",
+    name = "fcpu-paste-sprite",
+    filename = "__base__/graphics/icons/shortcut-toolbar/mip/paste-x24.png",
+    width = 24,
+    height = 24
+  },
 }
 --[[
 for i = 1, MC_LINES do
