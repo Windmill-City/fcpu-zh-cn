@@ -429,15 +429,18 @@ script.on_event("fcpu-open", function(event)
   local player = game.players[event.player_index]
   local entity = player.selected
   if entity and entity.name == "fcpu" then
-    if player.can_reach_entity(entity) then
-      local player_data = get_player_data(event.player_index)
+    if not (player.cursor_stack and player.cursor_stack.valid_for_read)
+    or (player.cursor_stack.name ~= 'red-wire' and player.cursor_stack.name ~= 'green-wire') then
+      if player.can_reach_entity(entity) then
+        local player_data = get_player_data(event.player_index)
 
-      if player_data.current_fcpu_gui and Entity._are_equal(player_data.current_fcpu, entity) then return end
+        if player_data.current_fcpu_gui and Entity._are_equal(player_data.current_fcpu, entity) then return end
 
-      player_data.current_fcpu = entity
-      set_player_data(event.player_index, player_data)
+        player_data.current_fcpu = entity
+        set_player_data(event.player_index, player_data)
 
-      GuiWidgetOpen(player, entity)
+        GuiWidgetOpen(player, entity)
+      end
     end
   elseif entity then
     GuiWidgetClose(event.player_index)
