@@ -50,7 +50,7 @@ function io.make_signal(signal_id, countstr)
   else
     local count = tonumber(countstr)
     if count == nil then
-      assert.exception("Can't parse count '".. countstr .."'")
+      assert.exception("Can't parse count '".. (countstr or 'nil') .."'")
     end
     return { type = 'signal', signal = signal_id, count = count }
   end

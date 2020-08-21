@@ -2,6 +2,8 @@
 Version: 0.2.2
 Date: ????
   Changes:
+  Bugfixes:
+    - Fixed custom signal names parsing.
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.1
 Date: 2020-08-20
@@ -70,7 +72,7 @@ Date: 2020-08-13
   Changes:
     - Program size increased up to 64 lines.
   Bugfixes:
-    - tas (https://mods.factorio.com/mod/fcpu/discussion/5f3596e989786166f267f2d7) .
+    - tas, tad (https://mods.factorio.com/mod/fcpu/discussion/5f3596e989786166f267f2d7) .
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.6
 Date: 2020-08-13

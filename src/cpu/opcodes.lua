@@ -346,10 +346,8 @@ local opcodes = {
   end,
   tas = function(_) -- tas a[T/R/I] b[T/R/I]
     assert.two(_)
-    assert.type(_[1], {'type', 'input', 'register'})
-    assert.type(_[2], {'type', 'input', 'register'})
-    local as = io.register_get(_[1]).signal
-    local bs = io.register_get(_[2]).signal
+    local as = io.gettype(_[1], {'type', 'input', 'register'})
+    local bs = io.gettype(_[2], {'type', 'input', 'register'})
     local av = (as ~= nil)
     local bv = (bs ~= nil)
     if av ~= bv then
@@ -362,10 +360,8 @@ local opcodes = {
   end,
   tad = function(_) -- tad a[T/R/I] b[T/R/I]
     assert.two(_)
-    assert.type(_[1], {'type', 'input', 'register'})
-    assert.type(_[2], {'type', 'input', 'register'})
-    local as = io.register_get(_[1]).signal
-    local bs = io.register_get(_[2]).signal
+    local as = io.gettype(_[1], {'type', 'input', 'register'})
+    local bs = io.gettype(_[2], {'type', 'input', 'register'})
     local av = (as ~= nil)
     local bv = (bs ~= nil)
     if not (av or bv) then

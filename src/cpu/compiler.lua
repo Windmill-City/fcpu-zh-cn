@@ -94,7 +94,7 @@ local function parse(tokens)
   end
   local parseSignal = function(name)
     local token = consume()
-    local m = array_build{ string.match(token, '(%d*)%[([%a%-]+)[=%-]([%a%d%-]+)%]') }
+    local m = array_build{ string.match(token, '(%d*)%[([%a%-]+)[=%-]([%a%d%-_:]+)%]') }
     if m[2] == 'virtual-signal' then
       m[2] = 'virtual'
     end
