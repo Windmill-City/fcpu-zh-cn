@@ -111,39 +111,36 @@ function Controller.tick(state)
   local red_input = control.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_input)
   local green_input = control.get_circuit_network(defines.wire_type.green, defines.circuit_connector_id.combinator_input)
   local get_signal = function(signal)
+    local result = 0
     if red_input then
-      local result = red_input.get_signal(signal.signal)
-      if result ~= nil then
-        return result
-      end
+      local r = red_input.get_signal(signal.signal)
+      result = result + r
     end
     if green_input then
-      local result = green_input.get_signal(signal.signal)
-      if result ~= nil then
-        return result
-      end
+      local g = green_input.get_signal(signal.signal)
+      result = result + g
     end
-    return 0
+    return result
   end
-  if state.program_state == PSTATE_RUNNING and get_signal(HALT_SIGNAL) > 0 then
+  if state.program_state == PSTATE_RUNNING and 0 < get_signal(HALT_SIGNAL) then
     Controller.halt(state)
   end
-  if state.program_state == PSTATE_HALTED and get_signal(RUN_SIGNAL) > 0 then
+  if state.program_state == PSTATE_HALTED and 0 < get_signal(RUN_SIGNAL) then
     Controller.run(state)
   end
-  if state.program_state == PSTATE_HALTED and get_signal(STEP_SIGNAL) > 0 then
+  if state.program_state == PSTATE_HALTED and 0 < get_signal(STEP_SIGNAL) then
     Controller.step(state)
   end
-  if state.program_state == PSTATE_RUNNING and get_signal(SLEEP_SIGNAL) > 0 then
+  if state.program_state == PSTATE_RUNNING then
     local value = get_signal(SLEEP_SIGNAL)
-    if value then
+    if 0 < value then
       Controller.update_state(state, PSTATE_SLEEPING)
       state.sleep_time = value
     end
   end
-  if get_signal(JUMP_SIGNAL) > 0 then
+  if true then
     local value = get_signal(JUMP_SIGNAL)
-    if value then
+    if 0 < value then
       Controller.set_program_counter(state, value)
     end
   end
