@@ -9,6 +9,6 @@
   "factorio_version": "1.0",
   "dependencies": ["base >= 0.18", "stdlib", "flib", "(?) profiler"],
   "package": {
-    "ignore": [ "tests/**", "*.psd" ]
+    "ignore": [ "tests/**", "*.psd", "todos.md"]
   }
 }
