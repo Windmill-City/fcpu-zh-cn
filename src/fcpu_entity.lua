@@ -311,3 +311,10 @@ function fcpu_update_program(fcpu, program_text)
     encode_fcpu(fcpu)
   end
 end
+
+function fcpu_update_blueprint(fcpu)
+  local state = get_fcpu_state(fcpu)
+  if state then
+    encode_fcpu(state.entity)
+  end
+end

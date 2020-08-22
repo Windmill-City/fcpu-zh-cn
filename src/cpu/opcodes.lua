@@ -87,14 +87,14 @@ local opcodes = {
     assert.two_or_more(_)
     local sigcount = io.getcount(_[#_], {'value', 'signal', 'register', 'input'})
     for i = 1, #_ - 1 do
-      io.setcount(_[i], sigcount, {'register'})
+      io.setcount(_[i], sigcount, {'register', 'output'})
     end
   end,
   sst = function(_) -- sst dst...[R] type[T/S/R/I]
     assert.two_or_more(_)
     local sigtype = io.gettype(_[#_], {'type', 'signal', 'register', 'input'})
     for i = 1, #_ - 1 do
-      io.settype(_[i], sigtype, {'register'})
+      io.settype(_[i], sigtype, {'register', 'output'})
     end
   end,
 

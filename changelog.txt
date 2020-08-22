@@ -1,8 +1,11 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.4
 Date: ????
+  Changes:
+    - Allow `ssv`, `sst` on output registers.
   Bugfixes:
     - Input control-signal priority now handled properly.
+    - Restore run state of fCPU after blueprint stamp.
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.3
 Date: 2020-08-21

@@ -95,11 +95,11 @@ Each instruction take one or more operands and modify them or state of fCPU.
   Copy signal from source to output.  
   Same as `mov out src`.  
 
-* `ssv` dst...[**R**] val[**V**/**S**/**R**/**I**]  
+* `ssv` dst...[**R**/**O**] val[**V**/**S**/**R**/**I**]  
   Set signal value.  
   *dst... = val*
 
-* `sst` dst...[**R**] type[**T**/**S**/**R**/**I**]  
+* `sst` dst...[**R**/**O**] type[**T**/**S**/**R**/**I**]  
   Set signal type.  
   *dst... = type*
 

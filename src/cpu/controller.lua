@@ -122,20 +122,21 @@ function Controller.tick(state)
     end
     return result
   end
-  if state.program_state == PSTATE_RUNNING and 0 < get_signal(HALT_SIGNAL) then
-    Controller.halt(state)
-  end
-  if state.program_state == PSTATE_HALTED and 0 < get_signal(RUN_SIGNAL) then
-    Controller.run(state)
-  end
-  if state.program_state == PSTATE_HALTED and 0 < get_signal(STEP_SIGNAL) then
-    Controller.step(state)
-  end
   if state.program_state == PSTATE_RUNNING then
-    local value = get_signal(SLEEP_SIGNAL)
-    if 0 < value then
-      Controller.update_state(state, PSTATE_SLEEPING)
-      state.sleep_time = value
+    if 0 < get_signal(HALT_SIGNAL) then
+      Controller.halt(state)
+    else
+      local value = get_signal(SLEEP_SIGNAL)
+      if 0 < value then
+        Controller.update_state(state, PSTATE_SLEEPING)
+        state.sleep_time = value
+      end
+    end
+  elseif state.program_state == PSTATE_HALTED then
+    if 0 < get_signal(RUN_SIGNAL) then
+      Controller.run(state)
+    elseif 0 < get_signal(STEP_SIGNAL) then
+      Controller.step(state)
     end
   end
   if true then
@@ -242,6 +243,8 @@ function Controller.update_state(state, pstate)
     if pstate ~= nil then
       state.program_state = pstate
     end
+
+    fcpu_update_blueprint(state.entity)
 
     local str = pstateStr[state.program_state]
     if state.error_message and state.program_state == PSTATE_HALTED then
