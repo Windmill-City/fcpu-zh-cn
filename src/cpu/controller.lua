@@ -248,12 +248,18 @@ function Controller.update_state(state, pstate)
 
     local str = pstateStr[state.program_state]
     if state.error_message and state.program_state == PSTATE_HALTED then
-      str = 'signal-fcpu-error'
-    end
-    if str then
+      local control = state.entity.get_control_behavior()
+      local param = control.parameters
+      param.parameters.first_signal = nil
+      param.parameters.first_constant = state.instruction_pointer
+      param.parameters.output_signal = { type="virtual", name='signal-fcpu-error' }
+      control.parameters = param
+    elseif str then
       local control = state.entity.get_control_behavior()
       local param = control.parameters
       param.parameters.first_signal = { type="virtual", name=str }
+      param.parameters.first_constant = nil
+      param.parameters.output_signal = nil
       control.parameters = param
     end
   end

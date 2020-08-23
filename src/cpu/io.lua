@@ -73,6 +73,21 @@ function io.make_wire(name, address)
 end
 
 
+-- Control output
+local function control_get()
+  local params = control.parameters
+  local signal_id = params.parameters.output_signal
+  local count = params.parameters.first_constant
+  return io.make_signal(signal_id, count)
+end
+
+local function output_set(signal)
+  local params = control.parameters
+  params.parameters.first_constant = signal.count
+  params.parameters.output_signal = signal.signal
+  control.parameters = params
+end
+
 -- Output wire access
 local function output_get(index)
   local params = control.parameters
