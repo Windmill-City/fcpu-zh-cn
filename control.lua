@@ -127,6 +127,29 @@ local function on_entity_settings_pasted(event)
 end
 
 -------------------------------------------------------------------------------------------------------
+local function on_picker_dolly_moved(event)
+  if event and event.moved_entity then
+    local entity = event.moved_entity
+    if entity.name == 'fcpu' then
+      local state = get_fcpu_state(entity)
+      if state then
+        local fcpu = state.entity
+        local output_fcpu = state.output_fcpu
+        local imposter_fcpu = state.imposter_fcpu
+        output_fcpu.teleport(fcpu.position)
+        imposter_fcpu.teleport(fcpu.position)
+      end
+    end
+  end
+end
+
+function register_picker_dolly_handler()
+  if remote.interfaces["PickerDollies"] and remote.interfaces["PickerDollies"]["dolly_moved_entity_id"] then
+    script.on_event(remote.call("PickerDollies", "dolly_moved_entity_id"), on_picker_dolly_moved)
+  end
+end
+
+-------------------------------------------------------------------------------------------------------
 local event = require("__flib__.event")
 local event_filters = {
   {filter = "name", name = "fcpu"},

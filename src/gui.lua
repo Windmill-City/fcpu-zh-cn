@@ -474,9 +474,11 @@ script.on_init(function()
   gui.init()
   gui.build_lookup_tables()
   global.fcpus = {}
+  register_picker_dolly_handler()
 end)
 script.on_load(function()
   gui.build_lookup_tables()
+  register_picker_dolly_handler()
 end)
 script.on_configuration_changed(function(e)
   if migration.on_config_changed(e, migrations) then

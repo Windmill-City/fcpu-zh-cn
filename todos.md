@@ -1,6 +1,5 @@
 # TODO list, fCPU
 
-* Mimic vanilla blueprint bahavior when stamped ontop of fCPU (copy blueprint program)
 * Single instruction, multiple data (SIMD) and memory for it
 * Memory browser for SIMD instructions
 * New min, max, avg, etc SIMD opcodes
@@ -10,7 +9,8 @@
 * Program library for storing subprograms outside of a fCPU units
 * Factorio modules support
 * Profiling & optimization
+* Mimic vanilla blueprint bahavior when stamped ontop of fCPU (copy blueprint program)
 
 
-## Done
+# Done
 * Output multiple signals (DONE in v0.2.0)
