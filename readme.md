@@ -1,4 +1,4 @@
-# fASM
+# fCPU
 
 ## Specs
 * supports blueprints
@@ -10,26 +10,61 @@
 * rich math instructions
 * two input wires (Red, Green)
 * two output wires (Red, Green) have same output signals and values
-* parallel output, allows output multiple signals simultaneously (up to 128 signals simultaneously)
+* parallel output, allows output multiple signals simultaneously (up to 256 signals)
 * could be controlled through special input signals
 * one tick = one instruction
 * made for geeks
 
 
-## Registers
+
+## Description
+fCPU is a combinator that includes:
+
+- program text
+- a set of registers (for storing signals and numbers)
+- processor (command processor)
+
+### Program
+Programs for fCPU are entered in plain text in simplified [assembly language][1] and consists of lines.
+Each line represents one instruction.
+An instruction consists of mnemonics and operands.
+For example: `mov out1 123[item=copper-ore]`, here `mov` is a mnemonic,` out1` is the first operand, `123[item=copper-ore]` is the second operand.
+This instruction tells the processor to send signal `[item=copper-ore]` with number `123` on to wires connected to the output.
+
+Mnemonics are abbreviated names of operations that the processor understands and knows how to execute.
+Operands are arguments to operations. They are used to indicate the values ​​on which an operation will be performed.
+
+The following can be used as operands:
+
+- **Signal**: each signal consists of a type and a value (`123[item=copper-ore]`)
+  `123` - signal value represented by number
+  `[item=copper-ore]` - type can be represented by pictogram or text
+- **Register**: these are special cells that store the transmitted signal indefinitely (`reg1`,` r2`, ...)
+- **Input** wire: you can receive signals on wires connected to a combinator's input (`red`,` green`)
+- **Output** wire: sets the values ​​at the output of a combinator (`out1`,` out2`, ..., `out256`)
+- **Address**: instruction address (line number)
+- **Label** in the code: written in text with a colon in front (`:label`,`:anyname`, ...)
+
+The processor executes instructions from a written program in turn, line by line.
+
+[1]: This guide is enough for a quick study
+
+
+### Registers
 
 There are 8 generic purpose read/write registers, named **reg1**, ... **reg8** or alias **r1**, ... **r8**.  
 Each register store signal type and numeric value (floating point numbers are supported).  
-For example `mov reg2 10[item=iron-plate]`, this instruction assigns to **reg2**
-*value of 10* and *type of [item=iron-plate]*.  
+For example `mov reg2 10[item=iron-plate]`, this instruction assigns to **reg2** value of *10* and type of *[item=iron-plate]*.  
 
 Besides general purpose registers there are some read only registers:  
-- **ipt**: current instruction line numer  
-- **clk**: clock, increases every tick  
-- **cnr**, **cng**: signals count on red/green input wire  
 
-Output registers, write only:
-- **out1**, ..., **out128**: output registers (only integer values)
+- **ipt**: current instruction line numer  
+- **clk**: clock, value increases every tick  
+- **cnr**, **cng**: signals number on red `cnr` or green `cng` input wire  
+
+Output registers (write only):
+
+- **out1**, ..., **out256**: output registers (only integer values)
 
 
 ## Arrays\indirect addressing
@@ -51,7 +86,20 @@ mov r8 r@5 # r8 will be equal to r5, which is 5
 ```
 
 
-## Opcodes
+## Control signals
+You could control fCPU state by wires (not only manually through game GUI.  
+There are some signals for it:
+
+* `[virtual-signal=signal-fcpu-halt]`: Halt program execution.
+* `[virtual-signal=signal-fcpu-run]`: Continue running program.
+* `[virtual-signal=signal-fcpu-step]`: Execute current instruction.
+* `[virtual-signal=signal-fcpu-sleep]`: Sleep specified game ticks.
+* `[virtual-signal=signal-fcpu-jump]`: Jump to specified line in program.
+
+If fCPU encounter error in program it will emit `[virtual-signal=signal-fcpu-error]` with line number as value.  
+
+
+## Mnemonics
 
 Instructions which can be executed one by one on per frame basis.  
 Each instruction take one or more operands and modify them or state of fCPU.  
@@ -65,7 +113,7 @@ Each instruction take one or more operands and modify them or state of fCPU.
 * **C**, value: integer constant [-2^31..2^31), same as **V** (`-3500`)
 * **R**, register: (`reg1`, `reg2`, ..., `reg8`)
 * **I**, wire: input wire (`red`, `green`)
-* **O**, wire: output wire (`out1`, `out2`, ..., `out128`)
+* **O**, wire: output wire (`out1`, `out2`, ..., `out256`)
 
 - **A**, address: instruction address (`5`)
 - **L**, label: instruction label (`:labelname`)
@@ -272,8 +320,10 @@ See: https://mods.factorio.com/mod/fcpu/faq
 * [Factorio Mod portal](https://mods.factorio.com/mod/fcpu/discussion) for bug reports
 * [Factorio Forum](https://forums.factorio.com/viewtopic.php?f=190&t=88141) for technical details and mod integration
 
+
 # TODOs
 See [here](https://www.buymeacoffee.com/p/100444)
+
 
 # Dear supporters
 * Lukáš Venhoda (v0.2.0 update)
