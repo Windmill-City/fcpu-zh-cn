@@ -129,9 +129,10 @@ gui.add_handlers{
             signal.type = 'virtual-signal'
           end
           local signal_str = '['.. signal.type ..'='.. signal.name ..']'
+          event.element.elem_value = defaultToolbarInsertSignal
+          -- see: https://forums.factorio.com/viewtopic.php?f=28&t=88330
           local pos = state.gui_program_input.text:len()
           state.gui_program_input.text = string.insert(state.gui_program_input.text, signal_str, pos)
-          event.element.elem_value = defaultToolbarInsertSignal
           fcpu_update_program(player_data.current_fcpu, state.gui_program_input.text)
         end
       end)
