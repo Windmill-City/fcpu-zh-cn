@@ -9,6 +9,9 @@
   "factorio_version": "1.0",
   "dependencies": ["base >= 0.18", "stdlib", "flib", "(?) profiler"],
   "package": {
-    "ignore": [ "tests/**", "*.psd", "todos.md"]
+    "ignore": [ "tests/**", "*.psd", "todos.md"],
+    "scripts": {
+      "version": "powershell -ExecutionPolicy Unrestricted .vscode/update_version.ps1"
+    }
   }
 }
