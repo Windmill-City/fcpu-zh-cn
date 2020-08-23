@@ -11,6 +11,7 @@
     "base >= 0.18",
     "stdlib",
     "flib",
+    "? informatron >= 0.1.12",
     "(?) profiler"
   ],
   "package": {

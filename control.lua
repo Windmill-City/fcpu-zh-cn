@@ -10,6 +10,7 @@ Controller = require('src/cpu/controller')
 require('src/storage')
 require('src/gui')
 require('src/fcpu_entity')
+require('src/wiki')
 
 -------------------------------------------------------------------------------------------------------
 
