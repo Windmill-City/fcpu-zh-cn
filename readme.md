@@ -5,6 +5,7 @@
 * supports blueprints
 * supports copy & paste
 * supports multiplayer
+* supports Informatron in-game wiki
 * 64 instructions for whole program
 * 8 general purpose registers
 * 50+ opcodes
@@ -259,7 +260,16 @@ Each instruction take one or more operands and modify them or state of fCPU.
 
 ### Testing operands values
 
-If test succeeded, then next instruction will be executed.
+If test succeeded, then the following instruction will be executed.  
+You may add `jmp :label` to implement branching. For Example:
+```
+clr
+:counter
+inc r1
+tlt r1 10
+jmp :counter
+; r1 now equal to 10
+```
 
 * `teq` a[**C**/**R**/**I**] b[**C**/**R**/**I**]  
   Equal.  
@@ -311,6 +321,7 @@ If test succeeded, then next instruction will be executed.
   Block until there are at least *cnt* *r*ed/*g*reen signals.
 
 
+[comment]: <> (md2frt-skip-section-begin)
 
 # Examples
 See: https://mods.factorio.com/mod/fcpu/faq
@@ -332,3 +343,5 @@ See [here](https://www.buymeacoffee.com/p/100444)
 
 # Support fCPU
 [![Buy Me A Coffee](https://cdn.buymeacoffee.com/buttons/lato-orange.png)](https://www.buymeacoffee.com/konstg)
+
+[comment]: <> (md2frt-skip-section-end)

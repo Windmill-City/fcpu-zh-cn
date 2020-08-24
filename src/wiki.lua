@@ -1,3 +1,6 @@
+local Text_readme = require('src/wiki/readme.md.lua')
+--local Source_readme = require('src/wiki/readme.src.lua')
+--local md2frt = require('src/wiki/md2frt')
 
 remote.add_interface("fcpu", {
   informatron_menu = function(data)
@@ -10,7 +13,7 @@ remote.add_interface("fcpu", {
 
 function fcpu_menu(player_index)
   return {
-    ['Docs']={
+    --[[['Docs']={
       ['Specs']=1,
       ['Description']={
         ['Program']=1,
@@ -35,16 +38,15 @@ function fcpu_menu(player_index)
     ['TODOs']=1,
     ['Dear supporters']=1,
     ['Support fCPU']=1,
-  }
+  ]]}
 end
-
-local Text_readme = require('src/wiki/readme')
 
 function fcpu_page_content(page_name, player_index, element)
   if page_name == "fcpu" then
-    element.add{type="label", name="text_1", caption={"fcpu.page_fcpu_text_1"}}
+    --element.add{type="label", name="text_1", caption={"fcpu.page_fcpu_text_1"}}
     element.add{type="button", name="image_1", style="fcpu_image_1"}
     element.add{type="label", name="text_2", caption=Text_readme}
+    --element.add{type="label", name="text_2", caption=md2frt.render(Source_readme)}
   end
 
   if page_name == "penguin" then

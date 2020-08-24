@@ -4,7 +4,7 @@
 * Memory browser for SIMD instructions
 * New min, max, avg, etc SIMD opcodes
 * Test result flags to extend one condition line limitation
-* Examples, demos and docs, `Informatron` support
+* Examples, demos and docs
 * Code highlighting
 * Program library for storing subprograms outside of a fCPU units
 * Factorio modules support
@@ -14,3 +14,4 @@
 
 # Done
 * Output multiple signals (DONE in v0.2.0)
+* `Informatron` support (DONE in v0.2.7)

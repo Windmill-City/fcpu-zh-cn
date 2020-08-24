@@ -15,9 +15,15 @@ data:extend{
   },
   {
     type = "font",
-    name = "default-mono",
-    from = "default-mono",
+    name = "fcpu-mono",
+    from = "fcpu-mono",
     size = 14
+  },
+  {
+    type = "font",
+    name = "fcpu-mono-small",
+    from = "fcpu-mono",
+    size = 13
   },
 }
 

@@ -18,17 +18,31 @@
             "hookMode": "profile"
         },
         {
-            "name": "Run Md-2-FRT",
+            "name": "Convert Readme to Wiki",
             "type": "lua",
             "request": "launch",
             "luaVersion": "5.2",
             "stopOnEntry": false,
             "stopOnThreadEntry": false,
-            "program": "${workspaceFolder}/md2frt.lua",
+            "program": "${workspaceFolder}/tests/wiki.lua",
             "cwd": "${workspaceFolder}/src/wiki",
             "path": "?;?.lua;${workspaceFolder}/?.lua;${workspaceFolder}/src/?.lua",
             "cpath": "${workspaceFolder}/?.dll",
             "arg": ["${workspaceFolder}/readme.md"],
+            "consoleCoding": "utf8"
+        },
+        {
+            "name": "Test Md2FRT",
+            "type": "lua",
+            "request": "launch",
+            "luaVersion": "5.2",
+            "stopOnEntry": false,
+            "stopOnThreadEntry": false,
+            "program": "${workspaceFolder}/tests/wiki.lua",
+            "cwd": "${workspaceFolder}/tests",
+            "path": "?;?.lua;${workspaceFolder}/?.lua;${workspaceFolder}/src/?.lua",
+            "cpath": "${workspaceFolder}/?.dll",
+            "arg": ["${workspaceFolder}/tests/wiki.md"],
             "consoleCoding": "utf8"
         },
         {

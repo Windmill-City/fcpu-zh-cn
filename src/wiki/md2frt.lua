@@ -1,4 +1,18 @@
 --[[
+    Modified by KonStg <konstg.dev@gmail.com> in 2020 for rendering Factorio Rich Text
+    and ingame wiki for mod (https://mods.factorio.com/mod/fcpu).
+    Original code written by `Calvin Rose` (see below).
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy of
+    this software and associated documentation files (the "Software"), to deal in
+    the Software without restriction, including without limitation the rights to
+    use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+    the Software, and to permit persons to whom the Software is furnished to do so,
+    subject to the following conditions:
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+]]
+--[[
 Copyright (c) 2016 Calvin Rose <calsrose@gmail.com>
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -55,6 +69,12 @@ local function bufferStream(linestream)
     local bufferedLine = linestream()
     return function()
         bufferedLine = linestream()
+        if bufferedLine and find(bufferedLine, 'md2frt%-skip%-section%-begin') then
+            repeat
+                bufferedLine = linestream()
+            until not bufferedLine or find(bufferedLine, 'md2frt%-skip%-section%-end')
+            bufferedLine = linestream()
+        end
         return bufferedLine
     end, function()
         return bufferedLine
@@ -114,7 +134,7 @@ local function linkEscape(str, t)
 end
 
 local lineDeimiterNames = {
-    ['`'] = { type='font', attrs='default-mono' }, --'code',
+    ['`'] = { type='font', attrs='fcpu-mono-small' }, --'code',
     ['__'] = { type='font', attrs='default-bold' }, --'strong',
     ['**'] = { type='font', attrs='default-bold' }, --'strong',
     ['_'] = { type='font', attrs='default-small' }, --'em',
@@ -124,7 +144,11 @@ local lineDeimiterNames = {
 local function lineRead(str, start, finish)
     local factorio_escape_str = function(s, color)
         local r = s--string.gsub(s, '%[', '[color=default][[/color]')
-        return '[color='.. (color or 'default') ..']'.. r ..'[/color]'
+        return {
+            type = 'color',
+            attributes = (color or 'default'),
+            [1] = r
+        }
     end
 
     start, finish = start or 1, finish or #str
@@ -295,7 +319,7 @@ local function readSimple(next, peek, tree, links)
         end
         local pre = {
             type = "font",-- "pre",
-            attributes = "default-mono",
+            attributes = "fcpu-mono-small",
             [1] = {
                 [1] = code,
                 type = 'color',
@@ -415,7 +439,7 @@ local function readList(next, peek, tree, links, expectedIndent)
             if i < indent then break end
             if i > indent then
                 local subtree = readFragment(next, peek, links, recurse_level + 1, string.rep(' ', i+6), function(l)
-                    if not l or l == '' then return true end
+                    if not l then return true end
                     local tp = isSpecialLine(l)
                     return tp ~= PATTERN_EMPTY and getIndentLevel(l) < i
                 end)
@@ -565,9 +589,9 @@ end
 --------------------------------------------------------------------------------
 
 local function pwrap(...)
-    local status, value = pcall(...)
+    local status, value, tree = pcall(...)
     if status then
-        return value
+        return value, tree
     else
         return nil, value
     end
