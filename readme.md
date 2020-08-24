@@ -44,7 +44,7 @@ The following can be used as operands:
 - **Input** wire: you can receive signals on wires connected to a combinator's input (`red`,` green`)
 - **Output** wire: sets the values ​​at the output of a combinator (`out1`,` out2`, ..., `out256`)
 - **Address**: instruction address (line number)
-- **Label** in the code: written in text with a colon in front (`:label`,`:anyname`, ...)
+- **Label** in the code: written in text with a colon in front (`:label`, `:anyname`, ...)
 
 The processor executes instructions from a written program in turn, line by line.
 

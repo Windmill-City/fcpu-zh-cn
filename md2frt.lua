@@ -1,5 +1,11 @@
 #!/usr/bin/env lua
 
+G_FONT_BLOCKQUOTE = "locale-pick"
+G_FONT_CODE = "default-mono"
+G_FONT_STRONG = "default-bold"
+G_FONT_EMPHASIS = "default-small"
+G_FONT_EMPHASIS_STRONG = "default-tiny-bold"
+
 ----------------------------------------------------------------------
 -- Utility functions
 ----------------------------------------------------------------------
@@ -400,8 +406,7 @@ local function blocks_to_html(lines, no_paragraphs)
                 table.insert(out, "<p>" .. span_transform(s) .. "</p>")
             end
         elseif line.type == "header" then
-            local s = "<h" .. line.level .. ">" .. span_transform(line.text) ..
-                          "</h" .. line.level .. ">"
+            local s = "[font=heading-" .. line.level .. "]" .. span_transform(line.text) .. "[/font]"
             table.insert(out, s)
         else
             table.insert(out, line.line)
@@ -570,7 +575,7 @@ local function blockquotes(lines)
         for i = 2, #lines do raw = raw .. "\n" .. lines[i].text end
         local bt = block_transform(raw)
         if not bt:find("<pre>") then bt = indent(bt) end
-        return "<blockquote>\n    " .. bt .. "\n</blockquote>"
+        return "[font="..G_FONT_BLOCKQUOTE.."]\n    " .. bt .. "\n[/font]"
     end
 
     while true do
@@ -928,19 +933,23 @@ end
 
 -- Handles emphasis markers (* and _) in the text.
 local function emphasis(text)
-    for _, s in ipairs {"%*%*", "%_%_"} do
-        text = text:gsub(s .. "([^%s][%*%_]?)" .. s, "<strong>%1</strong>")
-        text = text:gsub(s .. "([^%s][^<>]-[^%s][%*%_]?)" .. s,
-                         "<strong>%1</strong>")
-    end
-    for _, s in ipairs {"%*", "%_"} do
-        text = text:gsub(s .. "([^%s_])" .. s, "<em>%1</em>")
-        text = text:gsub(s .. "(<strong>[^%s_]</strong>)" .. s, "<em>%1</em>")
-        text = text:gsub(s .. "([^%s_][^<>_]-[^%s_])" .. s, "<em>%1</em>")
-        text = text:gsub(s .. "([^<>_]-<strong>[^<>_]-</strong>[^<>_]-)" .. s,
-                         "<em>%1</em>")
-    end
-    return text
+  for _, s in ipairs {"%*%*", "%_%_"} do
+    text = text:gsub(s .. "([^%s][%*%_]?)" .. s, "<strong>%1</strong>")
+    text = text:gsub(s .. "([^%s][^<>]-[^%s][%*%_]?)" .. s, "<strong>%1</strong>")
+  end
+  for _, s in ipairs {"%*", "%_"} do
+    text = text:gsub(s .. "([^%s_])" .. s, "<em>%1</em>")
+    text = text:gsub(s .. "(<strong>[^%s_]</strong>)" .. s, "<em>%1</em>")
+    text = text:gsub(s .. "([^%s_][^<>_]-[^%s_])" .. s, "<em>%1</em>")
+    text = text:gsub(s .. "([^<>_]-<strong>[^<>_]-</strong>[^<>_]-)" .. s, "<em>%1</em>")
+  end
+  text = text:gsub("<em><strong>", "[font="..G_FONT_EMPHASIS_STRONG.."]")
+  text = text:gsub("</strong></em>", "[/font]")
+  text = text:gsub("<em>", "[font="..G_FONT_EMPHASIS.."]")
+  text = text:gsub("</em>", "[/font]")
+  text = text:gsub("<strong>", "[font="..G_FONT_STRONG.."]")
+  text = text:gsub("</strong>", "[/font]")
+  return text
 end
 
 -- Handles line break markers in the text.
@@ -1027,30 +1036,25 @@ end
 -- End of module
 ----------------------------------------------------------------------
 
+local md = require('md')
+
 local function run_command_line(arg)
     local function read_file(path, descr)
-        local file = io.open(path) or
-                         error("Could not open " .. descr .. " file: " .. path)
-        local contents = file:read("*a") or
-                             error("Could not read " .. descr .. " from " ..
-                                       path)
+        local file = io.open(path) or error("Could not open " .. descr .. " file: " .. path)
+        local contents = file:read("*a") or error("Could not read " .. descr .. " from " .. path)
         file:close()
         return contents
     end
 
     local function outpath(path)
-        local m = path:match("^(.+%.html)[^/\\]+$")
-        if m then return m end
-        m = path:match("^(.+%.)[^/\\]*$")
-        if m and path ~= m .. "html" then return m .. "html" end
-        return path .. ".html"
+        local base, name = path:match("^(.+[/\\])(.+%.)[^/\\]*$")
+        return base .. "src/wiki/" .. name .."lua"
     end
 
     (function(path)
         local s = read_file(path, "input")
-        s = markdown(s)
-        local file = io.open(outpath(path), "w") or
-                         error("Could not open output file: " .. outpath(path))
+        s = "return [==[".. md.renderString(s) .."]==]"
+        local file = io.open(outpath(path), "w") or error("Could not open output file: " .. outpath(path))
         file:write(s)
         file:close()
     end)(arg[1])
