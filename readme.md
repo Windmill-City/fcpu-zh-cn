@@ -5,7 +5,7 @@
 * supports blueprints
 * supports copy & paste
 * supports multiplayer
-* supports [Informatron](https://mods.factorio.com/mod/informatron) in-game wiki
+* supports [Informatron](https://mods.factorio.com/mod/informatron) and [Booktorio](https://mods.factorio.com/mod/Booktorio) in-game wiki
 * 64 instructions for whole program
 * 8 general purpose registers
 * 50+ opcodes

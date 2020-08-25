@@ -5,7 +5,7 @@
 * поддерживает чертежи
 * поддерживает копирование и вставку
 * поддерживает мультиплеер
-* поддерживает внутри-игровую документацию [Informatron](https://mods.factorio.com/mod/informatron)
+* поддерживает внутри-игровую документацию [Informatron](https://mods.factorio.com/mod/informatron) и [Booktorio](https://mods.factorio.com/mod/Booktorio)
 * 64 инструкции для всей программы
 * 8 регистров общего назначения
 * 50+ операций

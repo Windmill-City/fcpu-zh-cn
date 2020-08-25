@@ -15,3 +15,4 @@
 # Done
 * Output multiple signals (DONE in v0.2.0)
 * `Informatron` support (DONE in v0.2.7)
+* `Booktorio` support (DONE in v0.2.8)
