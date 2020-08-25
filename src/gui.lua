@@ -476,6 +476,7 @@ script.on_init(function()
   gui.build_lookup_tables()
   global.fcpus = {}
   register_picker_dolly_handler()
+  fcpu_wiki_booktorio_init()
 end)
 script.on_load(function()
   gui.build_lookup_tables()
@@ -485,4 +486,5 @@ script.on_configuration_changed(function(e)
   if migration.on_config_changed(e, migrations) then
     gui.check_filter_validity()
   end
+  fcpu_wiki_booktorio_init()
 end)
