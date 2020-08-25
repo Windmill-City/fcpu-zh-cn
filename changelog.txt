@@ -2,11 +2,12 @@
 Version: 0.2.8
 Date: ????
   Changes:
+    - Added sections for Informatron.
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.7
 Date: 2020-08-24
   Features:
-    - Added Informatron support (https://mods.factorio.com/mod/informatron)
+    - Added Informatron support (https://mods.factorio.com/mod/informatron).
   Changes:
     - Use monospace font for `ru` language.
 ---------------------------------------------------------------------------------------------------

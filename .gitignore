@@ -1,3 +1,4 @@
 .obfuscate.ps1
 fcpu_*.zip
 tests/wiki.md.lua
+src/wiki/readme.src.lua

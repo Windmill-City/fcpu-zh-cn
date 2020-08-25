@@ -16,11 +16,13 @@ local function run_command_line(arg)
 
     (function(path)
         local s = read_file(path, "input")
-        local r, tree = md.renderString(s)
+        local r, mdstate = md.renderString(s)
         s = "return [==[".. r .."]==]"
         local file = io.open(outpath(path), "w") or error("Could not open output file: " .. outpath(path))
         file:write(s)
         file:close()
+
+        --local sections = md.renderSections(mdstate)
     end)(arg[1])
 end
 

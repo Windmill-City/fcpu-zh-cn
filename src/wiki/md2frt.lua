@@ -66,8 +66,8 @@ local function tableLineStream(t)
 end
 
 local function bufferStream(linestream)
-    local bufferedLine = linestream()
-    return function()
+    local bufferedLine
+    local getline = function()
         bufferedLine = linestream()
         if bufferedLine and find(bufferedLine, 'md2frt%-skip%-section%-begin') then
             repeat
@@ -76,9 +76,9 @@ local function bufferStream(linestream)
             bufferedLine = linestream()
         end
         return bufferedLine
-    end, function()
-        return bufferedLine
     end
+    bufferedLine = getline()
+    return getline, function() return bufferedLine end
 end
 
 --------------------------------------------------------------------------------
@@ -288,9 +288,12 @@ local function readSimple(next, peek, tree, links)
     if m then
         tree[#tree + 1] = {
             NEWLINE,
-            lineRead(rest),
-            type = 'font',
-            attributes = "heading-" .. #m
+            {
+                lineRead(rest),
+                type = 'font',
+                attributes = "heading-" .. #m
+            },
+            type = { sub = 'h'.. #m }
         }
         tree[#tree + 1] = NEWLINE
         return next()
@@ -554,8 +557,7 @@ local function renderTree(tree, links, accum)
     end
 end
 
-local function renderLinesRaw(stream, options)
-    local tree, links = readLineStream(stream)
+local function renderTreeRaw(tree, links, options)
     local accum = {}
     local head, tail, insertHead, insertTail, prependHead, appendTail = nil, nil, nil, nil, nil, nil
     if options then
@@ -581,7 +583,12 @@ local function renderLinesRaw(stream, options)
     accum[#accum + 1] = insertTail
     accum[#accum + 1] = tail
     accum[#accum + 1] = appendTail
-    return concat(accum), tree
+    return concat(accum), { tree = tree, links = links }
+end
+
+local function renderLines(stream, options)
+    local tree, links = readLineStream(stream)
+    return renderTreeRaw(tree, links, options)
 end
 
 --------------------------------------------------------------------------------
@@ -589,24 +596,60 @@ end
 --------------------------------------------------------------------------------
 
 local function pwrap(...)
-    local status, value, tree = pcall(...)
+    local status, value, state = pcall(...)
     if status then
-        return value, tree
+        return value, state
     else
         return nil, value
     end
 end
 
 local function renderLineIterator(stream, options)
-    return pwrap(renderLinesRaw, stream, options)
+    return pwrap(renderLines, stream, options)
 end
 
 local function renderTable(t, options)
-    return pwrap(renderLinesRaw, tableLineStream(t), options)
+    return pwrap(renderLines, tableLineStream(t), options)
 end
 
 local function renderString(str, options)
-    return pwrap(renderLinesRaw, stringLineStream(str), options)
+    return pwrap(renderLines, stringLineStream(str), options)
+end
+
+local function renderSections(mdstate)
+    local wiki_pages = {}
+    local header = ''
+    local list = {}
+
+    local push = function(v)
+        if header == '' then
+            header = v
+        else
+            list[#list + 1] = v
+        end
+    end
+
+    local emit = function(mdstate)
+        if list and 0 < #list then
+            wiki_pages[#wiki_pages + 1] = {
+                header = header[2][1][1],
+                level = string.match(header.type.sub, 'h(%d+)'),
+                content = renderTreeRaw(list, mdstate.links)
+            }
+        end
+        header = ''
+        list = {}
+    end
+
+    for k,v in ipairs(mdstate.tree) do
+      if type(v) == 'table' and type(v.type) == 'table' and string.find(v.type.sub, 'h%d+') then
+        emit(mdstate)
+      end
+      push(v)
+    end
+    emit(mdstate)
+
+    return wiki_pages
 end
 
 local renderers = {
@@ -625,7 +668,8 @@ return setmetatable({
     render = render,
     renderString = renderString,
     renderLineIterator = renderLineIterator,
-    renderTable = renderTable
+    renderTable = renderTable,
+    renderSections = renderSections
 }, {
     __call = function(self, ...) -- luacheck: no unused args
         return render(...)

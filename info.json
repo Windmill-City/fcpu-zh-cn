@@ -11,13 +11,14 @@
     "base >= 0.18",
     "stdlib",
     "flib",
-    "? informatron >= 0.1.12",
+    "? informatron >= 0.1.13",
     "(?) profiler"
   ],
   "package": {
     "ignore": [ "tests/**", "*.psd", "todos.md"],
     "scripts": {
-      "version": "powershell -ExecutionPolicy Unrestricted .vscode/update_version.ps1"
+      "version": "powershell -ExecutionPolicy Unrestricted .vscode/event_version.ps1",
+      "compile": "powershell -ExecutionPolicy Unrestricted .vscode/event_compile.ps1"
     }
   }
 }
