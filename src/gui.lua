@@ -68,7 +68,7 @@ gui.add_handlers{
           if event.element.switch_state == "right" then
             state.disabled = nil
             if not Controller.is_running(state) then
-              player_data.current_fcpu_gui.outer.error_message.caption = ""
+              player_data.gui_fcpu.outer.error_message.caption = ""
               Controller.compile(state)
               Controller.run(state)
             end
@@ -83,7 +83,7 @@ gui.add_handlers{
     run_program = {
       on_gui_click = mixPlayerData(function(player_data)
         local state = get_fcpu_state(player_data.current_fcpu)
-        player_data.current_fcpu_gui.outer.error_message.caption = ""
+        player_data.gui_fcpu.outer.error_message.caption = ""
         Controller.compile(state)
         Controller.run(state)
         Entity.set_data(player_data.current_fcpu, state)
@@ -99,7 +99,7 @@ gui.add_handlers{
     step_program = {
       on_gui_click = mixPlayerData(function(player_data)
         local state = get_fcpu_state(player_data.current_fcpu)
-        player_data.current_fcpu_gui.outer.error_message.caption = ""
+        player_data.gui_fcpu.outer.error_message.caption = ""
         Controller.compile(state)
         Controller.step(state)
         Entity.set_data(player_data.current_fcpu, state)
@@ -107,22 +107,19 @@ gui.add_handlers{
     },
     copy_program = {
       on_gui_click = mixPlayerData(function(player_data)
-        local state = get_fcpu_state(player_data.current_fcpu)
-        player_data.program_clipboard = state.gui_program_input.text
+        player_data.program_clipboard = player_data.gui_program_input.text
       end)
     },
     paste_program = {
       on_gui_click = mixPlayerData(function(player_data)
         if player_data.program_clipboard then
-          local state = get_fcpu_state(player_data.current_fcpu)
-          state.gui_program_input.text = player_data.program_clipboard
-          fcpu_update_program(player_data.current_fcpu, state.gui_program_input.text)
+          player_data.gui_program_input.text = player_data.program_clipboard
+          fcpu_update_program(player_data.current_fcpu, player_data.gui_program_input.text)
         end
       end)
     },
     insert_signal_to_program = {
       on_gui_elem_changed = mixPlayerData(function(player_data, player, event)
-        local state = get_fcpu_state(player_data.current_fcpu)
         local signal = event.element.elem_value
         if signal then
           if signal.type == 'virtual' then
@@ -131,9 +128,9 @@ gui.add_handlers{
           local signal_str = '['.. signal.type ..'='.. signal.name ..']'
           event.element.elem_value = defaultToolbarInsertSignal
           -- see: https://forums.factorio.com/viewtopic.php?f=28&t=88330
-          local pos = state.gui_program_input.text:len()
-          state.gui_program_input.text = string.insert(state.gui_program_input.text, signal_str, pos)
-          fcpu_update_program(player_data.current_fcpu, state.gui_program_input.text)
+          local pos = player_data.gui_program_input.text:len()
+          player_data.gui_program_input.text = string.insert(player_data.gui_program_input.text, signal_str, pos)
+          fcpu_update_program(player_data.current_fcpu, player_data.gui_program_input.text)
         end
       end)
     },
@@ -276,35 +273,33 @@ function GuiWidgetOpen(player, entity)
   if 0 < fcpu_debug_enabled then
     elems.gui_fcpu.titlebar.label.caption = elems.gui_fcpu.titlebar.label.caption.." #"..entity.unit_number
   end
-  state = table.merge(state, elems)
+  player_data = table.merge(player_data, elems)
 
-  state.gui_program_input.text = state.program_text
-  GuiWidgetUpdate(state)
+  player_data.gui_program_input.text = state.program_text
+  GuiWidgetUpdate(player_data, state)
 
   if state.error_message then
-    state.gui_fcpu.outer.error_message.caption = state.error_message
+    player_data.gui_fcpu.outer.error_message.caption = state.error_message
   end
 
   if state.disabled then
-    state.gui_enable_switch.switch_state = "left"
+    player_data.gui_enable_switch.switch_state = "left"
   else
-    state.gui_enable_switch.switch_state = "right"
+    player_data.gui_enable_switch.switch_state = "right"
   end
 
   if Controller.is_running(state) then
-    state.gui_run_button.enabled = false
+    player_data.gui_run_button.enabled = false
   else
-    state.gui_run_button.enabled = true
+    player_data.gui_run_button.enabled = true
   end
 
-  player_data.current_fcpu_gui = state.gui_fcpu
+  player.play_sound{path="entity-open/"..entity.prototype.name, volume_modifier=0.85}
 
-  Entity.set_data(entity, state)
-  set_player_data(player.index, player_data)
+  player_data.current_fcpu = entity
+  player_data.gui_fcpu = player_data.gui_fcpu
 
-  player.play_sound{path="entity-open/"..player_data.current_fcpu.prototype.name, volume_modifier=0.85}
-
-  return state.gui_fcpu
+  return player_data
 end
 
 local function UpdateLines(element, state)
@@ -324,27 +319,27 @@ local function UpdateLines(element, state)
   element.text = table.concat(lines, "\n")
 end
 
-function GuiWidgetUpdate(state)
+function GuiWidgetUpdate(player_data, state)
   -- Enable/Disable the run/step button
-  if state.gui_run_button and state.gui_run_button.valid then
+  if player_data.gui_run_button and player_data.gui_run_button.valid then
     if Controller.is_running(state) then
-      --state.gui_halt_button.style = "highlighted_tool_button"
-      state.gui_halt_button.sprite = "fcpu-pause-sprite"
-      state.gui_halt_button.enabled = true
-      state.gui_run_button.enabled = false
+      --player_data.gui_halt_button.style = "highlighted_tool_button"
+      player_data.gui_halt_button.sprite = "fcpu-pause-sprite"
+      player_data.gui_halt_button.enabled = true
+      player_data.gui_run_button.enabled = false
     else
-      --state.gui_halt_button.style = "tool_button_red"
-      state.gui_halt_button.sprite = "fcpu-stop-sprite"
-      state.gui_halt_button.enabled = (state.instruction_pointer ~= 1)
-      state.gui_run_button.enabled = true
+      --player_data.gui_halt_button.style = "tool_button_red"
+      player_data.gui_halt_button.sprite = "fcpu-stop-sprite"
+      player_data.gui_halt_button.enabled = (state.instruction_pointer ~= 1)
+      player_data.gui_run_button.enabled = true
     end
   end
   -- Update the inspector GUI
-  if state.gui_inspector and state.gui_inspector.valid and state.regs then
+  if player_data.gui_inspector and player_data.gui_inspector.valid and state.regs then
     for i = 1, MC_REGS do
       local reg = state.regs[i]
       if reg then
-        local button = state.gui_inspector['reg'..i..'-inspect']
+        local button = player_data.gui_inspector['reg'..i..'-inspect']
         button.sprite = signalToSpritePath(reg.signal)
         if reg.fixedpoint then
           button.number = reg.count / MC_FIXEDPOINT
@@ -355,8 +350,8 @@ function GuiWidgetUpdate(state)
     end
   end
   -- Update toolbar
-  if state.gui_fcpu and state.gui_fcpu.valid then
-    local toolbar = state.gui_fcpu.outer['editor-toolbar']
+  if player_data.gui_fcpu and player_data.gui_fcpu.valid then
+    local toolbar = player_data.gui_fcpu.outer['editor-toolbar']
     if toolbar then
       local button_istp = toolbar['insert-signal-to-program']
       if button_istp and button_istp.valid then
@@ -369,24 +364,31 @@ function GuiWidgetUpdate(state)
     end
   end
   -- Make text read-only while running
-  if state.gui_program_input and state.gui_program_input.valid then
-    state.gui_program_input.read_only = Controller.is_running(state)
+  if player_data.gui_program_input and player_data.gui_program_input.valid then
+    player_data.gui_program_input.read_only = Controller.is_running(state)
   end
   -- Update the program lines in the GUI
-  if state.gui_line_numbers and state.gui_line_numbers.valid then
-    UpdateLines(state.gui_line_numbers, state)
+  if player_data.gui_line_numbers and player_data.gui_line_numbers.valid then
+    UpdateLines(player_data.gui_line_numbers, state)
   end
 end
 
 function GuiWidgetClose(player_index, silent)
   local player_data, player = get_player_data(player_index)
-  if player_data and player_data.current_fcpu and player_data.current_fcpu_gui then
-    local state = get_fcpu_state(player_data.current_fcpu)
-    fcpu_update_program(player_data.current_fcpu, state.gui_program_input.text)
+  if player_data and player_data.current_fcpu then
+    if not player_data.gui_fcpu then
+      local rootGui = player.gui.screen -- mod_gui.get_frame_flow({gui={left=player.gui.screen}})
+      if rootGui["fcpu-widget"] then
+        rootGui["fcpu-widget"].destroy()
+      end
+      return
+    end
+
+    fcpu_update_program(player_data.current_fcpu, player_data.gui_program_input.text)
     player_data.current_fcpu.operable = true
 
-    player_data.current_fcpu_gui.destroy()
-    player_data.current_fcpu_gui = nil
+    player_data.gui_fcpu.destroy()
+    player_data.gui_fcpu = nil
     set_player_data(player.index, player_data)
 
     if not silent then
@@ -399,9 +401,9 @@ function GuiEntityCloseWidget(entity)
   for player_index, player in pairs(game.players) do
     local player_data = get_player_data(player_index)
     if Entity._are_equal(entity, player_data.current_fcpu) then
-      if player_data.current_fcpu_gui and player_data.current_fcpu_gui.valid then
-        player_data.current_fcpu_gui.destroy()
-        player_data.current_fcpu_gui = nil
+      if player_data.gui_fcpu and player_data.gui_fcpu.valid then
+        player_data.gui_fcpu.destroy()
+        player_data.gui_fcpu = nil
       end
       player_data.current_fcpu = nil
       set_player_data(player_index, player_data)
@@ -420,7 +422,7 @@ script.on_event(defines.events.on_gui_opened, function(event)
   if entity and entity.valid and entity.name == "fcpu" then
     local player_data, player = get_player_data(event.player_index)
     if player_data then
-      player.opened = player_data.current_fcpu_widget
+      player.opened = player_data.gui_fcpu
     end
   end
 end)
@@ -435,12 +437,11 @@ script.on_event("fcpu-open", function(event)
       if player.can_reach_entity(entity) then
         local player_data = get_player_data(event.player_index)
 
-        if player_data.current_fcpu_gui and Entity._are_equal(player_data.current_fcpu, entity) then return end
+        if player_data.gui_fcpu and Entity._are_equal(player_data.current_fcpu, entity) then return end
 
-        player_data.current_fcpu = entity
+        player_data = GuiWidgetOpen(player, entity)
+
         set_player_data(event.player_index, player_data)
-
-        GuiWidgetOpen(player, entity)
       end
     end
   elseif entity then
@@ -456,7 +457,7 @@ end)
 -- Handle player move event to close GUI when out of range.
 script.on_event(defines.events.on_player_changed_position, function(event)
   local player_data, player = get_player_data(event.player_index)
-  if player_data and player_data.current_fcpu and player_data.current_fcpu_gui then
+  if player_data and player_data.current_fcpu and player_data.gui_fcpu then
     if not player.can_reach_entity(player_data.current_fcpu) then
       GuiWidgetClose(event.player_index, true)
     end

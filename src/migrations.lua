@@ -53,4 +53,19 @@ return {
       end
     end)
   end,
+
+  ["0.2.9"] = function()
+    foreach_fcpu(function(fcpu, state)
+      state.gui_fcpu = nil
+      state.gui_exit_button = nil
+      state.gui_halt_button = nil
+      state.gui_step_button = nil
+      state.gui_run_button = nil
+      state.gui_enable_switch = nil
+      state.gui_inspector = nil
+      state.gui_line_numbers = nil
+      state.gui_program_input = nil
+      Entity.set_data(fcpu, state)
+    end)
+  end,
 }

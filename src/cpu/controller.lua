@@ -75,7 +75,7 @@ end
 function Controller.set_error_message(state, error_message)
   state.error_message = {"gui-fcpu.program_error", state.instruction_pointer, error_message}
   state.error_line = state.instruction_pointer
-  script.raise_event(Controller.event_error, {['entity'] = state.entity, ['state'] = state, message = state.error_message})
+  script.raise_event(Controller.event_error, {['entity'] = state.entity, message = state.error_message})
 end
 
 function Controller.set_program_counter(state, value)
@@ -84,7 +84,7 @@ function Controller.set_program_counter(state, value)
     state.instruction_pointer = 1
     Controller.update_state(state, PSTATE_HALTED)
     state.do_step = false
-    script.raise_event(Controller.event_halt, {['entity'] = state.entity, ['state'] = state})
+    script.raise_event(Controller.event_halt, {['entity'] = state.entity})
   else
     local next_ast = state.program_ast[state.instruction_pointer]
     while(next_ast and (next_ast.type == 'nop' or next_ast.type == 'label')) do
@@ -97,7 +97,7 @@ function Controller.set_program_counter(state, value)
     if state.instruction_pointer > #state.program_ast then
       Controller.update_state(state, PSTATE_HALTED)
       state.do_step = false
-      script.raise_event(Controller.event_halt, {['entity'] = state.entity, ['state'] = state})
+      script.raise_event(Controller.event_halt, {['entity'] = state.entity})
     end
   end
   Controller.update_ip(state)
@@ -217,7 +217,7 @@ function Controller.halt(state)
   end
   Controller.update_state(state, PSTATE_HALTED)
   state.do_step = false
-  script.raise_event(Controller.event_halt, {entity = state.entity, ['state'] = state})
+  script.raise_event(Controller.event_halt, {entity = state.entity})
 end
 
 function Controller.is_running(state)

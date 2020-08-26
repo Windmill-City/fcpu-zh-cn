@@ -84,6 +84,48 @@ end
 
 -------------------------------------------------------------------------------------------------------
 
+local function fcpu_set_memory(entity, memory_fcpu)
+  local state = Entity.get_data(entity) or {}
+  state.memory_fcpu = memory_fcpu
+  Entity.set_data(entity, state)
+end
+
+function fcpu_create_memory(entity)
+  local surf = entity.surface
+  local memory_fcpu = surf.create_entity({
+    name = "memory-fcpu",
+    position = { x = entity.position.x, y = entity.position.y },
+    direction = entity.direction,
+    force = entity.force
+  })
+  memory_fcpu.destructible = false
+  memory_fcpu.operable = true
+  Entity.set_data(memory_fcpu, {fcpu = entity})
+  return memory_fcpu
+end
+
+function fcpu_destroy_memory(entity)
+  if not (entity and entity.valid) then return end
+  if entity.name == "fcpu" then
+    local state = Entity.get_data(entity)
+    fcpu_destroy_memory(state.memory_fcpu)
+  elseif entity.name == "memory-fcpu" then
+    local memory_fcpu = Entity.get_data(entity)
+    if memory_fcpu and memory_fcpu.fcpu and memory_fcpu.fcpu.valid then
+      fcpu_set_memory(memory_fcpu.fcpu, nil)
+    end
+    debug_print("destroyed fcpu memory")
+    entity.destroy()
+  elseif entity.name == "entity-ghost" and entity.ghost_name == "fcpu" then
+    local memory_fcpus = entity.surface.find_entities_filtered{name = "memory-fcpu", position = { x = entity.position.x, y = entity.position.y }, force = entity.force, limit = 1}
+    if #memory_fcpus > 0 then
+      fcpu_destroy_memory(memory_fcpus[1])
+    end
+  end
+end
+
+-------------------------------------------------------------------------------------------------------
+
 require('__fcpu__/3rdparty/blueprintdata')
 
 function fcpu_verify_utility(entity)

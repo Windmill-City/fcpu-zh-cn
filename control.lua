@@ -51,6 +51,16 @@ local function on_marked_for_deconstruction(event)
   end
 end
 
+script.on_nth_tick(10, function(event)
+  for _, player in pairs(game.players) do
+    local player_data = get_player_data(player.index)
+    if player_data and player_data.current_fcpu and player_data.gui_fcpu then
+      local state = Entity.get_data(player_data.current_fcpu)
+      GuiWidgetUpdate(player_data, state)
+    end
+  end
+end)
+
 global.profile = false
 
 script.on_event(defines.events.on_tick, function(event)
@@ -68,7 +78,6 @@ script.on_event(defines.events.on_tick, function(event)
     if cpu.valid then
       local state = Entity.get_data(cpu)
       if state then
-        GuiWidgetUpdate(state)
         -- Tick the Controller
         if not state.disabled and cpu.active and cpu.is_connected_to_electric_network() then
           Controller.tick(state)
@@ -91,9 +100,9 @@ script.on_event(Controller.event_error, function(event)
   local entity = event.entity
   for _, player in pairs(game.players) do
     local player_data = get_player_data(player.index)
-    if player_data.current_fcpu_gui then
+    if player_data.gui_fcpu then
       if Entity._are_equal(entity, player_data.current_fcpu) then
-        player_data.current_fcpu_gui.outer.error_message.caption = event.message
+        player_data.gui_fcpu.outer.error_message.caption = event.message
       end
     end
   end

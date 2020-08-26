@@ -321,6 +321,17 @@ jmp :counter
   Block until there are at least *cnt* *r*ed/*g*reen signals.
 
 
+
+## SIMD instructions
+Until now you can control fCPU with one instructon per game cycle and operate with a couple signals per instruction.  
+But it is not a limit. fCPOU support Single Instruction Multiple Dama instructions, which means that you could do much more efficient work per instruction and so per one game tick.  
+
+
+## Memory viewer
+TODO
+
+
+
 [comment]: <> (md2frt-skip-section-begin)
 
 # Examples
