@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.9
-Date: ????
+Date: 2020-08-26
   Changes:
     - Cleaned-up fCPU state and moved some of it into player_data.
   Bugfixes:
