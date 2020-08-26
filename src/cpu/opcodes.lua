@@ -1,6 +1,5 @@
 local assert
 local io
-local bit32 = require('3rdparty/numberlua')
 
 
 local standard_op = function(_)
