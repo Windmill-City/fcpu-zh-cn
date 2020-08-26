@@ -3,6 +3,8 @@ Version: 0.2.9
 Date: ????
   Changes:
     - Cleaned-up fCPU state and moved some of it into player_data.
+  Bugfixes:
+    - Fixed closing widget with `E` now do not open Character widget.
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.8
 Date: 2020-08-25

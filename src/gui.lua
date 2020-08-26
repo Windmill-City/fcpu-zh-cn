@@ -2,21 +2,7 @@
 
 local gui = require("__flib__.gui")
 
-local defaultToolbarInsertSignal = {type='virtual', name='signal-dot'}
-
 -------------------------------------------------------------------------------------------------------
-
-function string.insert(str1, str2, pos)
-  return str1:sub(1,pos)..str2..str1:sub(pos+1)
-end
-
-local function mixPlayerData(proc)
-  return function(event)
-    local player_data, player = get_player_data(event.player_index)
-    proc(player_data, player, event)
-    set_player_data(event.player_index, player_data)
-  end
-end
 
 local function signalToSpritePath(signal)
   if signal then
@@ -28,137 +14,7 @@ local function signalToSpritePath(signal)
   end
 end
 
-gui.add_handlers{
-  widget = {
-    close_button = {
-      on_gui_click = function(event)
-        GuiWidgetClose(event.player_index)
-      end
-    },
-    program_input = {
-      on_gui_text_changed = mixPlayerData(function(player_data, player, event)
-        local element = event.element
-        local lines = {};
-        for m in (element.text..'\n'):gmatch("(.-)\n") do
-            table.insert(lines, m);
-        end
-        if #lines > MC_LINES or #lines == MC_LINES and lines[#lines] == '\n' then
-          local c = #lines - MC_LINES
-          for i = 1, MC_LINES do
-            if c == 0 then break end
-            if lines[i] == "" then
-              table.remove(lines, i)
-              c = c - 1
-            end
-          end
-          if 0 < c then
-            for i = 1, c do
-              table.remove(lines, #lines)
-            end
-          end
-          element.text = table.concat(lines, '\n')
-        end
-        fcpu_update_program(player_data.current_fcpu, element.text)
-      end)
-    },
-    enable_program = {
-      on_gui_switch_state_changed = mixPlayerData(function(player_data, player, event)
-        local state = get_fcpu_state(player_data.current_fcpu)
-        if event.element then
-          if event.element.switch_state == "right" then
-            state.disabled = nil
-            if not Controller.is_running(state) then
-              player_data.gui_fcpu.outer.error_message.caption = ""
-              Controller.compile(state)
-              Controller.run(state)
-            end
-          else
-            state.disabled = true -- halt will clear output registers
-            Controller.halt(state)
-          end
-          Entity.set_data(player_data.current_fcpu, state)
-        end
-      end)
-    },
-    run_program = {
-      on_gui_click = mixPlayerData(function(player_data)
-        local state = get_fcpu_state(player_data.current_fcpu)
-        player_data.gui_fcpu.outer.error_message.caption = ""
-        Controller.compile(state)
-        Controller.run(state)
-        Entity.set_data(player_data.current_fcpu, state)
-      end)
-    },
-    halt_program = {
-      on_gui_click = mixPlayerData(function(player_data)
-        local state = get_fcpu_state(player_data.current_fcpu)
-        Controller.halt(state)
-        Entity.set_data(player_data.current_fcpu, state)
-      end)
-    },
-    step_program = {
-      on_gui_click = mixPlayerData(function(player_data)
-        local state = get_fcpu_state(player_data.current_fcpu)
-        player_data.gui_fcpu.outer.error_message.caption = ""
-        Controller.compile(state)
-        Controller.step(state)
-        Entity.set_data(player_data.current_fcpu, state)
-      end)
-    },
-    copy_program = {
-      on_gui_click = mixPlayerData(function(player_data)
-        player_data.program_clipboard = player_data.gui_program_input.text
-      end)
-    },
-    paste_program = {
-      on_gui_click = mixPlayerData(function(player_data)
-        if player_data.program_clipboard then
-          player_data.gui_program_input.text = player_data.program_clipboard
-          fcpu_update_program(player_data.current_fcpu, player_data.gui_program_input.text)
-        end
-      end)
-    },
-    insert_signal_to_program = {
-      on_gui_elem_changed = mixPlayerData(function(player_data, player, event)
-        local signal = event.element.elem_value
-        if signal then
-          if signal.type == 'virtual' then
-            signal.type = 'virtual-signal'
-          end
-          local signal_str = '['.. signal.type ..'='.. signal.name ..']'
-          event.element.elem_value = defaultToolbarInsertSignal
-          -- see: https://forums.factorio.com/viewtopic.php?f=28&t=88330
-          local pos = player_data.gui_program_input.text:len()
-          player_data.gui_program_input.text = string.insert(player_data.gui_program_input.text, signal_str, pos)
-          fcpu_update_program(player_data.current_fcpu, player_data.gui_program_input.text)
-        end
-      end)
-    },
-  }
-}
-
-gui.add_templates{
-  pushers = {
-    horizontal = {type="empty-widget", style_mods={horizontally_stretchable=true}},
-    vertical = {type="empty-widget", style_mods={vertically_stretchable=true}}
-  },
-  frame_title = {type="label", style="frame_title"},
-  frame_action_button = {type="sprite-button", style="frame_action_button", mouse_button_filter={"left"}},
-  drag_handle = {type="empty-widget", name="drag-handle", style="draggable_space_header", style_mods={minimal_width=30, height=24, right_margin=4, horizontally_stretchable=true}},
-  close_button = {template="frame_action_button", sprite="utility/close_white", hovered_sprite="utility/close_black"},
-  heading_2 = {type="frame", style="invisible_frame_with_title"},
-  control_button = function(name, sprite, color)
-    return {type="sprite-button", style="tool_button"..(color and "_"..color or ""), name=name.."-program", sprite="fcpu-"..sprite.."-sprite", save_as="gui_"..name.."_button", handlers="widget."..name.."_program"}
-  end,
-  slot_button = function(name)
-    return {type="sprite-button", style="slot_button_in_shallow_frame", name=""..name.."-inspect", tooltip=""..name..""}
-  end,
-  tool_button = function(name, sprite, color, ...)
-    return table.merge({type="sprite-button", style="shortcut_bar_button_small"..(color and "_"..color or ""), name=name.."-program", sprite="fcpu-"..sprite.."-sprite", handlers="widget."..name.."_program"}, ...)
-  end,
-}
-
-local function CreateWidget(player)
+local function CreateWidget_Main(player)
   local rootGui = player.gui.screen -- mod_gui.get_frame_flow({gui={left=player.gui.screen}})
   if rootGui["fcpu-widget"] then
     rootGui["fcpu-widget"].destroy()
@@ -251,7 +107,6 @@ local function CreateWidget(player)
       }},
 
       {type="flow", name="footer", children={
-        --{template="drag_handle", style_mods={horizontally_stretchable=true, height=32}}
       }},
     }}
   })
@@ -259,7 +114,6 @@ local function CreateWidget(player)
   elems.gui_fcpu.outer['editor-toolbar']['insert-signal-to-program'].elem_value = defaultToolbarInsertSignal
   elems.gui_fcpu.titlebar.label.drag_target = elems.gui_fcpu
   elems.gui_fcpu.titlebar['drag-handle'].drag_target = elems.gui_fcpu
-  --elems.gui_fcpu.footer['drag-handle'].drag_target = elems.gui_fcpu
   elems.gui_fcpu.force_auto_center()
 
   return elems
@@ -269,7 +123,7 @@ function GuiWidgetOpen(player, entity)
   local player_data = get_player_data(player.index)
   local state = get_fcpu_state(entity)
 
-  local elems = CreateWidget(player)
+  local elems = CreateWidget_Main(player)
   if 0 < fcpu_debug_enabled then
     elems.gui_fcpu.titlebar.label.caption = elems.gui_fcpu.titlebar.label.caption.." #"..entity.unit_number
   end
@@ -411,6 +265,153 @@ function GuiEntityCloseWidget(entity)
   end
 end
 
+-------------------------------------------------------------------------------------------------------
+
+local defaultToolbarInsertSignal = {type='virtual', name='signal-dot'}
+
+function string.insert(str1, str2, pos)
+  return str1:sub(1,pos)..str2..str1:sub(pos+1)
+end
+
+local function mixPlayerData(proc)
+  return function(event)
+    local player_data, player = get_player_data(event.player_index)
+    proc(player_data, player, event)
+    set_player_data(event.player_index, player_data)
+  end
+end
+
+gui.add_handlers{
+  widget = {
+    close_button = {
+      on_gui_click = function(event)
+        GuiWidgetClose(event.player_index)
+      end
+    },
+    program_input = {
+      on_gui_text_changed = mixPlayerData(function(player_data, player, event)
+        local element = event.element
+        local lines = {};
+        for m in (element.text..'\n'):gmatch("(.-)\n") do
+            table.insert(lines, m);
+        end
+        if #lines > MC_LINES or #lines == MC_LINES and lines[#lines] == '\n' then
+          local c = #lines - MC_LINES
+          for i = 1, MC_LINES do
+            if c == 0 then break end
+            if lines[i] == "" then
+              table.remove(lines, i)
+              c = c - 1
+            end
+          end
+          if 0 < c then
+            for i = 1, c do
+              table.remove(lines, #lines)
+            end
+          end
+          element.text = table.concat(lines, '\n')
+        end
+        fcpu_update_program(player_data.current_fcpu, element.text)
+      end)
+    },
+    enable_program = {
+      on_gui_switch_state_changed = mixPlayerData(function(player_data, player, event)
+        local state = get_fcpu_state(player_data.current_fcpu)
+        if event.element then
+          if event.element.switch_state == "right" then
+            state.disabled = nil
+            if not Controller.is_running(state) then
+              player_data.gui_fcpu.outer.error_message.caption = ""
+              Controller.compile(state)
+              Controller.run(state)
+            end
+          else
+            state.disabled = true -- halt will clear output registers
+            Controller.halt(state)
+          end
+          Entity.set_data(player_data.current_fcpu, state)
+        end
+      end)
+    },
+    run_program = {
+      on_gui_click = mixPlayerData(function(player_data)
+        local state = get_fcpu_state(player_data.current_fcpu)
+        player_data.gui_fcpu.outer.error_message.caption = ""
+        Controller.compile(state)
+        Controller.run(state)
+        Entity.set_data(player_data.current_fcpu, state)
+      end)
+    },
+    halt_program = {
+      on_gui_click = mixPlayerData(function(player_data)
+        local state = get_fcpu_state(player_data.current_fcpu)
+        Controller.halt(state)
+        Entity.set_data(player_data.current_fcpu, state)
+      end)
+    },
+    step_program = {
+      on_gui_click = mixPlayerData(function(player_data)
+        local state = get_fcpu_state(player_data.current_fcpu)
+        player_data.gui_fcpu.outer.error_message.caption = ""
+        Controller.compile(state)
+        Controller.step(state)
+        Entity.set_data(player_data.current_fcpu, state)
+      end)
+    },
+    copy_program = {
+      on_gui_click = mixPlayerData(function(player_data)
+        player_data.program_clipboard = player_data.gui_program_input.text
+      end)
+    },
+    paste_program = {
+      on_gui_click = mixPlayerData(function(player_data)
+        if player_data.program_clipboard then
+          player_data.gui_program_input.text = player_data.program_clipboard
+          fcpu_update_program(player_data.current_fcpu, player_data.gui_program_input.text)
+        end
+      end)
+    },
+    insert_signal_to_program = {
+      on_gui_elem_changed = mixPlayerData(function(player_data, player, event)
+        local signal = event.element.elem_value
+        if signal then
+          if signal.type == 'virtual' then
+            signal.type = 'virtual-signal'
+          end
+          local signal_str = '['.. signal.type ..'='.. signal.name ..']'
+          event.element.elem_value = defaultToolbarInsertSignal
+          -- see: https://forums.factorio.com/viewtopic.php?f=28&t=88330
+          local pos = player_data.gui_program_input.text:len()
+          player_data.gui_program_input.text = string.insert(player_data.gui_program_input.text, signal_str, pos)
+          fcpu_update_program(player_data.current_fcpu, player_data.gui_program_input.text)
+        end
+      end)
+    },
+  }
+}
+
+gui.add_templates{
+  pushers = {
+    horizontal = {type="empty-widget", style_mods={horizontally_stretchable=true}},
+    vertical = {type="empty-widget", style_mods={vertically_stretchable=true}}
+  },
+  frame_title = {type="label", style="frame_title"},
+  frame_action_button = {type="sprite-button", style="frame_action_button", mouse_button_filter={"left"}},
+  drag_handle = {type="empty-widget", name="drag-handle", style="draggable_space_header", style_mods={minimal_width=30, height=24, right_margin=4, horizontally_stretchable=true}},
+  close_button = {template="frame_action_button", sprite="utility/close_white", hovered_sprite="utility/close_black"},
+  heading_2 = {type="frame", style="invisible_frame_with_title"},
+  control_button = function(name, sprite, color, handler)
+    return {type="sprite-button", style="tool_button"..(color and "_"..color or ""), name=name.."-program", sprite="fcpu-"..sprite.."-sprite", save_as="gui_"..name.."_button", handlers="widget."..(handler or name.."_program")}
+  end,
+  slot_button = function(name)
+    return {type="sprite-button", style="slot_button_in_shallow_frame", name=""..name.."-inspect", tooltip=""..name..""}
+  end,
+  tool_button = function(name, sprite, color, ...)
+    return table.merge({type="sprite-button", style="shortcut_bar_button_small"..(color and "_"..color or ""), name=name.."-program", sprite="fcpu-"..sprite.."-sprite", handlers="widget."..name.."_program"}, ...)
+  end,
+}
+
+-------------------------------------------------------------------------------------------------------
 
 gui.register_handlers()
 
@@ -467,8 +468,8 @@ end)
 
 script.on_event(defines.events.on_runtime_mod_setting_changed, UpdateModSetting)
 
-
 -------------------------------------------------------------------------------------------------------
+
 local migration = require("__flib__.migration")
 local migrations = require("src/migrations.lua")
 
