@@ -52,7 +52,7 @@ function io.make_signal(signal_id, countstr)
     if count == nil then
       assert.exception("Can't parse count '".. (countstr or 'nil') .."'")
     end
-    return { type = 'signal', signal = signal_id, count = count }
+    return { type = 'signal', signal = signal_id, count = count or 0 }
   end
 end
 
@@ -100,6 +100,11 @@ local function output_get(index)
 end
 
 local function output_set(index, signal)
+  if signal.count == 1/0 then
+    signal.count = 2147483647
+  elseif signal.count == -1/0 then
+    signal.count = -2147483648
+  end
   local params = control.parameters
   --params.parameters.first_constant = signal.count
   --params.parameters.output_signal = signal.signal
@@ -219,11 +224,19 @@ end
 
 function io.register_getraw(index)
   assert.regs_index_range(index, MC_REGS)
+  if regs[index] or not regs[index].count then
+    regs[index].count = 0
+  end
   return regs[index]
 end
 
 function io.register_setraw(index, signal)
   assert.regs_index_range(index, MC_REGS)
+  if signal.count == 1/0 then
+    signal.count = 2147483647
+  elseif signal.count == -1/0 then
+    signal.count = -2147483648
+  end
   regs[index] = signal
 end
 

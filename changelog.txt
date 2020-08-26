@@ -5,6 +5,7 @@ Date: ????
     - Cleaned-up fCPU state and moved some of it into player_data.
   Bugfixes:
     - Fixed closing widget with `E` now do not open Character widget.
+    - Fixed inf value (https://mods.factorio.com/mod/fcpu/discussion/5f4692c016d864df7ac0b531).
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.8
 Date: 2020-08-25
