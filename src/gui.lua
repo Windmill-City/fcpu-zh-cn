@@ -4,14 +4,12 @@ local gui = require("__flib__.gui")
 
 -------------------------------------------------------------------------------------------------------
 
-local function signalToSpritePath(signal)
-  if signal then
-    if signal.type == "virtual" then
-      return "virtual-signal/" .. signal.name
-    elseif signal.name then
-      return signal.type .. '/' .. signal.name
-    end
+local function CreateWidget_MemoryView(player)
+  local rootGui = player.gui.screen -- mod_gui.get_frame_flow({gui={left=player.gui.screen}})
+  if rootGui["fcpu-memory-widget"] then
+    rootGui["fcpu-memory-widget"].destroy()
   end
+
 end
 
 local function CreateWidget_Main(player)
@@ -39,6 +37,8 @@ local function CreateWidget_Main(player)
           gui.templates.control_button("halt", "stop", "red"),
           gui.templates.control_button("run", "play", "green"),
           gui.templates.control_button("step", "next"),
+          {template="pushers.horizontal"},
+          gui.templates.control_button("memory", "memory", "blue", "view_memory"),
           {template="pushers.horizontal"},
           {type="switch", style_mods={ right_margin=10 }, left_label_caption={"gui-constant.off"}, right_label_caption={"gui-constant.on"}, save_as="gui_enable_switch", handlers="widget.enable_program"},
         }},
@@ -174,6 +174,16 @@ local function UpdateLines(element, state)
 end
 
 function GuiWidgetUpdate(player_data, state)
+  local signalToSpritePath = function(signal)
+    if signal then
+      if signal.type == "virtual" then
+        return "virtual-signal/" .. signal.name
+      elseif signal.name then
+        return signal.type .. '/' .. signal.name
+      end
+    end
+  end
+
   -- Enable/Disable the run/step button
   if player_data.gui_run_button and player_data.gui_run_button.valid then
     if Controller.is_running(state) then
@@ -381,6 +391,11 @@ gui.add_handlers{
           player_data.gui_program_input.text = string.insert(player_data.gui_program_input.text, signal_str, pos)
           fcpu_update_program(player_data.current_fcpu, player_data.gui_program_input.text)
         end
+      end)
+    },
+    view_memory = {
+      on_gui_click = mixPlayerData(function(player_data, player)
+        CreateWidget_MemoryView(player)
       end)
     },
   }

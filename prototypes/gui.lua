@@ -71,6 +71,15 @@ data:extend{
     width = 24,
     height = 24
   },
+  {
+    type = "sprite",
+    name = "fcpu-memory-sprite",
+    filename = "__core__/graphics/icons/mip/grid-view.png",
+    x = 0,
+    y = 0,
+    width = 32,
+    height = 32
+  },
 }
 --[[
 for i = 1, MC_LINES do

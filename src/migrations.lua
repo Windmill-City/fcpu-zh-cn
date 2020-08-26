@@ -10,6 +10,14 @@ local function foreach_fcpu(proc)
 end
 
 return {
+  ["0.0.1"] = function()
+    foreach_fcpu(function(fcpu, state)
+      state.instruction_pointer = state.program_counter
+      state.program_counter = nil
+      Entity.set_data(fcpu, state)
+    end)
+  end,
+
   ["0.1.13"] = function()
     foreach_fcpu(function(fcpu, state)
       state.entity = fcpu

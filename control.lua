@@ -87,7 +87,9 @@ script.on_event(defines.events.on_tick, function(event)
       end
     else
       GuiEntityCloseWidget(cpu)
-      table.remove(global.fcpus, global.last_index)
+      --table.remove(global.fcpus, global.last_index)
+      global.fcpus[global.last_index] = global.fcpus[#global.fcpus]
+      global.fcpus[#global.fcpus] = nil
     end
 
     c = c + 1
