@@ -100,7 +100,7 @@ local function output_get(index)
 end
 
 local function output_set(index, signal)
-  assert.check(math.abs(signal.count) ~= 1/0, "Division by zero")
+  assert.check(math.abs(signal.count or 0) ~= 1/0, "Division by zero")
   local params = control.parameters
   --params.parameters.first_constant = signal.count
   --params.parameters.output_signal = signal.signal
@@ -228,7 +228,7 @@ end
 
 function io.register_setraw(index, signal)
   assert.regs_index_range(index, MC_REGS)
-  assert.check(math.abs(signal.count) ~= 1/0, "Division by zero")
+  assert.check(math.abs(signal.count or 0) ~= 1/0, "Division by zero")
   regs[index] = signal
 end
 
