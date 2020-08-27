@@ -8,15 +8,15 @@ Date: 2020-08-27
   Features:
     - Added error line coloring.
   Bugfixes:
-    - Fixed typo introduced in v0.2.9 .
+    - Typo introduced in v0.2.9 .
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.9
 Date: 2020-08-26
   Changes:
     - Cleaned-up fCPU state and moved some of it into player_data.
   Bugfixes:
-    - Fixed closing widget with `E` now do not open Character widget.
-    - Fixed inf value (https://mods.factorio.com/mod/fcpu/discussion/5f4692c016d864df7ac0b531).
+    - Closing widget with `E` now do not open Character widget.
+    - Infinity value handling (https://mods.factorio.com/mod/fcpu/discussion/5f4692c016d864df7ac0b531).
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.8
 Date: 2020-08-25
