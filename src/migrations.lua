@@ -9,6 +9,15 @@ local function foreach_fcpu(proc)
   end
 end
 
+local function foreach_player(proc)
+  for _, player in pairs(game.players) do
+    local player_data = get_player_data(player.index)
+    if player_data then
+      proc(player, player_data)
+    end
+  end
+end
+
 return {
   ["0.0.1"] = function()
     foreach_fcpu(function(fcpu, state)
@@ -74,6 +83,16 @@ return {
       state.gui_line_numbers = nil
       state.gui_program_input = nil
       Entity.set_data(fcpu, state)
+    end)
+  end,
+
+  ["0.3.0"] = function()
+    foreach_player(function(player, player_data)
+      if player_data.gui_fcpu then
+        player_data.gui_error_message = player_data.gui_fcpu['error_message']
+        player_data.gui_editor_toolbar = player_data.gui_fcpu['editor-toolbar']
+        set_player_data(player.index, player_data)
+      end
     end)
   end,
 }
