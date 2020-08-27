@@ -100,11 +100,7 @@ local function output_get(index)
 end
 
 local function output_set(index, signal)
-  if signal.count == 1/0 then
-    signal.count = 2147483647
-  elseif signal.count == -1/0 then
-    signal.count = -2147483648
-  end
+  assert.check(math.abs(signal.count) ~= 1/0, "Division by zero")
   local params = control.parameters
   --params.parameters.first_constant = signal.count
   --params.parameters.output_signal = signal.signal
@@ -224,7 +220,7 @@ end
 
 function io.register_getraw(index)
   assert.regs_index_range(index, MC_REGS)
-  if regs[index] or not regs[index].count then
+  if regs[index] and not regs[index].count then
     regs[index].count = 0
   end
   return regs[index]
@@ -232,11 +228,7 @@ end
 
 function io.register_setraw(index, signal)
   assert.regs_index_range(index, MC_REGS)
-  if signal.count == 1/0 then
-    signal.count = 2147483647
-  elseif signal.count == -1/0 then
-    signal.count = -2147483648
-  end
+  assert.check(math.abs(signal.count) ~= 1/0, "Division by zero")
   regs[index] = signal
 end
 
@@ -260,9 +252,7 @@ end
 
 function io.register_set_count(index_expr, count)
   local value = io.register_get(index_expr)
-  if count ~= count then
-    assert.exception("Division by zero")
-  end
+  assert.check(count == count, "Division by zero")
   value.count = count
   value.fixedpoint = false
   io.register_set(index_expr, value)

@@ -162,9 +162,9 @@ local function UpdateLines(element, state)
     local line = tostring(i)
     if i < 10 then line = " "..i end
     if i == state.error_line then
-      line = line..'!'
+      line = '[color=red]'..line..'![/color]'
     elseif i == state.instruction_pointer then
-      line = line..'>'
+      line = '[color=blue]'..line..'>[/color]'
     else
       line = line..' '
     end

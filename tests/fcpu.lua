@@ -26,7 +26,7 @@ function createFCPU(input)
     local out = {
       signals = {},
       get_signal = function(signal)
-        return bus and bus[signal.name] or nil
+        return bus and bus[signal.name] or 0
       end
     }
     if bus then
