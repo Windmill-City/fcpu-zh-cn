@@ -14,6 +14,12 @@ data:extend{
     linked_game_control = "close-gui",
   },
   {
+    type = "custom-input",
+    name = "fcpu-escape",
+    key_sequence = "",
+    linked_game_control = "toggle-menu",
+  },
+  {
     type = "font",
     name = "fcpu-mono",
     from = "fcpu-mono",

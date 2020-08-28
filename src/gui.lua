@@ -502,6 +502,9 @@ end)
 script.on_event("fcpu-close", function(event)
   GuiWidgetClose(event.player_index)
 end)
+script.on_event("fcpu-escape", function(event)
+  GuiWidgetClose(event.player_index)
+end)
 
 -- Handle player move event to close GUI when out of range.
 script.on_event(defines.events.on_player_changed_position, function(event)
