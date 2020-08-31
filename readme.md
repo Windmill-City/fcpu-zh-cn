@@ -377,13 +377,14 @@ TODO
 [comment]: <> (md2frt-skip-section-begin)
 
 # Examples
-See: https://mods.factorio.com/mod/fcpu/faq
+See: https://mods.factorio.com/mod/fcpu/faq and [Discord channel](https://discord.gg/pCTz9hW)
 
 
 # Community
-* [Reddit](https://www.reddit.com/r/factorio/comments/i8e7dh/new_mod_fcpu/) for general discussion
+* [Discord](https://discord.com/invite/vPnDPhV) for general discussion
 * [Factorio Mod portal](https://mods.factorio.com/mod/fcpu/discussion) for bug reports
 * [Factorio Forum](https://forums.factorio.com/viewtopic.php?f=190&t=88141) for technical details and mod integration
+* [Reddit](https://www.reddit.com/r/factorio/comments/i8e7dh/new_mod_fcpu/)
 
 
 # TODOs
@@ -393,6 +394,7 @@ See [here](https://www.buymeacoffee.com/p/100444)
 # Dear supporters
 * Lukáš Venhoda (v0.2.0 update)
 * Someone (v0.2.12 update)
+
 
 # Support fCPU
 [![Buy Me A Coffee](https://cdn.buymeacoffee.com/buttons/lato-orange.png)](https://www.buymeacoffee.com/konstg)
