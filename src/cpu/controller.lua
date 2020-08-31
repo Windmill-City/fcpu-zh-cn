@@ -1,4 +1,5 @@
 local Compiler = require('src/cpu/compiler')
+local Builder = require('src/cpu/hdl_builder')
 
 PSTATE_HALTED = 0
 PSTATE_RUNNING = 1

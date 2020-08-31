@@ -4,6 +4,16 @@ local gui = require("__flib__.gui")
 
 local defaultToolbarInsertSignal = {type='virtual', name='signal-dot'}
 
+local signalToSpritePath = function(signal)
+  if signal then
+    if signal.type == "virtual" then
+      return "virtual-signal/" .. signal.name
+    elseif signal.name then
+      return signal.type .. '/' .. signal.name
+    end
+  end
+end
+
 -------------------------------------------------------------------------------------------------------
 
 gui.add_templates{
@@ -26,24 +36,32 @@ gui.add_templates{
 
   heading_2 = {type="frame", style="invisible_frame_with_title"},
   heading_3 = {type="label", style="heading_3_label", style_mods={padding=4}},
-  slot_button = function(name)
-    return {type="sprite-button", style="slot_button_in_shallow_frame", name=""..name.."-inspect", tooltip=""..name..""}
+  slot_button = function(name, title)
+    return {type="sprite-button", style="slot_button_in_shallow_frame", name=name.."-inspect", tooltip=(title or name)}
   end,
-  slot_inventory = function(name)
-    return {type="sprite-button", style="inventory_slot", name=""..name.."-inspect", tooltip=""..name..""}
+  slot_inventory = function(name, title)
+    return {type="sprite-button", style="inventory_slot", name=name .."-inspect", tooltip=(title or name)}
   end,
 }
+
+-------------------------------------------------------------------------------------------------------
 
 local function CreateWidget_MemoryView(rootGui)
   local cellslots = {}
   for i = 1, MC_MEMORY do
-    table.insert(cellslots, gui.templates.slot_inventory('mem'..i))
+    cellslots[#cellslots + 1] = gui.templates.slot_inventory('index-'..i, '['..i..']')
+  end
+
+  local membricks = {}
+  for i = 1, MC_MEMORY_BRICKS do
+    membricks[#membricks + 1] = 'mem'.. i
   end
 
   local elems = gui.build(rootGui, {
-    --{type="line", name="fcpu-panels-separator", direction="vertical"},
-
     {type="frame", name="fcpu-memory-view", save_as="gui_memory_view", style="inside_shallow_frame_with_padding", direction="vertical", children={
+      {template="heading_3", caption={"gui-fcpu.memory-brick"}},
+      {type='drop-down', save_as='gui_memory_brick', items={ table.unpack(membricks) }, selected_index=1, handlers="memory.memory_brick"},
+
       {template="heading_3", caption={"gui-fcpu.memory-view"}},
       {type="scroll-pane", style="scroll_pane_in_shallow_frame", direction="vertical", children={
         {type="table", save_as="gui_memory_cells", style="slot_table", column_count=8, children={ table.unpack(cellslots) }},
@@ -63,6 +81,28 @@ local function DestroyWidget_MemoryView(player_data)
   player_data.gui_memory_view = nil
   player_data.gui_memory_cells = nil
 end
+
+local function UpdateWidget_MemoryView(player_data)
+  local index = player_data.gui_memory_brick.selected_index
+  local cells = player_data.gui_memory_cells.children
+  local state = get_fcpu_state(player_data.current_fcpu)
+
+  if state and cells then
+    index = math.max(1, math.min(index, MC_MEMORY_BRICKS))
+
+    -- TODO: this is draft implem,entation for GUI design check
+    for i = 1, MC_MEMORY do
+      local reg = state.regs[(i - 1) % 8 + 1]
+      if reg then
+        local button = cells[i]
+        button.sprite = signalToSpritePath(reg.signal)
+        button.number = reg.count
+      end
+    end
+  end
+end
+
+-------------------------------------------------------------------------------------------------------
 
 local function CreateWidget_Main(rootGui)
   local regslots = {}
@@ -181,7 +221,7 @@ function GuiWidgetOpen(player, entity)
   if 0 < fcpu_debug_enabled then
     elems.gui_fcpu.titlebar.label.caption = elems.gui_fcpu.titlebar.label.caption.." #"..entity.unit_number
   end
-  player_data = table.merge(player_data, elems)
+  player_data = table.dictionary_combine(player_data, elems, CreateWidget_MemoryView(elems.gui_fcpu["fcpu-panels"]))
 
   player_data.gui_program_input.text = state.program_text
   GuiWidgetUpdate(player_data, state)
@@ -228,16 +268,6 @@ local function UpdateLines(element, state)
 end
 
 function GuiWidgetUpdate(player_data, state)
-  local signalToSpritePath = function(signal)
-    if signal then
-      if signal.type == "virtual" then
-        return "virtual-signal/" .. signal.name
-      elseif signal.name then
-        return signal.type .. '/' .. signal.name
-      end
-    end
-  end
-
   -- Enable/Disable the run/step button
   if player_data.gui_run_button and player_data.gui_run_button.valid then
     if Controller.is_running(state) then
@@ -284,6 +314,10 @@ function GuiWidgetUpdate(player_data, state)
   -- Update the program lines in the GUI
   if player_data.gui_line_numbers and player_data.gui_line_numbers.valid then
     UpdateLines(player_data.gui_line_numbers, state)
+  end
+
+  if player_data.gui_memory_view and player_data.gui_memory_view.valid then
+    UpdateWidget_MemoryView(player_data, state)
   end
 end
 
@@ -340,6 +374,15 @@ local function mixPlayerData(proc)
 end
 
 gui.add_handlers{
+  memory={
+    memory_brick = {
+      on_gui_selection_state_changed = mixPlayerData(function(player_data, player, event)
+        if player_data.gui_memory_view then
+          UpdateWidget_MemoryView(player_data)
+        end
+      end)
+    },
+  },
   widget = {
     close_button = {
       on_gui_click = function(event)
@@ -452,7 +495,7 @@ gui.add_handlers{
         else
           local rootGui = player_data.gui_fcpu["fcpu-panels"]
           local elems = CreateWidget_MemoryView(rootGui)
-          player_data = table.merge(player_data, elems)
+          player_data = table.dictionary_combine(player_data, elems)
         end
       end)
     },
