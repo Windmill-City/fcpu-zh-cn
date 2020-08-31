@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.12
-Date: ????
+Date: 2020-08-31
   Features:
     - Added test and jump mnemonics (https://mods.factorio.com/mod/fcpu/discussion/5f49bc5bc5438f3510d94409).
   Fixes:
