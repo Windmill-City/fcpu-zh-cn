@@ -32,11 +32,7 @@ function io.make_value(numstr, fixedpoint)
   if number == nil then
     assert.exception("Can't parse number '".. numstr .."'")
   end
-  if fixedpoint then
-    return { type = 'value', count = number * MC_FIXEDPOINT, fixedpoint = true }
-  else
-    return { type = 'value', count = number }
-  end
+  return { type = 'value', count = number }
 end
 
 function io.make_address(addr, is_ptr)
@@ -174,11 +170,7 @@ end
 
 function io.value_get(_)
   assert.check(_.type == 'value')
-  if _.fixedpoint then
-    return _.count / MC_FIXEDPOINT
-  else
-    return _.count
-  end
+  return _.count
 end
 
 function io.signal_name(_)
@@ -254,14 +246,6 @@ function io.register_set_count(index_expr, count)
   local value = io.register_get(index_expr)
   assert.check(count == count, "Division by zero")
   value.count = count
-  value.fixedpoint = false
-  io.register_set(index_expr, value)
-end
-
-function io.register_set_fp(index_expr, count)
-  local value = io.register_get(index_expr)
-  value.count = count * MC_FIXEDPOINT
-  value.fixedpoint = true
   io.register_set(index_expr, value)
 end
 

@@ -195,11 +195,7 @@ function GuiWidgetUpdate(player_data, state)
       if reg then
         local button = player_data.gui_inspector['reg'..i..'-inspect']
         button.sprite = signalToSpritePath(reg.signal)
-        if reg.fixedpoint then
-          button.number = reg.count / MC_FIXEDPOINT
-        else
-          button.number = reg.count
-        end
+        button.number = reg.count
       end
     end
   end

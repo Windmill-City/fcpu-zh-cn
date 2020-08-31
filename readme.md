@@ -258,6 +258,22 @@ Each instruction take one or more operands and modify them or state of fCPU.
   *dst = dst rot>> src*
 
 
+### Flow control
+
+* `jmp` addr[**C**/**A**/**L**/**R**]  
+  Jump to address or label.
+
+* `hlt`  
+  *Halt* program execution until it will be resumed by player or by *Run* signal from any **i**nput wire.
+
+* `slp` cnt[**C**/**R**]  
+  Sleep for specified ticks count.
+
+* `bkr` cnt[**C**/**R**]  
+  `bkg` cnt[**C**/**R**]  
+  Block until there are at least *cnt* *r*ed/*g*reen signals.
+
+
 ### Testing operands values
 
 If test succeeded, then the following instruction will be executed.  
@@ -305,21 +321,47 @@ jmp :counter
   Types are different.  
 
 
-### Flow control
+### Branching
 
-* `jmp` addr[**C**/**A**/**L**/**R**]  
-  Jump to address or label.
+This is the same as testing and then immediately jump if test succeeded.  
+The mnemonics same as in testing cases, but with `b` instead of `t` and uses extra operand for jump address.  
 
-* `hlt`  
-  *Halt* program execution until it will be resumed by player or by *Run* signal from any **i**nput wire.
+```
+clr
+:counter
+inc r1
+blt r1 10 :counter
+; r1 now equal to 10
+```
 
-* `slp` cnt[**C**/**R**]  
-  Sleep for specified ticks count.
+* `beq` a[**C**/**R**/**I**] b[**C**/**R**/**I**] addr[**C**/**A**/**L**/**R**]  
+  Equal.  
+  *a == b*
+* `bne` a[**C**/**R**/**I**] b[**C**/**R**/**I**] addr[**C**/**A**/**L**/**R**]  
+  Not equal.  
+  *a != b*
 
-* `bkr` cnt[**C**/**R**]  
-  `bkg` cnt[**C**/**R**]  
-  Block until there are at least *cnt* *r*ed/*g*reen signals.
+* `bgt` a[**C**/**R**/**I**] b[**C**/**R**/**I**] addr[**C**/**A**/**L**/**R**]  
+  Greater than.  
+  *a > b*
 
+* `blt` a[**C**/**R**/**I**] b[**C**/**R**/**I**] addr[**C**/**A**/**L**/**R**]  
+  Less than.  
+  *a < b*
+
+* `bge` a[**C**/**R**/**I**] b[**C**/**R**/**I**] addr[**C**/**A**/**L**/**R**]  
+  Greater or equal than.  
+  *a >= b*
+
+* `ble` a[**C**/**R**/**I**] b[**C**/**R**/**I**] addr[**C**/**A**/**L**/**R**]  
+  Less or equal than.  
+  *a <= b*
+
+* `bas` a[**T**/**R**/**I**] b[**T**/**R**/**I**] addr[**C**/**A**/**L**/**R**]  
+  Branch if types are same.  
+
+* `bad` a[**T**/**R**/**I**] b[**T**/**R**/**I**] addr[**C**/**A**/**L**/**R**]  
+  Branch if types are different.  
 
 
 ## SIMD instructions
