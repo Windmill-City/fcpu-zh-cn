@@ -143,13 +143,13 @@ local fcpu, state = ExecuteTest(
   ]],
   {
     [defines.wire_type.green] = {
-      ['recipe=copper-plate'] = 1000,
+      ['item=copper-plate'] = 1000,
     },
     [defines.wire_type.red] = nil,
   },
   function(state, output)
-    return output[1].signal.type == 'recipe' and output[1].signal.name == 'copper-plate' and output[1].count == 1000
-    --return output.output_signal.type == 'recipe' and output.output_signal.name == 'copper-plate' and output.first_constant == 1000
+    return output[1].signal.type == 'item' and output[1].signal.name == 'copper-plate' and output[1].count == 1000
+    --return output.output_signal.type == 'item' and output.output_signal.name == 'copper-plate' and output.first_constant == 1000
   end
 )
 
@@ -157,19 +157,19 @@ local fcpu, state = ExecuteTest(
 local fcpu, state = ExecuteTest(
   'MOV',
   [[
-    mov reg1 10[recipe=iron-plate]
+    mov reg1 10[item=iron-plate]
     mov reg2 green1
     mov reg3 green2
   ]],
   {
     [defines.wire_type.green] = {
-      ['recipe=copper-plate'] = 1000,
-      ['recipe=steel-plate'] = 200,
+      ['item=copper-plate'] = 1000,
+      ['item=steel-plate'] = 200,
     },
     [defines.wire_type.red] = nil,
   },
   function(state, output)
-    return assert.result_signal(state.regs[1], {count=10, signal={type='recipe', name='iron-plate'}})
+    return assert.result_signal(state.regs[1], {count=10, signal={type='item', name='iron-plate'}})
     and ((state.regs[2].count == 1000 and state.regs[3].count == 200)
       or (state.regs[2].count == 200 and state.regs[3].count == 1000))
   end
@@ -181,12 +181,23 @@ local fcpu, state = ExecuteTest(
     sst reg1 [item=iron-plate]
     ssv reg1 10
     mov reg2 reg1
-    sst reg2 [recipe=copper-plate]
+    sst reg2 [item=copper-plate]
   ]],
   {},
   function(state, output)
     return assert.result_signal(state.regs[1], {count=10, signal={type='item', name='iron-plate'}})
-    and assert.result_signal(state.regs[2], {count=10, signal={type='recipe', name='copper-plate'}})
+    and assert.result_signal(state.regs[2], {count=10, signal={type='item', name='copper-plate'}})
+  end
+)
+
+local fcpu, state = ExecuteTest(
+  'Set Signal Value/Type (signed)',
+  [[
+    mov r1 -20.2[item=iron-plate]
+  ]],
+  {},
+  function(state, output)
+    return assert.result_signal(state.regs[1], {count=-20.2, signal={type='item', name='iron-plate'}})
   end
 )
 
@@ -195,7 +206,7 @@ local fcpu, state = ExecuteTest(
   'Swap signal/Type/Value',
   [[
     mov reg1 reg2 reg3 reg4 13[item=iron-plate]
-    mov reg5 reg6 reg7 reg8 61[recipe=copper-plate]
+    mov reg5 reg6 reg7 reg8 61[item=copper-plate]
     swp reg2 reg6
     swpt reg3 reg7
     swpv reg4 reg8
@@ -204,16 +215,16 @@ local fcpu, state = ExecuteTest(
   function(state, output)
     return
     assert.result_signal(state.regs[1], {count=13, signal={type='item', name='iron-plate'}}) and
-    assert.result_signal(state.regs[5], {count=61, signal={type='recipe', name='copper-plate'}}) and
+    assert.result_signal(state.regs[5], {count=61, signal={type='item', name='copper-plate'}}) and
 
-    assert.result_signal(state.regs[2], {count=61, signal={type='recipe', name='copper-plate'}}) and
+    assert.result_signal(state.regs[2], {count=61, signal={type='item', name='copper-plate'}}) and
     assert.result_signal(state.regs[6], {count=13, signal={type='item', name='iron-plate'}}) and
 
-    assert.result_signal(state.regs[3], {count=13, signal={type='recipe', name='copper-plate'}}) and
+    assert.result_signal(state.regs[3], {count=13, signal={type='item', name='copper-plate'}}) and
     assert.result_signal(state.regs[7], {count=61, signal={type='item', name='iron-plate'}}) and
 
     assert.result_signal(state.regs[4], {count=61, signal={type='item', name='iron-plate'}}) and
-    assert.result_signal(state.regs[8], {count=13, signal={type='recipe', name='copper-plate'}})
+    assert.result_signal(state.regs[8], {count=13, signal={type='item', name='copper-plate'}})
   end
 )
 
@@ -221,15 +232,15 @@ local fcpu, state = ExecuteTest(
 local fcpu, state = ExecuteTest(
   'Find In Red/Green',
   [[
-    fig reg1 [recipe=copper-plate]
-    fig reg2 [recipe=iron-plate]
-    fir reg3 [recipe=steel-plate]
+    fig reg1 [item=copper-plate]
+    fig reg2 [item=iron-plate]
+    fir reg3 [item=steel-plate]
     fir reg4 [item=iron-plate]
   ]],
   {
     [defines.wire_type.green] = {
-      ['recipe=copper-plate'] = 1000,
-      ['recipe=steel-plate'] = 200,
+      ['item=copper-plate'] = 1000,
+      ['item=steel-plate'] = 200,
     },
     [defines.wire_type.red] = {
       ['item=copper-plate'] = 40,
@@ -237,7 +248,7 @@ local fcpu, state = ExecuteTest(
     },
   },
   function(state, output)
-    return assert.result_signal(state.regs[1], {count=1000, signal={type='recipe', name='copper-plate'}})
+    return assert.result_signal(state.regs[1], {count=1000, signal={type='item', name='copper-plate'}})
     and assert.result_signal(state.regs[2], {count=0})
     and assert.result_signal(state.regs[3], {count=0})
     and assert.result_signal(state.regs[4], {count=300, signal={type='item', name='iron-plate'}})

@@ -94,7 +94,7 @@ local function parse(tokens)
   end
   local parseSignal = function(name)
     local token = consume()
-    local m = array_build{ string.match(token, '(%d*)%[([%a%-]+)[=%-]([%a%d%-_:,]+)%]') }
+    local m = array_build{ string.match(token, '(-?[%d%.]*)%[([%a%-]+)[=%-]([%a%d%-_:,]+)%]') }
     if m[2] and not (m[2] == 'item' or m[2] == 'fluid' or m[2] == 'virtual-signal') then
       assert.exception("Signal with type '".. (m[2] or 'nil') .."' is not supported")
     end
