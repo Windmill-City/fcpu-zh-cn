@@ -47,24 +47,21 @@ gui.add_templates{
 -------------------------------------------------------------------------------------------------------
 
 local function CreateWidget_MemoryView(rootGui)
-  local cellslots = {}
-  for i = 1, MC_MEMORY do
-    cellslots[#cellslots + 1] = gui.templates.slot_inventory('index-'..i, '['..i..']')
+  local memchannels = {}
+  for i = 1, MC_MEMORY_CHANNELS do
+    memchannels[#memchannels + 1] = 'mem'.. i
   end
-
-  local membricks = {}
-  for i = 1, MC_MEMORY_BRICKS do
-    membricks[#membricks + 1] = 'mem'.. i
-  end
+  memchannels[#memchannels+1] = { 'gui-fcpu-memviewer.channel-input-red' }
+  memchannels[#memchannels+1] = { 'gui-fcpu-memviewer.channel-input-green' }
 
   local elems = gui.build(rootGui, {
     {type="frame", name="fcpu-memory-view", save_as="gui_memory_view", style="inside_shallow_frame_with_padding", direction="vertical", children={
-      {template="heading_3", caption={"gui-fcpu.memory-brick"}},
-      {type='drop-down', save_as='gui_memory_brick', items={ table.unpack(membricks) }, selected_index=1, handlers="memory.memory_brick"},
+      {template="heading_3", caption={"gui-fcpu-memviewer.memory-channel"}},
+      {type='drop-down', save_as='gui_memory_channel', items={ table.unpack(memchannels) }, selected_index=1, handlers="memory.memory_channel"},
 
-      {template="heading_3", caption={"gui-fcpu.memory-view"}},
+      {template="heading_3", caption={"gui-fcpu-memviewer.memory-view"}},
       {type="scroll-pane", style="scroll_pane_in_shallow_frame", direction="vertical", children={
-        {type="table", save_as="gui_memory_cells", style="slot_table", column_count=8, children={ table.unpack(cellslots) }},
+        {type="table", save_as="gui_memory_cells", style="slot_table", column_count=8 --[[ will be populated in `MemoryView_UpdateFromTable` ]]},
       }}
     }}
   });
@@ -82,21 +79,67 @@ local function DestroyWidget_MemoryView(player_data)
   player_data.gui_memory_cells = nil
 end
 
-local function UpdateWidget_MemoryView(player_data)
-  local index = player_data.gui_memory_brick.selected_index
+local function MemoryView_UpdateFromTable(player_data, signals)
   local cells = player_data.gui_memory_cells.children
+  if cells then
+    -- add extra
+    for i = #cells + 1, math.max(MC_MEMORY_SLOTS_MIN, (signals and #signals or 0)) do
+      gui.build(player_data.gui_memory_cells, { gui.templates.slot_inventory('index-'..i, '['..i..']') })
+    end
+
+    local i = 1
+    -- show and setup visible
+    if signals then
+      for _, v in ipairs(signals) do
+        local cell = cells[i]
+        if v and cell then
+          cell.visible = true
+          cell.sprite = signalToSpritePath(v.signal)
+          cell.number = v.count
+        end
+        i = i + 1
+      end
+    end
+
+    -- clear `number`
+    while i <= MC_MEMORY_SLOTS_MIN and cells[i] do
+      cells[i].sprite = nil
+      cells[i].number = nil
+      i = i + 1
+    end
+
+    -- hide others
+    while i <= #cells and cells[i] and cells[i].visible do
+      cells[i].visible = false
+      i = i + 1
+    end
+  end
+end
+
+local function UpdateWidget_MemoryView(player_data)
+  if not player_data.gui_memory_channel then return end
+  local index = player_data.gui_memory_channel.selected_index
   local state = get_fcpu_state(player_data.current_fcpu)
 
-  if state and cells then
-    index = math.max(1, math.min(index, MC_MEMORY_BRICKS))
+  if state then
+    index = math.max(1, index)
 
-    -- TODO: this is draft implem,entation for GUI design check
-    for i = 1, MC_MEMORY do
-      local reg = state.regs[(i - 1) % 8 + 1]
-      if reg then
-        local button = cells[i]
-        button.sprite = signalToSpritePath(reg.signal)
-        button.number = reg.count
+    if index <= MC_MEMORY_CHANNELS then
+      -- TODO: this is draft implementation for GUI design check
+      MemoryView_UpdateFromTable(player_data, state.regs)
+    else
+      local wire_type
+
+      local control = state.entity.get_control_behavior()
+      if index == MC_MEMORY_CHANNELS + 1 then
+        wire_type = defines.wire_type.red
+      elseif index == MC_MEMORY_CHANNELS + 2 then
+        wire_type = defines.wire_type.green
+      end
+
+      if wire_type then
+        local input = control.get_circuit_network(wire_type, defines.circuit_connector_id.combinator_input)
+        MemoryView_UpdateFromTable(player_data, input and input.signals)
       end
     end
   end
@@ -368,14 +411,15 @@ end
 local function mixPlayerData(proc)
   return function(event)
     local player_data, player = get_player_data(event.player_index)
-    proc(player_data, player, event)
+    local newData = proc(player_data, player, event)
+    player_data = newData or player_data
     set_player_data(event.player_index, player_data)
   end
 end
 
 gui.add_handlers{
   memory={
-    memory_brick = {
+    memory_channel = {
       on_gui_selection_state_changed = mixPlayerData(function(player_data, player, event)
         if player_data.gui_memory_view then
           UpdateWidget_MemoryView(player_data)
@@ -495,7 +539,7 @@ gui.add_handlers{
         else
           local rootGui = player_data.gui_fcpu["fcpu-panels"]
           local elems = CreateWidget_MemoryView(rootGui)
-          player_data = table.dictionary_combine(player_data, elems)
+          return table.dictionary_combine(player_data, elems)
         end
       end)
     },
