@@ -392,7 +392,7 @@ See [here](https://www.buymeacoffee.com/p/100444)
 
 # Dear supporters
 * Lukáš Venhoda (v0.2.0 update)
-
+* Someone (v0.2.12 update)
 
 # Support fCPU
 [![Buy Me A Coffee](https://cdn.buymeacoffee.com/buttons/lato-orange.png)](https://www.buymeacoffee.com/konstg)
