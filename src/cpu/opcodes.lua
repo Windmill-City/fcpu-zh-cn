@@ -366,12 +366,13 @@ local opcodes = {
     local av = (as ~= nil)
     local bv = (bs ~= nil)
     if av ~= bv then
-      return jump_op(_[3])
+      return
     elseif av and bv then
       if not (as.type == bs.type and as.name == bs.name) then
-        return jump_op(_[3])
+        return
       end
     end
+    return jump_op(_[3])
   end,
   bad = function(_) -- bad a[T/R/I] b[T/R/I]
     assert.three(_)
@@ -380,12 +381,13 @@ local opcodes = {
     local av = (as ~= nil)
     local bv = (bs ~= nil)
     if not (av or bv) then
-      return jump_op(_[3])
+      return
     elseif av and bv then
       if not (as.type ~= bs.type or as.name ~= bs.name) then
-        return jump_op(_[3])
+        return
       end
     end
+    return jump_op(_[3])
   end,
 
   jmp = function(_)
