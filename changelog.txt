@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.13
 Date: ????
+  Changes:
+    - `out` should be replaced with explicit `out1`, except for `clr out` which is correct.
   Bugfixes:
     - `bas`, `bad` was accidentally inverted.
     - `crl out` now clears all output signals.

@@ -134,8 +134,8 @@ Each instruction take one or more operands and modify them or state of fCPU.
 * `clr` out  
   Clear all output values.
 
-* `clr` reg...[**R**/**O**]  
-  Clear specified registers.
+* `clr` dst...[**R**/**O**]  
+  Clear specified registers or output wires.
 
 * `mov` dst...[**R**/**O**] src[**V**/**T**/**S**/**R**/**I**]  
   Copy signal from source to destination.  

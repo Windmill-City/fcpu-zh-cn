@@ -13,6 +13,8 @@ assert = require('../src/cpu/assert')
 
 unit_number = 0
 
+function fcpu_update_blueprint() end
+
 function createFCPU(input)
   local fcpu = table.deepcopy(require('__stdlib__/faketorio/raw/arithmetic-combinator')['arithmetic-combinator'])
   unit_number = unit_number + 1
@@ -30,7 +32,13 @@ function createFCPU(input)
       end
     }
     if bus then
-      for k,v in pairs(bus) do
+      for _, s in pairs(bus) do
+        local k, v
+        for k_,v_ in pairs(s) do
+          k = k_
+          v = v_
+          break
+        end
         local t, n = string.match(k, '(%a+)=([%a%-]+)')
         table.insert(out.signals, { signal = { type = t, name = n }, count = v })
       end
@@ -137,19 +145,40 @@ end
 ----------------------------------------------------------------------------------------------------------------
 
 local fcpu, state = ExecuteTest(
-  'check output',
+  'check input/output',
   [[
-    mov out green1
+    mov out1 green1
+    mov out2 green2
+    mov out3 green3
   ]],
   {
     [defines.wire_type.green] = {
-      ['item=copper-plate'] = 1000,
+      {['item=iron-plate'] = 1000},
+      {['item=steel-plate'] = 2000},
+      {['item=copper-plate'] = 3000},
     },
     [defines.wire_type.red] = nil,
   },
   function(state, output)
-    return output[1].signal.type == 'item' and output[1].signal.name == 'copper-plate' and output[1].count == 1000
-    --return output.output_signal.type == 'item' and output.output_signal.name == 'copper-plate' and output.first_constant == 1000
+    return assert.result_signal(output[1], {count=1000, signal={type='item', name='iron-plate'}})
+       and assert.result_signal(output[2], {count=2000, signal={type='item', name='steel-plate'}})
+       and assert.result_signal(output[3], {count=3000, signal={type='item', name='copper-plate'}})
+  end
+)
+
+local fcpu, state = ExecuteTest(
+  'check `crl out`',
+  [[
+    mov out1 1[item=copper-plate]
+    mov out2 2[item=copper-plate]
+    mov out3 3[item=copper-plate]
+    clr out
+  ]],
+  {},
+  function(state, output)
+    return assert.result_signal(output[1], NULL_SIGNAL)
+       and assert.result_signal(output[2], NULL_SIGNAL)
+       and assert.result_signal(output[3], NULL_SIGNAL)
   end
 )
 
@@ -163,8 +192,8 @@ local fcpu, state = ExecuteTest(
   ]],
   {
     [defines.wire_type.green] = {
-      ['item=copper-plate'] = 1000,
-      ['item=steel-plate'] = 200,
+      {['item=copper-plate'] = 1000},
+      {['item=steel-plate'] = 200},
     },
     [defines.wire_type.red] = nil,
   },
@@ -239,12 +268,12 @@ local fcpu, state = ExecuteTest(
   ]],
   {
     [defines.wire_type.green] = {
-      ['item=copper-plate'] = 1000,
-      ['item=steel-plate'] = 200,
+      {['item=copper-plate'] = 1000},
+      {['item=steel-plate'] = 200},
     },
     [defines.wire_type.red] = {
-      ['item=copper-plate'] = 40,
-      ['item=iron-plate'] = 300,
+      {['item=copper-plate'] = 40},
+      {['item=iron-plate'] = 300},
     },
   },
   function(state, output)

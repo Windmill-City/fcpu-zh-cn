@@ -105,11 +105,12 @@ end
 
 
 function assert.result_signal(reg, signal)
-  return (signal.count == nil or reg.count == signal.count) and
-  (signal.signal == nil or
-    (signal.signal.type == nil or reg.signal.type == signal.signal.type) and
-    (signal.signal.name == nil or reg.signal.name == signal.signal.name)
-  )
+  return
+    (signal.count == nil or reg.count == signal.count) and
+    (signal.signal == nil or
+      (signal.signal.type == nil or reg.signal.type == signal.signal.type) and
+      (signal.signal.name == nil or reg.signal.name == signal.signal.name)
+    )
 end
 
 function assert.bind()
