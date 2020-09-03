@@ -133,7 +133,7 @@ local function parse(tokens)
     if peek() == 'out' then
       consume()
       assert.deprecated('0.2.0', 'You should replace `out` with `out1`')
-      address = { addr = 1, pointer = false}
+      address = { addr = nil, pointer = false }
     else
       address = parseAddress(name)
     end
@@ -149,8 +149,6 @@ local function parse(tokens)
         return parseLabel()
       elseif string.find(peek(), '%[') then
         return parseSignal()
-      --elseif string.find(peek(), '[%-]?%d+%.%d*') == 1 then
-      --  return parseConstant(true)
       elseif string.find(peek(), '[%-]?%d') == 1 then
         return parseConstant()
       else

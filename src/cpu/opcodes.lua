@@ -66,7 +66,7 @@ local opcodes = {
   clr = function(_)
     if 0 < #_ then
       for i, expr in ipairs(_) do
-        if expr == 'out' then
+        if expr and expr.addr == nil and expr.color == 'out' then
           io.output_clear()
         else
           io.setsignal(_[i], NULL_SIGNAL, {'register', 'wire'})

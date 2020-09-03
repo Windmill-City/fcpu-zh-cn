@@ -3,6 +3,7 @@ Version: 0.2.13
 Date: ????
   Bugfixes:
     - `bas`, `bad` was accidentally inverted.
+    - `crl out` now clears all output signals.
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.12
 Date: 2020-08-31

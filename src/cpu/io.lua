@@ -160,11 +160,11 @@ end
 
 -- Address, Value and Signal decomposition
 function io.addr_to_index(_, ignore_pointer)
-  assert.check(_.addr ~= nil and _.pointer ~= nil)
+  assert.check((_.addr ~= nil or _.type == 'wire' and _.color == 'out') and _.pointer ~= nil)
   if _.pointer and not ignore_pointer then
     return io.register_get(_, true).count
   else
-    return _.addr
+    return _.addr or 1
   end
 end
 
