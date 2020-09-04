@@ -90,6 +90,26 @@ function Controller.compile(state)
   state.program_ast = Compiler.compile(program_lines)
 
   state.program_begin = SkipNOPs(state.program_ast, 1) or 1
+
+  Controller.build(state)
+end
+
+function Controller.build(state)
+  if type(state.program_ics) == 'table' then
+    HdlBuilder.destroy_node(state.entity)
+  end
+
+  state.ics_stack = {}
+  state.program_ics = {}
+
+  for k, v in ipairs(state.program_ast) do
+    if v.type == 'ic' then
+      local ic = HdlBuilder.construct(v.name, v.expr, state)
+      state.program_ics[k] = ic
+    end
+  end
+
+  state.ics_stack = nil
 end
 
 function Controller.set_error_message(state, error_message)

@@ -420,6 +420,17 @@ local opcodes = {
     end
   end,
 
+  --------------------------------------------------------------[[ HDL opcodes ]]
+
+  xmov = function(state, _)
+    state.latch = state.latch or {}
+    state.latch[#state.latch] = function(state)
+      if dst then
+        local control = dst.get_or_create_control_behavior()
+        control.parameters.parameters.first_signal = nil
+      end
+    end
+  end,
 }
 
 

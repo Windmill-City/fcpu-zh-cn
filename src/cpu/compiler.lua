@@ -164,8 +164,10 @@ local function parse(tokens)
         elseif string.find(peek(), 'out') then
           return parseOutput('out')
 
-        --elseif string.find(peek(), 'mem') then
-        --  return parseMemory('mem')
+        elseif string.find(peek(), 'mem') then
+          return parseMemory('mem')
+        elseif string.find(peek(), 'm@?%d') == 1 then
+          return parseMemory('mem', 'm')
 
         elseif string.find(peek(), 'reg') then
           return parseRegister('reg')
@@ -188,6 +190,12 @@ local function eval(ast)
     if _.type == 'value' then
       return io.value_get(_)
     elseif _.type == 'op' then
+      if ops[_.name] then
+        return ops[_.name](_.expr)
+      else
+        assert.exception('Unknown opcode: '.._.name)
+      end
+    elseif _.type == 'ic' then
       if ops[_.name] then
         return ops[_.name](_.expr)
       else

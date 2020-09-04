@@ -51,6 +51,7 @@ local function CreateWidget_MemoryView(rootGui)
   for i = 1, MC_MEMORY_CHANNELS do
     memchannels[#memchannels + 1] = 'mem'.. i
   end
+  memchannels[#memchannels+1] = { 'gui-fcpu-memviewer.channel-registers' }
   memchannels[#memchannels+1] = { 'gui-fcpu-memviewer.channel-input-red' }
   memchannels[#memchannels+1] = { 'gui-fcpu-memviewer.channel-input-green' }
 
@@ -125,15 +126,26 @@ local function UpdateWidget_MemoryView(player_data)
     index = math.max(1, index)
 
     if index <= MC_MEMORY_CHANNELS then
+      local ic = state.program_ics and state.program_ics[1]
+      if ic and ic.valid then
+        local control = ic.get_control_behavior()
+        local wire_type = defines.wire_type.red
+
+        local output = control.get_circuit_network(wire_type, defines.circuit_connector_id.combinator_output)
+        MemoryView_UpdateFromTable(player_data, output and output.signals)
+      else
+        MemoryView_UpdateFromTable(player_data, {})
+      end
+    elseif index == MC_MEMORY_CHANNELS + 1 then
       -- TODO: this is draft implementation for GUI design check
       MemoryView_UpdateFromTable(player_data, state.regs)
     else
-      local wire_type
-
       local control = state.entity.get_control_behavior()
-      if index == MC_MEMORY_CHANNELS + 1 then
+
+      local wire_type
+      if index == MC_MEMORY_CHANNELS + 2 then
         wire_type = defines.wire_type.red
-      elseif index == MC_MEMORY_CHANNELS + 2 then
+      elseif index == MC_MEMORY_CHANNELS + 3 then
         wire_type = defines.wire_type.green
       end
 

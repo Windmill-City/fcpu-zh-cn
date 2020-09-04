@@ -138,19 +138,7 @@ data:extend{
 }
 
 
-local output_fcpu_item ={
-  type = "item",
-  name = "output-fcpu",
-  icon = "__fcpu__/graphics/icons/fcpu.png",
-  icon_size = 1,
-  flags = { "hidden" },
-  subgroup = "circuit-network",
-  place_result="output-fcpu",
-  order = "c[combinators]-f[imposter-fcpu]",
-  stack_size = 1,
-}
-
-local output_fcpu = table.merge(table.deepcopy(data.raw['constant-combinator']['constant-combinator']), {
+local hdl_output_fcpu = table.merge(table.deepcopy(data.raw['constant-combinator']['constant-combinator']), {
   name = "output-fcpu",
   icon = "__fcpu__/graphics/icons/fcpu.png",
   icon_size = 1,
@@ -173,7 +161,6 @@ local output_fcpu = table.merge(table.deepcopy(data.raw['constant-combinator']['
     "not-flammable",
     "not-in-kill-statistics",
   },
-  max_health = 1,
   collision_mask = {"not-colliding-with-itself"},
 
   item_slot_count = MC_OUTPUT,
@@ -193,7 +180,119 @@ local output_fcpu = table.merge(table.deepcopy(data.raw['constant-combinator']['
   },
 })
 
+local hdl_decider_fcpu = table.merge(table.deepcopy(data.raw['decider-combinator']['decider-combinator']), {
+  name = "decider-fcpu",
+  icon = "__fcpu__/graphics/icons/fcpu.png",
+  icon_size = 1,
+  icon_mipmaps = 0,
+  allow_copy_paste = false,
+--  selectable_in_game = false,
+--  draw_circuit_wires = false,
+  create_ghost_on_death = false,
+
+  energy_source = {
+    type = "void",
+    usage_priority = "primary-input"
+  },
+
+  flags = {
+    "not-rotatable",
+    "placeable-off-grid",
+    "not-repairable",
+    "not-on-map",
+    "not-blueprintable",
+    "not-deconstructable", -- can't be deconstructed by 'demolition blueprint'. reducing bounds marker spam
+    --"hidden",
+    --"hide-alt-info",
+    "not-flammable",
+    "not-in-kill-statistics",
+  },
+  collision_mask = {"not-colliding-with-itself"},
+--[[
+  equal_symbol_sprites = empty_picture,
+  greater_or_equal_symbol_sprites = empty_picture,
+  greater_symbol_sprites = empty_picture,
+  less_or_equal_symbol_sprites = empty_picture,
+  less_symbol_sprites = empty_picture,
+  not_equal_symbol_sprites = empty_picture,
+
+  sprites =
+  {
+      north = empty_picture,
+      east = empty_picture,
+      south = empty_picture,
+      west = empty_picture,
+  },
+  activity_led_sprites =
+  {
+      north = empty_picture,
+      east = empty_picture,
+      south = empty_picture,
+      west = empty_picture,
+  },
+--]]
+})
+
+local hdl_arithmetic_fcpu = table.merge(table.deepcopy(data.raw['arithmetic-combinator']['arithmetic-combinator']), {
+  name = "arithmetic-fcpu",
+  icon = "__fcpu__/graphics/icons/fcpu.png",
+  icon_size = 1,
+  icon_mipmaps = 0,
+  allow_copy_paste = false,
+--  selectable_in_game = false,
+--  draw_circuit_wires = false,
+  create_ghost_on_death = false,
+
+  energy_source = {
+    type = "void",
+    usage_priority = "primary-input"
+  },
+
+  flags = {
+    "not-rotatable",
+    "placeable-off-grid",
+    "not-repairable",
+    "not-on-map",
+    "not-blueprintable",
+    "not-deconstructable", -- can't be deconstructed by 'demolition blueprint'. reducing bounds marker spam
+--    "hidden",
+--    "hide-alt-info",
+    "not-flammable",
+    "not-in-kill-statistics",
+  },
+  collision_mask = {"not-colliding-with-itself"},
+--[[
+  and_symbol_sprites = empty_picture,
+  divide_symbol_sprites = empty_picture,
+  left_shift_symbol_sprites = empty_picture,
+  minus_symbol_sprites = empty_picture,
+  modulo_symbol_sprites = empty_picture,
+  multiply_symbol_sprites = empty_picture,
+  or_symbol_sprites = empty_picture,
+  plus_symbol_sprites = empty_picture,
+  power_symbol_sprites = empty_picture,
+  right_shift_symbol_sprites = empty_picture,
+  xor_symbol_sprites = empty_picture,
+
+  sprites =
+  {
+      north = empty_picture,
+      east = empty_picture,
+      south = empty_picture,
+      west = empty_picture,
+  },
+  activity_led_sprites =
+  {
+      north = empty_picture,
+      east = empty_picture,
+      south = empty_picture,
+      west = empty_picture,
+  },
+--]]
+})
+
 data:extend{
-  output_fcpu_item,
-  output_fcpu
+  hdl_output_fcpu,
+  hdl_decider_fcpu,
+  hdl_arithmetic_fcpu,
 }
