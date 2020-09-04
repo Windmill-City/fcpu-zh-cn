@@ -87,6 +87,10 @@ return {
   end,
 
   ["0.3.0"] = function()
+    foreach_fcpu(function(fcpu, state)
+      state.program_begin = 1
+      Entity.set_data(fcpu, state)
+    end)
     foreach_player(function(player, player_data)
       if player_data.gui_fcpu then
         player_data.gui_error_message = player_data.gui_fcpu['error_message']

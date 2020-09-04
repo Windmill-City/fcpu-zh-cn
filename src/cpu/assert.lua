@@ -18,7 +18,7 @@ function assert.deprecated(since_ver, ...)
 end
 
 function assert.todo(msg)
-  exception("NOT IMPLEMENTED")
+  exception("NOT IMPLEMENTED".. (msg and (': '..msg) or ''))
 end
 
 function assert.check(b, ...)
@@ -81,6 +81,14 @@ function assert.is_register(...)
   for i,v in ipairs(...) do
     if v.type ~= "register" then
       exception("Expecting parameter to be a register")
+    end
+  end
+end
+
+function assert.is_memory(...)
+  for i,v in ipairs(...) do
+    if v.type ~= "memory" then
+      exception("Expecting parameter to be a memory")
     end
   end
 end

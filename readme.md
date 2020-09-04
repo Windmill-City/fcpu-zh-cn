@@ -41,7 +41,8 @@ The following can be used as operands:
 - **Signal**: each signal consists of a type and a value (`123[item=copper-ore]`)
   `123` - signal value represented by number
   `[item=copper-ore]` - type can be represented by pictogram or text
-- **Register**: these are special cells that store the transmitted signal indefinitely (`reg1`,` r2`, ...)
+- **Register**: these are special cells that store the transmitted signal indefinitely (`reg1`, `r2`, ...)
+- **Memory**: consists of multiple registers (array), you may operate simultaneously on each cell (`mem1`, `m2`, ...)
 - **Input** wire: you can receive signals on wires connected to a combinator's input (`red`,` green`)
 - **Output** wire: sets the values ​​at the output of a combinator (`out1`,` out2`, ..., `out256`)
 - **Address**: instruction address (line number)
@@ -114,6 +115,7 @@ Each instruction take one or more operands and modify them or state of fCPU.
 
 * **C**, value: integer constant [-2^31..2^31), same as **V** (`-3500`)
 * **R**, register: (`reg1`, `reg2`, ..., `reg8`)
+* **M**, memory: (`mem1`, `mem2`, ..., `mem4`)
 * **I**, wire: input wire (`red`, `green`)
 * **O**, wire: output wire (`out1`, `out2`, ..., `out256`)
 
@@ -134,7 +136,7 @@ Each instruction take one or more operands and modify them or state of fCPU.
 * `clr` out  
   Clear all output values.
 
-* `clr` dst...[**R**/**O**]  
+* `clr` dst...[**R**/**M**/**O**]  
   Clear specified registers or output wires.
 
 * `mov` dst...[**R**/**O**] src[**V**/**T**/**S**/**R**/**I**]  
@@ -366,7 +368,17 @@ blt r1 10 :counter
 
 ## SIMD instructions
 Until now you can control fCPU with one instructon per game cycle and operate with a couple signals per instruction.  
-But it is not a limit. fCPOU support Single Instruction Multiple Dama instructions, which means that you could do much more efficient work per instruction and so per one game tick.  
+But it is not a limit. fCPU supports _Single Instruction Multiple Data_ instructions, which means that you could do much more efficient work per instruction and so per one game tick.  
+
+* `xmov` a[**M**/**O**] b[**M**/**I**]
+* `xadd` a[**M**/**O**] b[**C**/**M**/**I**]
+* `xsub` a[**M**/**O**] b[**C**/**M**/**I**]
+* `xmul` a[**M**/**O**] b[**C**/**M**/**I**]
+* `xdiv` a[**M**/**O**] b[**C**/**M**/**I**]
+* `xmod` a[**M**/**O**] b[**C**/**M**/**I**]
+* `xpow` a[**M**/**O**] b[**C**/**M**/**I**]
+* `xinc` dst[**O**]
+* `xdec` dst[**O**]
 
 
 ## Memory viewer

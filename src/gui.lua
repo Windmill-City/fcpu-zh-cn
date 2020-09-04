@@ -321,7 +321,7 @@ function GuiWidgetUpdate(player_data, state)
     else
       --player_data.gui_halt_button.style = "tool_button_red"
       player_data.gui_halt_button.sprite = "fcpu-stop-sprite"
-      player_data.gui_halt_button.enabled = (state.instruction_pointer ~= 1)
+      player_data.gui_halt_button.enabled = not Controller.is_first_instruction(state)
       player_data.gui_run_button.enabled = true
     end
   end
@@ -465,7 +465,7 @@ gui.add_handlers{
         if event.element then
           if event.element.switch_state == "right" then
             state.disabled = nil
-            if not Controller.is_running(state) then
+            if not Controller.is_running(state) and Controller.is_first_instruction(state) then
               player_data.gui_error_message.caption = ""
               Controller.compile(state)
               Controller.run(state)
@@ -473,6 +473,7 @@ gui.add_handlers{
           else
             state.disabled = true -- halt will clear output registers
             Controller.halt(state)
+            Controller.update_state(state)
           end
           Entity.set_data(player_data.current_fcpu, state)
         end
@@ -490,6 +491,10 @@ gui.add_handlers{
     halt_program = {
       on_gui_click = mixPlayerData(function(player_data)
         local state = get_fcpu_state(player_data.current_fcpu)
+        Controller.compile(state)
+        if not Controller.is_running(state) then
+          Controller.set_program_counter(state, 1)
+        end
         Controller.halt(state)
         Entity.set_data(player_data.current_fcpu, state)
       end)

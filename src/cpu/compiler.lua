@@ -9,7 +9,7 @@ ops.bind(assert, io)
 
 -- require('constants')
 -- {
-  OP_NOP = {type = 'nop'}
+  OP_COMMENT = {type = 'nop', name = 'comment'}
 -- }
 
 
@@ -44,7 +44,7 @@ end
 -- Parse tokens in to an AST we can store and evaluate later.
 local function parse(tokens)
   if #tokens == 0 then
-    return OP_NOP
+    return OP_COMMENT
   end
 
   local c = 1
@@ -62,6 +62,9 @@ local function parse(tokens)
 
   local parseOp = function()
     local node = { type = 'op', name = consume(), expr = {} }
+    if string.sub(node.name, 1, 1) == 'x' then
+      node.type = 'ic'
+    end
     while (peek()) do
       local expr = parseExpr()
       if expr then
@@ -120,8 +123,8 @@ local function parse(tokens)
       assert.exception('Unknown register `'..name..'`')
     end
   end
-  local parseMemory = function(name)
-    local address = parseAddress(name)
+  local parseMemory = function(name, alias)
+    local address = parseAddress(alias or name)
     return io.make_memory(name, address)
   end
   local parseInput = function(name)
@@ -144,7 +147,7 @@ local function parse(tokens)
     if peek() then
       local fc = string.sub(peek(), 1, 1)
       if fc == '#' or fc == ';' then
-        return OP_NOP
+        return OP_COMMENT
       elseif fc == ':' then
         return parseLabel()
       elseif string.find(peek(), '%[') then

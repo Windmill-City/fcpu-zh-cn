@@ -1,5 +1,5 @@
 local Compiler = require('src/cpu/compiler')
-local Builder = require('src/cpu/hdl_builder')
+local HdlBuilder = require('src/cpu/hdl_builder')
 
 PSTATE_HALTED = 0
 PSTATE_RUNNING = 1
@@ -28,6 +28,7 @@ function Controller.init(mc)
     program_lines = {},
     program_ast = {},
     program_state = PSTATE_HALTED,
+    program_begin = 1,
     instruction_pointer = 1
   }
 
@@ -65,12 +66,30 @@ function Controller.update_program_text(state, program_text)
   end
 end
 
+local function SkipNOPs(ast, i, limit)
+  local length = #ast
+  local hops = limit or length
+  local next = ast[i]
+  while (next and (next.type == 'nop' and next.name == 'comment' or next.type == 'label')) do
+    i = i % length + 1
+    hops = hops - 1
+    if hops < 1 then
+      return false
+    end
+    next = ast[i]
+  end
+  return i
+end
+
 function Controller.compile(state)
+  -- TODO: add modification check and do not perform odd recompilation
   local program_lines = {}
   for line in linepairs(state.program_text) do
     table.insert(program_lines, line)
   end
   state.program_ast = Compiler.compile(program_lines)
+
+  state.program_begin = SkipNOPs(state.program_ast, 1) or 1
 end
 
 function Controller.set_error_message(state, error_message)
@@ -80,25 +99,21 @@ function Controller.set_error_message(state, error_message)
 end
 
 function Controller.set_program_counter(state, value)
-  state.instruction_pointer = value
-  if #state.program_ast == 0 or state.instruction_pointer > #state.program_ast then
-    state.instruction_pointer = 1
+  local length = #state.program_ast
+  if length == 0 or length < value then
+    state.instruction_pointer = state.program_begin or 1
     Controller.update_state(state, PSTATE_HALTED)
     state.do_step = false
     script.raise_event(Controller.event_halt, {['entity'] = state.entity})
   else
-    local next_ast = state.program_ast[state.instruction_pointer]
-    while(next_ast and (next_ast.type == 'nop' or next_ast.type == 'label')) do
-      state.instruction_pointer = state.instruction_pointer + 1
-      if state.instruction_pointer > #state.program_ast then
-        break
-      end
-      next_ast = state.program_ast[state.instruction_pointer]
-    end
-    if state.instruction_pointer > #state.program_ast then
+    local i = SkipNOPs(state.program_ast, value, length - value + 1)
+    if i == false then
+      state.instruction_pointer = state.program_begin or 1
       Controller.update_state(state, PSTATE_HALTED)
       state.do_step = false
       script.raise_event(Controller.event_halt, {['entity'] = state.entity})
+    else
+      state.instruction_pointer = i
     end
   end
   Controller.update_ip(state)
@@ -203,7 +218,7 @@ function Controller.run(state)
 end
 
 function Controller.step(state)
-  if state.instruction_pointer > #state.program_ast then
+  if #state.program_ast < state.instruction_pointer then
     Controller.set_program_counter(state, 1)
   end
   Controller.update_state(state, PSTATE_RUNNING)
@@ -213,9 +228,6 @@ function Controller.step(state)
 end
 
 function Controller.halt(state)
-  if state.program_state == PSTATE_HALTED then
-    Controller.set_program_counter(state, 1)
-  end
   Controller.update_state(state, PSTATE_HALTED)
   state.do_step = false
   script.raise_event(Controller.event_halt, {entity = state.entity})
@@ -223,6 +235,10 @@ end
 
 function Controller.is_running(state)
   return state.program_state ~= PSTATE_HALTED
+end
+
+function Controller.is_first_instruction(state)
+  return state.program_begin == state.instruction_pointer
 end
 
 -------------------------------------------------------------------------------------------------------
@@ -248,21 +264,22 @@ function Controller.update_state(state, pstate)
     fcpu_update_blueprint(state.entity)
 
     local str = pstateStr[state.program_state]
-    if state.error_message and state.program_state == PSTATE_HALTED then
-      local control = state.entity.get_control_behavior()
-      local param = control.parameters
-      param.parameters.first_signal = nil
-      param.parameters.first_constant = state.instruction_pointer
-      param.parameters.output_signal = { type="virtual", name='signal-fcpu-error' }
-      control.parameters = param
-    elseif str then
-      local control = state.entity.get_control_behavior()
-      local param = control.parameters
-      param.parameters.first_signal = { type="virtual", name=str }
+    local control = state.entity.get_control_behavior()
+    local param = control.parameters
+    if state.disabled then
       param.parameters.first_constant = nil
+      param.parameters.first_signal = nil
       param.parameters.output_signal = nil
-      control.parameters = param
+    elseif state.error_message and state.program_state == PSTATE_HALTED then
+      param.parameters.first_constant = state.instruction_pointer
+      param.parameters.first_signal = nil
+      param.parameters.output_signal = { type="virtual", name='signal-fcpu-error' }
+    elseif str then
+      param.parameters.first_constant = nil
+      param.parameters.first_signal = { type="virtual", name=str }
+      param.parameters.output_signal = nil
     end
+    control.parameters = param
   end
 end
 

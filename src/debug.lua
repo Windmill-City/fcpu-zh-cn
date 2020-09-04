@@ -35,5 +35,5 @@ UpdateModSetting{setting = "fcpu-debug-enabled"}
 UpdateModSetting{setting = "fcpu-maximum-updates-per-tick"}
 
 
-local hasProfiler, Profiler = pcall(require, '__profiler__/profiler')
-return hasProfiler and Profiler or nil
+--local hasProfiler, Profiler = pcall(require, '__profiler__/profiler')
+--return hasProfiler and Profiler or nil

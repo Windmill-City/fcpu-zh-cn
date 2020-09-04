@@ -118,7 +118,6 @@ local imposter_fcpu = table.merge(table.deepcopy(data.raw['constant-combinator']
     --"not-selectable-in-game",
     "not-in-kill-statistics",
   },
-  max_health = 1,
   selection_box = {{-1, -1}, {1, 1}},
   collision_box = {{-0.65, -0.65}, {0.65, 0.65}},
   collision_mask = {"layer-13"},--"not-colliding-with-itself"},
