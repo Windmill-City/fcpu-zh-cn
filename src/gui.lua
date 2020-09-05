@@ -54,6 +54,7 @@ local function CreateWidget_MemoryView(rootGui)
   memchannels[#memchannels+1] = { 'gui-fcpu-memviewer.channel-registers' }
   memchannels[#memchannels+1] = { 'gui-fcpu-memviewer.channel-input-red' }
   memchannels[#memchannels+1] = { 'gui-fcpu-memviewer.channel-input-green' }
+  memchannels[#memchannels+1] = { 'gui-fcpu-memviewer.channel-output' }
 
   local elems = gui.build(rootGui, {
     {type="frame", name="fcpu-memory-view", save_as="gui_memory_view", style="inside_shallow_frame_with_padding", direction="vertical", children={
@@ -139,7 +140,13 @@ local function UpdateWidget_MemoryView(player_data)
     elseif index == MC_MEMORY_CHANNELS + 1 then
       -- TODO: this is draft implementation for GUI design check
       MemoryView_UpdateFromTable(player_data, state.regs)
-    else
+    elseif index == MC_MEMORY_CHANNELS + 4 then
+      if state.output_fcpu then
+        local control = state.output_fcpu.get_control_behavior()
+        local output = control.get_circuit_network(defines.wire_type.green, defines.circuit_connector_id.constant_combinator)
+        MemoryView_UpdateFromTable(player_data, output and output.signals)
+      end
+  else
       local control = state.entity.get_control_behavior()
 
       local wire_type
