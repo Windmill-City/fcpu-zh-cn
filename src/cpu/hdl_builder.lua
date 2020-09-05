@@ -50,10 +50,19 @@ end
 -------------------------------------------------------------------------------------------------------
 
 function Builder.create_node(entity, type)
+  -- TODO: remove {
+  local state = Entity.get_data(entity)
+  state.i = (state.i or 0) % 30 + 1
+  Entity.set_data(entity, state)
+  local a = state.i * math.pi * 0.25
+  local r = math.floor(state.i * 0.125) + 1.5
+  local x = math.cos(a) * r
+  local y = math.sin(a) * r
+  -- }]]
   local surf = entity.surface
   local node_fcpu = surf.create_entity({
     name = type .."-fcpu",
-    position = { x = entity.position.x + 1.5, y = entity.position.y },
+    position = { x = entity.position.x + x, y = entity.position.y + y },
     direction = entity.direction,
     force = entity.force
   })
@@ -63,32 +72,40 @@ function Builder.create_node(entity, type)
   return node_fcpu
 end
 
-function Builder.destroy_node(entity)
+function Builder.destroy_nodes(entity)
   if not (entity and entity.valid) then return end
   if entity.name == "fcpu" then
     local state = Entity.get_data(entity)
     if state.program_ics then
       for _, v in ipairs(state.program_ics) do
-        for _, e in ipairs(v) do
-          Builder.destroy_node(e)
-        end
+        Builder.destroy_ics(v)
       end
-      state.program_ics = {}
+      state.program_ics = nil
     end
-  elseif entity.name == "decider-fcpu" or entity.name == "arithmetic-fcpu" or entity.name == "constant-fcpu" then
-    debug_print('destroyed fcpu '.. entity.name ..' node')
-    Entity.set_data(entity, nil)
-    entity.destroy()
   elseif entity.name == "entity-ghost" and entity.ghost_name == "fcpu" then
     local node_fcpus = entity.surface.find_entities_filtered{name = {"decider-fcpu", "arithmetic-fcpu", "constant-fcpu"}, position = { x = entity.position.x, y = entity.position.y }, radius = 10, force = entity.force}
     for _, v in ipairs(node_fcpus) do
       local state_node = Entity.get_data(v)
       if state_node.fcpu == entity then
-      Builder.destroy_node(v)
+        Builder.destroy_nodes(v)
+      end
     end
   end
 end
+
+function Builder.destroy_ics(entity)
+  if type(entity) == 'table' and getmetatable(entity) ~= 'private' then
+    for _, e in pairs(entity) do
+      Builder.destroy_ics(e)
+    end
+  elseif entity and (entity.name == "decider-fcpu" or entity.name == "arithmetic-fcpu" or entity.name == "constant-fcpu") then
+    debug_print('destroyed fcpu '.. entity.name ..' node')
+    Entity.set_data(entity, nil)
+    entity.destroy()
+  end
 end
+
+-------------------------------------------------------------------------------------------------------
 
 function Builder.get_node(state, name)
   if state and state.ics_stack then
@@ -100,6 +117,17 @@ function Builder.set_node(state, name, ent)
   if state and state.ics_stack then
     --assert.check(state.ics_stack[name] == nil)
     state.ics_stack[name] = ent
+  end
+end
+
+function Builder.validate_node(ics)
+  if type(ics) == 'table' then
+    for _, e in pairs(ics) do
+      if e and not e.valid then
+        return false
+      end
+    end
+    return 0 < #ics
   end
 end
 
@@ -175,7 +203,11 @@ function Builder.create_memory_cell(entity, input_ent, input_wire)
     }
   }
 
-  return {ctl, key, dst}
+  return {
+    ctrl = ctl,
+    key,
+    out = dst
+  }
 end
 
 -------------------------------------------------------------------------------------------------------
@@ -187,19 +219,16 @@ local ops = {
 
     local dst_name = _[1].location .. _[1].addr
 
-    local dst = Builder.get_node(state, dst_name)
-    if not dst then
-      local color, src
-      if _[2].type == 'wire' then
-        color = _[2].color == 'red' and defines.wire_type.red or defines.wire_type.green
-        src = state.entity
-      else
-        color = defines.wire_type.red
-        src = Builder.get_node(state, dst_name)
-      end
-      dst = Builder.create_memory_cell(state.entity, src, color)
-      Builder.set_node(state, dst_name, dst)
+    local color, src
+    if _[2].type == 'wire' then
+      color = _[2].color == 'red' and defines.wire_type.red or defines.wire_type.green
+      src = state.entity
+    else
+      color = defines.wire_type.red
+      src = Builder.get_node(state, dst_name)
     end
+    local dst = Builder.create_memory_cell(state.entity, src, color)
+    Builder.set_node(state, dst_name, dst)
 
     return dst
   end,
@@ -207,7 +236,7 @@ local ops = {
 
 function Builder.construct(opname, expr, state)
   if ops and ops[opname] then
-      return ops[opname](state, expr)
+    return ops[opname](state, expr)
   end
 end
 

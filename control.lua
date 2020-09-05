@@ -154,7 +154,7 @@ local function on_picker_dolly_moved(event)
         output_fcpu.teleport(fcpu.position)
         imposter_fcpu.teleport(fcpu.position)
 
-        for _, ics in ipairs(state.program_ics) do
+        for _, ics in ipairs(nil--[[state.program_ics]]) do
           for _, e in ipairs(ics) do
             if e and e.valid then
               e.teleport(fcpu.position)

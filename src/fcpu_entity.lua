@@ -233,7 +233,7 @@ end
 
 function handle_fcpu_destroy(entity, leave_imposter)
   HdlBuilder.destroy_output(entity)
-  HdlBuilder.destroy_node(entity)
+  HdlBuilder.destroy_nodes(entity)
 
   if entity.name == "fcpu" then
     -- move data from fcpu to its imposter so we can revive it later

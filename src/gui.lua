@@ -127,13 +127,10 @@ local function UpdateWidget_MemoryView(player_data)
     index = math.max(1, index)
 
     if index <= MC_MEMORY_CHANNELS then
-      local ic = state.program_ics and state.program_ics[1]
-      if ic and ic.valid then
-        local control = ic.get_control_behavior()
-        local wire_type = defines.wire_type.red
-
-        local output = control.get_circuit_network(wire_type, defines.circuit_connector_id.combinator_output)
-        MemoryView_UpdateFromTable(player_data, output and output.signals)
+      local ic = state.program_ics and state.program_ics[index]
+      if ic and ic.out and ic.out.valid then
+        local control = ic.out.get_control_behavior()
+        MemoryView_UpdateFromTable(player_data, control.signals_last_tick)
       else
         MemoryView_UpdateFromTable(player_data, {})
       end
@@ -410,7 +407,7 @@ end
 function GuiEntityCloseWidget(entity)
   for player_index, player in pairs(game.players) do
     local player_data = get_player_data(player_index)
-    if Entity._are_equal(entity, player_data.current_fcpu) then
+    if entity.valid and Entity._are_equal(entity, player_data.current_fcpu) then
       if player_data.gui_fcpu and player_data.gui_fcpu.valid then
         player_data.gui_fcpu.destroy()
         player_data.gui_fcpu = nil

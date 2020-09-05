@@ -62,6 +62,7 @@ end
 function Controller.update_program_text(state, program_text)
   if state.program_text ~= program_text then
     state.program_text = program_text
+    state.modified = true
     return true
   end
 end
@@ -82,35 +83,38 @@ local function SkipNOPs(ast, i, limit)
 end
 
 function Controller.compile(state)
-  -- TODO: add modification check and do not perform odd recompilation
-  local program_lines = {}
-  for line in linepairs(state.program_text) do
-    table.insert(program_lines, line)
+  if state.modified or not (state.program_ast and 0 < #state.program_ast) then
+    local program_lines = {}
+    for line in linepairs(state.program_text) do
+      table.insert(program_lines, line)
+    end
+
+    state.program_ast = Compiler.compile(program_lines)
+    state.program_begin = SkipNOPs(state.program_ast, 1) or 1
   end
-  state.program_ast = Compiler.compile(program_lines)
 
-  state.program_begin = SkipNOPs(state.program_ast, 1) or 1
+  Controller.build(state, state.modified)
 
-  Controller.build(state)
+  state.modified = false
 end
 
-function Controller.build(state)
-  if type(state.program_ics) == 'table' then
-    -- TODO: rebuild if needed
-    return
-    --HdlBuilder.destroy_node(state.entity)
-  end
+function Controller.build(state, force)
+  state.program_ics = state.program_ics or {}
 
   state.ics_stack = {}
-  state.program_ics = {}
-
   for k, v in ipairs(state.program_ast) do
     if v.type == 'ic' then
-      local ic = HdlBuilder.construct(v.name, v.expr, state)
-      state.program_ics[k] = ic
+      if force or not HdlBuilder.validate_node(state.program_ics[k]) then
+        HdlBuilder.destroy_ics(state.program_ics[k])
+
+        local ics = HdlBuilder.construct(v.name, v.expr, state)
+        state.program_ics[k] = ics
+      end
+    else
+      HdlBuilder.destroy_ics(state.program_ics[k])
+      state.program_ics[k] = nil
     end
   end
-
   state.ics_stack = nil
 end
 
@@ -142,9 +146,16 @@ function Controller.set_program_counter(state, value)
 end
 
 function Controller.do_defferred(state)
-  for k, v in ipairs(state.deffer) do
-    if v.delay <= 1 then
-      v.op(state)
+  for k, v in pairs(state.deffer) do
+    if v.delay <= 1 and v.ops then
+      for _, op in ipairs(v.ops) do
+        if op.action == 'disable' then
+          if op.ic and op.ic.valid then
+            local control = op.ic.get_or_create_control_behavior()
+            control.enabled = false
+          end
+        end
+      end
       state.deffer[k] = nil
     else
       state.deffer[k].delay = v.delay - 1
@@ -228,8 +239,9 @@ function Controller.tick(state)
         -- Do nothing, keeping the instruction_pointer the same.
       elseif result.type == 'deffer' then
         Controller.set_program_counter(state, state.instruction_pointer + 1)
+        result.type = nil
         state.deffer = state.deffer or {}
-        state.deffer[#state.deffer + 1] = { delay = result.delay, op = result.op }
+        state.deffer[#state.deffer + 1] = result
       end
     else
       Controller.set_program_counter(state, state.instruction_pointer + 1)

@@ -423,18 +423,14 @@ local opcodes = {
   --------------------------------------------------------------[[ HDL opcodes ]]
 
   xmov = function(_, ics)
-    if ics and ics[1] then
-      local control = ics[1].get_or_create_control_behavior()
+    if ics and ics.ctrl then
+      local control = ics.ctrl.get_or_create_control_behavior()
       control.enabled = true
 
       local deffer = {
         type = 'deffer',
         delay = 2,
-        op = function(state)
-          if control then
-            control.enabled = false
-          end
-        end
+        ops = { {action='disable', ic=ics.ctrl} }
       }
       return deffer
     end
