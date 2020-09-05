@@ -3,6 +3,8 @@ Version: 0.3.0
 Date: ????
   Features:
     - Added memory viewer.
+  Changes:
+    - Added disabled state into blueprint.
   Bugfixes:
     - Escape key handling.
     - Pause/Stop button depicts reset state correctly now.

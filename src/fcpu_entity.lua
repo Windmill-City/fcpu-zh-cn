@@ -80,7 +80,8 @@ local function encode_fcpu(entity)
   write_to_combinator(state.imposter_fcpu, {
     t=state.program_text,
     i=state.instruction_pointer,
-    r=Controller.is_running(state)
+    r=Controller.is_running(state),
+    d=state.disabled
   })
 end
 
@@ -91,6 +92,7 @@ local function decode_fcpu(imposter_fcpu, target)
     local imposter_state = Entity.get_data(imposter_fcpu) or {}
     imposter_state.target = target
     imposter_state.target_program = data.t
+    imposter_state.disabled = data.d
     imposter_state.run = data.r
     imposter_state.ip = 1
     Entity.set_data(imposter_fcpu, imposter_state)
@@ -106,6 +108,7 @@ local function update_fcpu_target(imposter_fcpu, new_fcpu)
 
   local state = Entity.get_data(new_fcpu) or { ['entity'] = new_fcpu }
   state.imposter_fcpu = imposter_fcpu
+  state.disabled = imposter_state.disabled
 
   if imposter_state.target_program then
     Controller.update_program_text(state, imposter_state.target_program)
