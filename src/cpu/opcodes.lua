@@ -427,6 +427,8 @@ local opcodes = {
       local control = ics.ctrl.get_or_create_control_behavior()
       control.enabled = true
 
+      io.set_node(_[1].location .. _[1].addr, ics)
+
       local deffer = {
         type = 'deffer',
         delay = 2,

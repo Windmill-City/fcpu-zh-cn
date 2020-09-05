@@ -1,9 +1,7 @@
 local assert
 local control
 local wires
-local regs
-local instruction_pointer
-local clock
+local state
 local io = {}
 
 
@@ -186,7 +184,7 @@ end
 -- Registers
 local function readOnlyRegister(index)
   if index == REG_IP then
-    return instruction_pointer
+    return state.instruction_pointer
   elseif index == REG_CNR then
     if wires.red and wires.red.signals then
       return #wires.red.signals
@@ -200,28 +198,28 @@ local function readOnlyRegister(index)
       return 0
     end
   elseif index == REG_CLK then
-    return clock
+    return state.clock
   else
     assert.exception('unhandler')
   end
 end
 
 function io.register_last_index()
-  return #regs
+  return #state.regs
 end
 
 function io.register_getraw(index)
   assert.regs_index_range(index, MC_REGS)
-  if regs[index] and not regs[index].count then
-    regs[index].count = 0
+  if state.regs[index] and not state.regs[index].count then
+    state.regs[index].count = 0
   end
-  return regs[index]
+  return state.regs[index]
 end
 
 function io.register_setraw(index, signal)
   assert.regs_index_range(index, MC_REGS)
   assert.check(math.abs(signal.count or 0) ~= 1/0, "Division by zero")
-  regs[index] = signal
+  state.regs[index] = signal
 end
 
 function io.register_get(index_expr, ignore_pointer)
@@ -321,6 +319,17 @@ function io.settype(_, sigtype, types)
 end
 
 
+function io.get_node(name)
+  return state.ics_stack[name]
+end
+function io.set_node(name, ent)
+  --assert.check(state.ics_stack[name] == nil)
+
+  state.ics_stack = state.ics_stack or {}
+  state.ics_stack[name] = ent
+end
+
+
 
 function io.bind(assert_)
   assert = assert_
@@ -337,8 +346,6 @@ function io.setup(control_, state_)
     assert.todo()
     control = control_
   end
-  regs = state_.regs
-  instruction_pointer = state_.instruction_pointer
-  clock = state_.clock
+  state = state_
 end
 return io

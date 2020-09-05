@@ -249,4 +249,8 @@ function compiler.eval(ast, ics, control, state)
   return status, results
 end
 
+function compiler.bind(hdlbuilder)
+  hdlbuilder.bind(io)
+end
+
 return compiler

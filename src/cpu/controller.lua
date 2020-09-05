@@ -1,6 +1,8 @@
 local Compiler = require('src/cpu/compiler')
 local HdlBuilder = require('src/cpu/hdl_builder')
 
+Compiler.bind(HdlBuilder)
+
 PSTATE_HALTED = 0
 PSTATE_RUNNING = 1
 PSTATE_SLEEPING = 2
@@ -101,7 +103,6 @@ end
 function Controller.build(state, force)
   state.program_ics = state.program_ics or {}
 
-  state.ics_stack = {}
   for k, v in ipairs(state.program_ast) do
     if v.type == 'ic' then
       if force or not HdlBuilder.validate_node(state.program_ics[k]) then
@@ -115,7 +116,6 @@ function Controller.build(state, force)
       state.program_ics[k] = nil
     end
   end
-  state.ics_stack = nil
 end
 
 function Controller.set_error_message(state, error_message)

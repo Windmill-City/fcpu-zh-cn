@@ -127,7 +127,7 @@ local function UpdateWidget_MemoryView(player_data)
     index = math.max(1, index)
 
     if index <= MC_MEMORY_CHANNELS then
-      local ic = state.program_ics and state.program_ics[index]
+      local ic = state.ics_stack and state.ics_stack['mem' .. index]
       if ic and ic.out and ic.out.valid then
         local control = ic.out.get_control_behavior()
         MemoryView_UpdateFromTable(player_data, control.signals_last_tick)
