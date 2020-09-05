@@ -422,13 +422,21 @@ local opcodes = {
 
   --------------------------------------------------------------[[ HDL opcodes ]]
 
-  xmov = function(state, _)
-    state.latch = state.latch or {}
-    state.latch[#state.latch] = function(state)
-      if dst then
-        local control = dst.get_or_create_control_behavior()
-        control.parameters.parameters.first_signal = nil
-      end
+  xmov = function(_, ics)
+    if ics and ics[1] then
+      local control = ics[1].get_or_create_control_behavior()
+      control.enabled = true
+
+      local deffer = {
+        type = 'deffer',
+        delay = 2,
+        op = function(state)
+          if control then
+            control.enabled = false
+          end
+        end
+      }
+      return deffer
     end
   end,
 }

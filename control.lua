@@ -78,6 +78,9 @@ script.on_event(defines.events.on_tick, function(event)
     if cpu.valid then
       local state = Entity.get_data(cpu)
       if state then
+        if state.deffer and 0 < #state.deffer then
+          Controller.do_defferred(state)
+        end
         -- Tick the Controller
         if not state.disabled and cpu.active and cpu.is_connected_to_electric_network() then
           Controller.tick(state)
@@ -150,6 +153,14 @@ local function on_picker_dolly_moved(event)
         local imposter_fcpu = state.imposter_fcpu
         output_fcpu.teleport(fcpu.position)
         imposter_fcpu.teleport(fcpu.position)
+
+        for _, ics in ipairs(state.program_ics) do
+          for _, e in ipairs(ics) do
+            if e and e.valid then
+              e.teleport(fcpu.position)
+            end
+          end
+        end
       end
     end
   end

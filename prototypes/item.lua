@@ -180,6 +180,54 @@ local hdl_output_fcpu = table.merge(table.deepcopy(data.raw['constant-combinator
   },
 })
 
+local hdl_constant_fcpu = table.merge(table.deepcopy(data.raw['constant-combinator']['constant-combinator']), {
+  name = "constant-fcpu",
+  icon = "__fcpu__/graphics/icons/fcpu.png",
+  icon_size = 1,
+  icon_mipmaps = 0,
+  allow_copy_paste = false,
+  --selectable_in_game = false,
+  --draw_circuit_wires = false,
+  create_ghost_on_death = false,
+
+  energy_source = {
+    type = "void",
+    usage_priority = "primary-input"
+  },
+
+  flags = {
+    "not-rotatable",
+    "player-creation",
+    "placeable-off-grid",
+    "not-repairable",
+    "not-on-map",
+    "not-blueprintable",
+    "not-deconstructable", -- can't be deconstructed by 'demolition blueprint'. reducing bounds marker spam
+    --"hidden",
+    --"hide-alt-info",
+    "not-flammable",
+    "not-in-kill-statistics",
+  },
+  collision_mask = {"not-colliding-with-itself"},
+--[[
+  item_slot_count = 1,
+  sprites =
+  {
+      north = empty_picture,
+      east = empty_picture,
+      south = empty_picture,
+      west = empty_picture,
+  },
+  activity_led_sprites =
+  {
+      north = empty_picture,
+      east = empty_picture,
+      south = empty_picture,
+      west = empty_picture,
+  },
+--]]
+})
+
 local hdl_decider_fcpu = table.merge(table.deepcopy(data.raw['decider-combinator']['decider-combinator']), {
   name = "decider-fcpu",
   icon = "__fcpu__/graphics/icons/fcpu.png",
@@ -293,6 +341,7 @@ local hdl_arithmetic_fcpu = table.merge(table.deepcopy(data.raw['arithmetic-comb
 
 data:extend{
   hdl_output_fcpu,
+  hdl_constant_fcpu,
   hdl_decider_fcpu,
   hdl_arithmetic_fcpu,
 }

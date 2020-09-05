@@ -185,7 +185,7 @@ local function parse(tokens)
 end
 
 --- Evaluates an AST.
-local function eval(ast)
+local function eval(ast, ics)
   local node = function(_)
     if _.type == 'value' then
       return io.value_get(_)
@@ -197,7 +197,7 @@ local function eval(ast)
       end
     elseif _.type == 'ic' then
       if ops[_.name] then
-        return ops[_.name](_.expr)
+        return ops[_.name](_.expr, ics)
       else
         assert.exception('Unknown opcode: '.._.name)
       end
@@ -237,10 +237,10 @@ function compiler.compile(lines)
   return ast
 end
 
-function compiler.eval(ast, control, state)
+function compiler.eval(ast, ics, control, state)
   io.setup(control, state)
 
-  local status, results = pcall(eval, ast)
+  local status, results = pcall(eval, ast, ics)
   --local status, results = true, eval(ast)
   if not status then
     local start_index = string.find(results, '@') or 1

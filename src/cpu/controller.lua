@@ -96,7 +96,9 @@ end
 
 function Controller.build(state)
   if type(state.program_ics) == 'table' then
-    HdlBuilder.destroy_node(state.entity)
+    -- TODO: rebuild if needed
+    return
+    --HdlBuilder.destroy_node(state.entity)
   end
 
   state.ics_stack = {}
@@ -137,6 +139,17 @@ function Controller.set_program_counter(state, value)
     end
   end
   Controller.update_ip(state)
+end
+
+function Controller.do_defferred(state)
+  for k, v in ipairs(state.deffer) do
+    if v.delay <= 1 then
+      v.op(state)
+      state.deffer[k] = nil
+    else
+      state.deffer[k].delay = v.delay - 1
+    end
+  end
 end
 
 function Controller.tick(state)
@@ -185,7 +198,8 @@ function Controller.tick(state)
   -- Run Controller code.
   if state.program_state == PSTATE_RUNNING then
     local ast = state.program_ast[state.instruction_pointer]
-    local success, result = Compiler.eval(ast, control, state)
+    local ics = state.program_ics[state.instruction_pointer]
+    local success, result = Compiler.eval(ast, ics, control, state)
     if not success then
       Controller.set_error_message(state, result)
       Controller.halt(state)
@@ -212,6 +226,10 @@ function Controller.tick(state)
       elseif result.type == 'block' then
         -- FIXME: should take into account the fcpu_maximum_updates_per_tick limit!
         -- Do nothing, keeping the instruction_pointer the same.
+      elseif result.type == 'deffer' then
+        Controller.set_program_counter(state, state.instruction_pointer + 1)
+        state.deffer = state.deffer or {}
+        state.deffer[#state.deffer + 1] = { delay = result.delay, op = result.op }
       end
     else
       Controller.set_program_counter(state, state.instruction_pointer + 1)

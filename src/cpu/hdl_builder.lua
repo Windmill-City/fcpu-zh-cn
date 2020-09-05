@@ -69,31 +69,36 @@ function Builder.destroy_node(entity)
     local state = Entity.get_data(entity)
     if state.program_ics then
       for _, v in ipairs(state.program_ics) do
-        Builder.destroy_node(v)
+        for _, e in ipairs(v) do
+          Builder.destroy_node(e)
+        end
       end
       state.program_ics = {}
     end
-  elseif entity.name == "decider-fcpu" or entity.name == "arithmetic-fcpu" then
+  elseif entity.name == "decider-fcpu" or entity.name == "arithmetic-fcpu" or entity.name == "constant-fcpu" then
     debug_print('destroyed fcpu '.. entity.name ..' node')
     Entity.set_data(entity, nil)
     entity.destroy()
   elseif entity.name == "entity-ghost" and entity.ghost_name == "fcpu" then
-    local node_fcpus = entity.surface.find_entities_filtered{name = {"decider-fcpu", "arithmetic-fcpu"}, position = { x = entity.position.x + 1.5, y = entity.position.y }, force = entity.force}
+    local node_fcpus = entity.surface.find_entities_filtered{name = {"decider-fcpu", "arithmetic-fcpu", "constant-fcpu"}, position = { x = entity.position.x, y = entity.position.y }, radius = 10, force = entity.force}
     for _, v in ipairs(node_fcpus) do
+      local state_node = Entity.get_data(v)
+      if state_node.fcpu == entity then
       Builder.destroy_node(v)
     end
   end
 end
+end
 
 function Builder.get_node(state, name)
-  if state and state.ics_stack and state.ics_stack[name] then
+  if state and state.ics_stack then
     return state.ics_stack[name]
   end
 end
 
 function Builder.set_node(state, name, ent)
   if state and state.ics_stack then
-    assert.check(state.ics_stack[name] == nil)
+    --assert.check(state.ics_stack[name] == nil)
     state.ics_stack[name] = ent
   end
 end
@@ -101,10 +106,42 @@ end
 -------------------------------------------------------------------------------------------------------
 
 function Builder.create_memory_cell(entity, input_ent, input_wire)
+  local wire1 = (input_wire == defines.wire_type.red) and defines.wire_type.red or defines.wire_type.green
+  local wire2 = (input_wire ~= defines.wire_type.red) and defines.wire_type.red or defines.wire_type.green
+
+  local ctl = Builder.create_node(entity, 'constant')
+  local key = Builder.create_node(entity, 'decider')
   local dst = Builder.create_node(entity, 'decider')
 
-  local control = dst.get_or_create_control_behavior()
-  control.parameters = {
+  local control_ctl = ctl.get_or_create_control_behavior()
+  local control_key = key.get_or_create_control_behavior()
+  local control_dst = dst.get_or_create_control_behavior()
+
+  ctl.connect_neighbour({
+    source_circuit_id = defines.circuit_connector_id.constant_combinator,
+    wire = wire2,
+    target_entity = key,
+    target_circuit_id = defines.circuit_connector_id.combinator_input
+  })
+  ctl.connect_neighbour({
+    source_circuit_id = defines.circuit_connector_id.constant_combinator,
+    wire = wire1,
+    target_entity = dst,
+    target_circuit_id = defines.circuit_connector_id.combinator_input
+  })
+  control_ctl.enabled = false
+  control_ctl.set_signal(1, {
+    signal = {type='virtual', name='signal-fcpu-error'},
+    count = 1
+  })
+
+  key.connect_neighbour({
+    source_circuit_id = defines.circuit_connector_id.combinator_input,
+    wire = wire1,
+    target_entity = input_ent,
+    target_circuit_id = defines.circuit_connector_id.combinator_input
+  })
+  control_key.parameters = {
     parameters = {
       first_signal = {type='virtual', name='signal-fcpu-error'},
       second_signal = nil,
@@ -114,20 +151,31 @@ function Builder.create_memory_cell(entity, input_ent, input_wire)
       copy_count_from_input = true
     }
   }
+
   dst.connect_neighbour({
     source_circuit_id = defines.circuit_connector_id.combinator_output,
-    wire = defines.wire_type.green,
+    wire = wire2,
     target_entity = dst,
     target_circuit_id = defines.circuit_connector_id.combinator_input
   })
   dst.connect_neighbour({
     source_circuit_id = defines.circuit_connector_id.combinator_input,
-    wire = input_wire,
-    target_entity = input_ent,
-    target_circuit_id = defines.circuit_connector_id.combinator_input
+    wire = wire1,
+    target_entity = key,
+    target_circuit_id = defines.circuit_connector_id.combinator_output
   })
+  control_dst.parameters = {
+    parameters = {
+      first_signal = {type='virtual', name='signal-fcpu-error'},
+      second_signal = nil,
+      constant = 1,
+      comparator = "≤", -- ≥",
+      output_signal = {type='virtual', name='signal-everything'},
+      copy_count_from_input = true
+    }
+  }
 
-  return dst
+  return {ctl, key, dst}
 end
 
 -------------------------------------------------------------------------------------------------------
@@ -141,7 +189,15 @@ local ops = {
 
     local dst = Builder.get_node(state, dst_name)
     if not dst then
-      dst = Builder.create_memory_cell(state.entity, state.entity, defines.wire_type.red)
+      local color, src
+      if _[2].type == 'wire' then
+        color = _[2].color == 'red' and defines.wire_type.red or defines.wire_type.green
+        src = state.entity
+      else
+        color = defines.wire_type.red
+        src = Builder.get_node(state, dst_name)
+      end
+      dst = Builder.create_memory_cell(state.entity, src, color)
       Builder.set_node(state, dst_name, dst)
     end
 
