@@ -78,7 +78,7 @@ script.on_event(defines.events.on_tick, function(event)
     if cpu.valid then
       local state = Entity.get_data(cpu)
       if state then
-        if state.deffer and 0 < #state.deffer then
+        if state.deffer and next(state.deffer) ~= nil then
           Controller.do_defferred(state)
         end
         -- Tick the Controller

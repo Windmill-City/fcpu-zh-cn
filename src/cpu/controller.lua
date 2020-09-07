@@ -241,7 +241,7 @@ function Controller.tick(state)
         Controller.set_program_counter(state, state.instruction_pointer + 1)
         result.type = nil
         state.deffer = state.deffer or {}
-        state.deffer[#state.deffer + 1] = result
+        table.insert(state.deffer, result)
       end
     else
       Controller.set_program_counter(state, state.instruction_pointer + 1)
