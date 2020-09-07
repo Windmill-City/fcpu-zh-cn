@@ -81,9 +81,9 @@ local opcodes = {
     end
   end,
 
-  mov = function(_) -- mov dst...[R/O] src[V/T/S/R/I]
+  mov = function(_) -- mov dst...[R/O] src[V/T/S/R/M/I]
     assert.two_or_more(_)
-    local sig = io.getsignal(_[#_], {'value', 'type', 'signal', 'register', 'input'})
+    local sig = io.getsignal(_[#_], {'value', 'type', 'signal', 'register', 'memory', 'input'})
     for i = 1, #_ - 1 do
       io.setsignal(_[i], sig, {'register', 'wire'})
     end
@@ -427,7 +427,7 @@ local opcodes = {
       local control = ics.ctrl.get_or_create_control_behavior()
       control.enabled = true
 
-      io.set_node(_[1].location .. _[1].addr, ics)
+      io.set_node(_[1].location .. _[1].index, ics)
 
       local deffer = {
         type = 'deffer',

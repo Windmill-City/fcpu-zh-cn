@@ -23,11 +23,11 @@ local function array_build(...)
 end
 
 -- check if `array` contain `value`
-local function has_value(value, table)
+local function has_pattern(value, table)
   for i, v in ipairs(table) do
-      if value == v then
-          return true
-      end
+    if string.find(value, v) then
+      return true
+    end
   end
   return false
 end
@@ -47,17 +47,17 @@ local function parse(tokens)
     return OP_COMMENT
   end
 
-  local c = 1
+  local parseCnt = 1
   local parseExpr
 
-  local peek = function() return tokens[c] end
+  local peek = function() return tokens[parseCnt] end
   local consume = function()
     local result = peek()
-    c = c + 1
+    parseCnt = parseCnt + 1
     return result
   end
   local rewriteLower = function()
-    tokens[c] = string.lower(tokens[c])
+    tokens[parseCnt] = string.lower(tokens[parseCnt])
   end
 
   local parseOp = function()
@@ -87,13 +87,8 @@ local function parse(tokens)
   end
   local parseAddress = function(name)
     local token = consume()
-    if string.find(token, '@%d') then
-      local address = string.gsub(token, name..'@(%d+)', '%1')
-      return io.make_address(address, true)
-    else
-      local index = string.gsub(token, name..'(%d+)', '%1')
-      return io.make_address(index, false)
-    end
+    local a, b = string.match(token, name..'(@?)(%d+)')
+    return io.make_address(b or '', a == '@')
   end
   local parseSignal = function(name)
     local token = consume()
@@ -113,19 +108,34 @@ local function parse(tokens)
   local parseReadOnlyRegister = function(name)
     if string.find(name, 'ipt') then
       return io.make_register_ro(REG_IP)
-    elseif string.find(name, 'cnr') then
-      return io.make_register_ro(REG_CNR)
-    elseif string.find(name, 'cng') then
-      return io.make_register_ro(REG_CNG)
     elseif string.find(name, 'clk') then
       return io.make_register_ro(REG_CLK)
     else
-      assert.exception('Unknown register `'..name..'`')
+      local w, i = string.match(name, 'cn([rgm])(%d*)')
+      if w == 'm' and i ~= nil then
+        return io.make_register_ro(REG_CNM + tonumber(i) - 1)
+      elseif w ~= 'm' then
+        return io.make_register_ro(w == 'r' and REG_CNR or w == 'g' and REG_CNG)
+      else
+        assert.exception('Unknown register `'..name..'`')
+      end
     end
   end
   local parseMemory = function(name, alias)
-    local address = parseAddress(alias or name)
-    return io.make_memory(name, address)
+    local token = consume()
+    local a, b, d, e = string.match(token, (alias or name)..'(%d+)([@%[]?)(%d*)(%]?)')
+
+    local index = a
+    local addr
+    if b == '@' or b == '[' and e == ']' then
+      addr = d
+    end
+
+    if b == '@' then
+      return io.make_memory(name, index, addr, true)
+    else
+      return io.make_memory(name, index, addr, false)
+    end
   end
   local parseInput = function(name)
     local address = parseAddress(name)
@@ -150,7 +160,7 @@ local function parse(tokens)
         return OP_COMMENT
       elseif fc == ':' then
         return parseLabel()
-      elseif string.find(peek(), '%[') then
+      elseif string.find(peek(), '(-?[%d%.]*)%[') == 1 then
         return parseSignal()
       elseif string.find(peek(), '[%-]?%d') == 1 then
         return parseConstant()
@@ -164,16 +174,16 @@ local function parse(tokens)
         elseif string.find(peek(), 'out') then
           return parseOutput('out')
 
-        elseif string.find(peek(), 'mem') then
+        elseif string.find(peek(), 'mem%d') then
           return parseMemory('mem')
-        elseif string.find(peek(), 'm@?%d') == 1 then
+        elseif string.find(peek(), 'm%d[@%[]?%d') == 1 then
           return parseMemory('mem', 'm')
 
         elseif string.find(peek(), 'reg') then
           return parseRegister('reg')
         elseif string.find(peek(), 'r@?%d') == 1 then
           return parseRegister('reg', 'r')
-        elseif has_value(peek(), {'ipt', 'cnr', 'cng', 'clk'}) then
+        elseif has_pattern(peek(), {'ipt', 'cnr', 'cng', 'clk', 'cnm%d'}) then
           return parseReadOnlyRegister(consume())
         else
           return parseOp()

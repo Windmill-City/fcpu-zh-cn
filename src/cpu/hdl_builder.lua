@@ -205,7 +205,7 @@ local ops = {
     assert.two(_)
     assert.is_memory(_[1], _[2])
 
-    local dst_name = _[1].location .. _[1].addr
+    local dst_name = _[1].location .. _[1].index
 
     local color, src
     if _[2].type == 'wire' then

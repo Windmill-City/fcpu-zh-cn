@@ -4,21 +4,22 @@ local wires
 local state
 local io = {}
 
-
 -- require('constants')
 -- {
-  NULL_SIGNAL = {signal = nil--[[{ type = "virtual", name = "signal-black" }]], count = 0}
+  NULL_SIGNAL = {signal = nil, count = 0}
   HALT_SIGNAL = {signal = { type = "virtual", name = "signal-fcpu-halt"}, count = 1}
   RUN_SIGNAL = {signal = { type = "virtual", name = "signal-fcpu-run"}, count = 1}
   STEP_SIGNAL = {signal = { type = "virtual", name = "signal-fcpu-step"}, count = 1}
   SLEEP_SIGNAL = {signal = { type = "virtual", name = "signal-fcpu-sleep"}, count = 1}
   JUMP_SIGNAL = {signal = { type = "virtual", name = "signal-fcpu-jump"}, count = 1}
 --
-  REG_IP = MC_REGS + 1
-  REG_CNR = MC_REGS + 2
-  REG_CNG = MC_REGS + 3
-  REG_CLK = MC_REGS + 4
+  REG_IP = MC_REGS_RO_FIRST + 0
+  REG_CNR = MC_REGS_RO_FIRST + 1
+  REG_CNG = MC_REGS_RO_FIRST + 2
+  REG_CLK = MC_REGS_RO_FIRST + 3
+  REG_CNM = MC_REGS_RO_MSLOT
 -- }
+
 
 -- Makers
 function io.make_label(label)
@@ -58,12 +59,47 @@ function io.make_register_ro(addr)
   return { type = 'register', location = 'readonly', addr = tonumber(addr), pointer = false }
 end
 
-function io.make_memory(name, address)
-  return { type = 'memory', location = name, addr = address.addr, pointer = address.pointer }
+function io.make_memory(name, index, addr, is_ptr)
+  return { type = 'memory', location = name, index = tonumber(index), addr = tonumber(addr), pointer = is_ptr }
 end
 
 function io.make_wire(name, address)
   return { type = 'wire', color = name, addr = address.addr, pointer = address.pointer}
+end
+
+
+-- Address, Value and Signal decomposition
+local function addr_deref(_, ignore_pointer)
+  assert.check(_.addr ~= nil and _.pointer ~= nil, "Invalid address")
+  if _.pointer and not ignore_pointer then
+    return io.register_get(_, true).count
+  else
+    return _.addr
+  end
+end
+
+function io.value_get(_)
+  assert.check(_.type == 'value')
+  return _.count
+end
+
+function io.signal_name(_)
+  assert.check(_.type == 'signal')
+  return _.signal.name
+end
+
+function io.signal_count(_)
+  assert.check(_.type == 'signal')
+  return _.signal.count
+end
+
+function io.get_node(name)
+  return state.ics_stack[name]
+end
+
+function io.set_node(name, ent)
+  state.ics_stack = state.ics_stack or {}
+  state.ics_stack[name] = ent
 end
 
 
@@ -75,19 +111,17 @@ local function control_get()
   return io.make_signal(signal_id, count)
 end
 
-local function output_set(signal)
+local function control_set(signal)
   local params = control.parameters
   params.parameters.first_constant = signal.count
   params.parameters.output_signal = signal.signal
   control.parameters = params
 end
 
+
 -- Output wire access
 local function output_get(index)
   local params = control.parameters
-  --local signal_id = params.parameters.output_signal
-  --local count = params.parameters.first_constant
-  --return io.make_signal(signal_id, count)
   local signal_id = params.parameters[index].signal
   local count = params.parameters[index].count
   return io.make_signal(signal_id, count)
@@ -96,8 +130,6 @@ end
 local function output_set(index, signal)
   assert.check(math.abs(signal.count or 0) ~= 1/0, "Division by zero")
   local params = control.parameters
-  --params.parameters.first_constant = signal.count
-  --params.parameters.output_signal = signal.signal
   params.parameters[index].signal = signal.signal
   params.parameters[index].count = signal.count
   params.parameters[index].index = index
@@ -108,11 +140,12 @@ function io.output_clear()
   control.parameters = nil
 end
 
+
 -- General wire manipulation
 function io.wire_get(_)
   if _.type == 'wire' and _.color == 'out' then
-    local index = io.addr_to_index(_)
-    return output_get(index)
+    local addr = addr_deref(_)
+    return output_get(addr)
   elseif _.type == 'output' then
     assert.todo()
   end
@@ -120,16 +153,16 @@ function io.wire_get(_)
     assert.exception("Tried to access ".._.color.." wire when input not present.")
   end
   if wires[_.color].signals then
-    local index = io.addr_to_index(_)
-    return wires[_.color].signals[index] or NULL_SIGNAL
+    local addr = addr_deref(_)
+    return wires[_.color].signals[addr] or NULL_SIGNAL
   end
   return NULL_SIGNAL
 end
 
 function io.wire_set(_, signal)
   if _.type == 'wire' and _.color == 'out' then
-    local index = io.addr_to_index(_)
-    output_set(index, signal)
+    local addr = addr_deref(_)
+    output_set(addr, signal)
   elseif _.type == 'output' then
     assert.todo()
   else
@@ -156,30 +189,6 @@ function io.wire_count(color)
   return wires[color] and wires[color].signals and #wires[color].signals or 0
 end
 
--- Address, Value and Signal decomposition
-function io.addr_to_index(_, ignore_pointer)
-  assert.check(_.addr ~= nil and _.pointer ~= nil, "Invalid address")
-  if _.pointer and not ignore_pointer then
-    return io.register_get(_, true).count
-  else
-    return _.addr
-  end
-end
-
-function io.value_get(_)
-  assert.check(_.type == 'value')
-  return _.count
-end
-
-function io.signal_name(_)
-  assert.check(_.type == 'signal')
-  return _.signal.name
-end
-
-function io.signal_count(_)
-  assert.check(_.type == 'signal')
-  return _.signal.count
-end
 
 -- Registers
 local function readOnlyRegister(index)
@@ -199,8 +208,17 @@ local function readOnlyRegister(index)
     end
   elseif index == REG_CLK then
     return state.clock
+  elseif REG_CNM <= index then
+    local node = io.get_node('mem'.. (index - REG_CNM + 1))
+    if node and node.out and node.out.valid then
+      local control = node.out.get_control_behavior()
+      if control and control.signals_last_tick then
+        return #control.signals_last_tick
+      end
+    end
+    return 0
   else
-    assert.exception('unhandler')
+    assert.exception('Unknown register with internal index '.. index)
   end
 end
 
@@ -223,21 +241,20 @@ function io.register_setraw(index, signal)
 end
 
 function io.register_get(index_expr, ignore_pointer)
-  local index = io.addr_to_index(index_expr, ignore_pointer)
-  if MC_REGS < index then
-    assert.regs_index_range(index, MC_REGS + 4)
+  local addr = addr_deref(index_expr, ignore_pointer)
+  if MC_REGS < addr then
     local result = table.deepcopy(NULL_SIGNAL)
-    result.count = readOnlyRegister(index)
+    result.count = readOnlyRegister(addr)
     return result
   else
-    return table.deepcopy(io.register_getraw(index))
+    return table.deepcopy(io.register_getraw(addr))
   end
 end
 
 function io.register_set(index_expr, value)
-  local index = io.addr_to_index(index_expr)
+  local addr = addr_deref(index_expr)
   local signal = table.deepcopy(value)
-  io.register_setraw(index, signal)
+  io.register_setraw(addr, signal)
 end
 
 function io.register_set_count(index_expr, count)
@@ -246,6 +263,29 @@ function io.register_set_count(index_expr, count)
   value.count = count
   io.register_set(index_expr, value)
 end
+
+
+-- Memory
+function io.memory_getraw(channel, index)
+  assert.check(1 <= channel and channel <= MC_MEMORY_CHANNELS, "Memory channel is out of range")
+  local node = io.get_node("mem" .. channel)
+  if node and node.out and node.out.valid then
+    local control = node.out.get_control_behavior()
+    if control and control.signals_last_tick then
+      --assert.check(1 <= index and index <= #control.signals_last_tick, "Memory cell index is out of range")
+      return control.signals_last_tick[index]
+    end
+  else
+    assert.exception("Memory channel do not exists yet")
+  end
+end
+
+function io.memory_get(address)
+  assert.check(address.index ~= nil, "Should be addressable memory cell")
+  local addr = addr_deref(address)
+  return table.deepcopy(io.memory_getraw(address.index, addr))
+end
+
 
 -- Multiplex Helper Functions
 function io.getsignal(_, types)
@@ -258,6 +298,9 @@ function io.getsignal(_, types)
     signal = io.wire_get(_)
   elseif _.type == 'register' then
     signal = io.register_get(_)
+  elseif _.type == 'memory' then
+    assert.check(_.location == 'mem', 'expecting location `mem`')
+    signal = io.memory_get(_)
   elseif _.type == 'signal' or _.type == 'type' or _.type == 'value' then
     signal = _
   else
@@ -274,6 +317,7 @@ function io.setsignal(_, signal, types)
   if _.type == 'wire' then 
     io.wire_set(_, signal)
   elseif _.type == 'register' then
+    assert.check(_.location == 'reg', 'expecting location `reg`')
     io.register_set(_, signal)
   elseif _.type == 'output' then
     assert.todo()
@@ -316,17 +360,6 @@ function io.settype(_, sigtype, types)
   local signal = io.getsignal(_, types)
   signal.signal = sigtype
   io.setsignal(_, signal, types)
-end
-
-
-function io.get_node(name)
-  return state.ics_stack[name]
-end
-function io.set_node(name, ent)
-  --assert.check(state.ics_stack[name] == nil)
-
-  state.ics_stack = state.ics_stack or {}
-  state.ics_stack[name] = ent
 end
 
 
