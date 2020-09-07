@@ -3,6 +3,7 @@ Version: 0.3.0
 Date: ????
   Features:
     - Added memory viewer.
+    - Added GUI refresh rate setting.
   Changes:
     - Added disabled state into blueprint.
   Bugfixes:

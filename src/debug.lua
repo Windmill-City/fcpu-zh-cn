@@ -25,6 +25,9 @@ function UpdateModSetting(event)
     fcpu_debug_enabled = log_format_map[settings.global[event.setting].value]
     update_debug_enabled()
   end
+  if event.setting == "fcpu-gui-updates-every-tick" then
+    fcpu_gui_updates_every_tick = settings.startup[event.setting].value
+  end
   if event.setting == "fcpu-maximum-updates-per-tick" then
     fcpu_maximum_updates_per_tick = settings.global[event.setting].value
   end
@@ -32,6 +35,7 @@ end
 
 
 UpdateModSetting{setting = "fcpu-debug-enabled"}
+UpdateModSetting{setting = "fcpu-gui-updates-every-tick"}
 UpdateModSetting{setting = "fcpu-maximum-updates-per-tick"}
 
 

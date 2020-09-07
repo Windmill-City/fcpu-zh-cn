@@ -51,7 +51,7 @@ local function on_marked_for_deconstruction(event)
   end
 end
 
-script.on_nth_tick(10, function(event)
+script.on_nth_tick(fcpu_gui_updates_every_tick, function(event)
   for _, player in pairs(game.players) do
     local player_data = get_player_data(player.index)
     if player_data and player_data.current_fcpu and player_data.gui_fcpu then
