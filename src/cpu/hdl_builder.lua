@@ -1,5 +1,5 @@
 local assert = require('src/cpu/assert')
-local io
+local state
 
 assert.bind()
 
@@ -99,7 +99,7 @@ function builder.destroy_ics(entity)
     for _, e in pairs(entity) do
       builder.destroy_ics(e)
     end
-  elseif entity and (entity.name == "decider-fcpu" or entity.name == "arithmetic-fcpu" or entity.name == "constant-fcpu") then
+  elseif entity and entity.valid and (entity.name == "decider-fcpu" or entity.name == "arithmetic-fcpu" or entity.name == "constant-fcpu") then
     debug_print('destroyed fcpu '.. entity.name ..' node')
     Entity.set_data(entity, nil)
     entity.destroy()
@@ -108,14 +108,16 @@ end
 
 -------------------------------------------------------------------------------------------------------
 
-function builder.validate_node(ics)
+function builder.validate_ics(ics)
   if type(ics) == 'table' then
+    local cnt = 0
     for _, e in pairs(ics) do
+      cnt = cnt + 1
       if e and not e.valid then
         return false
       end
     end
-    return 0 < #ics
+    return 0 < cnt
   end
 end
 
@@ -198,6 +200,104 @@ function builder.create_memory_cell(entity, input_ent, input_wire)
   }
 end
 
+
+function builder.create_math_cell(entity, input_ent_a, input_ent_b, operation)
+  local constant
+  if input_ent_b then
+    if type(input_ent_b) == 'number' then
+      constant = input_ent_b
+    else
+      assert.todo()
+    end
+  end
+
+  local wire_a = defines.wire_type.red
+  local wire_b = defines.wire_type.green
+
+  local dst = builder.create_node(entity, 'arithmetic')
+  local control_dst = dst.get_or_create_control_behavior()
+
+  input_ent_a.connect_neighbour({
+    source_circuit_id = defines.circuit_connector_id.combinator_output,
+    wire = wire_a,
+    target_entity = dst,
+    target_circuit_id = defines.circuit_connector_id.combinator_input
+  })
+  if input_ent_b ~= nil and constant == nil then
+    input_ent_b.connect_neighbour({
+      source_circuit_id = defines.circuit_connector_id.combinator_output,
+      wire = wire_b,
+      target_entity = dst,
+      target_circuit_id = defines.circuit_connector_id.combinator_input
+    })
+  end
+  control_dst.parameters = {
+    parameters = {
+      first_signal = {type='virtual', name='signal-each'},
+      second_signal = nil,
+      first_constant  = nil,
+      second_constant = constant,
+      operation  = operation,
+      output_signal = {type='virtual', name='signal-each'}
+    }
+  }
+
+  return {
+    out = dst
+  }
+end
+
+-------------------------------------------------------------------------------------------------------
+
+function builder.get_node(state_, name)
+  return state_.program_ics[state_.ics_stack[name]]
+end
+
+function builder.set_ics(name, index)
+  -- same as io.set_ics
+  state.ics_stack = state.ics_stack or {}
+  state.ics_stack[name] = index
+end
+
+-------------------------------------------------------------------------------------------------------
+
+local function vector_op(operation)
+  return function(state, _)
+    assert.one(_)
+    assert.is_memory(_[1])
+
+    local dst_name = _[1].location .. _[1].index
+
+    local ics = builder.get_node(state, dst_name)
+    if ics then
+      local dst = ics.out
+
+      dst = builder.create_math_cell(state.entity, dst, nil, operation)
+
+      return dst_name, dst
+    end
+  end
+end
+
+local function vector_scalar_op(operation)
+  return function(state, _)
+    assert.two(_)
+    assert.is_memory(_[1])
+    assert.type(_[2], {'value', 'register', 'input'})
+
+    local dst_name = _[1].location .. _[1].index
+
+    local ics = builder.get_node(state, dst_name)
+    if ics then
+      local dst = ics.out
+
+      dst = builder.create_math_cell(state.entity, dst, nil, operation)
+
+      return dst_name, dst
+    end
+  end
+end
+
 -------------------------------------------------------------------------------------------------------
 
 local ops = {
@@ -213,22 +313,32 @@ local ops = {
       src = state.entity
     else
       color = defines.wire_type.red
-      src = io.get_node(dst_name)
+      src = builder.get_node(state, dst_name)
     end
     local dst = builder.create_memory_cell(state.entity, src, color)
-    io.set_node(dst_name, dst)
 
-    return dst
+    return dst_name, dst
   end,
+
+  xadd = vector_scalar_op('+'),
+  xsub = vector_scalar_op('-'),
+  xmul = vector_scalar_op('*'),
+  xdiv = vector_scalar_op('/'),
+  xmod = vector_scalar_op('%'),
+  xpow = vector_scalar_op('^'),
+  xinc = vector_op('+'),
+  xdec = vector_op('-'),
 }
 
-function builder.construct(opname, expr, state)
-  if ops and ops[opname] then
-    return ops[opname](state, expr)
+function builder.construct(ast, state_)
+  state = state_
+
+  if ops and ops[ast.name] then
+    return ops[ast.name](state, ast.expr)
   end
 end
 
-function builder.bind(io_)
-  io = io_
+
+function builder.bind()
 end
 return builder

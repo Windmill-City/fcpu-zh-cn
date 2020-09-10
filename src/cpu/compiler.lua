@@ -1,10 +1,8 @@
 local assert = require('src/cpu/assert')
 local io = require('src/cpu/io')
 local ops = require('src/cpu/opcodes')
-
-assert.bind()
-io.bind(assert)
-ops.bind(assert, io)
+local ops_vx = require('src/cpu/opcodes_vx')
+local hdlBuilder = require('src/cpu/hdl_builder')
 
 
 -- require('constants')
@@ -194,6 +192,14 @@ local function parse(tokens)
   return parseExpr()
 end
 
+local function update_ics_stack(subsystem, push_ics)
+  if push_ics then
+    for k,v in ipairs(push_ics) do
+      subsystem.set_ics(v.name, v.index)
+    end
+  end
+end
+
 --- Evaluates an AST.
 local function eval(ast, ics)
   local node = function(_)
@@ -206,8 +212,10 @@ local function eval(ast, ics)
         assert.exception('Unknown opcode: '.._.name)
       end
     elseif _.type == 'ic' then
-      if ops[_.name] then
-        return ops[_.name](_.expr, ics)
+      if ops_vx[_.name] then
+        local result = ops_vx[_.name](_.expr, ics)
+        update_ics_stack(io, _.push_ics)
+        return result
       else
         assert.exception('Unknown opcode: '.._.name)
       end
@@ -247,6 +255,41 @@ function compiler.compile(lines)
   return ast
 end
 
+function compiler.build(state, force)
+  local construct = function(k, ast)
+    local name, ics = hdlBuilder.construct(ast, state)
+    if name then
+      ast.push_ics = { {index=k, name=name} }
+      update_ics_stack(hdlBuilder, ast.push_ics)
+    end
+    return ics
+  end
+
+  state.program_ics = state.program_ics or {}
+
+  for k, v in ipairs(state.program_ast) do
+    if v.type == 'ic' then
+      if force or not hdlBuilder.validate_ics(state.program_ics[k]) then
+        hdlBuilder.destroy_ics(state.program_ics[k])
+
+        local status, result = pcall(construct, k, v)
+        --local status, result = true, construct(k, v)
+        if not status then
+          local start_index = string.find(result, '@') or 1
+          result = string.sub(result, start_index+1, -1)
+          state.program_ast[k] = { type='error', error=result }
+          break
+        else
+          state.program_ics[k] = result
+        end
+      end
+    else
+      hdlBuilder.destroy_ics(state.program_ics[k])
+      state.program_ics[k] = nil
+    end
+  end
+end
+
 function compiler.eval(ast, ics, control, state)
   io.setup(control, state)
 
@@ -259,8 +302,11 @@ function compiler.eval(ast, ics, control, state)
   return status, results
 end
 
-function compiler.bind(hdlbuilder)
-  hdlbuilder.bind(io)
-end
 
+function compiler.bind()
+  assert.bind()
+  io.bind(assert, hdlBuilder)
+  ops.bind(assert, io)
+  ops_vx.bind(assert, io, hdlBuilder)
+end
 return compiler

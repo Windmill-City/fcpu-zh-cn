@@ -1,4 +1,5 @@
 local assert
+local hdlbuilder
 local control
 local wires
 local state
@@ -67,6 +68,12 @@ function io.make_wire(name, address)
   return { type = 'wire', color = name, addr = address.addr, pointer = address.pointer}
 end
 
+function io.set_ics(name, index)
+  -- same as HdlBuilder.set_ics
+  state.ics_stack = state.ics_stack or {}
+  state.ics_stack[name] = index
+end
+
 
 -- Address, Value and Signal decomposition
 local function addr_deref(_, ignore_pointer)
@@ -91,15 +98,6 @@ end
 function io.signal_count(_)
   assert.check(_.type == 'signal')
   return _.signal.count
-end
-
-function io.get_node(name)
-  return state.ics_stack[name]
-end
-
-function io.set_node(name, ent)
-  state.ics_stack = state.ics_stack or {}
-  state.ics_stack[name] = ent
 end
 
 
@@ -209,7 +207,7 @@ local function readOnlyRegister(index)
   elseif index == REG_CLK then
     return state.clock
   elseif REG_CNM <= index then
-    local node = io.get_node('mem'.. (index - REG_CNM + 1))
+    local node = hdlbuilder.get_node(state, 'mem'.. (index - REG_CNM + 1))
     if node and node.out and node.out.valid then
       local control = node.out.get_control_behavior()
       if control and control.signals_last_tick then
@@ -268,7 +266,7 @@ end
 -- Memory
 function io.memory_getraw(channel, index)
   assert.check(1 <= channel and channel <= MC_MEMORY_CHANNELS, "Memory channel is out of range")
-  local node = io.get_node("mem" .. channel)
+  local node = hdlbuilder.get_node(state, "mem" .. channel)
   if node and node.out and node.out.valid then
     local control = node.out.get_control_behavior()
     if control and control.signals_last_tick then
@@ -363,10 +361,6 @@ function io.settype(_, sigtype, types)
 end
 
 
-
-function io.bind(assert_)
-  assert = assert_
-end
 function io.setup(control_, state_)
   wires = {
     red = control_.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_input),
@@ -380,5 +374,11 @@ function io.setup(control_, state_)
     control = control_
   end
   state = state_
+end
+
+
+function io.bind(assert_, hdlbuilder_)
+  assert = assert_
+  hdlbuilder = hdlbuilder_
 end
 return io

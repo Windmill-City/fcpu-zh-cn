@@ -12,7 +12,7 @@ data:extend({
     setting_type = "startup",
     default_value = 5,
     minimum_value = 1,
-    maximum_value = 10,
+    maximum_value = 60,
     allowed_values = { 1, 2, 5, 10, 20, 30, 60 }
   },
   {

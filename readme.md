@@ -381,10 +381,6 @@ But it is not a limit. fCPU supports _Single Instruction Multiple Data_ instruct
 * `xdec` dst[**O**]
 
 
-## Memory viewer
-TODO
-
-
 
 [comment]: <> (md2frt-skip-section-begin)
 
