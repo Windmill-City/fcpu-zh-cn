@@ -317,6 +317,8 @@ function io.setsignal(_, signal, types)
   elseif _.type == 'register' then
     assert.check(_.location == 'reg', 'expecting location `reg`')
     io.register_set(_, signal)
+  elseif _.type == 'memory' then
+    assert.exception('Memory cell could not be changed. Not supported yet.')
   elseif _.type == 'output' then
     assert.todo()
   else

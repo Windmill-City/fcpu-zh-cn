@@ -72,22 +72,26 @@ function assert.type(_, valid)
         assert.todo()
         return
       end
+    elseif v == 'register' and _.type == 'memory' and _.addr ~= nil then
+      return
     end
   end
   exception("Expecting parameter to be a "..(table.concat(valid, ' or ')))
 end
 
 function assert.is_register(...)
-  for i,v in ipairs(...) do
+  for _,v in ipairs(...) do
     if v.type ~= "register" then
-      exception("Expecting parameter to be a register")
+      if not (v.type == 'memory' and v.addr ~= nil) then
+        exception("Expecting parameter to be a register")
+      end
     end
   end
 end
 
 function assert.is_memory(...)
-  for i,v in ipairs(...) do
-    if v.type ~= "memory" then
+  for _,v in ipairs(...) do
+    if v.type ~= "memory" or v.index == nil or v.addr ~= nil then
       exception("Expecting parameter to be a memory")
     end
   end
