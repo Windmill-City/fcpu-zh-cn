@@ -368,7 +368,7 @@ blt r1 10 :counter
 
 ## SIMD instructions
 Until now you can control fCPU with one instructon per game cycle and operate with a couple signals per instruction.  
-But it is not a limit. fCPU supports _Single Instruction Multiple Data_ instructions, which means that you could do much more efficient work per instruction and so per one game tick.  
+But it is not a limit. fCPU supports _Single Instruction Multiple Data_ mnemonics, which means that you could do much more efficient work per instruction and so per one game tick.  
 
 * `xmov` a[**M**/**O**] b[**M**/**I**]
 * `xadd` a[**M**/**O**] b[**C**/**M**/**I**]
@@ -402,6 +402,7 @@ See [here](https://www.buymeacoffee.com/p/100444)
 # Dear supporters
 * Lukáš Venhoda (v0.2.0 update)
 * Someone (v0.2.12 update)
+* kKdH (v0.3.0 update)
 
 
 # Support fCPU
