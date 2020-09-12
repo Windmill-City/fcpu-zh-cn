@@ -55,8 +55,9 @@ function builder.create_node(entity, type)
   local state = Entity.get_data(entity)
   state.i = (state.i or 0) % 30 + 1
   Entity.set_data(entity, state)
-  local a = state.i * math.pi * 0.25
-  local r = math.floor(state.i * 0.125) + 1.5
+  local c = math.floor((state.i - 1) * 0.125)
+  local r = (c + 1) * 1.5
+  local a = (state.i - 1) * math.pi * 0.25 * (c == 2 and 0.5 or 1)
   local x = math.cos(a) * r
   local y = math.sin(a) * r
   -- }]]
@@ -95,14 +96,16 @@ function builder.destroy_nodes(entity)
 end
 
 function builder.destroy_ics(entity)
-  if type(entity) == 'table' and getmetatable(entity) ~= 'private' then
-    for _, e in pairs(entity) do
-      builder.destroy_ics(e)
+  if type(entity) == 'table' then
+    if getmetatable(entity) ~= 'private' then
+      for _, e in pairs(entity) do
+        builder.destroy_ics(e)
+      end
+    elseif entity.valid and (entity.name == "decider-fcpu" or entity.name == "arithmetic-fcpu" or entity.name == "constant-fcpu") then
+      debug_print('destroyed fcpu '.. entity.name ..' node')
+      Entity.set_data(entity, nil)
+      entity.destroy()
     end
-  elseif entity and entity.valid and (entity.name == "decider-fcpu" or entity.name == "arithmetic-fcpu" or entity.name == "constant-fcpu") then
-    debug_print('destroyed fcpu '.. entity.name ..' node')
-    Entity.set_data(entity, nil)
-    entity.destroy()
   end
 end
 
@@ -112,9 +115,11 @@ function builder.validate_ics(ics)
   if type(ics) == 'table' then
     local cnt = 0
     for _, e in pairs(ics) do
-      cnt = cnt + 1
-      if e and not e.valid then
-        return false
+      if type(e) == 'table' then
+        cnt = cnt + 1
+        if not e.valid then
+          return false
+        end
       end
     end
     return 0 < cnt
@@ -127,10 +132,12 @@ function builder.create_memory_cell(entity, input_ent, input_wire)
   local wire1 = (input_wire == defines.wire_type.red) and defines.wire_type.red or defines.wire_type.green
   local wire2 = (input_wire ~= defines.wire_type.red) and defines.wire_type.red or defines.wire_type.green
 
+  local fix = builder.create_node(entity, 'constant')
   local ctl = builder.create_node(entity, 'constant')
   local key = builder.create_node(entity, 'decider')
   local dst = builder.create_node(entity, 'decider')
 
+  local control_fix = fix.get_or_create_control_behavior()
   local control_ctl = ctl.get_or_create_control_behavior()
   local control_key = key.get_or_create_control_behavior()
   local control_dst = dst.get_or_create_control_behavior()
@@ -193,15 +200,29 @@ function builder.create_memory_cell(entity, input_ent, input_wire)
     }
   }
 
+  dst.connect_neighbour({
+    source_circuit_id = defines.circuit_connector_id.combinator_output,
+    wire = wire1,
+    target_entity = fix,
+    target_circuit_id = defines.circuit_connector_id.constant_combinator
+  })
+  control_fix.enabled = false
+  control_fix.set_signal(1, {
+    signal = {type='virtual', name='signal-fcpu-error'},
+    count = -1
+  })
+
   return {
+    color_out = wire1,
     ctrl = ctl,
+    fix = fix,
     key,
     out = dst
   }
 end
 
 
-function builder.create_math_cell(entity, input_ent_a, input_ent_b, operation)
+function builder.create_math_cell(entity, input_ent_a, input_ent_b, operation, input_wire)
   local constant
   if input_ent_b then
     if type(input_ent_b) == 'number' then
@@ -211,8 +232,8 @@ function builder.create_math_cell(entity, input_ent_a, input_ent_b, operation)
     end
   end
 
-  local wire_a = defines.wire_type.red
-  local wire_b = defines.wire_type.green
+  local wire_a = (input_wire == defines.wire_type.red) and defines.wire_type.red or defines.wire_type.green
+  local wire_b = (input_wire ~= defines.wire_type.red) and defines.wire_type.red or defines.wire_type.green
 
   local dst = builder.create_node(entity, 'arithmetic')
   local control_dst = dst.get_or_create_control_behavior()
@@ -243,6 +264,7 @@ function builder.create_math_cell(entity, input_ent_a, input_ent_b, operation)
   }
 
   return {
+    color_out = wire_a,
     out = dst
   }
 end
@@ -270,9 +292,7 @@ local function vector_op(operation)
 
     local ics = builder.get_node(state, dst_name)
     if ics then
-      local dst = ics.out
-
-      dst = builder.create_math_cell(state.entity, dst, nil, operation)
+      local dst = builder.create_math_cell(state.entity, ics.out, nil, operation, ics.color_out)
 
       return dst_name, dst
     end
@@ -289,9 +309,7 @@ local function vector_scalar_op(operation)
 
     local ics = builder.get_node(state, dst_name)
     if ics then
-      local dst = ics.out
-
-      dst = builder.create_math_cell(state.entity, dst, nil, operation)
+      local dst = builder.create_math_cell(state.entity, ics.out, nil, operation, ics.color_out)
 
       return dst_name, dst
     end
@@ -303,19 +321,36 @@ end
 local ops = {
   xmov = function(state, _)
     assert.two(_)
-    assert.is_memory(_[1], _[2])
-
-    local dst_name = _[1].location .. _[1].index
+    assert.type(_[1], {'memory', 'output'})
+    assert.type(_[2], {'input', 'memory'})
 
     local color, src
     if _[2].type == 'wire' then
       color = _[2].color == 'red' and defines.wire_type.red or defines.wire_type.green
       src = state.entity
-    else
+    elseif _[2].type == 'memory' then
       color = defines.wire_type.red
-      src = builder.get_node(state, dst_name)
+      src = builder.get_node(state, _[2].location .. _[2].index)
+      src = src.out
+    else
+      assert.todo()
     end
+
     local dst = builder.create_memory_cell(state.entity, src, color)
+
+    local dst_name
+    if _[1].type == 'wire' then
+      dst.out.connect_neighbour({
+        source_circuit_id = defines.circuit_connector_id.combinator_output,
+        wire = defines.wire_type.red,
+        target_entity = state.entity,
+        target_circuit_id = defines.circuit_connector_id.combinator_output
+      })
+    elseif _[1].type == 'memory' then
+      dst_name = _[1].location .. _[1].index
+    else
+      assert.todo()
+    end
 
     return dst_name, dst
   end,

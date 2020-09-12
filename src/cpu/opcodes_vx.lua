@@ -27,6 +27,10 @@ local opcodes_vx = {
 -- A: instruction address
 -- L: instruction label
 
+  xwait = function(_, ics)
+    
+  end,
+
   xmov = function(_, ics)
     if ics and ics.ctrl then
       local control = ics.ctrl.get_or_create_control_behavior()
@@ -35,7 +39,10 @@ local opcodes_vx = {
       local deffer = {
         type = 'deffer',
         delay = 2,
-        ops = { {action='disable', ic=ics.ctrl} }
+        ops = {
+          {action='disable', ic=ics.ctrl},
+          {action='enable', ic=ics.fix}
+        }
       }
       return deffer
     end

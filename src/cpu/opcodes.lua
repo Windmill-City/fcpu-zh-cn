@@ -225,23 +225,6 @@ local opcodes = {
     io.register_set_count(_[1], tonumber(s:reverse()))
   end,
 
-  _tofp = function(_)
-    assert.two(_)
-    assert.type(_[1], {'register'})
-    assert.type(_[2], {'value'})
-    local _dst = io.getcount(_[1])
-    local _src = io.getcount(_[2])
-    io.register_set_count(_dst, io.getcount(_src))
-  end,
-  _fromfp = function(_)
-    assert.two(_)
-    assert.type(_[1], {'register'})
-    assert.type(_[2], {'value', 'register', 'input'})
-    local _dst = io.getcount(_[1])
-    local _src = io.getcount(_[2])
-    io.register_set_count(_dst, io.getcount(_src))
-  end,
-
   cos = function(_) -- * **cos** dst[R] src[C/R/I]
     local _dst, _src = standard_op(_)
     io.register_set_count(_dst, math.cos(io.getcount(_src)))

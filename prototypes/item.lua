@@ -190,6 +190,7 @@ local hdl_constant_fcpu = table.merge(table.deepcopy(data.raw['constant-combinat
   --draw_circuit_wires = false,
   create_ghost_on_death = false,
 
+  circuit_wire_max_distance = 10000,
   energy_source = {
     type = "void",
     usage_priority = "primary-input"
@@ -238,6 +239,7 @@ local hdl_decider_fcpu = table.merge(table.deepcopy(data.raw['decider-combinator
 --  draw_circuit_wires = false,
   create_ghost_on_death = false,
 
+  circuit_wire_max_distance = 10000,
   energy_source = {
     type = "void",
     usage_priority = "primary-input"
@@ -291,6 +293,7 @@ local hdl_arithmetic_fcpu = table.merge(table.deepcopy(data.raw['arithmetic-comb
 --  draw_circuit_wires = false,
   create_ghost_on_death = false,
 
+  circuit_wire_max_distance = 10000,
   energy_source = {
     type = "void",
     usage_priority = "primary-input"

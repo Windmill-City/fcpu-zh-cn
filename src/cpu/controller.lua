@@ -136,6 +136,11 @@ function Controller.do_defferred(state)
             local control = op.ic.get_or_create_control_behavior()
             control.enabled = false
           end
+        elseif op.action == 'enable' then
+          if op.ic and op.ic.valid then
+            local control = op.ic.get_or_create_control_behavior()
+            control.enabled = true
+          end
         end
       end
       state.deffer[k] = nil

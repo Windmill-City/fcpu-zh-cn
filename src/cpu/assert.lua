@@ -80,7 +80,7 @@ function assert.type(_, valid)
 end
 
 function assert.is_register(...)
-  for _,v in ipairs(...) do
+  for _,v in ipairs(table.pack(...)) do
     if v.type ~= "register" then
       if not (v.type == 'memory' and v.addr ~= nil) then
         exception("Expecting parameter to be a register")
@@ -90,7 +90,7 @@ function assert.is_register(...)
 end
 
 function assert.is_memory(...)
-  for _,v in ipairs(...) do
+  for _,v in ipairs(table.pack(...)) do
     if v.type ~= "memory" or v.index == nil or v.addr ~= nil then
       exception("Expecting parameter to be a memory")
     end
