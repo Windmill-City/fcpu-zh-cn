@@ -5,6 +5,7 @@ Date: ????
     - Added memory viewer.
     - Added GUI refresh rate setting.
     - Added `btr`, `btg` mnemonics.
+    - Added SIMD mnemonics.
   Changes:
     - Added disabled state into blueprint.
   Bugfixes:

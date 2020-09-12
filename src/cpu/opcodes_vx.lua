@@ -56,6 +56,12 @@ local opcodes_vx = {
   xpow = vector_scalar_op(),
   xinc = vector_scalar_op(1),
   xdec = vector_scalar_op(1),
+
+  xand = vector_scalar_op(),
+  xor  = vector_scalar_op(),
+  xxor = vector_scalar_op(),
+  xsl  = vector_scalar_op(),
+  xsr  = vector_scalar_op(),
 }
 
 

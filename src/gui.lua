@@ -131,7 +131,12 @@ local function UpdateWidget_MemoryView(player_data)
       local ic = ici and state.program_ics[ici]
       if ic and ic.out and ic.out.valid then
         local control = ic.out.get_control_behavior()
-        MemoryView_UpdateFromTable(player_data, control.signals_last_tick)
+        if control.signals_last_tick then
+          MemoryView_UpdateFromTable(player_data, control.signals_last_tick)
+        else
+          local output = control.get_circuit_network(ic.color_out, defines.circuit_connector_id.combinator_output)
+          MemoryView_UpdateFromTable(player_data, output and output.signals)
+        end
       else
         MemoryView_UpdateFromTable(player_data, {})
       end
@@ -579,7 +584,7 @@ script.on_event(defines.events.on_gui_opened, function(event)
   local entity = event.entity
   if entity and entity.valid and entity.name == "fcpu" then
     local player_data, player = get_player_data(event.player_index)
-    if player_data then
+    if player_data and player_data.gui_fcpu then
       player.opened = player_data.gui_fcpu
     end
   end

@@ -363,6 +363,12 @@ local ops = {
   xpow = vector_scalar_op('^'),
   xinc = vector_op('+'),
   xdec = vector_op('-'),
+
+  xand = vector_scalar_op('AND'),
+  xor  = vector_scalar_op('OR'),
+  xxor = vector_scalar_op('XOR'),
+  xsl  = vector_scalar_op('<<'),
+  xsr  = vector_scalar_op('>>'),
 }
 
 function builder.construct(ast, state_)

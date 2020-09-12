@@ -370,19 +370,25 @@ blt r1 10 :counter
   Branch if types are different.  
 
 
-## SIMD instructions
+### SIMD instructions
 Until now you can control fCPU with one instructon per game cycle and operate with a couple signals per instruction.  
 But it is not a limit. fCPU supports _Single Instruction Multiple Data_ mnemonics, which means that you could do much more efficient work per instruction and so per one game tick.  
 
 * `xmov` a[**M**/**O**] b[**M**/**I**]
-* `xadd` a[**M**/**O**] b[**C**/**M**/**I**]
-* `xsub` a[**M**/**O**] b[**C**/**M**/**I**]
-* `xmul` a[**M**/**O**] b[**C**/**M**/**I**]
-* `xdiv` a[**M**/**O**] b[**C**/**M**/**I**]
-* `xmod` a[**M**/**O**] b[**C**/**M**/**I**]
-* `xpow` a[**M**/**O**] b[**C**/**M**/**I**]
+* `xadd` a[**M**/**O**] b[**C**/**R**/**I**]
+* `xsub` a[**M**/**O**] b[**C**/**R**/**I**]
+* `xmul` a[**M**/**O**] b[**C**/**R**/**I**]
+* `xdiv` a[**M**/**O**] b[**C**/**R**/**I**]
+* `xmod` a[**M**/**O**] b[**C**/**R**/**I**]
+* `xpow` a[**M**/**O**] b[**C**/**R**/**I**]
 * `xinc` dst[**O**]
 * `xdec` dst[**O**]
+
+* `xand` a[**M**/**O**] b[**C**/**R**/**I**]
+* `xor`  a[**M**/**O**] b[**C**/**R**/**I**]
+* `xxor` a[**M**/**O**] b[**C**/**R**/**I**]
+* `xsl`  a[**M**/**O**] b[**C**/**R**/**I**]
+* `xsr`  a[**M**/**O**] b[**C**/**R**/**I**]
 
 
 
