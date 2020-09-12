@@ -402,6 +402,21 @@ local opcodes = {
       return {type = 'block'}
     end
   end,
+
+  btr = function(_)
+    assert.one(_)
+    local type = io.gettype(_[1], {'type', 'register'})
+    if io.wire_find_signal('red', type) == NULL_SIGNAL then
+      return {type = 'block'}
+    end
+  end,
+  btg = function(_)
+    assert.one(_)
+    local type = io.gettype(_[1], {'type', 'register'})
+    if io.wire_find_signal('green', type) == NULL_SIGNAL then
+      return {type = 'block'}
+    end
+  end,
 }
 
 

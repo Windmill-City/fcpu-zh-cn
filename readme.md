@@ -275,6 +275,10 @@ Each instruction take one or more operands and modify them or state of fCPU.
   `bkg` cnt[**C**/**R**]  
   Block until there are at least *cnt* *r*ed/*g*reen signals.
 
+* `btr` type[**T**]
+  `btg` type[**T**]
+  Block until signal type found in *r*ed/*g*reen input wires.
+
 
 ### Testing operands values
 

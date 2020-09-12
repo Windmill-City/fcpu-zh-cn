@@ -173,11 +173,10 @@ function io.wire_find_signal(color, signal_to_find)
     assert.exception("Tried to access "..color.." wire when input not present.")
   end
   local wire = wires[color]
-  if signal_to_find and wire.signals then
-    for index, wire_signal in pairs(wire.signals) do
-      if wire_signal and wire_signal.signal.name == signal_to_find.name then
-        return wire.signals[index]
-      end
+  if signal_to_find then
+    local count = wire.get_signal(signal_to_find)
+    if count ~= 0 then
+      return {signal = signal_to_find, count = count}
     end
   end
   return NULL_SIGNAL
