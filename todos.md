@@ -12,6 +12,7 @@
 * Add `call`, `ret` semantics.
 * Program library for storing subprograms outside of a fCPU units.
 * Factorio modules support.
+* Assign a power cost to groups of instructions, and lower base cost (nop=200w, mov=2kW, xmov=30kW)
 * Profiling & optimization.
 * Mimic vanilla blueprint bahavior when stamped ontop of fCPU (copy blueprint program).
 * Add drag and drop GUI for newbies.

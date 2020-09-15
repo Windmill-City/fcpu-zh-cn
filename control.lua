@@ -61,6 +61,12 @@ script.on_nth_tick(fcpu_gui_updates_every_tick, function(event)
   end
 end)
 
+local function sufficient_power(cpu)
+  if cpu.is_connected_to_electric_network() then
+    return cpu.electric_buffer_size <= cpu.energy
+  end
+end
+
 global.profile = false
 
 script.on_event(defines.events.on_tick, function(event)
@@ -82,9 +88,11 @@ script.on_event(defines.events.on_tick, function(event)
           Controller.do_defferred(state)
         end
         -- Tick the Controller
-        if not state.disabled and cpu.active and cpu.is_connected_to_electric_network() then
-          Controller.tick(state)
-          Entity.set_data(cpu, state)
+        if not state.disabled and cpu.active then
+          if sufficient_power(cpu) then
+            Controller.tick(state)
+            Entity.set_data(cpu, state)
+          end
           i = i + 1
         end
       end

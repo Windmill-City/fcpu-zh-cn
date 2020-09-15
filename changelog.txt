@@ -13,6 +13,7 @@ Date: ????
     - Pause/Stop button depicts reset state correctly now.
     - Properly skip begin/end `nop` and comments in stepping mode.
     - On/Off switch mess with `ipc` register. Should run program if in reset state.
+    - Pause fCPU until there is sufficient power in electric network.
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.13
 Date: 2020-09-03
