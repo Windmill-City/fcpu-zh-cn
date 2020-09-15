@@ -131,11 +131,15 @@ local function UpdateWidget_MemoryView(player_data)
       local ic = ici and state.program_ics[ici]
       if ic and ic.out and ic.out.valid then
         local control = ic.out.get_control_behavior()
-        if control.signals_last_tick then
+        if control.signals_last_tick and not ic.color_out then
           MemoryView_UpdateFromTable(player_data, control.signals_last_tick)
         else
           local output = control.get_circuit_network(ic.color_out, defines.circuit_connector_id.combinator_output)
-          MemoryView_UpdateFromTable(player_data, output and output.signals)
+          if output then
+            MemoryView_UpdateFromTable(player_data, output and output.signals)
+          else
+            MemoryView_UpdateFromTable(player_data, control.signals_last_tick)
+          end
         end
       else
         MemoryView_UpdateFromTable(player_data, {})

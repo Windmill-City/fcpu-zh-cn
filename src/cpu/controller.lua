@@ -128,29 +128,32 @@ function Controller.set_program_counter(state, value)
 end
 
 function Controller.do_defferred(state)
-  for k, v in pairs(state.deffer) do
-    if v.delay <= 1 and v.ops then
-      for _, op in ipairs(v.ops) do
-        if op.action == 'disable' then
-          if op.ic and op.ic.valid then
-            local control = op.ic.get_or_create_control_behavior()
-            control.enabled = false
-          end
-        elseif op.action == 'enable' then
-          if op.ic and op.ic.valid then
-            local control = op.ic.get_or_create_control_behavior()
-            control.enabled = true
-          end
+  local count = 0
+  for k, op in pairs(state.deffer) do
+    if op.delay <= 1 then
+      if op.action == 'disable' then
+        if op.ic and op.ic.valid then
+          local control = op.ic.get_or_create_control_behavior()
+          control.enabled = false
         end
+      elseif op.action == 'enable' then
+        if op.ic and op.ic.valid then
+          local control = op.ic.get_or_create_control_behavior()
+          control.enabled = true
+        end
+      elseif op.action == 'disable-output' then
+        state.vector_output = true
       end
       state.deffer[k] = nil
     else
-      state.deffer[k].delay = v.delay - 1
+      state.deffer[k].delay = op.delay - 1
     end
+    count = count + 1
   end
+  return count
 end
 
-function Controller.tick(state)
+function Controller.tick(state, sync_wait)
   state.clock = state.clock + 1
 
   -- Interrupts
@@ -224,11 +227,16 @@ function Controller.tick(state)
       elseif result.type == 'block' then
         -- FIXME: should take into account the fcpu_maximum_updates_per_tick limit!
         -- Do nothing, keeping the instruction_pointer the same.
+      elseif result.type == 'xwait' then
+        if sync_wait < 1 then
+          Controller.set_program_counter(state, state.instruction_pointer + 1)
+        end
       elseif result.type == 'deffer' then
         Controller.set_program_counter(state, state.instruction_pointer + 1)
-        result.type = nil
         state.deffer = state.deffer or {}
-        table.insert(state.deffer, result)
+        for _,v in ipairs(result.ops) do
+          table.insert(state.deffer, v)
+        end
       end
     else
       Controller.set_program_counter(state, state.instruction_pointer + 1)
@@ -290,7 +298,7 @@ end
 function Controller.update_state(state, pstate)
   if state.output_fcpu then
     local control = state.output_fcpu.get_control_behavior()
-    control.enabled = not state.disabled
+    control.enabled = not state.disabled and not state.vector_output
   end
 
   if state.program_state ~= pstate then

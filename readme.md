@@ -390,6 +390,10 @@ But it is not a limit. fCPU supports _Single Instruction Multiple Data_ mnemonic
 * `xsl`  a[**M**/**O**] b[**C**/**R**/**I**]
 * `xsr`  a[**M**/**O**] b[**C**/**R**/**I**]
 
+* `xwait`
+  Wait until vector coprocessor finish it's work.
+  This instructions should be placed between writing and reading from same memory channel.
+
 
 
 [comment]: <> (md2frt-skip-section-begin)

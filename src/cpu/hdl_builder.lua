@@ -17,7 +17,7 @@ function builder.create_output(entity)
   local surf = entity.surface
   local output_fcpu = surf.create_entity({
     name = "output-fcpu",
-    position = { x = entity.position.x, y = entity.position.y },
+    position = { x = entity.position.x+1, y = entity.position.y },
     direction = entity.direction,
     force = entity.force
   })
@@ -71,7 +71,7 @@ function builder.create_node(entity, type)
   node_fcpu.destructible = false
   node_fcpu.operable = true
   Entity.set_data(node_fcpu, {fcpu = entity})
-  return node_fcpu
+  return node_fcpu, node_fcpu.get_or_create_control_behavior()
 end
 
 function builder.destroy_nodes(entity)
@@ -128,19 +128,14 @@ end
 
 -------------------------------------------------------------------------------------------------------
 
-function builder.create_memory_cell(entity, input_ent, input_wire)
-  local wire1 = (input_wire == defines.wire_type.red) and defines.wire_type.red or defines.wire_type.green
-  local wire2 = (input_wire ~= defines.wire_type.red) and defines.wire_type.red or defines.wire_type.green
+function builder.create_memory_cell(entity, input_ent, input_color, input_port, proxy_output)
+  local wire1 = (input_color == defines.wire_type.red) and defines.wire_type.red or defines.wire_type.green
+  local wire2 = (input_color ~= defines.wire_type.red) and defines.wire_type.red or defines.wire_type.green
 
-  local fix = builder.create_node(entity, 'constant')
-  local ctl = builder.create_node(entity, 'constant')
-  local key = builder.create_node(entity, 'decider')
-  local dst = builder.create_node(entity, 'decider')
-
-  local control_fix = fix.get_or_create_control_behavior()
-  local control_ctl = ctl.get_or_create_control_behavior()
-  local control_key = key.get_or_create_control_behavior()
-  local control_dst = dst.get_or_create_control_behavior()
+  local ctl, control_ctl = builder.create_node(entity, 'constant')
+  local key, control_key = builder.create_node(entity, 'decider')
+  local dst, control_dst = builder.create_node(entity, 'decider')
+  local fix, control_fix = builder.create_node(entity, 'constant')
 
   ctl.connect_neighbour({
     source_circuit_id = defines.circuit_connector_id.constant_combinator,
@@ -151,8 +146,8 @@ function builder.create_memory_cell(entity, input_ent, input_wire)
   ctl.connect_neighbour({
     source_circuit_id = defines.circuit_connector_id.constant_combinator,
     wire = wire1,
-    target_entity = dst,
-    target_circuit_id = defines.circuit_connector_id.combinator_input
+    target_entity = key,
+    target_circuit_id = defines.circuit_connector_id.combinator_output
   })
   control_ctl.enabled = false
   control_ctl.set_signal(1, {
@@ -164,7 +159,7 @@ function builder.create_memory_cell(entity, input_ent, input_wire)
     source_circuit_id = defines.circuit_connector_id.combinator_input,
     wire = wire1,
     target_entity = input_ent,
-    target_circuit_id = defines.circuit_connector_id.combinator_input
+    target_circuit_id = input_port
   })
   control_key.parameters = {
     parameters = {
@@ -212,13 +207,40 @@ function builder.create_memory_cell(entity, input_ent, input_wire)
     count = -1
   })
 
-  return {
+  local ics = {
     color_out = wire1,
     ctrl = ctl,
     fix = fix,
     key,
     out = dst
   }
+
+  if proxy_output then
+    local proxy, control_proxy = builder.create_node(entity, 'decider')
+
+    control_proxy.parameters = {
+      parameters = {
+        first_signal = {type='virtual', name='signal-fcpu-error'},
+        second_signal = nil,
+        constant = 0,
+        comparator = "=",
+        output_signal = {type='virtual', name='signal-everything'},
+        copy_count_from_input = true
+      }
+    }
+
+    ics.out.connect_neighbour({
+      source_circuit_id = defines.circuit_connector_id.combinator_output,
+      wire = wire1,
+      target_entity = proxy,
+      target_circuit_id = defines.circuit_connector_id.combinator_input
+    })
+
+    ics.dst = ics.out
+    ics.out = proxy
+  end
+
+  return ics
 end
 
 
@@ -324,35 +346,45 @@ local ops = {
     assert.type(_[1], {'memory', 'output'})
     assert.type(_[2], {'input', 'memory'})
 
-    local color, src
+    local src, color, port
     if _[2].type == 'wire' then
-      color = _[2].color == 'red' and defines.wire_type.red or defines.wire_type.green
       src = state.entity
+      color = _[2].color == 'red' and defines.wire_type.red or defines.wire_type.green
+      port = defines.circuit_connector_id.combinator_input
     elseif _[2].type == 'memory' then
-      color = defines.wire_type.red
-      src = builder.get_node(state, _[2].location .. _[2].index)
-      src = src.out
+      local ics = builder.get_node(state, _[2].location .. _[2].index)
+      assert.check(ics ~= nil, "Memory is not initialized yet")
+      src = ics.out
+      color = ics.color_out
+      port = defines.circuit_connector_id.combinator_output
     else
       assert.todo()
     end
 
-    local dst = builder.create_memory_cell(state.entity, src, color)
+    local do_proxy = (_[1].type == 'wire')
+    local ics = builder.create_memory_cell(state.entity, src, color, port, do_proxy)
 
-    local dst_name
-    if _[1].type == 'wire' then
-      dst.out.connect_neighbour({
+    local ics_name
+    if do_proxy then
+      state.entity.connect_neighbour({
         source_circuit_id = defines.circuit_connector_id.combinator_output,
         wire = defines.wire_type.red,
-        target_entity = state.entity,
+        target_entity = ics.out,
+        target_circuit_id = defines.circuit_connector_id.combinator_output
+      })
+      state.entity.connect_neighbour({
+        source_circuit_id = defines.circuit_connector_id.combinator_output,
+        wire = defines.wire_type.green,
+        target_entity = ics.out,
         target_circuit_id = defines.circuit_connector_id.combinator_output
       })
     elseif _[1].type == 'memory' then
-      dst_name = _[1].location .. _[1].index
+      ics_name = _[1].location .. _[1].index
     else
       assert.todo()
     end
 
-    return dst_name, dst
+    return ics_name, ics
   end,
 
   xadd = vector_scalar_op('+'),

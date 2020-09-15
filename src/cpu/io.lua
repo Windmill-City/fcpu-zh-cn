@@ -275,6 +275,7 @@ function io.memory_getraw(channel, index)
   else
     assert.exception("Memory channel do not exists yet")
   end
+  return NULL_SIGNAL
 end
 
 function io.memory_get(address)

@@ -84,13 +84,14 @@ script.on_event(defines.events.on_tick, function(event)
     if cpu.valid then
       local state = Entity.get_data(cpu)
       if state then
+        local need_sync = 0
         if state.deffer and next(state.deffer) ~= nil then
-          Controller.do_defferred(state)
+          need_sync = Controller.do_defferred(state)
         end
         -- Tick the Controller
         if not state.disabled and cpu.active then
           if sufficient_power(cpu) then
-            Controller.tick(state)
+            Controller.tick(state, need_sync)
             Entity.set_data(cpu, state)
           end
           i = i + 1
