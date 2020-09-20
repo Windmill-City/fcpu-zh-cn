@@ -1,3 +1,5 @@
+MC_DEBUG = false
+
 MC_LINES = 64
 MC_OUTPUT = 256
 MC_REGS = 8

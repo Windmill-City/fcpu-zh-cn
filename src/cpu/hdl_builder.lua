@@ -51,16 +51,18 @@ end
 -------------------------------------------------------------------------------------------------------
 
 function builder.create_node(entity, type)
-  -- TODO: remove {
-  local state = Entity.get_data(entity)
-  state.i = (state.i or 0) % 30 + 1
-  Entity.set_data(entity, state)
-  local c = math.floor((state.i - 1) * 0.125)
-  local r = (c + 1) * 1.5
-  local a = (state.i - 1) * math.pi * 0.25 * (c == 2 and 0.5 or 1)
-  local x = math.cos(a) * r
-  local y = math.sin(a) * r
-  -- }]]
+  local x = 0
+  local y = 0
+  if MC_DEBUG then
+    local state = Entity.get_data(entity)
+    state.i = (state.i or 0) % 30 + 1
+    Entity.set_data(entity, state)
+    local c = math.floor((state.i - 1) * 0.125)
+    local r = (c + 1) * 1.5
+    local a = (state.i - 1) * math.pi * 0.25 * (c == 2 and 0.5 or 1)
+    x = math.cos(a) * r
+    y = math.sin(a) * r
+  end
   local surf = entity.surface
   local node_fcpu = surf.create_entity({
     name = type .."-fcpu",
