@@ -45,9 +45,9 @@ local opcodes_vx = {
           {action='enable', ic=ics.fix, delay = 3}
         }
       }
-      if _[1].type == 'wire' and _[1].color == 'out' then
-        deffer.ops[#deffer.ops + 1] = {action='disable-output', delay = 3}
-      end
+      --if _[1].type == 'wire' and _[1].color == 'out' then
+      --  deffer.ops[#deffer.ops + 1] = {action='disable-output', delay = 3}
+      --end
       return deffer
     end
   end,

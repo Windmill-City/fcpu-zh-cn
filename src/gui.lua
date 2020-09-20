@@ -81,7 +81,7 @@ local function DestroyWidget_MemoryView(player_data)
   player_data.gui_memory_cells = nil
 end
 
-local function MemoryView_UpdateFromTable(player_data, signals)
+local function MemoryView_UpdateFromTable(player_data, signals, no_sort)
   local cells = player_data.gui_memory_cells.children
   if cells then
     -- add extra
@@ -95,16 +95,20 @@ local function MemoryView_UpdateFromTable(player_data, signals)
       for _, v in ipairs(signals) do
         local cell = cells[i]
         if v and cell then
+          local sprite = signalToSpritePath(v.signal)
           cell.visible = true
-          cell.sprite = signalToSpritePath(v.signal)
-          cell.number = v.count
+          cell.sprite = sprite
+          cell.number = sprite and v.count
+          if sprite or no_sort then
+            i = i + 1
+          end
         end
-        i = i + 1
       end
     end
 
     -- clear `number`
     while i <= MC_MEMORY_SLOTS_MIN and cells[i] do
+      cells[i].visible = true
       cells[i].sprite = nil
       cells[i].number = nil
       i = i + 1
@@ -128,15 +132,15 @@ local function UpdateWidget_MemoryView(player_data)
 
     if index <= MC_MEMORY_CHANNELS then
       local ici = state.ics_stack and state.ics_stack['mem' .. index]
-      local ic = ici and state.program_ics[ici]
-      if ic and ic.out and ic.out.valid then
-        local control = ic.out.get_control_behavior()
-        if control.signals_last_tick and not ic.color_out then
+      local ics = ici and state.program_ics[ici]
+      if ics and ics.out and ics.out.valid then
+        local control = ics.out.get_control_behavior()
+        if control.signals_last_tick and not ics.color_out then
           MemoryView_UpdateFromTable(player_data, control.signals_last_tick)
         else
-          local output = control.get_circuit_network(ic.color_out, defines.circuit_connector_id.combinator_output)
+          local output = control.get_circuit_network(ics.color_out, defines.circuit_connector_id.combinator_output)
           if output then
-            MemoryView_UpdateFromTable(player_data, output and output.signals)
+            MemoryView_UpdateFromTable(player_data, output.signals)
           else
             MemoryView_UpdateFromTable(player_data, control.signals_last_tick)
           end
@@ -146,12 +150,13 @@ local function UpdateWidget_MemoryView(player_data)
       end
     elseif index == MC_MEMORY_CHANNELS + 1 then
       -- TODO: this is draft implementation for GUI design check
-      MemoryView_UpdateFromTable(player_data, state.regs)
+      MemoryView_UpdateFromTable(player_data, state.regs, true)
     elseif index == MC_MEMORY_CHANNELS + 4 then
       if state.output_fcpu then
         local control = state.output_fcpu.get_control_behavior()
-        local output = control.get_circuit_network(defines.wire_type.green, defines.circuit_connector_id.constant_combinator)
-        MemoryView_UpdateFromTable(player_data, output and output.signals)
+        MemoryView_UpdateFromTable(player_data, control and control.parameters and control.parameters.parameters)
+      else
+        MemoryView_UpdateFromTable(player_data, {})
       end
   else
       local control = state.entity.get_control_behavior()
@@ -166,6 +171,8 @@ local function UpdateWidget_MemoryView(player_data)
       if wire_type then
         local input = control.get_circuit_network(wire_type, defines.circuit_connector_id.combinator_input)
         MemoryView_UpdateFromTable(player_data, input and input.signals)
+      else
+        MemoryView_UpdateFromTable(player_data, {})
       end
     end
   end

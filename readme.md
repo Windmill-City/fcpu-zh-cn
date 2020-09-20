@@ -8,13 +8,15 @@
 * supports [Informatron](https://mods.factorio.com/mod/informatron) and [Booktorio](https://mods.factorio.com/mod/Booktorio) in-game wiki
 * 64 instructions for whole program
 * 8 general purpose registers
+* 4 memory slots for vector processing
 * 50+ opcodes
 * rich math instructions
+* SIMD instructions
 * two input wires (Red, Green)
 * two output wires (Red, Green) have same output signals and values
 * parallel output, allows output multiple signals simultaneously (up to 256 signals)
 * could be controlled through special input signals
-* one tick = one instruction
+* one tick = one instruction (except for SIMD ones)
 * made for geeks
 
 
@@ -24,7 +26,8 @@ fCPU is a combinator that includes:
 
 - program text
 - a set of registers (for storing signals and numbers)
-- processor (command processor)
+- processor (command processor and vector coprocessor)
+
 
 ### Program
 Programs for fCPU are entered in plain text in simplified [assembly language][1] and consists of lines.
@@ -41,11 +44,11 @@ The following can be used as operands:
 - **Signal**: each signal consists of a type and a value (`123[item=copper-ore]`)
   `123` - signal value represented by number
   `[item=copper-ore]` - type can be represented by pictogram or text
-- **Register**: these are special cells that store the transmitted signal indefinitely (`reg1`, `r2`, ...)
-- **Memory**: consists of multiple registers (array), you may operate simultaneously on each cell (`mem1`, `m2`, ...)
-- **Input** wire: you can receive signals on wires connected to a combinator's input (`red`,` green`)
-- **Output** wire: sets the values ​​at the output of a combinator (`out1`,` out2`, ..., `out256`)
-- **Address**: instruction address (line number)
+- **Register**: this is a special cell that store the transmitted signal indefinitely (`reg1`, `r2`, ...)
+- **Memory** slot: one memory slot consists of multiple cells (array) that store the signal indefinitely (`mem1`, `m2`, ...)
+- **Input** wire: you can receive signals on wires connected to a combinator's input (`red`,` green`, `red1`, `green@3`, ...)
+- **Output** wire: sets the values ​​at the output of a combinator (`out1`, `out2`, ..., `out256`)
+- **Address**: instruction address (line number `34`)
 - **Label** in the code: written in text with a colon in front (`:label`, `:anyname`, ...)
 
 The processor executes instructions from a written program in turn, line by line.
@@ -70,6 +73,19 @@ Output registers (write only):
 - **out1**, ..., **out256**: output registers (only integer values)
 
 
+### Memory
+
+For processing several signals at the same time, the fCPU provides a vector coprocessor that handles SIMD instructions.  
+Unlike scalar operations, which process a limited number of signals at a time, vector operations can process hundreds of signals in the same amount of time.  
+fCPU Memory is an analogue of registers but for vector instructions.  
+
+There are 4 memory slots available for use.  
+Each slot consists of multiple memory cells.  
+Each cell stores a signal type and a numeric value.  
+Memory slots are addressed: `mem1`, ...,` mem4`.  
+To access one cell: `mem2[44]` or `mem1@3` (see Arrays)  
+
+
 ## Arrays\indirect addressing
 Each register could be adressed not only by direct name **regN** (**reg1**, **r2**, etc...) but also with indirect pointer **reg@N** (**reg@3**, **r@7**, etc...). This allow you to use them as **array** indices.
 For example:
@@ -87,6 +103,9 @@ mov r7 r@5 # r7 will be equal to r3, which is 300[item=steel-plate]
 mov r5 5
 mov r8 r@5 # r8 will be equal to r5, which is 5
 ```
+
+This approach is also could be used with `red`, `green` input wires and memory slots, for example: `red@1`, `green@8`, `mem1@3`.  
+
 
 
 ## Control signals
@@ -373,7 +392,25 @@ blt r1 10 :counter
 ### SIMD instructions
 Until now you can control fCPU with one instructon per game cycle and operate with a couple signals per instruction.  
 But it is not a limit. fCPU supports _Single Instruction Multiple Data_ mnemonics, which means that you could do much more efficient work per instruction and so per one game tick.  
+SIMD instructions process several signals in parallel at once, unlike scalar instructions.  
 
+When working with SIMD instructions, the following features should be considered:  
+- SIMD instructions do not costs additional time for handling, so UPS friendly
+- Some vector instructions are executed for more than 1 tick (`xmov mem1 red` takes 3 ticks for populating `mem1` slot with data from `red` wire)
+- Retrieving effective data from affected memory is possible only after completion of a vector instruction
+  For handling this you may use `fwait` before getting data from memory cell.
+- Vector instructions are executed in parallel with scalar
+
+For example:
+```
+xmov mem2 green ; mem2 will be copied on third tick
+nop ; mem2 is not ready yet
+nop ; mem2 is not ready yet
+mov r1 mem2[1] ; mem2 is ready on this tick
+```
+
+
+#### SIMD Mnemonics
 * `xmov` a[**M**/**O**] b[**M**/**I**]
 * `xadd` a[**M**/**O**] b[**C**/**R**/**I**]
 * `xsub` a[**M**/**O**] b[**C**/**R**/**I**]

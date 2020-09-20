@@ -76,10 +76,11 @@ end
 
 
 -- Address, Value and Signal decomposition
-local function addr_deref(_, ignore_pointer)
+local function addr_deref(_)
   assert.check(_.addr ~= nil and _.pointer ~= nil, "Invalid address")
-  if _.pointer and not ignore_pointer then
-    return io.register_get(_, true).count
+  if _.pointer then
+    assert.check(_.addr <= MC_REGS)
+    return io.register_getraw(_.addr).count
   else
     return _.addr
   end
@@ -206,14 +207,8 @@ local function readOnlyRegister(index)
   elseif index == REG_CLK then
     return state.clock
   elseif REG_CNM <= index then
-    local node = hdlbuilder.get_node(state, 'mem'.. (index - REG_CNM + 1))
-    if node and node.out and node.out.valid then
-      local control = node.out.get_control_behavior()
-      if control and control.signals_last_tick then
-        return #control.signals_last_tick
-      end
-    end
-    return 0
+    local signals = io.memory_getchannel_signals(index - REG_CNM + 1)
+    return signals and #signals or 0
   else
     assert.exception('Unknown register with internal index '.. index)
   end
@@ -237,8 +232,9 @@ function io.register_setraw(index, signal)
   state.regs[index] = signal
 end
 
-function io.register_get(index_expr, ignore_pointer)
-  local addr = addr_deref(index_expr, ignore_pointer)
+function io.register_get(index_expr)
+  assert.check(index_expr.type == 'register', "Register expected")
+  local addr = addr_deref(index_expr)
   if MC_REGS < addr then
     local result = table.deepcopy(NULL_SIGNAL)
     result.count = readOnlyRegister(addr)
@@ -249,6 +245,7 @@ function io.register_get(index_expr, ignore_pointer)
 end
 
 function io.register_set(index_expr, value)
+  assert.check(index_expr.type == 'register', "Register expected")
   local addr = addr_deref(index_expr)
   local signal = table.deepcopy(value)
   io.register_setraw(addr, signal)
@@ -263,19 +260,28 @@ end
 
 
 -- Memory
-function io.memory_getraw(channel, index)
+function io.memory_getchannel_signals(channel)
   assert.check(1 <= channel and channel <= MC_MEMORY_CHANNELS, "Memory channel is out of range")
-  local node = hdlbuilder.get_node(state, "mem" .. channel)
-  if node and node.out and node.out.valid then
-    local control = node.out.get_control_behavior()
-    if control and control.signals_last_tick then
-      --assert.check(1 <= index and index <= #control.signals_last_tick, "Memory cell index is out of range")
-      return control.signals_last_tick[index]
+  local ics = hdlbuilder.get_node(state, "mem" .. channel)
+  if ics and ics.out and ics.out.valid then
+    local control = ics.out.get_control_behavior()
+    if ics.color_out then
+      local output = control.get_circuit_network(ics.color_out, defines.circuit_connector_id.combinator_output)
+      if output then
+        return output.signals
+      end
     end
+    return control.signals_last_tick
   else
     assert.exception("Memory channel do not exists yet")
   end
-  return NULL_SIGNAL
+end
+
+function io.memory_getraw(channel, index)
+  local signals = io.memory_getchannel_signals(channel)
+  assert.check(signals ~= nil, "Memory channel do not exists yet")
+  assert.check(1 <= index and index <= #signals, "Memory cell index is out of range")
+  return signals[index] or NULL_SIGNAL
 end
 
 function io.memory_get(address)

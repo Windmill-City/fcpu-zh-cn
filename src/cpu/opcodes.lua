@@ -81,7 +81,7 @@ local opcodes = {
     end
   end,
 
-  mov = function(_) -- mov dst...[R/O] src[V/T/S/R/M/I]
+  mov = function(_) -- mov dst...[R/O] src[V/T/S/R/I]
     assert.two_or_more(_)
     local sig = io.getsignal(_[#_], {'value', 'type', 'signal', 'register', 'input'})
     for i = 1, #_ - 1 do
