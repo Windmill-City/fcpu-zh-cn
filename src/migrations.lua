@@ -90,6 +90,7 @@ return {
     foreach_fcpu(function(fcpu, state)
       state.program_begin = 1
       state.program_ics = {}
+      state.ics_stack = {}
       Entity.set_data(fcpu, state)
     end)
     foreach_player(function(player, player_data)

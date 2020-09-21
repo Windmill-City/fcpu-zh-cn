@@ -30,6 +30,8 @@ function Controller.init(mc)
     program_ast = {},
     program_state = PSTATE_HALTED,
     program_begin = 1,
+    program_ics = {},
+    ics_stack = {},
     instruction_pointer = 1
   }
 

@@ -70,7 +70,6 @@ end
 
 function io.set_ics(name, index)
   -- same as HdlBuilder.set_ics
-  state.ics_stack = state.ics_stack or {}
   state.ics_stack[name] = index
 end
 
@@ -279,7 +278,7 @@ end
 
 function io.memory_getraw(channel, index)
   local signals = io.memory_getchannel_signals(channel)
-  assert.check(signals ~= nil, "Memory channel do not exists yet")
+  assert.check(signals ~= nil, "Trying to retrieve nil memory cell")
   assert.check(1 <= index and index <= #signals, "Memory cell index is out of range")
   return signals[index] or NULL_SIGNAL
 end

@@ -49,8 +49,7 @@ function builder.destroy_output(entity)
 end
 
 -------------------------------------------------------------------------------------------------------
-
-function builder.create_node(entity, type, d_next_node)
+local function get_debug_offset(entity, d_next_node)
   local x = 0
   local y = 0
   if MC_DEBUG then
@@ -75,12 +74,16 @@ function builder.create_node(entity, type, d_next_node)
     end
     Entity.set_data(entity, state)
   end
+  return x, y
+end
 
+function builder.create_node(entity, type, debug_next_node)
+  local x, y = get_debug_offset(entity, debug_next_node)
   local surf = entity.surface
   local node_fcpu = surf.create_entity({
     name = type .."-fcpu",
     position = { x = entity.position.x + x, y = entity.position.y + y },
-    direction = entity.direction,
+    direction = defines.direction.south,
     force = entity.force
   })
   node_fcpu.destructible = false
@@ -97,7 +100,7 @@ function builder.destroy_nodes(entity)
       for _, v in pairs(state.program_ics) do
         builder.destroy_ics(v)
       end
-      state.program_ics = nil
+      state.program_ics = {}
     end
   elseif entity.name == "entity-ghost" and entity.ghost_name == "fcpu" then
     local node_fcpus = entity.surface.find_entities_filtered{name = {"decider-fcpu", "arithmetic-fcpu", "constant-fcpu"}, position = { x = entity.position.x, y = entity.position.y }, radius = 10, force = entity.force}
@@ -117,7 +120,7 @@ function builder.destroy_ics(entity)
         builder.destroy_ics(e)
       end
     elseif entity.valid and (entity.name == "decider-fcpu" or entity.name == "arithmetic-fcpu" or entity.name == "constant-fcpu") then
-      debug_print('destroyed fcpu '.. entity.name ..' node')
+      debug_print('destroyed fcpu '.. entity.name ..' ic')
       Entity.set_data(entity, nil)
       entity.destroy()
     end
@@ -147,8 +150,8 @@ function builder.create_memory_cell(entity, input_ent, input_color, input_port, 
   local wire1 = (input_color == defines.wire_type.red) and defines.wire_type.red or defines.wire_type.green
   local wire2 = (input_color ~= defines.wire_type.red) and defines.wire_type.red or defines.wire_type.green
 
-  local ctl, control_ctl = builder.create_node(entity, 'constant', true)
-  local key, control_key = builder.create_node(entity, 'decider')
+  local key, control_key = builder.create_node(entity, 'decider', true)
+  local ctl, control_ctl = builder.create_node(entity, 'constant')
   local dst, control_dst = builder.create_node(entity, 'decider')
   local fix, control_fix = builder.create_node(entity, 'constant')
 
@@ -314,7 +317,6 @@ end
 
 function builder.set_ics(name, index)
   -- same as io.set_ics
-  state.ics_stack = state.ics_stack or {}
   state.ics_stack[name] = index
 end
 

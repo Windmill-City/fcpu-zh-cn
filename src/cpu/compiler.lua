@@ -194,7 +194,7 @@ end
 
 local function update_ics_stack(subsystem, push_ics)
   if push_ics then
-    for k,v in ipairs(push_ics) do
+    for _,v in ipairs(push_ics) do
       subsystem.set_ics(v.name, v.index)
     end
   end
@@ -266,7 +266,6 @@ function compiler.build(state, force)
   end
 
   state.d_j = nil
-  state.program_ics = state.program_ics or {}
 
   for k, v in ipairs(state.program_ast) do
     if v.type == 'ic' then
@@ -279,7 +278,6 @@ function compiler.build(state, force)
           local start_index = string.find(result, '@') or 1
           result = string.sub(result, start_index+1, -1)
           state.program_ast[k] = { type='error', error=result }
-          break
         else
           state.program_ics[k] = result
         end
