@@ -50,19 +50,32 @@ end
 
 -------------------------------------------------------------------------------------------------------
 
-function builder.create_node(entity, type)
+function builder.create_node(entity, type, d_next_node)
   local x = 0
   local y = 0
   if MC_DEBUG then
     local state = Entity.get_data(entity)
-    state.i = (state.i or 0) % 30 + 1
+    if MC_DEBUG == true then
+      if state.d_e ~= entity or d_next_node then
+        state.d_e = entity
+        state.d_j = (state.d_j or 0) + 1
+        state.d_i = 1
+      else
+        state.d_i = (state.d_i or 0) + 1
+      end
+      x = state.d_i * 2
+      y = state.d_j * 2
+    else
+      state.d_i = (state.d_i or 0) % 30 + 1
+      local c = math.floor((state.d_i - 1) * 0.125)
+      local r = (c + 1) * 1.5
+      local a = (state.d_i - 1) * math.pi * 0.25 * (c == 2 and 0.5 or 1)
+      x = math.cos(a) * r
+      y = math.sin(a) * r
+    end
     Entity.set_data(entity, state)
-    local c = math.floor((state.i - 1) * 0.125)
-    local r = (c + 1) * 1.5
-    local a = (state.i - 1) * math.pi * 0.25 * (c == 2 and 0.5 or 1)
-    x = math.cos(a) * r
-    y = math.sin(a) * r
   end
+
   local surf = entity.surface
   local node_fcpu = surf.create_entity({
     name = type .."-fcpu",
@@ -81,7 +94,7 @@ function builder.destroy_nodes(entity)
   if entity.name == "fcpu" then
     local state = Entity.get_data(entity)
     if state.program_ics then
-      for _, v in ipairs(state.program_ics) do
+      for _, v in pairs(state.program_ics) do
         builder.destroy_ics(v)
       end
       state.program_ics = nil
@@ -134,7 +147,7 @@ function builder.create_memory_cell(entity, input_ent, input_color, input_port, 
   local wire1 = (input_color == defines.wire_type.red) and defines.wire_type.red or defines.wire_type.green
   local wire2 = (input_color ~= defines.wire_type.red) and defines.wire_type.red or defines.wire_type.green
 
-  local ctl, control_ctl = builder.create_node(entity, 'constant')
+  local ctl, control_ctl = builder.create_node(entity, 'constant', true)
   local key, control_key = builder.create_node(entity, 'decider')
   local dst, control_dst = builder.create_node(entity, 'decider')
   local fix, control_fix = builder.create_node(entity, 'constant')
@@ -259,7 +272,7 @@ function builder.create_math_cell(entity, input_ent_a, input_ent_b, operation, i
   local wire_a = (input_wire == defines.wire_type.red) and defines.wire_type.red or defines.wire_type.green
   local wire_b = (input_wire ~= defines.wire_type.red) and defines.wire_type.red or defines.wire_type.green
 
-  local dst = builder.create_node(entity, 'arithmetic')
+  local dst = builder.create_node(entity, 'arithmetic', true)
   local control_dst = dst.get_or_create_control_behavior()
 
   input_ent_a.connect_neighbour({
@@ -368,17 +381,17 @@ local ops = {
 
     local ics_name
     if do_proxy then
-      state.entity.connect_neighbour({
+      ics.out.connect_neighbour({
         source_circuit_id = defines.circuit_connector_id.combinator_output,
         wire = defines.wire_type.red,
-        target_entity = ics.out,
-        target_circuit_id = defines.circuit_connector_id.combinator_output
+        target_entity = state.output_fcpu,
+        target_circuit_id = defines.circuit_connector_id.constant_combinator
       })
-      state.entity.connect_neighbour({
+      ics.out.connect_neighbour({
         source_circuit_id = defines.circuit_connector_id.combinator_output,
         wire = defines.wire_type.green,
-        target_entity = ics.out,
-        target_circuit_id = defines.circuit_connector_id.combinator_output
+        target_entity = state.output_fcpu,
+        target_circuit_id = defines.circuit_connector_id.constant_combinator
       })
     elseif _[1].type == 'memory' then
       ics_name = _[1].location .. _[1].index

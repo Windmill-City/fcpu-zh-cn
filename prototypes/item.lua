@@ -137,7 +137,10 @@ data:extend{
   imposter_fcpu
 }
 
-local hdl_output_fcpu = table.merge(table.deepcopy(data.raw['constant-combinator']['constant-combinator']), { name = "output-fcpu" })
+local hdl_output_fcpu = table.merge(table.deepcopy(data.raw['constant-combinator']['constant-combinator']), {
+  name = "output-fcpu",
+  circuit_wire_max_distance = 10000,
+})
 if not MC_DEBUG then hdl_output_fcpu = table.merge(hdl_output_fcpu, {
   icon = "__fcpu__/graphics/icons/fcpu.png",
   icon_size = 1,

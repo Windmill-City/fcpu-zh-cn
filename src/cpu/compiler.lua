@@ -265,6 +265,7 @@ function compiler.build(state, force)
     return ics
   end
 
+  state.d_j = nil
   state.program_ics = state.program_ics or {}
 
   for k, v in ipairs(state.program_ast) do
