@@ -389,7 +389,7 @@ blt r1 10 :counter
   Branch if types are different.  
 
 
-### SIMD instructions
+## SIMD instructions
 Until now you can control fCPU with one instructon per game cycle and operate with a couple signals per instruction.  
 But it is not a limit. fCPU supports _Single Instruction Multiple Data_ mnemonics, which means that you could do much more efficient work per instruction and so per one game tick.  
 SIMD instructions process several signals in parallel at once, unlike scalar instructions.  
@@ -398,19 +398,19 @@ When working with SIMD instructions, the following features should be considered
 - SIMD instructions do not costs additional time for handling, so UPS friendly
 - Some vector instructions are executed for more than 1 tick (`xmov mem1 red` takes 3 ticks for populating `mem1` slot with data from `red` wire)
 - Retrieving effective data from affected memory is possible only after completion of a vector instruction
-  For handling this you may use `fwait` before getting data from memory cell.
+  For handling this you may use `xwait` before getting data from memory cell.
 - Vector instructions are executed in parallel with scalar
 
 For example:
 ```
-xmov mem2 green ; mem2 will be copied on third tick
+xmov mem2 green ; mem2 will be ready on third tick with data from this tick
 nop ; mem2 is not ready yet
 nop ; mem2 is not ready yet
 mov r1 mem2[1] ; mem2 is ready on this tick
 ```
 
 
-#### SIMD Mnemonics
+### SIMD Mnemonics
 * `xmov` a[**M**/**O**] b[**M**/**I**]
 * `xadd` a[**M**/**O**] b[**C**/**R**/**I**]
 * `xsub` a[**M**/**O**] b[**C**/**R**/**I**]
