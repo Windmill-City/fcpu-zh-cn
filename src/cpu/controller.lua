@@ -202,7 +202,7 @@ function Controller.tick(state, sync_wait)
   if state.program_state == PSTATE_RUNNING then
     local ast = state.program_ast[state.instruction_pointer]
     local ics = state.program_ics[state.instruction_pointer]
-    local success, result = Compiler.eval(ast, ics, control, state)
+    local success, result = Compiler.eval(ast, ics, state, control)
     if not success then
       Controller.set_error_message(state, result)
       Controller.halt(state)

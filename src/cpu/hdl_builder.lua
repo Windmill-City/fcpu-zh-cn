@@ -6,16 +6,22 @@ assert.bind()
 local builder = {}
 
 -------------------------------------------------------------------------------------------------------
+local function inverse_wire_color(color)
+  return (color ~= defines.wire_type.red) and defines.wire_type.red or defines.wire_type.green
+end
+
 local function get_debug_offset(entity, d_next_node)
   local x = 0
   local y = 0
   if MC_DEBUG then
     local state = Entity.get_data(entity)
     if MC_DEBUG == true then
-      if state.d_e ~= entity or d_next_node then
-        state.d_e = entity
-        state.d_j = (state.d_j or 0) + 1
+      if d_next_node == true then
         state.d_i = 1
+        state.d_j = (state.d_j or 0) + 1
+      elseif state.d_j == nil or d_next_node == false then
+        state.d_i = 1
+        state.d_j = 0
       else
         state.d_i = (state.d_i or 0) + 1
       end
@@ -106,13 +112,14 @@ end
 -------------------------------------------------------------------------------------------------------
 
 function builder.create_memory_cell(entity, input_ent, input_color, input_port, proxy_output)
-  local wire1 = (input_color == defines.wire_type.red) and defines.wire_type.red or defines.wire_type.green
-  local wire2 = (input_color ~= defines.wire_type.red) and defines.wire_type.red or defines.wire_type.green
+  local wire1 = input_color
+  local wire2 = inverse_wire_color(input_color)
 
   local key, control_key = builder.create_node(entity, 'decider', true)
   local ctl, control_ctl = builder.create_node(entity, 'constant')
-  local dst, control_dst = builder.create_node(entity, 'decider')
+  local out, control_out = builder.create_node(entity, 'decider')
   local fix, control_fix = builder.create_node(entity, 'constant')
+  local rst, control_rst = builder.create_node(entity, 'constant')
 
   ctl.connect_neighbour({
     source_circuit_id = defines.circuit_connector_id.constant_combinator,
@@ -149,19 +156,19 @@ function builder.create_memory_cell(entity, input_ent, input_color, input_port, 
     }
   }
 
-  dst.connect_neighbour({
+  out.connect_neighbour({
     source_circuit_id = defines.circuit_connector_id.combinator_output,
     wire = wire2,
-    target_entity = dst,
+    target_entity = out,
     target_circuit_id = defines.circuit_connector_id.combinator_input
   })
-  dst.connect_neighbour({
+  out.connect_neighbour({
     source_circuit_id = defines.circuit_connector_id.combinator_input,
     wire = wire1,
     target_entity = key,
     target_circuit_id = defines.circuit_connector_id.combinator_output
   })
-  control_dst.parameters = {
+  control_out.parameters = {
     parameters = {
       first_signal = {type='virtual', name='signal-fcpu-error'},
       second_signal = nil,
@@ -172,7 +179,7 @@ function builder.create_memory_cell(entity, input_ent, input_color, input_port, 
     }
   }
 
-  dst.connect_neighbour({
+  out.connect_neighbour({
     source_circuit_id = defines.circuit_connector_id.combinator_output,
     wire = wire1,
     target_entity = fix,
@@ -184,12 +191,25 @@ function builder.create_memory_cell(entity, input_ent, input_color, input_port, 
     count = -1
   })
 
+  rst.connect_neighbour({
+    source_circuit_id = defines.circuit_connector_id.constant_combinator,
+    wire = wire2,
+    target_entity = out,
+    target_circuit_id = defines.circuit_connector_id.combinator_input
+  })
+  control_rst.enabled = false
+  control_rst.set_signal(1, {
+    signal = {type='virtual', name='signal-fcpu-error'},
+    count = 2
+  })
+
   local ics = {
     color_out = wire1,
     ctrl = ctl,
     fix = fix,
+    rst = rst,
     key,
-    out = dst
+    out = out
   }
 
   if proxy_output then
@@ -231,8 +251,8 @@ function builder.create_math_cell(entity, input_ent_a, input_ent_b, operation, i
     end
   end
 
-  local wire_a = (input_wire == defines.wire_type.red) and defines.wire_type.red or defines.wire_type.green
-  local wire_b = (input_wire ~= defines.wire_type.red) and defines.wire_type.red or defines.wire_type.green
+  local wire_a = input_wire
+  local wire_b = inverse_wire_color(input_wire)
 
   local dst = builder.create_node(entity, 'arithmetic', true)
   local control_dst = dst.get_or_create_control_behavior()
@@ -272,6 +292,10 @@ end
 
 function builder.get_node(state_, name)
   return state_.program_ics[state_.ics_stack[name]]
+end
+
+function builder.get_ics(state_, index)
+  return state_.program_ics[index]
 end
 
 function builder.set_ics(name, index)

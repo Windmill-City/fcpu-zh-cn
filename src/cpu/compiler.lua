@@ -172,7 +172,7 @@ local function parse(tokens)
         elseif string.find(peek(), 'out') then
           return parseOutput('out')
 
-        elseif string.find(peek(), 'mem%d') then
+        elseif string.find(peek(), 'mem') then
           return parseMemory('mem')
         elseif string.find(peek(), 'm%d[@%[]?%d') == 1 then
           return parseMemory('mem', 'm')
@@ -289,8 +289,8 @@ function compiler.build(state, force)
   end
 end
 
-function compiler.eval(ast, ics, control, state)
-  io.setup(control, state)
+function compiler.eval(ast, ics, state, control)
+  io.setup(state, control)
 
   local status, results = pcall(eval, ast, ics)
   --local status, results = true, eval(ast)

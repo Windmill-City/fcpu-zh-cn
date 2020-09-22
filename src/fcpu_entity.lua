@@ -55,7 +55,7 @@ function fcpu_verify_utility(entity)
   end
 
   if not (state.program_ics.output and state.program_ics.output.valid) then
-    local output_fcpu = HdlBuilder.create_node(entity, 'output')
+    local output_fcpu = HdlBuilder.create_node(entity, 'output', false)
     state.program_ics.output = output_fcpu
 
     entity.connect_neighbour({
@@ -109,6 +109,9 @@ local function update_fcpu_target(imposter_fcpu, new_fcpu)
   local state = Entity.get_data(new_fcpu) or { ['entity'] = new_fcpu }
   state.imposter_fcpu = imposter_fcpu
   state.disabled = imposter_state.disabled
+  Entity.set_data(new_fcpu, state)
+
+  state = fcpu_verify_utility(new_fcpu)
 
   if imposter_state.target_program then
     Controller.update_program_text(state, imposter_state.target_program)
@@ -216,7 +219,7 @@ function handle_fcpu_create(ent)
           if math.abs(imposter_fcpu.position.x-x)<0.01 and math.abs(imposter_fcpu.position.y-y)<0.01 then -- if we replaced a correct ghost, reassign
             debug_print("-- update imposter fcpu state")
             update_fcpu_target(imposter_fcpu, ent)
-            break
+            return
           else -- we destroyed an unrelated ghost
             debug_print("-- destroy_imposter_fcpu - unrelated")
           --  fcpu_destroy_imposter(imposter_fcpu)

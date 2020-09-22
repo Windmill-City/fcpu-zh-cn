@@ -49,6 +49,21 @@ local find_in_wire = function(_, color)
   io.setsignal(_dst, sig)
 end
 
+local memory_clear = function(slot)
+  local deffer = { type = 'deffer', ops = {} }
+  io.each_ics(function(ics)
+    if ics.rst then
+      local control_rst = ics.rst.get_or_create_control_behavior()
+      control_rst.enabled = true
+      deffer.ops[#deffer.ops + 1] = {action='disable', ic=ics.rst, delay = 1}
+    end
+    if ics.fix then
+      deffer.ops[#deffer.ops + 1] = {action='disable', ic=ics.fix, delay = 1}
+    end
+  end, slot)
+  return deffer
+end
+
 local opcodes = {
 -- S: Signal
 -- T: signal type
@@ -66,18 +81,24 @@ local opcodes = {
   clr = function(_)
     if 0 < #_ then
       for i, expr in ipairs(_) do
-        if expr and expr.addr == nil and expr.color == 'out' then
-          io.output_clear()
-        else
-          io.setsignal(_[i], NULL_SIGNAL, {'register', 'wire'})
+        if expr then
+          assert.type(expr, {'register', 'memory', 'output'})
+          if expr.addr == nil and expr.color == 'out' then
+            io.output_clear()
+          elseif expr.type == 'register' then
+            io.setsignal(_[i], NULL_SIGNAL, {'register', 'wire'})
+          elseif expr.type == 'memory' then
+            return memory_clear(expr.index and (expr.location .. expr.index))
+          end
         end
       end
     else
       for i = 1, io.register_last_index() do
         io.register_setraw(i, table.deepcopy(NULL_SIGNAL))
       end
-      io.wire_set({type='wire', color='out', addr=1, pointer=false}, NULL_SIGNAL)
+      io.control_set(table.deepcopy(NULL_SIGNAL))
       io.output_clear()
+      return memory_clear()
     end
   end,
 

@@ -1,5 +1,6 @@
 local assert
 local hdlbuilder
+local control_out
 local control
 local wires
 local state
@@ -102,14 +103,14 @@ end
 
 
 -- Control output
-local function control_get()
+function io.control_get()
   local params = control.parameters
   local signal_id = params.parameters.output_signal
   local count = params.parameters.first_constant
   return io.make_signal(signal_id, count)
 end
 
-local function control_set(signal)
+function io.control_set(signal)
   local params = control.parameters
   params.parameters.first_constant = signal.count
   params.parameters.output_signal = signal.signal
@@ -119,7 +120,7 @@ end
 
 -- Output wire access
 local function output_get(index)
-  local params = control.parameters
+  local params = control_out.parameters
   local signal_id = params.parameters[index].signal
   local count = params.parameters[index].count
   return io.make_signal(signal_id, count)
@@ -127,15 +128,15 @@ end
 
 local function output_set(index, signal)
   assert.check(math.abs(signal.count or 0) ~= 1/0, "Division by zero")
-  local params = control.parameters
+  local params = control_out.parameters
   params.parameters[index].signal = signal.signal
   params.parameters[index].count = signal.count
   params.parameters[index].index = index
-  control.parameters = params
+  control_out.parameters = params
 end
 
 function io.output_clear()
-  control.parameters = nil
+  control_out.parameters = nil
 end
 
 
@@ -259,6 +260,22 @@ end
 
 
 -- Memory
+function io.each_ics(proc, name)
+  local index = name and state.ics_stack[name]
+  for k, ics in pairs(state.program_ics) do
+    if type(k) == 'number' then
+      if not index or k == index then
+        proc(ics)
+      end
+    end
+  end
+end
+
+function io.ics_control(index)
+  local ics = hdlbuilder.get_ics(state, index)
+  return ics, ics and ics.get_or_create_control_behavior()
+end
+
 function io.memory_getchannel_signals(channel)
   assert.check(1 <= channel and channel <= MC_MEMORY_CHANNELS, "Memory channel is out of range")
   local ics = hdlbuilder.get_node(state, "mem" .. channel)
@@ -368,19 +385,18 @@ function io.settype(_, sigtype, types)
 end
 
 
-function io.setup(control_, state_)
+function io.setup(state_, control_)
+  state = state_
+  control = control_
+
   wires = {
     red = control_.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_input),
     green = control_.get_circuit_network(defines.wire_type.green, defines.circuit_connector_id.combinator_input),
   }
 
   if state_.program_ics.output then
-    control = state_.program_ics.output.get_control_behavior()
-  else
-    assert.todo()
-    control = control_
+    control_out = state_.program_ics.output.get_control_behavior()
   end
-  state = state_
 end
 
 
