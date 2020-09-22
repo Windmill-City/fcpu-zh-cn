@@ -298,8 +298,8 @@ function Controller.update_ip(state)
 end
 
 function Controller.update_state(state, pstate)
-  if state.output_fcpu then
-    local control = state.output_fcpu.get_control_behavior()
+  if state.program_ics.output then
+    local control = state.program_ics.output.get_control_behavior()
     control.enabled = not state.disabled-- and not state.vector_output
   end
 

@@ -54,9 +54,9 @@ function fcpu_verify_utility(entity)
     fcpu_set_imposter(entity, imposter_fcpu)
   end
 
-  if not (state.output_fcpu and state.output_fcpu.valid) then
-    local output_fcpu = HdlBuilder.create_output(entity)
-    HdlBuilder.set_output(entity, output_fcpu)
+  if not (state.program_ics.output and state.program_ics.output.valid) then
+    local output_fcpu = HdlBuilder.create_node(entity, 'output')
+    state.program_ics.output = output_fcpu
 
     entity.connect_neighbour({
       wire = defines.wire_type.green,
@@ -232,7 +232,6 @@ function handle_fcpu_create(ent)
 end
 
 function handle_fcpu_destroy(entity, leave_imposter)
-  HdlBuilder.destroy_output(entity)
   HdlBuilder.destroy_nodes(entity)
 
   if entity.name == "fcpu" then

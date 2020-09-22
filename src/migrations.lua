@@ -91,6 +91,8 @@ return {
       state.program_begin = 1
       state.program_ics = {}
       state.ics_stack = {}
+      state.program_ics.output = state.output_fcpu
+      state.output_fcpu = nil
       Entity.set_data(fcpu, state)
     end)
     foreach_player(function(player, player_data)

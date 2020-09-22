@@ -190,6 +190,7 @@ local hdl_constant_fcpu = table.merge(table.deepcopy(data.raw['constant-combinat
   icon_mipmaps = 0,
   allow_copy_paste = false,
   create_ghost_on_death = false,
+  item_slot_count = 1,
 
   circuit_wire_max_distance = 10000,
   energy_source = {
@@ -217,7 +218,6 @@ if not MC_DEBUG then hdl_constant_fcpu = table.merge(hdl_constant_fcpu, {
     "not-in-kill-statistics",
   },
 
-  item_slot_count = 1,
   sprites =
   {
       north = empty_picture,

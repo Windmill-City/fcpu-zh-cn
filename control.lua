@@ -158,13 +158,11 @@ local function on_picker_dolly_moved(event)
       local state = get_fcpu_state(entity)
       if state then
         local fcpu = state.entity
-        local output_fcpu = state.output_fcpu
         local imposter_fcpu = state.imposter_fcpu
 
         local offset_x = fcpu.position.x - event.start_pos.x
         local offset_y = fcpu.position.y - event.start_pos.y
 
-        output_fcpu.teleport{x = output_fcpu.position.x + offset_x, y = output_fcpu.position.y + offset_y}
         imposter_fcpu.teleport{x = imposter_fcpu.position.x + offset_x, y = imposter_fcpu.position.y + offset_y}
 
         if state.program_ics then

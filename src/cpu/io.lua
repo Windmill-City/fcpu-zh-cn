@@ -374,8 +374,8 @@ function io.setup(control_, state_)
     green = control_.get_circuit_network(defines.wire_type.green, defines.circuit_connector_id.combinator_input),
   }
 
-  if state_.output_fcpu then
-    control = state_.output_fcpu.get_control_behavior()
+  if state_.program_ics.output then
+    control = state_.program_ics.output.get_control_behavior()
   else
     assert.todo()
     control = control_

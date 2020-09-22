@@ -6,49 +6,6 @@ assert.bind()
 local builder = {}
 
 -------------------------------------------------------------------------------------------------------
-
-function builder.set_output(entity, output_fcpu)
-  local state = Entity.get_data(entity) or {}
-  state.output_fcpu = output_fcpu
-  Entity.set_data(entity, state)
-end
-
-function builder.create_output(entity)
-  local surf = entity.surface
-  local output_fcpu = surf.create_entity({
-    name = "output-fcpu",
-    position = { x = entity.position.x+1, y = entity.position.y },
-    direction = entity.direction,
-    force = entity.force
-  })
-  output_fcpu.destructible = false
-  output_fcpu.operable = true
-  Entity.set_data(output_fcpu, {fcpu = entity})
-  return output_fcpu
-end
-
-function builder.destroy_output(entity)
-  if not (entity and entity.valid) then return end
-  if entity.name == "fcpu" then
-    local state = Entity.get_data(entity)
-    builder.destroy_output(state.output_fcpu)
-  elseif entity.name == "output-fcpu" then
-    local output_fcpu = Entity.get_data(entity)
-    if output_fcpu and output_fcpu.fcpu and output_fcpu.fcpu.valid then
-      builder.set_output(output_fcpu.fcpu, nil)
-    end
-    debug_print("destroyed fcpu output")
-    Entity.set_data(entity, nil)
-    entity.destroy()
-  elseif entity.name == "entity-ghost" and entity.ghost_name == "fcpu" then
-    local output_fcpus = entity.surface.find_entities_filtered{name = "output-fcpu", position = { x = entity.position.x, y = entity.position.y }, force = entity.force, limit = 1}
-    if #output_fcpus > 0 then
-      builder.destroy_output(output_fcpus[1])
-    end
-  end
-end
-
--------------------------------------------------------------------------------------------------------
 local function get_debug_offset(entity, d_next_node)
   local x = 0
   local y = 0
@@ -110,6 +67,8 @@ function builder.destroy_nodes(entity)
         builder.destroy_nodes(v)
       end
     end
+  else
+    assert.todo()
   end
 end
 
@@ -119,7 +78,7 @@ function builder.destroy_ics(entity)
       for _, e in pairs(entity) do
         builder.destroy_ics(e)
       end
-    elseif entity.valid and (entity.name == "decider-fcpu" or entity.name == "arithmetic-fcpu" or entity.name == "constant-fcpu") then
+    elseif entity.valid and (entity.name == "decider-fcpu" or entity.name == "arithmetic-fcpu" or entity.name == "constant-fcpu" or entity.name == "output-fcpu") then
       debug_print('destroyed fcpu '.. entity.name ..' ic')
       Entity.set_data(entity, nil)
       entity.destroy()
@@ -386,13 +345,13 @@ local ops = {
       ics.out.connect_neighbour({
         source_circuit_id = defines.circuit_connector_id.combinator_output,
         wire = defines.wire_type.red,
-        target_entity = state.output_fcpu,
+        target_entity = state.program_ics.output,
         target_circuit_id = defines.circuit_connector_id.constant_combinator
       })
       ics.out.connect_neighbour({
         source_circuit_id = defines.circuit_connector_id.combinator_output,
         wire = defines.wire_type.green,
-        target_entity = state.output_fcpu,
+        target_entity = state.program_ics.output,
         target_circuit_id = defines.circuit_connector_id.constant_combinator
       })
     elseif _[1].type == 'memory' then

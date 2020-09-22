@@ -152,8 +152,8 @@ local function UpdateWidget_MemoryView(player_data)
       -- TODO: this is draft implementation for GUI design check
       MemoryView_UpdateFromTable(player_data, state.regs, true)
     elseif index == MC_MEMORY_CHANNELS + 4 then
-      if state.output_fcpu then
-        local control = state.output_fcpu.get_control_behavior()
+      if state.program_ics.output then
+        local control = state.program_ics.output.get_control_behavior()
         MemoryView_UpdateFromTable(player_data, control and control.parameters and control.parameters.parameters)
       else
         MemoryView_UpdateFromTable(player_data, {})
