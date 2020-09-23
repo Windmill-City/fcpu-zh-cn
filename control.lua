@@ -86,7 +86,7 @@ script.on_event(defines.events.on_tick, function(event)
       if state then
         local need_sync = 0
         if state.deffer and next(state.deffer) ~= nil then
-          need_sync = Controller.do_defferred(state)
+          need_sync = Controller.do_defferred(state, 1)
         end
         -- Tick the Controller
         if not state.disabled and cpu.active then

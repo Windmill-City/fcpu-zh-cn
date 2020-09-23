@@ -32,6 +32,7 @@ function Controller.init(mc)
     program_begin = 1,
     program_ics = {},
     ics_stack = {},
+    deffer = {},
     instruction_pointer = 1
   }
 
@@ -129,10 +130,10 @@ function Controller.set_program_counter(state, value)
   Controller.update_ip(state)
 end
 
-function Controller.do_defferred(state)
+function Controller.do_defferred(state, frames)
   local count = 0
   for k, op in pairs(state.deffer) do
-    if op.delay <= 1 then
+    if op.delay <= frames then
       if op.action == 'disable' then
         if op.ic and op.ic.valid then
           local control = op.ic.get_or_create_control_behavior()
@@ -148,7 +149,7 @@ function Controller.do_defferred(state)
       end
       state.deffer[k] = nil
     else
-      state.deffer[k].delay = op.delay - 1
+      state.deffer[k].delay = op.delay - frames
     end
     count = count + 1
   end
@@ -235,10 +236,16 @@ function Controller.tick(state, sync_wait)
         end
       elseif result.type == 'deffer' then
         Controller.set_program_counter(state, state.instruction_pointer + 1)
-        state.deffer = state.deffer or {}
         for _,v in ipairs(result.ops) do
-          table.insert(state.deffer, v)
+          table.insert(state.deffer, table.deep_copy(v))
         end
+        Controller.do_defferred(state, 0)
+      elseif result == 'deffer' then
+        Controller.set_program_counter(state, state.instruction_pointer + 1)
+        for _,v in ipairs(ast.deffer) do
+          table.insert(state.deffer, table.deep_copy(v))
+        end
+        Controller.do_defferred(state, 0)
       end
     else
       Controller.set_program_counter(state, state.instruction_pointer + 1)

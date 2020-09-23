@@ -33,23 +33,7 @@ local opcodes_vx = {
 
   xmov = function(_, ics)
     assert.two(_)
-    if ics and ics.ctrl then
-      local control = ics.ctrl.get_or_create_control_behavior()
-      control.enabled = true
-
-      local deffer = {
-        type = 'deffer',
-        ops = {
-          {action='disable', ic=ics.fix, delay = 1},
-          {action='disable', ic=ics.ctrl, delay = 2},
-          {action='enable', ic=ics.fix, delay = 3}
-        }
-      }
-      --if _[1].type == 'wire' and _[1].color == 'out' then
-      --  deffer.ops[#deffer.ops + 1] = {action='disable-output', delay = 3}
-      --end
-      return deffer
-    end
+    return 'deffer'
   end,
 
   xadd = vector_scalar_op(),

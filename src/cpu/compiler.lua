@@ -257,12 +257,12 @@ end
 
 function compiler.build(state, force)
   local construct = function(k, ast)
-    local name, ics = hdlBuilder.construct(ast, state)
+    local name, ics, deffer = hdlBuilder.construct(ast, state)
     if name then
       ast.push_ics = { {index=k, name=name} }
       update_ics_stack(hdlBuilder, ast.push_ics)
     end
-    return ics
+    return ics, deffer
   end
 
   state.d_j = nil
@@ -272,19 +272,23 @@ function compiler.build(state, force)
       if force or not hdlBuilder.validate_ics(state.program_ics[k]) then
         hdlBuilder.destroy_ics(state.program_ics[k])
 
-        local status, result = pcall(construct, k, v)
-        --local status, result = true, construct(k, v)
+        local status, result, deffer = pcall(construct, k, v)
+        --local status, result, deffer = true, construct(k, v)
         if not status then
           local start_index = string.find(result, '@') or 1
           result = string.sub(result, start_index+1, -1)
           state.program_ast[k] = { type='error', error=result }
         else
+          state.program_ast[k].deffer = deffer
+          state.program_ast[k].ics = result
           state.program_ics[k] = result
         end
       end
     else
       hdlBuilder.destroy_ics(state.program_ics[k])
       state.program_ics[k] = nil
+      state.program_ast[k].deffer = nil
+      state.program_ast[k].ics = nil
     end
   end
 end

@@ -52,14 +52,9 @@ end
 local memory_clear = function(slot)
   local deffer = { type = 'deffer', ops = {} }
   io.each_ics(function(ics)
-    if ics.rst then
-      local control_rst = ics.rst.get_or_create_control_behavior()
-      control_rst.enabled = true
-      deffer.ops[#deffer.ops + 1] = {action='disable', ic=ics.rst, delay = 1}
-    end
-    if ics.fix then
-      deffer.ops[#deffer.ops + 1] = {action='disable', ic=ics.fix, delay = 1}
-    end
+    deffer.ops[#deffer.ops + 1] = {action='enable', ic=ics.rst, delay = 0}
+    deffer.ops[#deffer.ops + 1] = {action='disable', ic=ics.rst, delay = 1}
+    deffer.ops[#deffer.ops + 1] = {action='disable', ic=ics.fix, delay = 1}
   end, slot)
   return deffer
 end

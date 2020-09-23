@@ -384,7 +384,14 @@ local ops = {
       assert.todo()
     end
 
-    return ics_name, ics
+    local deffer = {
+      {action='enable', ic=ics.ctrl, delay = 0},
+      {action='disable', ic=ics.fix, delay = 1},
+      {action='disable', ic=ics.ctrl, delay = 2},
+      {action='enable', ic=ics.fix, delay = 3}
+    }
+
+    return ics_name, ics, deffer
   end,
 
   xadd = vector_scalar_op('+'),
