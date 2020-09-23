@@ -19,8 +19,8 @@ local function get_debug_offset(entity, d_next_node)
       if d_next_node == true then
         state.d_i = 1
         state.d_j = (state.d_j or 0) + 1
-      elseif state.d_j == nil or d_next_node == false then
-        state.d_i = 1
+      elseif state.d_j == nil or d_next_node == false or type(d_next_node) == 'number' then
+        state.d_i = d_next_node or 1
         state.d_j = 0
       else
         state.d_i = (state.d_i or 0) + 1
@@ -115,101 +115,83 @@ function builder.create_memory_cell(entity, input_ent, input_color, input_port, 
   local wire1 = input_color
   local wire2 = inverse_wire_color(input_color)
 
-  local key, control_key = builder.create_node(entity, 'decider', true)
-  local ctl, control_ctl = builder.create_node(entity, 'constant')
-  local out, control_out = builder.create_node(entity, 'decider')
-  local fix, control_fix = builder.create_node(entity, 'constant')
-  local rst, control_rst = builder.create_node(entity, 'constant')
+  local d_key, control_key = builder.create_node(entity, 'decider', true)
+  local c_in, control_in = builder.create_node(entity, 'constant')
+  local c_fix, control_fix = builder.create_node(entity, 'constant')
+  local d_out, control_out = builder.create_node(entity, 'decider')
 
-  ctl.connect_neighbour({
-    source_circuit_id = defines.circuit_connector_id.constant_combinator,
-    wire = wire2,
-    target_entity = key,
-    target_circuit_id = defines.circuit_connector_id.combinator_input
-  })
-  ctl.connect_neighbour({
-    source_circuit_id = defines.circuit_connector_id.constant_combinator,
-    wire = wire1,
-    target_entity = key,
-    target_circuit_id = defines.circuit_connector_id.combinator_output
-  })
-  control_ctl.enabled = false
-  control_ctl.set_signal(1, {
+  control_in.enabled = false
+  control_in.set_signal(1, {
     signal = {type='virtual', name='signal-fcpu-error'},
     count = 1
   })
 
-  key.connect_neighbour({
-    source_circuit_id = defines.circuit_connector_id.combinator_input,
-    wire = wire1,
-    target_entity = input_ent,
-    target_circuit_id = input_port
-  })
-  control_key.parameters = {
-    parameters = {
-      first_signal = {type='virtual', name='signal-fcpu-error'},
-      second_signal = nil,
-      constant = 1,
-      comparator = "=",
-      output_signal = {type='virtual', name='signal-everything'},
-      copy_count_from_input = true
-    }
-  }
-
-  out.connect_neighbour({
-    source_circuit_id = defines.circuit_connector_id.combinator_output,
-    wire = wire2,
-    target_entity = out,
-    target_circuit_id = defines.circuit_connector_id.combinator_input
-  })
-  out.connect_neighbour({
-    source_circuit_id = defines.circuit_connector_id.combinator_input,
-    wire = wire1,
-    target_entity = key,
-    target_circuit_id = defines.circuit_connector_id.combinator_output
-  })
-  control_out.parameters = {
-    parameters = {
-      first_signal = {type='virtual', name='signal-fcpu-error'},
-      second_signal = nil,
-      constant = 1,
-      comparator = "≤", -- ≥",
-      output_signal = {type='virtual', name='signal-everything'},
-      copy_count_from_input = true
-    }
-  }
-
-  out.connect_neighbour({
-    source_circuit_id = defines.circuit_connector_id.combinator_output,
-    wire = wire1,
-    target_entity = fix,
-    target_circuit_id = defines.circuit_connector_id.constant_combinator
-  })
   control_fix.enabled = false
   control_fix.set_signal(1, {
     signal = {type='virtual', name='signal-fcpu-error'},
     count = -1
   })
 
-  rst.connect_neighbour({
-    source_circuit_id = defines.circuit_connector_id.constant_combinator,
-    wire = wire2,
-    target_entity = out,
+  control_key.parameters = {
+    parameters = {
+      first_signal = {type='virtual', name='signal-fcpu-error'},
+      second_signal = nil,
+      constant = 1,
+      comparator = "=", -- < ≤ ≠ = ≥ >
+      output_signal = {type='virtual', name='signal-everything'},
+      copy_count_from_input = true
+    }
+  }
+
+  control_out.parameters = {
+    parameters = {
+      first_signal = {type='virtual', name='signal-fcpu-error'},
+      second_signal = nil,
+      constant = 0,
+      comparator = "=", -- < ≤ ≠ = ≥ >
+      output_signal = {type='virtual', name='signal-everything'},
+      copy_count_from_input = true
+    }
+  }
+
+
+  d_key.connect_neighbour({
+    source_circuit_id = defines.circuit_connector_id.combinator_input,
+    wire = wire1,
+    target_entity = input_ent,
+    target_circuit_id = input_port
+  })
+  d_key.connect_neighbour({
+    source_circuit_id = defines.circuit_connector_id.combinator_output,
+    wire = wire1,
+    target_entity = d_out,
     target_circuit_id = defines.circuit_connector_id.combinator_input
   })
-  control_rst.enabled = false
-  control_rst.set_signal(1, {
-    signal = {type='virtual', name='signal-fcpu-error'},
-    count = 2
+  c_in.connect_neighbour({
+    source_circuit_id = defines.circuit_connector_id.constant_combinator,
+    wire = wire2,
+    target_entity = d_key,
+    target_circuit_id = defines.circuit_connector_id.combinator_input
+  })
+  c_fix.connect_neighbour({
+    source_circuit_id = defines.circuit_connector_id.constant_combinator,
+    wire = wire1,
+    target_entity = d_key,
+    target_circuit_id = defines.circuit_connector_id.combinator_output
+  })
+  d_out.connect_neighbour({
+    source_circuit_id = defines.circuit_connector_id.combinator_output,
+    wire = wire2,
+    target_entity = d_out,
+    target_circuit_id = defines.circuit_connector_id.combinator_input
   })
 
   local ics = {
     color_out = wire1,
-    ctrl = ctl,
-    fix = fix,
-    rst = rst,
-    key,
-    out = out
+    d_key,
+    ctrl = c_in,
+    fix = c_fix,
+    out = d_out,
   }
 
   if proxy_output then
@@ -291,6 +273,7 @@ end
 -------------------------------------------------------------------------------------------------------
 
 function builder.get_node(state_, name)
+  -- same as io.get_node
   return state_.program_ics[state_.ics_stack[name]]
 end
 
@@ -352,10 +335,10 @@ local ops = {
       color = _[2].color == 'red' and defines.wire_type.red or defines.wire_type.green
       port = defines.circuit_connector_id.combinator_input
     elseif _[2].type == 'memory' then
-      local ics = builder.get_node(state, _[2].location .. _[2].index)
-      assert.check(ics ~= nil, "Memory is not initialized yet")
-      src = ics.out
-      color = ics.color_out
+      --local ics = builder.get_node(state, _[2].location .. _[2].index)
+      local mem_ics = state.program_ics[_[2].location .. _[2].index]
+      src = mem_ics.out
+      color = defines.wire_type.red
       port = defines.circuit_connector_id.combinator_output
     else
       assert.todo()
@@ -380,15 +363,22 @@ local ops = {
       })
     elseif _[1].type == 'memory' then
       ics_name = _[1].location .. _[1].index
+      local mem_ics = state.program_ics[ics_name]
+      mem_ics.out.connect_neighbour({
+        source_circuit_id = defines.circuit_connector_id.combinator_input,
+        wire = ics.color_out,
+        target_entity = ics.out,
+        target_circuit_id = defines.circuit_connector_id.combinator_output
+      })
     else
       assert.todo()
     end
 
     local deffer = {
       {action='enable', ic=ics.ctrl, delay = 0},
-      {action='disable', ic=ics.fix, delay = 1},
-      {action='disable', ic=ics.ctrl, delay = 2},
-      {action='enable', ic=ics.fix, delay = 3}
+      {action='enable', ic=ics.fix, delay = 0},
+      {action='disable', ic=ics.ctrl, delay = 1},
+      {action='disable', ic=ics.fix, delay = 2}
     }
 
     return ics_name, ics, deffer

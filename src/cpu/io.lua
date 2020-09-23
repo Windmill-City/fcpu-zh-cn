@@ -69,11 +69,6 @@ function io.make_wire(name, address)
   return { type = 'wire', color = name, addr = address.addr, pointer = address.pointer}
 end
 
-function io.set_ics(name, index)
-  -- same as HdlBuilder.set_ics
-  state.ics_stack[name] = index
-end
-
 
 -- Address, Value and Signal decomposition
 local function addr_deref(_)
@@ -260,6 +255,16 @@ end
 
 
 -- Memory
+function io.get_node(name)
+  -- same as HdlBuilder.get_node
+  return state.program_ics[state.ics_stack[name]]
+end
+
+function io.set_ics(name, index)
+  -- same as HdlBuilder.set_ics
+  state.ics_stack[name] = index
+end
+
 function io.each_ics(proc, name)
   local index = name and state.ics_stack[name]
   for k, ics in pairs(state.program_ics) do

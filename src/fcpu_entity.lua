@@ -72,6 +72,39 @@ function fcpu_verify_utility(entity)
     })
   end
 
+  for i = 1, MC_MEMORY_CHANNELS  do
+    local name = 'mem'..i
+    if not (state.program_ics[name] and state.program_ics[name].out and state.program_ics[name].out.valid) then
+      local ent_mem, ctrl_mem = HdlBuilder.create_node(entity, 'decider', i * 2)
+      --local ent_key, ctrl_key = HdlBuilder.create_node(entity, 'constant', i * 2 + 1)
+
+      state.program_ics[name] = { out = ent_mem }
+
+      --[[ent_mem.connect_neighbour({
+        wire = defines.wire_type.green,
+        target_entity = state.program_ics.output,
+        source_circuit_id = defines.circuit_connector_id.combinator_output,
+        target_circuit_id = defines.circuit_connector_id.constant_combinator
+      })
+      ent_mem.connect_neighbour({
+        wire = defines.wire_type.red,
+        target_entity = state.program_ics.output,
+        source_circuit_id = defines.circuit_connector_id.combinator_output,
+        target_circuit_id = defines.circuit_connector_id.constant_combinator
+      })]]
+      ctrl_mem.parameters = {
+        parameters = {
+          first_signal = {type='virtual', name='signal-fcpu-error'},
+          second_signal = nil,
+          constant = 0,
+          comparator = "=",
+          output_signal = {type='virtual', name='signal-everything'},
+          copy_count_from_input = true
+        }
+      }
+    end
+  end
+
   return state
 end
 

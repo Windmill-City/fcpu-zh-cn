@@ -98,7 +98,7 @@ local function MemoryView_UpdateFromTable(player_data, signals, no_sort)
           local sprite = signalToSpritePath(v.signal)
           cell.visible = true
           cell.sprite = sprite
-          cell.number = sprite and v.count
+          cell.number = (sprite or no_sort) and v.count
           if sprite or no_sort then
             i = i + 1
           end

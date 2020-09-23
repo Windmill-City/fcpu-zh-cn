@@ -214,6 +214,15 @@ local function eval(ast, ics)
     elseif _.type == 'ic' then
       if ops_vx[_.name] then
         local result = ops_vx[_.name](_.expr, ics)
+        if _.push_ics then
+          for k,v in ipairs(_.push_ics) do
+            local node = io.get_node(v.name)
+            if node and node.fix then
+              local control = node.fix.get_control_behavior()
+              control.enabled = true
+            end
+          end
+        end
         update_ics_stack(io, _.push_ics)
         return result
       else
