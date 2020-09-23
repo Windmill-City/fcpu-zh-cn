@@ -32,8 +32,6 @@ local opcodes_vx = {
   end,
 
   xmov = function(_, ics)
-    assert.two(_)
-    return 'deffer'
   end,
 
   xadd = vector_scalar_op(),

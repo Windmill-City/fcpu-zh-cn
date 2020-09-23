@@ -32,7 +32,7 @@ function Controller.init(mc)
     program_begin = 1,
     program_ics = {},
     ics_stack = {},
-    deffer = {},
+    deffered = {},
     instruction_pointer = 1
   }
 
@@ -132,7 +132,7 @@ end
 
 function Controller.do_defferred(state, frames)
   local count = 0
-  for k, op in pairs(state.deffer) do
+  for k, op in pairs(state.deffered) do
     if op.delay <= frames then
       if op.action == 'disable' then
         if op.ic and op.ic.valid then
@@ -144,12 +144,10 @@ function Controller.do_defferred(state, frames)
           local control = op.ic.get_or_create_control_behavior()
           control.enabled = true
         end
-      elseif op.action == 'disable-output' then
-        state.vector_output = true
       end
-      state.deffer[k] = nil
+      state.deffered[k] = nil
     else
-      state.deffer[k].delay = op.delay - frames
+      state.deffered[k].delay = op.delay - frames
     end
     count = count + 1
   end
@@ -237,18 +235,18 @@ function Controller.tick(state, sync_wait)
       elseif result.type == 'deffer' then
         Controller.set_program_counter(state, state.instruction_pointer + 1)
         for _,v in ipairs(result.ops) do
-          table.insert(state.deffer, table.deep_copy(v))
-        end
-        Controller.do_defferred(state, 0)
-      elseif result == 'deffer' then
-        Controller.set_program_counter(state, state.instruction_pointer + 1)
-        for _,v in ipairs(ast.deffer) do
-          table.insert(state.deffer, table.deep_copy(v))
+          table.insert(state.deffered, v)
         end
         Controller.do_defferred(state, 0)
       end
     else
       Controller.set_program_counter(state, state.instruction_pointer + 1)
+      if ast.deffer then
+        for _,v in ipairs(ast.deffer) do
+          table.insert(state.deffered, table.deep_copy(v))
+        end
+        Controller.do_defferred(state, 0)
+      end
     end
   elseif state.program_state == PSTATE_SLEEPING then
     state.sleep_time = state.sleep_time - 1
@@ -307,7 +305,7 @@ end
 function Controller.update_state(state, pstate)
   if state.program_ics.output then
     local control = state.program_ics.output.get_control_behavior()
-    control.enabled = not state.disabled-- and not state.vector_output
+    control.enabled = not state.disabled
   end
 
   if state.program_state ~= pstate then

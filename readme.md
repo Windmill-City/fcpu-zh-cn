@@ -87,7 +87,15 @@ To access one cell: `mem2[44]` or `mem1@3` (see Arrays)
 
 
 ## Arrays\indirect addressing
-Each register could be adressed not only by direct name **regN** (**reg1**, **r2**, etc...) but also with indirect pointer **reg@N** (**reg@3**, **r@7**, etc...). This allow you to use them as **array** indices.
+Each register or memory slot could be adressed not only by direct name:
+* **regN** (**reg1**, **r2**, etc... `N` is a register index)
+* **memS[M]** (**mem1[32]**, **m4[97]**, etc.. `S` is a memory slot number, `M` is a memory cell index)
+But also with indirect pointer:
+* **reg@R** (**reg@3**, **r@7**, etc... `R` is a register index)
+* **memS@R** (**mem1@3**, **mem4@8**, etc... `R` is a register index)
+
+This allow you to use them as **array** indices.  
+
 For example:
 ```
 mov r1 10[item=iron-plate]
@@ -96,12 +104,15 @@ mov r3 300[item=steel-plate]
 
 mov r5 2
 mov r6 r@5 # r6 will be equal to r2, which is 20[item=copper-plate]
+mov r4 m1@5 # r4 will be equal to mem1[2]
 
 mov r5 3
 mov r7 r@5 # r7 will be equal to r3, which is 300[item=steel-plate]
+mov r4 m2@5 # r4 will be equal to mem2[3]
 
 mov r5 5
 mov r8 r@5 # r8 will be equal to r5, which is 5
+mov r4 m3@5 # r4 will be equal to mem3[5]
 ```
 
 This approach is also could be used with `red`, `green` input wires and memory slots, for example: `red@1`, `green@8`, `mem1@3`.  

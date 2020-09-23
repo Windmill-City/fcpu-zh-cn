@@ -259,7 +259,7 @@ function compiler.build(state, force)
   local construct = function(k, ast)
     local name, ics, deffer = hdlBuilder.construct(ast, state)
     if name then
-      ast.push_ics = { {index=k, name=name} }
+      ast.push_ics = { {name=name, index=k} }
       update_ics_stack(hdlBuilder, ast.push_ics)
     end
     return ics, deffer
@@ -280,15 +280,13 @@ function compiler.build(state, force)
           state.program_ast[k] = { type='error', error=result }
         else
           state.program_ast[k].deffer = deffer
-          state.program_ast[k].ics = result
           state.program_ics[k] = result
         end
       end
     else
       hdlBuilder.destroy_ics(state.program_ics[k])
-      state.program_ics[k] = nil
       state.program_ast[k].deffer = nil
-      state.program_ast[k].ics = nil
+      state.program_ics[k] = nil
     end
   end
 end

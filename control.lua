@@ -85,7 +85,7 @@ script.on_event(defines.events.on_tick, function(event)
       local state = Entity.get_data(cpu)
       if state then
         local need_sync = 0
-        if state.deffer and next(state.deffer) ~= nil then
+        if state.deffered and next(state.deffered) ~= nil then
           need_sync = Controller.do_defferred(state, 1)
         end
         -- Tick the Controller
