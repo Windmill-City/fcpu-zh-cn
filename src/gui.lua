@@ -123,6 +123,10 @@ function GuiWidgetOpen(player, entity)
   local player_data = get_player_data(player.index)
   local state = get_fcpu_state(entity)
 
+  if not state then
+    return
+  end
+
   local elems = CreateWidget_Main(player)
   if 0 < fcpu_debug_enabled then
     elems.gui_fcpu.titlebar.label.caption = elems.gui_fcpu.titlebar.label.caption.." #"..entity.unit_number

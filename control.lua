@@ -56,7 +56,9 @@ script.on_nth_tick(10, function(event)
     local player_data = get_player_data(player.index)
     if player_data and player_data.current_fcpu and player_data.gui_fcpu then
       local state = Entity.get_data(player_data.current_fcpu)
-      GuiWidgetUpdate(player_data, state)
+      if state then
+        GuiWidgetUpdate(player_data, state)
+      end
     end
   end
 end)
