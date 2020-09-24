@@ -292,6 +292,9 @@ function GuiWidgetOpen(player, entity)
   if rootGui["fcpu-widget"] then
     rootGui["fcpu-widget"].destroy()
   end
+  if not state then
+    return
+  end
 
   local elems = CreateWidget_Main(rootGui)
   if 0 < fcpu_debug_enabled then
