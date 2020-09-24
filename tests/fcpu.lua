@@ -13,8 +13,6 @@ assert = require('../src/cpu/assert')
 
 unit_number = 0
 
-function fcpu_update_blueprint() end
-
 function createFCPU(input)
   local fcpu = table.deepcopy(require('__stdlib__/faketorio/raw/arithmetic-combinator')['arithmetic-combinator'])
   unit_number = unit_number + 1

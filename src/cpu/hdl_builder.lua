@@ -73,8 +73,6 @@ function builder.destroy_nodes(entity)
         builder.destroy_nodes(v)
       end
     end
-  else
-    assert.todo()
   end
 end
 

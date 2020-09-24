@@ -316,8 +316,6 @@ function Controller.update_state(state, pstate)
       state.program_state = pstate
     end
 
-    fcpu_update_blueprint(state.entity)
-
     local str = pstateStr[state.program_state]
     local control = state.entity.get_control_behavior()
     local param = control.parameters

@@ -8,6 +8,8 @@ Date: ????
     - Added SIMD mnemonics.
   Changes:
     - Added disabled state into blueprint.
+    - fCPU program now saved in tags. No more `fcpu-imposter` entities needed. Please update your blueprints.
+    - Better performance on repeated state changes (hlt, run, hlt...) be external signals.
   Bugfixes:
     - Escape key handling.
     - Pause/Stop button depicts reset state correctly now.

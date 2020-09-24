@@ -95,6 +95,15 @@ return {
       state.deffered = {}
       state.program_ics.output = state.program_ics.output or state.output_fcpu
       state.output_fcpu = nil
+
+      if state.imposter_fcpu then
+        if state.imposter_fcpu.valid then
+          Entity.set_data(state.imposter_fcpu, nil)
+          state.imposter_fcpu.destroy()
+        end
+        state.imposter_fcpu = nil
+      end
+
       Entity.set_data(fcpu, state)
     end)
     foreach_player(function(player, player_data)
@@ -104,5 +113,15 @@ return {
         set_player_data(player.index, player_data)
       end
     end)
+    for _, surface in pairs(game.surfaces) do
+      for _, imposter_fcpu in pairs(surface.find_entities_filtered{ name="imposter-fcpu" }) do
+        if imposter_fcpu then
+          if imposter_fcpu.valid then
+            Entity.set_data(imposter_fcpu, nil)
+            imposter_fcpu.destroy()
+          end
+        end
+      end
+    end
   end,
 }

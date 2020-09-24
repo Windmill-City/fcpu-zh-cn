@@ -18,37 +18,15 @@ local function on_build_fcpu(event)
   local entity = event.created_entity
   if not (entity and entity.valid) then return end
 
-  handle_fcpu_create(entity)
+  handle_fcpu_create(entity, event.tags and event.tags.fcpu)
 end
 
 local function on_destroy_fcpu(event)
   local entity = event.entity
   if not (entity and entity.valid and entity.unit_number) then return end
 
-  debug_print("entity destroyed #", entity.unit_number)
   GuiEntityCloseWidget(entity)
-
-  -- after entity die there will be ghost leaved for entity reviving, so do not remove fcpu imposter
-  local leave_imposter = (event.name == defines.events.on_entity_died)
-  handle_fcpu_destroy(entity, leave_imposter)
-end
-
-local function on_marked_for_deconstruction(event)
-  local ent = event.entity
-
-  if ent.name == "imposter-fcpu" then
-    local imposter_state = get_imposter_fcpu_state(ent)
-    if not (imposter_state.fcpu and imposter_state.fcpu.valid) or imposter_state.fcpu.name == "entity-ghost" then 
-      Entity.set_data(ent, nil)
-      ent.destroy()
-    else
-      -- if target is still valid, just cancel deconstruction
-      local force = (event.player_index and game.players[event.player_index].force) or
-                    (ent.last_user and ent.last_user.force) or
-                    ent.force
-      ent.cancel_deconstruction(force)
-    end
-  end
+  handle_fcpu_destroy(entity)
 end
 
 script.on_nth_tick(fcpu_gui_updates_every_tick, function(event)
@@ -156,6 +134,31 @@ local function on_entity_settings_pasted(event)
   end
 end
 
+local function on_player_setup_blueprint(event)
+  local player = game.players[event.player_index]
+  local blueprint = nil
+  if player and player.blueprint_to_setup and player.blueprint_to_setup.valid_for_read then
+    blueprint = player.blueprint_to_setup
+  elseif player and player.cursor_stack.valid_for_read and player.cursor_stack.name == "blueprint" then
+    blueprint = player.cursor_stack
+  end
+  if blueprint then
+    for index, entity in pairs(event.mapping.get()) do
+      if entity.name == 'fcpu' then
+        local state = get_fcpu_state(entity)
+        if state then
+          blueprint.set_blueprint_entity_tag(index, "fcpu", {
+            t = state.program_text,
+            i = state.instruction_pointer,
+            r = Controller.is_running(state),
+            d = state.disabled
+          })
+        end
+      end
+    end
+  end
+end
+
 local function on_entity_cloned(event)
   local dst_entity = event.destination
   if not (dst_entity and dst_entity.valid) then return end
@@ -201,12 +204,9 @@ local function on_picker_dolly_moved(event)
       local state = get_fcpu_state(entity)
       if state then
         local fcpu = state.entity
-        local imposter_fcpu = state.imposter_fcpu
 
         local offset_x = fcpu.position.x - event.start_pos.x
         local offset_y = fcpu.position.y - event.start_pos.y
-
-        imposter_fcpu.teleport{x = imposter_fcpu.position.x + offset_x, y = imposter_fcpu.position.y + offset_y}
 
         if state.program_ics then
           for _, ics in pairs(state.program_ics) do
@@ -268,14 +268,13 @@ event.register({
 )
 
 event.register(
-  defines.events.on_marked_for_deconstruction,
-  on_marked_for_deconstruction,
-  event_filters
+  defines.events.on_entity_settings_pasted,
+  on_entity_settings_pasted
 )
 
 event.register(
-  defines.events.on_entity_settings_pasted,
-  on_entity_settings_pasted
+  defines.events.on_player_setup_blueprint,
+  on_player_setup_blueprint
 )
 
 event.register(
