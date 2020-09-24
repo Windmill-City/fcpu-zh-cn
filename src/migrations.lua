@@ -54,6 +54,7 @@ return {
           }
         }
       end
+      state.program_ics = {}
       Controller.compile(state)
       Controller.update_ip(state)
       Controller.update_state(state)
@@ -61,7 +62,7 @@ return {
       state = fcpu_verify_utility(fcpu)
 
       if signal then
-        control = state.output_fcpu.get_control_behavior()
+        control = state.program_ics.output.get_control_behavior()
         local params = control.parameters
         params.parameters[1].signal = signal.signal_id
         params.parameters[1].count = signal.count or 0
@@ -89,10 +90,10 @@ return {
   ["0.3.0"] = function()
     foreach_fcpu(function(fcpu, state)
       state.program_begin = 1
-      state.program_ics = {}
+      state.program_ics = state.program_ics or {}
       state.ics_stack = {}
       state.deffered = {}
-      state.program_ics.output = state.output_fcpu
+      state.program_ics.output = state.program_ics.output or state.output_fcpu
       state.output_fcpu = nil
       Entity.set_data(fcpu, state)
     end)
