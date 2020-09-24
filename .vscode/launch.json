@@ -8,14 +8,28 @@
             "type": "factoriomod",
             "request": "launch",
             "name": "Factorio Mod Debug",
-            "factorioPath": "G:/SteamLibrary/steamapps/common/Factorio/bin/x64/factorio.exe",
-            "modsPath": "${workspaceFolder}/../.factorio_mods"
+            "factorioPath": "G:/SteamLibrary/steamapps/common/Factorio/bin/x64/factorio.exe"
         },
         {
             "type": "factoriomod",
             "request": "launch",
             "name": "Factorio Mod Profile",
             "factorioPath": "G:/SteamLibrary/steamapps/common/Factorio/bin/x64/factorio.exe",
+            "hookMode": "profile"
+        },
+        {
+            "type": "factoriomod",
+            "request": "launch",
+            "name": "Factorio Mod Debug (custom modPath)",
+            "factorioPath": "G:/SteamLibrary/steamapps/common/Factorio/bin/x64/factorio.exe",
+            "modsPath": "S:/Work/KonStg/.factorio_mods"
+        },
+        {
+            "type": "factoriomod",
+            "request": "launch",
+            "name": "Factorio Mod Profile (custom modPath)",
+            "factorioPath": "G:/SteamLibrary/steamapps/common/Factorio/bin/x64/factorio.exe",
+            "modsPath": "S:/Work/KonStg/.factorio_mods",
             "hookMode": "profile"
         },
         {

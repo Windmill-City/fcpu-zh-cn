@@ -13,8 +13,6 @@ assert = require('../src/cpu/assert')
 
 unit_number = 0
 
-function fcpu_update_blueprint() end
-
 function createFCPU(input)
   local fcpu = table.deepcopy(require('__stdlib__/faketorio/raw/arithmetic-combinator')['arithmetic-combinator'])
   unit_number = unit_number + 1
@@ -108,8 +106,8 @@ function ExecuteTest(test_title, program_text, input_signals, probe_result, max_
   local fcpu = createFCPU(input_signals)
   local state = Controller.init(fcpu)
 
-  state.output_fcpu = createFCPU_Output()
-  state.output_fcpu.get_or_create_control_behavior()
+  state.program_ics.output = createFCPU_Output()
+  state.program_ics.output.get_or_create_control_behavior()
 
   Controller.update_program_text(state, program_text)
   Controller.compile(state)
@@ -131,7 +129,7 @@ function ExecuteTest(test_title, program_text, input_signals, probe_result, max_
   end
   if probe_result then
     --local output = fcpu.get_control_behavior().parameters.parameters
-    local output = state.output_fcpu.get_control_behavior().parameters.parameters
+    local output = state.program_ics.output.get_control_behavior().parameters.parameters
     local ret = probe_result(state, output, fcpu)
     if ret ~= true and ret ~= nil then
       print(serpent.block(state.regs, {comment=true}))

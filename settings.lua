@@ -8,6 +8,15 @@ data:extend({
   },
   {
     type = "int-setting",
+    name = "fcpu-gui-updates-every-tick",
+    setting_type = "startup",
+    default_value = 5,
+    minimum_value = 1,
+    maximum_value = 60,
+    allowed_values = { 1, 2, 5, 10, 20, 30, 60 }
+  },
+  {
+    type = "int-setting",
     name = "fcpu-maximum-updates-per-tick",
     setting_type = "runtime-global",
     default_value = 200,

@@ -40,18 +40,3 @@ function get_fcpu_state(entity)
     end
   end
 end
-
-function get_imposter_fcpu_state(entity)
-  if not (entity and entity.valid) then return end
-  if entity.name == "imposter-fcpu" then
-    local imposter_state = Entity.get_data(entity)
-    return imposter_state
-  end
-  if entity.name == "fcpu" then
-    local state = Entity.get_data(entity)
-    if state then
-      return get_imposter_fcpu_state(state.imposter_fcpu)
-    end
-  end
-end
-

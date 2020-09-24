@@ -2,10 +2,9 @@
 -- lua-MessagePack : <https://fperrad.frama.io/lua-MessagePack/>
 --
 
-local r, jit = pcall(require, 'jit')
-if not r then
-    jit = nil
-end
+--local r, jit = pcall(require, 'jit')
+--jit = r and jit or nil
+
 
 local SIZEOF_NUMBER = string.pack and #string.pack('n', 0.0) or 8
 local maxinteger

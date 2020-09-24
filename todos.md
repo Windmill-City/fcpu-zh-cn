@@ -1,15 +1,21 @@
-# TODO list, fCPU
+# Upcoming  (in v0.3.0)
+* Memory browser for SIMD instructions.
+* Single instruction, multiple data (SIMD).
+* New min, max, avg, etc SIMD opcodes.
 
-* Single instruction, multiple data (SIMD) and memory for it
-* Memory browser for SIMD instructions
-* New min, max, avg, etc SIMD opcodes
-* Test result flags to extend one condition line limitation
-* Examples, demos and docs
-* Code highlighting
-* Program library for storing subprograms outside of a fCPU units
-* Factorio modules support
-* Profiling & optimization
-* Mimic vanilla blueprint bahavior when stamped ontop of fCPU (copy blueprint program)
+# TODO list, fCPU
+* Breakpoints
+* Increase lines count up to 128.
+* Test result flags to extend one condition line limitation.
+* Examples, demos and docs.
+* Code highlighting.
+* Add `call`, `ret` semantics.
+* Program library for storing subprograms outside of a fCPU units.
+* Factorio modules support.
+* Assign a power cost to groups of instructions, and lower base cost (nop=200w, mov=2kW, xmov=30kW)
+* Profiling & optimization.
+* Mimic vanilla blueprint bahavior when stamped ontop of fCPU (copy blueprint program).
+* Add drag and drop GUI for newbies.
 
 
 # Done

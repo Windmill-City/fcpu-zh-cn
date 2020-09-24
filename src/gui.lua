@@ -2,9 +2,9 @@
 
 local gui = require("__flib__.gui")
 
--------------------------------------------------------------------------------------------------------
+local defaultToolbarInsertSignal = {type='virtual', name='signal-dot'}
 
-local function signalToSpritePath(signal)
+local signalToSpritePath = function(signal)
   if signal then
     if signal.type == "virtual" then
       return "virtual-signal/" .. signal.name
@@ -14,15 +14,176 @@ local function signalToSpritePath(signal)
   end
 end
 
-local function CreateWidget_Main(player)
-  local rootGui = player.gui.screen -- mod_gui.get_frame_flow({gui={left=player.gui.screen}})
-  if rootGui["fcpu-widget"] then
-    rootGui["fcpu-widget"].destroy()
+-------------------------------------------------------------------------------------------------------
+
+gui.add_templates{
+  frame_title = {type="label", style="frame_title"},
+  frame_action_button = {type="sprite-button", style="frame_action_button", mouse_button_filter={"left"}},
+  drag_handle = {type="empty-widget", name="drag-handle", style="draggable_space_header", style_mods={minimal_width=30, height=24, right_margin=4, horizontally_stretchable=true}},
+  close_button = {template="frame_action_button", sprite="utility/close_white", hovered_sprite="utility/close_black"},
+
+  pushers = {
+    horizontal = {type="empty-widget", style_mods={horizontally_stretchable=true}},
+    vertical = {type="empty-widget", style_mods={vertically_stretchable=true}}
+  },
+
+  control_button = function(name, sprite, color, handler)
+    return {type="sprite-button", style="tool_button"..(color and "_"..color or ""), name=name.."-program", sprite="fcpu-"..sprite.."-sprite", save_as="gui_"..name.."_button", handlers="widget."..(handler or name.."_program")}
+  end,
+  tool_button = function(name, sprite, color, ...)
+    return table.merge({type="sprite-button", style="shortcut_bar_button_small"..(color and "_"..color or ""), name=name.."-program", sprite="fcpu-"..sprite.."-sprite", handlers="widget."..name.."_program"}, ...)
+  end,
+
+  heading_2 = {type="frame", style="invisible_frame_with_title"},
+  heading_3 = {type="label", style="heading_3_label", style_mods={padding=4}},
+  slot_button = function(name, title)
+    return {type="sprite-button", style="slot_button_in_shallow_frame", name=name.."-inspect", tooltip=(title or name)}
+  end,
+  slot_inventory = function(name, title)
+    return {type="sprite-button", style="inventory_slot", name=name .."-inspect", tooltip=(title or name)}
+  end,
+}
+
+-------------------------------------------------------------------------------------------------------
+
+local function CreateWidget_MemoryView(rootGui)
+  local memchannels = {}
+  for i = 1, MC_MEMORY_CHANNELS do
+    memchannels[#memchannels + 1] = 'mem'.. i
+  end
+  memchannels[#memchannels+1] = { 'gui-fcpu-memviewer.channel-registers' }
+  memchannels[#memchannels+1] = { 'gui-fcpu-memviewer.channel-input-red' }
+  memchannels[#memchannels+1] = { 'gui-fcpu-memviewer.channel-input-green' }
+  memchannels[#memchannels+1] = { 'gui-fcpu-memviewer.channel-output' }
+
+  local elems = gui.build(rootGui, {
+    {type="frame", name="fcpu-memory-view", save_as="gui_memory_view", style="inside_shallow_frame_with_padding", direction="vertical", children={
+      {template="heading_3", caption={"gui-fcpu-memviewer.memory-channel"}},
+      {type='drop-down', save_as='gui_memory_channel', items={ table.unpack(memchannels) }, selected_index=1, handlers="memory.memory_channel"},
+
+      {template="heading_3", caption={"gui-fcpu-memviewer.memory-view"}},
+      {type="scroll-pane", style="scroll_pane_in_shallow_frame", direction="vertical", children={
+        {type="table", save_as="gui_memory_cells", style="slot_table", column_count=8 --[[ will be populated in `MemoryView_UpdateFromTable` ]]},
+      }}
+    }}
+  });
+
+  return elems
+end
+
+local function DestroyWidget_MemoryView(player_data)
+  if not player_data or not player_data.gui_fcpu or not player_data.gui_fcpu["fcpu-panels"] or not player_data.gui_fcpu["fcpu-panels"]["fcpu-memory-view"] then
+    return
   end
 
-  local memslots = {}
+  player_data.gui_fcpu["fcpu-panels"]["fcpu-memory-view"].destroy()
+  player_data.gui_memory_view = nil
+  player_data.gui_memory_cells = nil
+end
+
+local function MemoryView_UpdateFromTable(player_data, signals, no_sort)
+  local cells = player_data.gui_memory_cells.children
+  if cells then
+    -- add extra
+    for i = #cells + 1, math.max(MC_MEMORY_SLOTS_MIN, (signals and #signals or 0)) do
+      gui.build(player_data.gui_memory_cells, { gui.templates.slot_inventory('index-'..i, '['..i..']') })
+    end
+
+    local i = 1
+    -- show and setup visible
+    if signals then
+      for _, v in ipairs(signals) do
+        local cell = cells[i]
+        if v and cell then
+          local sprite = signalToSpritePath(v.signal)
+          cell.visible = true
+          cell.sprite = sprite
+          cell.number = (sprite or no_sort) and v.count
+          if sprite or no_sort then
+            i = i + 1
+          end
+        end
+      end
+    end
+
+    -- clear `number`
+    while i <= MC_MEMORY_SLOTS_MIN and cells[i] do
+      cells[i].visible = true
+      cells[i].sprite = nil
+      cells[i].number = nil
+      i = i + 1
+    end
+
+    -- hide others
+    while i <= #cells and cells[i] and cells[i].visible do
+      cells[i].visible = false
+      i = i + 1
+    end
+  end
+end
+
+local function UpdateWidget_MemoryView(player_data)
+  if not player_data.gui_memory_channel then return end
+  local index = player_data.gui_memory_channel.selected_index
+  local state = get_fcpu_state(player_data.current_fcpu)
+
+  if state then
+    index = math.max(1, index)
+
+    if index <= MC_MEMORY_CHANNELS then
+      local ici = state.ics_stack['mem' .. index]
+      local ics = ici and state.program_ics[ici]
+      if ics and ics.out and ics.out.valid then
+        local control = ics.out.get_control_behavior()
+        if control.signals_last_tick and not ics.color_out then
+          MemoryView_UpdateFromTable(player_data, control.signals_last_tick)
+        else
+          local output = control.get_circuit_network(ics.color_out, defines.circuit_connector_id.combinator_output)
+          if output then
+            MemoryView_UpdateFromTable(player_data, output.signals)
+          else
+            MemoryView_UpdateFromTable(player_data, control.signals_last_tick)
+          end
+        end
+      else
+        MemoryView_UpdateFromTable(player_data, {})
+      end
+    elseif index == MC_MEMORY_CHANNELS + 1 then
+      -- TODO: this is draft implementation for GUI design check
+      MemoryView_UpdateFromTable(player_data, state.regs, true)
+    elseif index == MC_MEMORY_CHANNELS + 4 then
+      if state.program_ics.output then
+        local control = state.program_ics.output.get_control_behavior()
+        MemoryView_UpdateFromTable(player_data, control and control.parameters and control.parameters.parameters)
+      else
+        MemoryView_UpdateFromTable(player_data, {})
+      end
+  else
+      local control = state.entity.get_control_behavior()
+
+      local wire_type
+      if index == MC_MEMORY_CHANNELS + 2 then
+        wire_type = defines.wire_type.red
+      elseif index == MC_MEMORY_CHANNELS + 3 then
+        wire_type = defines.wire_type.green
+      end
+
+      if wire_type then
+        local input = control.get_circuit_network(wire_type, defines.circuit_connector_id.combinator_input)
+        MemoryView_UpdateFromTable(player_data, input and input.signals)
+      else
+        MemoryView_UpdateFromTable(player_data, {})
+      end
+    end
+  end
+end
+
+-------------------------------------------------------------------------------------------------------
+
+local function CreateWidget_Main(rootGui)
+  local regslots = {}
   for i = 1, MC_REGS do
-    table.insert(memslots, gui.templates.slot_button('reg'..i))
+    table.insert(regslots, gui.templates.slot_button('reg'..i))
   end
 
   local elems = gui.build(rootGui, {
@@ -32,86 +193,90 @@ local function CreateWidget_Main(player)
         {template="drag_handle", name="drag-handle"},
         {template="close_button", save_as="gui_exit_button", handlers="widget.close_button"},
       }},
+      {type="flow", name="fcpu-panels", direction="horizontal", style_mods={maximal_height=710, horizontal_spacing=12}, children={
 
-      {type="frame", name="outer", style="inside_shallow_frame_with_padding", direction="vertical", children={
-        -- Control buttons
-        {type="flow", name="buttons-row", direction="horizontal", style_mods={vertical_align="center"}, children={
-          gui.templates.control_button("halt", "stop", "red"),
-          gui.templates.control_button("run", "play", "green"),
-          gui.templates.control_button("step", "next"),
-          {template="pushers.horizontal"},
-          {type="switch", style_mods={ right_margin=10 }, left_label_caption={"gui-constant.off"}, right_label_caption={"gui-constant.on"}, save_as="gui_enable_switch", handlers="widget.enable_program"},
-        }},
-
-        -- Registers inspector
-        {template="heading_2", caption={"gui-fcpu.registers"}},
-        {type="flow", save_as="gui_inspector", direction="horizontal",
-          children={
-            table.unpack(memslots)
-          },
-          style_mods={horizontally_stretchable=true, horizontal_align="center"},
-        },
-
-        -- Editor toolbar
-        {type="flow", name="editor-toolbar", direction="horizontal",
-          children={
-            {template="heading_2", caption={"gui-fcpu.program"}},
+        {type="frame", name="fcpu-main", style="inside_shallow_frame_with_padding", direction="vertical", children={
+          -- Control buttons
+          {type="flow", name="buttons-row", direction="horizontal", style_mods={vertical_align="center"}, children={
+            gui.templates.control_button("halt", "stop", "red"),
+            gui.templates.control_button("run", "play", "green"),
+            gui.templates.control_button("step", "next"),
             {template="pushers.horizontal"},
+            {type="switch", style_mods={ right_margin=10 }, left_label_caption={"gui-constant.off"}, right_label_caption={"gui-constant.on"}, save_as="gui_enable_switch", handlers="widget.enable_program"},
+            {template="pushers.horizontal"},
+            gui.templates.control_button("memory", "memory", "blue", "view_memory"),
+          }},
 
-            gui.templates.tool_button("copy", "copy", "green", {tooltip={"gui-fcpu.copy-program"}, style="fcpu_toolbar_copy"}),
-            gui.templates.tool_button("paste", "paste", "", {tooltip={"gui-fcpu.paste-program"}, style="fcpu_toolbar_paste"}),
-            {template="pushers.horizontal", style_mods={width=16}},
-
-            {
-              type="choose-elem-button",
-              elem_type="signal",
-              style="shortcut_bar_button_small",
-              name="insert-signal-to-program",
-              tooltip={"gui-fcpu.insert-signal-to-program"},
-              handlers="widget.insert_signal_to_program",
-            },
-          },
-          style_mods={horizontally_stretchable=true, horizontal_align="right", vertical_align="center", top_margin=8},
-        },
-
-        -- Editor
-        {type="scroll-pane", style_mods={maximal_height=490}, horizontal_scroll_policy="never", children={
-          {type="flow", name="inner", direction="horizontal",
+          -- Registers inspector
+          {template="heading_2", caption={"gui-fcpu.registers"}},
+          {type="flow", save_as="gui_inspector", direction="horizontal",
             children={
-              {type="text-box", style="fcpu_notice_textbox", save_as="gui_line_numbers",
-                ignored_by_interaction=true,
-              },
-              {type="text-box", name="program-input", style="fcpu_program_input",
-                style_mods={
-                  vertically_stretchable=false,
-                  horizontally_stretchable=true,
-                  rich_text_setting=defines.rich_text_setting.enabled
-                },
-                horizontal_scroll_policy="never",
-                vertical_scroll_policy="never",
-                handlers="widget.program_input",
-                save_as="gui_program_input",
+              table.unpack(regslots)
+            },
+            style_mods={horizontally_stretchable=true, horizontal_align="center"},
+          },
+
+          -- Editor toolbar
+          {type="flow", save_as="gui_editor_toolbar", name="editor-toolbar", direction="horizontal",
+            children={
+              {template="heading_2", caption={"gui-fcpu.program"}},
+              {template="pushers.horizontal"},
+
+              gui.templates.tool_button("copy", "copy", "green", {tooltip={"gui-fcpu.copy-program"}, style="fcpu_toolbar_copy"}),
+              gui.templates.tool_button("paste", "paste", "", {tooltip={"gui-fcpu.paste-program"}, style="fcpu_toolbar_paste"}),
+              {template="pushers.horizontal", style_mods={width=16}},
+
+              {
+                type="choose-elem-button",
+                elem_type="signal",
+                style="shortcut_bar_button_small",
+                name="insert-signal-to-program",
+                tooltip={"gui-fcpu.insert-signal-to-program"},
+                handlers="widget.insert_signal_to_program",
               },
             },
-            style_mods={horizontally_stretchable=false, vertically_squashable=true},
+            style_mods={horizontally_stretchable=true, horizontal_align="right", vertical_align="center", top_margin=8},
           },
+
+          -- Editor
+          {type="scroll-pane", horizontal_scroll_policy="never", style="scroll_pane_in_shallow_frame", children={
+            {type="flow", name="inner", direction="horizontal",
+              children={
+                {type="text-box", style="fcpu_notice_textbox", save_as="gui_line_numbers",
+                  ignored_by_interaction=true,
+                },
+                {type="text-box", name="program-input", style="fcpu_program_input",
+                  style_mods={
+                    vertically_stretchable=false,
+                    horizontally_stretchable=true,
+                    rich_text_setting=defines.rich_text_setting.enabled
+                  },
+                  horizontal_scroll_policy="never",
+                  vertical_scroll_policy="never",
+                  handlers="widget.program_input",
+                  save_as="gui_program_input",
+                },
+              },
+              style_mods={horizontally_stretchable=false, vertically_squashable=true},
+            },
+          }},
+
+          -- Error message
+          {type="label", name="error_message", save_as="gui_error_message", caption="", style="bold_red_label", style_mods={
+            top_margin=10,
+            horizontally_stretchable=true,
+            horizontally_squashable=true,
+            single_line=false,
+          }},
         }},
 
-        -- Error message
-        {type="label", name="error_message", caption="", style="bold_red_label", style_mods={
-          top_margin=10,
-          horizontally_stretchable=true,
-          horizontally_squashable=true,
-          single_line=false,
-        }},
       }},
-
       {type="flow", name="footer", children={
       }},
     }}
   })
 
-  elems.gui_fcpu.outer['editor-toolbar']['insert-signal-to-program'].elem_value = defaultToolbarInsertSignal
+  elems.gui_editor_toolbar['insert-signal-to-program'].elem_value = defaultToolbarInsertSignal
   elems.gui_fcpu.titlebar.label.drag_target = elems.gui_fcpu
   elems.gui_fcpu.titlebar['drag-handle'].drag_target = elems.gui_fcpu
   elems.gui_fcpu.force_auto_center()
@@ -123,21 +288,25 @@ function GuiWidgetOpen(player, entity)
   local player_data = get_player_data(player.index)
   local state = get_fcpu_state(entity)
 
+  local rootGui = player.gui.screen -- mod_gui.get_frame_flow({gui={left=player.gui.screen}})
+  if rootGui["fcpu-widget"] then
+    rootGui["fcpu-widget"].destroy()
+  end
   if not state then
     return
   end
 
-  local elems = CreateWidget_Main(player)
+  local elems = CreateWidget_Main(rootGui)
   if 0 < fcpu_debug_enabled then
     elems.gui_fcpu.titlebar.label.caption = elems.gui_fcpu.titlebar.label.caption.." #"..entity.unit_number
   end
-  player_data = table.merge(player_data, elems)
+  player_data = table.dictionary_combine(player_data, elems, CreateWidget_MemoryView(elems.gui_fcpu["fcpu-panels"]))
 
   player_data.gui_program_input.text = state.program_text
   GuiWidgetUpdate(player_data, state)
 
   if state.error_message then
-    player_data.gui_fcpu.outer.error_message.caption = state.error_message
+    player_data.gui_error_message.caption = state.error_message
   end
 
   if state.disabled then
@@ -188,7 +357,7 @@ function GuiWidgetUpdate(player_data, state)
     else
       --player_data.gui_halt_button.style = "tool_button_red"
       player_data.gui_halt_button.sprite = "fcpu-stop-sprite"
-      player_data.gui_halt_button.enabled = (state.instruction_pointer ~= 1)
+      player_data.gui_halt_button.enabled = not Controller.is_first_instruction(state)
       player_data.gui_run_button.enabled = true
     end
   end
@@ -205,7 +374,7 @@ function GuiWidgetUpdate(player_data, state)
   end
   -- Update toolbar
   if player_data.gui_fcpu and player_data.gui_fcpu.valid then
-    local toolbar = player_data.gui_fcpu.outer['editor-toolbar']
+    local toolbar = player_data.gui_editor_toolbar
     if toolbar then
       local button_istp = toolbar['insert-signal-to-program']
       if button_istp and button_istp.valid then
@@ -224,6 +393,10 @@ function GuiWidgetUpdate(player_data, state)
   -- Update the program lines in the GUI
   if player_data.gui_line_numbers and player_data.gui_line_numbers.valid then
     UpdateLines(player_data.gui_line_numbers, state)
+  end
+
+  if player_data.gui_memory_view and player_data.gui_memory_view.valid then
+    UpdateWidget_MemoryView(player_data, state)
   end
 end
 
@@ -246,7 +419,7 @@ function GuiWidgetClose(player_index, silent)
         player.play_sound{path="entity-close/"..player_data.current_fcpu.prototype.name, volume_modifier=0.85}
       end
     end
- 
+
     player_data.gui_fcpu.destroy()
     player_data.gui_fcpu = nil
     set_player_data(player.index, player_data)
@@ -256,7 +429,7 @@ end
 function GuiEntityCloseWidget(entity)
   for player_index, player in pairs(game.players) do
     local player_data = get_player_data(player_index)
-    if Entity._are_equal(entity, player_data.current_fcpu) then
+    if entity.valid and Entity._are_equal(entity, player_data.current_fcpu) then
       if player_data.gui_fcpu and player_data.gui_fcpu.valid then
         player_data.gui_fcpu.destroy()
         player_data.gui_fcpu = nil
@@ -269,8 +442,6 @@ end
 
 -------------------------------------------------------------------------------------------------------
 
-local defaultToolbarInsertSignal = {type='virtual', name='signal-dot'}
-
 function string.insert(str1, str2, pos)
   return str1:sub(1,pos)..str2..str1:sub(pos+1)
 end
@@ -278,12 +449,22 @@ end
 local function mixPlayerData(proc)
   return function(event)
     local player_data, player = get_player_data(event.player_index)
-    proc(player_data, player, event)
+    local newData = proc(player_data, player, event)
+    player_data = newData or player_data
     set_player_data(event.player_index, player_data)
   end
 end
 
 gui.add_handlers{
+  memory={
+    memory_channel = {
+      on_gui_selection_state_changed = mixPlayerData(function(player_data, player, event)
+        if player_data.gui_memory_view then
+          UpdateWidget_MemoryView(player_data)
+        end
+      end)
+    },
+  },
   widget = {
     close_button = {
       on_gui_click = function(event)
@@ -322,14 +503,15 @@ gui.add_handlers{
         if event.element then
           if event.element.switch_state == "right" then
             state.disabled = nil
-            if not Controller.is_running(state) then
-              player_data.gui_fcpu.outer.error_message.caption = ""
+            if not Controller.is_running(state) and Controller.is_first_instruction(state) then
+              player_data.gui_error_message.caption = ""
               Controller.compile(state)
               Controller.run(state)
             end
           else
             state.disabled = true -- halt will clear output registers
             Controller.halt(state)
+            Controller.update_state(state)
           end
           Entity.set_data(player_data.current_fcpu, state)
         end
@@ -338,7 +520,7 @@ gui.add_handlers{
     run_program = {
       on_gui_click = mixPlayerData(function(player_data)
         local state = get_fcpu_state(player_data.current_fcpu)
-        player_data.gui_fcpu.outer.error_message.caption = ""
+        player_data.gui_error_message.caption = ""
         Controller.compile(state)
         Controller.run(state)
         Entity.set_data(player_data.current_fcpu, state)
@@ -347,6 +529,10 @@ gui.add_handlers{
     halt_program = {
       on_gui_click = mixPlayerData(function(player_data)
         local state = get_fcpu_state(player_data.current_fcpu)
+        Controller.compile(state)
+        if not Controller.is_running(state) then
+          Controller.set_program_counter(state, 1)
+        end
         Controller.halt(state)
         Entity.set_data(player_data.current_fcpu, state)
       end)
@@ -354,7 +540,7 @@ gui.add_handlers{
     step_program = {
       on_gui_click = mixPlayerData(function(player_data)
         local state = get_fcpu_state(player_data.current_fcpu)
-        player_data.gui_fcpu.outer.error_message.caption = ""
+        player_data.gui_error_message.caption = ""
         Controller.compile(state)
         Controller.step(state)
         Entity.set_data(player_data.current_fcpu, state)
@@ -389,28 +575,18 @@ gui.add_handlers{
         end
       end)
     },
+    view_memory = {
+      on_gui_click = mixPlayerData(function(player_data, player)
+        if not player_data.gui_fcpu or not player_data.gui_fcpu["fcpu-panels"] or player_data.gui_fcpu["fcpu-panels"]["fcpu-memory-view"] then
+          DestroyWidget_MemoryView(player_data)
+        else
+          local rootGui = player_data.gui_fcpu["fcpu-panels"]
+          local elems = CreateWidget_MemoryView(rootGui)
+          return table.dictionary_combine(player_data, elems)
+        end
+      end)
+    },
   }
-}
-
-gui.add_templates{
-  pushers = {
-    horizontal = {type="empty-widget", style_mods={horizontally_stretchable=true}},
-    vertical = {type="empty-widget", style_mods={vertically_stretchable=true}}
-  },
-  frame_title = {type="label", style="frame_title"},
-  frame_action_button = {type="sprite-button", style="frame_action_button", mouse_button_filter={"left"}},
-  drag_handle = {type="empty-widget", name="drag-handle", style="draggable_space_header", style_mods={minimal_width=30, height=24, right_margin=4, horizontally_stretchable=true}},
-  close_button = {template="frame_action_button", sprite="utility/close_white", hovered_sprite="utility/close_black"},
-  heading_2 = {type="frame", style="invisible_frame_with_title"},
-  control_button = function(name, sprite, color, handler)
-    return {type="sprite-button", style="tool_button"..(color and "_"..color or ""), name=name.."-program", sprite="fcpu-"..sprite.."-sprite", save_as="gui_"..name.."_button", handlers="widget."..(handler or name.."_program")}
-  end,
-  slot_button = function(name)
-    return {type="sprite-button", style="slot_button_in_shallow_frame", name=""..name.."-inspect", tooltip=""..name..""}
-  end,
-  tool_button = function(name, sprite, color, ...)
-    return table.merge({type="sprite-button", style="shortcut_bar_button_small"..(color and "_"..color or ""), name=name.."-program", sprite="fcpu-"..sprite.."-sprite", handlers="widget."..name.."_program"}, ...)
-  end,
 }
 
 -------------------------------------------------------------------------------------------------------
@@ -424,7 +600,7 @@ script.on_event(defines.events.on_gui_opened, function(event)
   local entity = event.entity
   if entity and entity.valid and entity.name == "fcpu" then
     local player_data, player = get_player_data(event.player_index)
-    if player_data then
+    if player_data and player_data.gui_fcpu then
       player.opened = player_data.gui_fcpu
     end
   end
@@ -454,6 +630,9 @@ end)
 
 -- Handle fCPU GUI Close event.
 script.on_event("fcpu-close", function(event)
+  GuiWidgetClose(event.player_index)
+end)
+script.on_event("fcpu-escape", function(event)
   GuiWidgetClose(event.player_index)
 end)
 

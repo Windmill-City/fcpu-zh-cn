@@ -14,6 +14,12 @@ data:extend{
     linked_game_control = "close-gui",
   },
   {
+    type = "custom-input",
+    name = "fcpu-escape",
+    key_sequence = "",
+    linked_game_control = "toggle-menu",
+  },
+  {
     type = "font",
     name = "fcpu-mono",
     from = "fcpu-mono",
@@ -70,6 +76,15 @@ data:extend{
     filename = "__base__/graphics/icons/shortcut-toolbar/mip/paste-x24.png",
     width = 24,
     height = 24
+  },
+  {
+    type = "sprite",
+    name = "fcpu-memory-sprite",
+    filename = "__core__/graphics/icons/mip/grid-view.png",
+    x = 0,
+    y = 0,
+    width = 32,
+    height = 32
   },
 }
 --[[

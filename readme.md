@@ -8,13 +8,15 @@
 * supports [Informatron](https://mods.factorio.com/mod/informatron) and [Booktorio](https://mods.factorio.com/mod/Booktorio) in-game wiki
 * 64 instructions for whole program
 * 8 general purpose registers
+* 4 memory slots for vector processing
 * 50+ opcodes
 * rich math instructions
+* SIMD instructions
 * two input wires (Red, Green)
 * two output wires (Red, Green) have same output signals and values
 * parallel output, allows output multiple signals simultaneously (up to 256 signals)
 * could be controlled through special input signals
-* one tick = one instruction
+* one tick = one instruction (except for SIMD ones)
 * made for geeks
 
 
@@ -24,7 +26,8 @@ fCPU is a combinator that includes:
 
 - program text
 - a set of registers (for storing signals and numbers)
-- processor (command processor)
+- processor (command processor and vector coprocessor)
+
 
 ### Program
 Programs for fCPU are entered in plain text in simplified [assembly language][1] and consists of lines.
@@ -41,10 +44,11 @@ The following can be used as operands:
 - **Signal**: each signal consists of a type and a value (`123[item=copper-ore]`)
   `123` - signal value represented by number
   `[item=copper-ore]` - type can be represented by pictogram or text
-- **Register**: these are special cells that store the transmitted signal indefinitely (`reg1`,` r2`, ...)
-- **Input** wire: you can receive signals on wires connected to a combinator's input (`red`,` green`)
-- **Output** wire: sets the values ​​at the output of a combinator (`out1`,` out2`, ..., `out256`)
-- **Address**: instruction address (line number)
+- **Register**: this is a special cell that store the transmitted signal indefinitely (`reg1`, `r2`, ...)
+- **Memory** slot: one memory slot consists of multiple cells (array) that store the signal indefinitely (`mem1`, `m2`, ...)
+- **Input** wire: you can receive signals on wires connected to a combinator's input (`red`,` green`, `red1`, `green@3`, ...)
+- **Output** wire: sets the values ​​at the output of a combinator (`out1`, `out2`, ..., `out256`)
+- **Address**: instruction address (line number `34`)
 - **Label** in the code: written in text with a colon in front (`:label`, `:anyname`, ...)
 
 The processor executes instructions from a written program in turn, line by line.
@@ -69,8 +73,29 @@ Output registers (write only):
 - **out1**, ..., **out256**: output registers (only integer values)
 
 
+### Memory
+
+For processing several signals at the same time, the fCPU provides a vector coprocessor that handles SIMD instructions.  
+Unlike scalar operations, which process a limited number of signals at a time, vector operations can process hundreds of signals in the same amount of time.  
+fCPU Memory is an analogue of registers but for vector instructions.  
+
+There are 4 memory slots available for use.  
+Each slot consists of multiple memory cells.  
+Each cell stores a signal type and a numeric value.  
+Memory slots are addressed: `mem1`, ...,` mem4`.  
+To access one cell: `mem2[44]` or `mem1@3` (see Arrays)  
+
+
 ## Arrays\indirect addressing
-Each register could be adressed not only by direct name **regN** (**reg1**, **r2**, etc...) but also with indirect pointer **reg@N** (**reg@3**, **r@7**, etc...). This allow you to use them as **array** indices.
+Each register or memory slot could be adressed not only by direct name:
+* **regN** (**reg1**, **r2**, etc... `N` is a register index)
+* **memS[M]** (**mem1[32]**, **m4[97]**, etc.. `S` is a memory slot number, `M` is a memory cell index)
+But also with indirect pointer:
+* **reg@R** (**reg@3**, **r@7**, etc... `R` is a register index)
+* **memS@R** (**mem1@3**, **mem4@8**, etc... `R` is a register index)
+
+This allow you to use them as **array** indices.  
+
 For example:
 ```
 mov r1 10[item=iron-plate]
@@ -79,13 +104,19 @@ mov r3 300[item=steel-plate]
 
 mov r5 2
 mov r6 r@5 # r6 will be equal to r2, which is 20[item=copper-plate]
+mov r4 m1@5 # r4 will be equal to mem1[2]
 
 mov r5 3
 mov r7 r@5 # r7 will be equal to r3, which is 300[item=steel-plate]
+mov r4 m2@5 # r4 will be equal to mem2[3]
 
 mov r5 5
 mov r8 r@5 # r8 will be equal to r5, which is 5
+mov r4 m3@5 # r4 will be equal to mem3[5]
 ```
+
+This approach is also could be used with `red`, `green` input wires and memory slots, for example: `red@1`, `green@8`, `mem1@3`.  
+
 
 
 ## Control signals
@@ -114,6 +145,7 @@ Each instruction take one or more operands and modify them or state of fCPU.
 
 * **C**, value: integer constant [-2^31..2^31), same as **V** (`-3500`)
 * **R**, register: (`reg1`, `reg2`, ..., `reg8`)
+* **M**, memory: (`mem1`, `mem2`, ..., `mem4`)
 * **I**, wire: input wire (`red`, `green`)
 * **O**, wire: output wire (`out1`, `out2`, ..., `out256`)
 
@@ -134,7 +166,7 @@ Each instruction take one or more operands and modify them or state of fCPU.
 * `clr` out  
   Clear all output values.
 
-* `clr` dst...[**R**/**O**]  
+* `clr` dst...[**R**/**M**/**O**]  
   Clear specified registers or output wires.
 
 * `mov` dst...[**R**/**O**] src[**V**/**T**/**S**/**R**/**I**]  
@@ -273,6 +305,10 @@ Each instruction take one or more operands and modify them or state of fCPU.
   `bkg` cnt[**C**/**R**]  
   Block until there are at least *cnt* *r*ed/*g*reen signals.
 
+* `btr` type[**T**]
+  `btg` type[**T**]
+  Block until signal type found in *r*ed/*g*reen input wires.
+
 
 ### Testing operands values
 
@@ -366,24 +402,59 @@ blt r1 10 :counter
 
 ## SIMD instructions
 Until now you can control fCPU with one instructon per game cycle and operate with a couple signals per instruction.  
-But it is not a limit. fCPOU support Single Instruction Multiple Dama instructions, which means that you could do much more efficient work per instruction and so per one game tick.  
+But it is not a limit. fCPU supports _Single Instruction Multiple Data_ mnemonics, which means that you could do much more efficient work per instruction and so per one game tick.  
+SIMD instructions process several signals in parallel at once, unlike scalar instructions.  
+
+When working with SIMD instructions, the following features should be considered:  
+- SIMD instructions do not costs additional time for handling, so UPS friendly
+- Some vector instructions are executed for more than 1 tick (`xmov mem1 red` takes 3 ticks for populating `mem1` slot with data from `red` wire)
+- Retrieving effective data from affected memory is possible only after completion of a vector instruction
+  For handling this you may use `xwait` before getting data from memory cell.
+- Vector instructions are executed in parallel with scalar
+
+For example:
+```
+xmov mem2 green ; mem2 will be ready on third tick with data from this tick
+nop ; mem2 is not ready yet
+nop ; mem2 is not ready yet
+mov r1 mem2[1] ; mem2 is ready on this tick
+```
 
 
-## Memory viewer
-TODO
+### SIMD Mnemonics
+* `xmov` a[**M**/**O**] b[**M**/**I**]
+* `xadd` a[**M**/**O**] b[**C**/**R**/**I**]
+* `xsub` a[**M**/**O**] b[**C**/**R**/**I**]
+* `xmul` a[**M**/**O**] b[**C**/**R**/**I**]
+* `xdiv` a[**M**/**O**] b[**C**/**R**/**I**]
+* `xmod` a[**M**/**O**] b[**C**/**R**/**I**]
+* `xpow` a[**M**/**O**] b[**C**/**R**/**I**]
+* `xinc` dst[**O**]
+* `xdec` dst[**O**]
+
+* `xand` a[**M**/**O**] b[**C**/**R**/**I**]
+* `xor`  a[**M**/**O**] b[**C**/**R**/**I**]
+* `xxor` a[**M**/**O**] b[**C**/**R**/**I**]
+* `xsl`  a[**M**/**O**] b[**C**/**R**/**I**]
+* `xsr`  a[**M**/**O**] b[**C**/**R**/**I**]
+
+* `xwait`
+  Wait until vector coprocessor finish it's work.
+  This instructions should be placed between writing and reading from same memory channel.
 
 
 
 [comment]: <> (md2frt-skip-section-begin)
 
 # Examples
-See: https://mods.factorio.com/mod/fcpu/faq
+See: https://mods.factorio.com/mod/fcpu/faq and [Discord channel](https://discord.gg/pCTz9hW)
 
 
 # Community
-* [Reddit](https://www.reddit.com/r/factorio/comments/i8e7dh/new_mod_fcpu/) for general discussion
+* [Discord](https://discord.com/invite/vPnDPhV) for general discussion
 * [Factorio Mod portal](https://mods.factorio.com/mod/fcpu/discussion) for bug reports
 * [Factorio Forum](https://forums.factorio.com/viewtopic.php?f=190&t=88141) for technical details and mod integration
+* [Reddit](https://www.reddit.com/r/factorio/comments/i8e7dh/new_mod_fcpu/)
 
 
 # TODOs
@@ -393,6 +464,8 @@ See [here](https://www.buymeacoffee.com/p/100444)
 # Dear supporters
 * Lukáš Venhoda (v0.2.0 update)
 * Someone (v0.2.12 update)
+* kKdH (v0.3.0 update)
+
 
 # Support fCPU
 [![Buy Me A Coffee](https://cdn.buymeacoffee.com/buttons/lato-orange.png)](https://www.buymeacoffee.com/konstg)

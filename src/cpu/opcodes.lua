@@ -49,6 +49,15 @@ local find_in_wire = function(_, color)
   io.setsignal(_dst, sig)
 end
 
+local memory_clear = function(slot)
+  local deffer = { type = 'deffer', ops = {} }
+  io.each_ics(function(ics)
+    deffer.ops[#deffer.ops + 1] = {action='enable', ic=ics.fix, delay = 0}
+    deffer.ops[#deffer.ops + 1] = {action='disable', ic=ics.fix, delay = 1}
+  end, slot)
+  return deffer
+end
+
 local opcodes = {
 -- S: Signal
 -- T: signal type
@@ -66,18 +75,24 @@ local opcodes = {
   clr = function(_)
     if 0 < #_ then
       for i, expr in ipairs(_) do
-        if expr and expr.addr == nil and expr.color == 'out' then
-          io.output_clear()
-        else
-          io.setsignal(_[i], NULL_SIGNAL, {'register', 'wire'})
+        if expr then
+          assert.type(expr, {'register', 'memory', 'output'})
+          if expr.addr == nil and expr.color == 'out' then
+            io.output_clear()
+          elseif expr.type == 'register' then
+            io.setsignal(_[i], NULL_SIGNAL, {'register', 'wire'})
+          elseif expr.type == 'memory' then
+            return memory_clear(expr.index and (expr.location .. expr.index))
+          end
         end
       end
     else
       for i = 1, io.register_last_index() do
         io.register_setraw(i, table.deepcopy(NULL_SIGNAL))
       end
-      io.wire_set({type='wire', color='out', addr=1, pointer=false}, NULL_SIGNAL)
+      io.control_set(table.deepcopy(NULL_SIGNAL))
       io.output_clear()
+      return memory_clear()
     end
   end,
 
@@ -223,23 +238,6 @@ local opcodes = {
       s = s..'-'
     end
     io.register_set_count(_[1], tonumber(s:reverse()))
-  end,
-
-  _tofp = function(_)
-    assert.two(_)
-    assert.type(_[1], {'register'})
-    assert.type(_[2], {'value'})
-    local _dst = io.getcount(_[1])
-    local _src = io.getcount(_[2])
-    io.register_set_count(_dst, io.getcount(_src))
-  end,
-  _fromfp = function(_)
-    assert.two(_)
-    assert.type(_[1], {'register'})
-    assert.type(_[2], {'value', 'register', 'input'})
-    local _dst = io.getcount(_[1])
-    local _src = io.getcount(_[2])
-    io.register_set_count(_dst, io.getcount(_src))
   end,
 
   cos = function(_) -- * **cos** dst[R] src[C/R/I]
@@ -420,6 +418,20 @@ local opcodes = {
     end
   end,
 
+  btr = function(_)
+    assert.one(_)
+    local type = io.gettype(_[1], {'type', 'register'})
+    if io.wire_find_signal('red', type) == NULL_SIGNAL then
+      return {type = 'block'}
+    end
+  end,
+  btg = function(_)
+    assert.one(_)
+    local type = io.gettype(_[1], {'type', 'register'})
+    if io.wire_find_signal('green', type) == NULL_SIGNAL then
+      return {type = 'block'}
+    end
+  end,
 }
 
 

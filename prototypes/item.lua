@@ -12,31 +12,36 @@ local empty_picture = {
 }
 
 
+local fcpu = table.merge(table.deepcopy(data.raw['arithmetic-combinator']['arithmetic-combinator']), generate_fcpu_combinator{
+  name = "fcpu",
+  icon = "__fcpu__/graphics/icons/fcpu.png",
+  minable = {hardness = 0.2, mining_time = 0.5, result = "fcpu"},
+  max_health = 300,
+  collision_box = {{-0.65, -0.65}, {0.65, 0.65}},
+  selection_box = {{-1, -1}, {1, 1}},
+  additional_pastable_entities = {"fcpu", "arithmetic-combinator", "decider-combinator", "constant-combinator"},
+
+  active_energy_usage = "20KW",
+
+  and_symbol_sprites = empty_picture,
+  divide_symbol_sprites = empty_picture,
+  left_shift_symbol_sprites = empty_picture,
+  minus_symbol_sprites = empty_picture,
+  modulo_symbol_sprites = empty_picture,
+  multiply_symbol_sprites = empty_picture,
+  or_symbol_sprites = empty_picture,
+  plus_symbol_sprites = empty_picture,
+  power_symbol_sprites = empty_picture,
+  right_shift_symbol_sprites = empty_picture,
+  xor_symbol_sprites = empty_picture,
+})
+if MC_DEBUG then fcpu = table.merge(fcpu, {
+  circuit_wire_max_distance = 10000,
+})
+end
+
 data:extend{
-  table.merge(table.deepcopy(data.raw['arithmetic-combinator']['arithmetic-combinator']), generate_fcpu_combinator
-  {
-    name = "fcpu",
-    icon = "__fcpu__/graphics/icons/fcpu.png",
-    minable = {hardness = 0.2, mining_time = 0.5, result = "fcpu"},
-    max_health = 300,
-    collision_box = {{-0.65, -0.65}, {0.65, 0.65}},
-    selection_box = {{-1, -1}, {1, 1}},
-    additional_pastable_entities = {"fcpu", "arithmetic-combinator", "decider-combinator", "constant-combinator"},
-
-    active_energy_usage = "20KW",
-
-    and_symbol_sprites = empty_picture,
-    divide_symbol_sprites = empty_picture,
-    left_shift_symbol_sprites = empty_picture,
-    minus_symbol_sprites = empty_picture,
-    modulo_symbol_sprites = empty_picture,
-    multiply_symbol_sprites = empty_picture,
-    or_symbol_sprites = empty_picture,
-    plus_symbol_sprites = empty_picture,
-    power_symbol_sprites = empty_picture,
-    right_shift_symbol_sprites = empty_picture,
-    xor_symbol_sprites = empty_picture,
-  }),
+  fcpu,
   {
     type = "item",
     name = "fcpu",
@@ -84,75 +89,13 @@ data:extend{
   },
 }
 
+require('legacy/imposter_fcpu')
 
-local imposter_fcpu_item ={
-  type = "item",
-  name = "imposter-fcpu",
-  icon = "__fcpu__/graphics/icons/fcpu.png",
-  icon_size = 1,
-  flags = { "hidden" },
-  subgroup = "circuit-network",
-  place_result="imposter-fcpu",
-  order = "c[combinators]-f[imposter-fcpu]",
-  stack_size = 1,
-}
-
-local imposter_fcpu = table.merge(table.deepcopy(data.raw['constant-combinator']['constant-combinator']), {
-  name = "imposter-fcpu",
-  icon = "__fcpu__/graphics/icons/fcpu.png",
-  icon_size = 1,
-  icon_mipmaps = 0,
-  allow_copy_paste = false,
-  selectable_in_game = false,
-
-  flags = {
-    "not-rotatable",
-    "player-creation",
-    "placeable-off-grid",
-    "not-repairable",
-    "not-on-map",
-    --"not-deconstructable", -- can't be deconstructed by 'demolition blueprint'. reducing bounds marker spam
-    "hide-alt-info",
-    "not-flammable",
-    --"no-copy-paste",
-    --"not-selectable-in-game",
-    "not-in-kill-statistics",
-  },
-  max_health = 1,
-  selection_box = {{-1, -1}, {1, 1}},
-  collision_box = {{-0.65, -0.65}, {0.65, 0.65}},
-  collision_mask = {"layer-13"},--"not-colliding-with-itself"},
-
-  item_slot_count = MC_SAVESLOTS,
-  sprites =
-  {
-      north = empty_picture,
-      east = empty_picture,
-      south = empty_picture,
-      west = empty_picture,
-  },
+local hdl_output_fcpu = table.merge(table.deepcopy(data.raw['constant-combinator']['constant-combinator']), {
+  name = "output-fcpu",
+  circuit_wire_max_distance = 10000,
 })
-
-data:extend{
-  imposter_fcpu_item,
-  imposter_fcpu
-}
-
-
-local output_fcpu_item ={
-  type = "item",
-  name = "output-fcpu",
-  icon = "__fcpu__/graphics/icons/fcpu.png",
-  icon_size = 1,
-  flags = { "hidden" },
-  subgroup = "circuit-network",
-  place_result="output-fcpu",
-  order = "c[combinators]-f[imposter-fcpu]",
-  stack_size = 1,
-}
-
-local output_fcpu = table.merge(table.deepcopy(data.raw['constant-combinator']['constant-combinator']), {
-  name = "output-fcpu",
+if not MC_DEBUG then hdl_output_fcpu = table.merge(hdl_output_fcpu, {
   icon = "__fcpu__/graphics/icons/fcpu.png",
   icon_size = 1,
   icon_mipmaps = 0,
@@ -174,7 +117,6 @@ local output_fcpu = table.merge(table.deepcopy(data.raw['constant-combinator']['
     "not-flammable",
     "not-in-kill-statistics",
   },
-  max_health = 1,
   collision_mask = {"not-colliding-with-itself"},
 
   item_slot_count = MC_OUTPUT,
@@ -193,8 +135,182 @@ local output_fcpu = table.merge(table.deepcopy(data.raw['constant-combinator']['
       west = empty_picture,
   },
 })
+end
+
+local hdl_constant_fcpu = table.merge(table.deepcopy(data.raw['constant-combinator']['constant-combinator']), {
+  name = "constant-fcpu",
+  icon = "__fcpu__/graphics/icons/fcpu.png",
+  icon_size = 1,
+  icon_mipmaps = 0,
+  allow_copy_paste = false,
+  create_ghost_on_death = false,
+  item_slot_count = 1,
+
+  circuit_wire_max_distance = 10000,
+  energy_source = {
+    type = "void",
+    usage_priority = "primary-input"
+  },
+
+  collision_mask = {"not-colliding-with-itself"},
+})
+if not MC_DEBUG then hdl_constant_fcpu = table.merge(hdl_constant_fcpu, {
+  selectable_in_game = false,
+  draw_circuit_wires = false,
+
+  flags = {
+    "not-rotatable",
+    "player-creation",
+    "placeable-off-grid",
+    "not-repairable",
+    "not-on-map",
+    "not-blueprintable",
+    "not-deconstructable", -- can't be deconstructed by 'demolition blueprint'. reducing bounds marker spam
+    "hidden",
+    "hide-alt-info",
+    "not-flammable",
+    "not-in-kill-statistics",
+  },
+
+  sprites =
+  {
+      north = empty_picture,
+      east = empty_picture,
+      south = empty_picture,
+      west = empty_picture,
+  },
+  activity_led_sprites =
+  {
+      north = empty_picture,
+      east = empty_picture,
+      south = empty_picture,
+      west = empty_picture,
+  },
+})
+end
+
+local hdl_decider_fcpu = table.merge(table.deepcopy(data.raw['decider-combinator']['decider-combinator']), {
+  name = "decider-fcpu",
+  icon = "__fcpu__/graphics/icons/fcpu.png",
+  icon_size = 1,
+  icon_mipmaps = 0,
+  allow_copy_paste = false,
+  create_ghost_on_death = false,
+
+  circuit_wire_max_distance = 10000,
+  energy_source = {
+    type = "void",
+    usage_priority = "primary-input"
+  },
+
+  collision_mask = {"not-colliding-with-itself"},
+})
+if not MC_DEBUG then hdl_decider_fcpu = table.merge(hdl_decider_fcpu, {
+  selectable_in_game = false,
+  draw_circuit_wires = false,
+
+  flags = {
+    "not-rotatable",
+    "placeable-off-grid",
+    "not-repairable",
+    "not-on-map",
+    "not-blueprintable",
+    "not-deconstructable", -- can't be deconstructed by 'demolition blueprint'. reducing bounds marker spam
+    "hidden",
+    "hide-alt-info",
+    "not-flammable",
+    "not-in-kill-statistics",
+  },
+
+  equal_symbol_sprites = empty_picture,
+  greater_or_equal_symbol_sprites = empty_picture,
+  greater_symbol_sprites = empty_picture,
+  less_or_equal_symbol_sprites = empty_picture,
+  less_symbol_sprites = empty_picture,
+  not_equal_symbol_sprites = empty_picture,
+
+  sprites =
+  {
+      north = empty_picture,
+      east = empty_picture,
+      south = empty_picture,
+      west = empty_picture,
+  },
+  activity_led_sprites =
+  {
+      north = empty_picture,
+      east = empty_picture,
+      south = empty_picture,
+      west = empty_picture,
+  },
+})
+end
+
+local hdl_arithmetic_fcpu = table.merge(table.deepcopy(data.raw['arithmetic-combinator']['arithmetic-combinator']), {
+  name = "arithmetic-fcpu",
+  icon = "__fcpu__/graphics/icons/fcpu.png",
+  icon_size = 1,
+  icon_mipmaps = 0,
+  allow_copy_paste = false,
+  create_ghost_on_death = false,
+
+  circuit_wire_max_distance = 10000,
+  energy_source = {
+    type = "void",
+    usage_priority = "primary-input"
+  },
+
+  collision_mask = {"not-colliding-with-itself"},
+})
+if not MC_DEBUG then hdl_arithmetic_fcpu = table.merge(hdl_arithmetic_fcpu, {
+  selectable_in_game = false,
+  draw_circuit_wires = false,
+
+  flags = {
+    "not-rotatable",
+    "placeable-off-grid",
+    "not-repairable",
+    "not-on-map",
+    "not-blueprintable",
+    "not-deconstructable", -- can't be deconstructed by 'demolition blueprint'. reducing bounds marker spam
+    "hidden",
+    "hide-alt-info",
+    "not-flammable",
+    "not-in-kill-statistics",
+  },
+
+  and_symbol_sprites = empty_picture,
+  divide_symbol_sprites = empty_picture,
+  left_shift_symbol_sprites = empty_picture,
+  minus_symbol_sprites = empty_picture,
+  modulo_symbol_sprites = empty_picture,
+  multiply_symbol_sprites = empty_picture,
+  or_symbol_sprites = empty_picture,
+  plus_symbol_sprites = empty_picture,
+  power_symbol_sprites = empty_picture,
+  right_shift_symbol_sprites = empty_picture,
+  xor_symbol_sprites = empty_picture,
+
+  sprites =
+  {
+      north = empty_picture,
+      east = empty_picture,
+      south = empty_picture,
+      west = empty_picture,
+  },
+  activity_led_sprites =
+  {
+      north = empty_picture,
+      east = empty_picture,
+      south = empty_picture,
+      west = empty_picture,
+  },
+})
+end
 
 data:extend{
-  output_fcpu_item,
-  output_fcpu
+  hdl_output_fcpu,
+  hdl_constant_fcpu,
+  hdl_decider_fcpu,
+  hdl_arithmetic_fcpu,
 }

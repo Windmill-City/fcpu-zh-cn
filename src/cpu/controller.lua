@@ -1,5 +1,7 @@
 local Compiler = require('src/cpu/compiler')
 
+Compiler.bind()
+
 PSTATE_HALTED = 0
 PSTATE_RUNNING = 1
 PSTATE_SLEEPING = 2
@@ -27,6 +29,10 @@ function Controller.init(mc)
     program_lines = {},
     program_ast = {},
     program_state = PSTATE_HALTED,
+    program_begin = 1,
+    program_ics = {},
+    ics_stack = {},
+    deffered = {},
     instruction_pointer = 1
   }
 
@@ -60,16 +66,41 @@ end
 function Controller.update_program_text(state, program_text)
   if state.program_text ~= program_text then
     state.program_text = program_text
+    state.modified = true
     return true
   end
 end
 
-function Controller.compile(state)
-  local program_lines = {}
-  for line in linepairs(state.program_text) do
-    table.insert(program_lines, line)
+local function SkipNOPs(ast, i, limit)
+  local length = #ast
+  local hops = limit or length
+  local next = ast[i]
+  while (next and (next.type == 'nop' and next.name == 'comment' or next.type == 'label')) do
+    i = i % length + 1
+    hops = hops - 1
+    if hops < 1 then
+      return false
+    end
+    next = ast[i]
   end
-  state.program_ast = Compiler.compile(program_lines)
+  return i
+end
+
+function Controller.compile(state)
+  if state.modified or not (state.program_ast and 0 < #state.program_ast) then
+    local program_lines = {}
+    for line in linepairs(state.program_text) do
+      table.insert(program_lines, line)
+    end
+
+    state.program_ast = Compiler.compile(program_lines)
+    state.program_begin = SkipNOPs(state.program_ast, 1) or 1
+    state.ics_stack = {}
+  end
+
+  Compiler.build(state, state.modified)
+
+  state.modified = false
 end
 
 function Controller.set_error_message(state, error_message)
@@ -79,48 +110,59 @@ function Controller.set_error_message(state, error_message)
 end
 
 function Controller.set_program_counter(state, value)
-  state.instruction_pointer = value
-  if #state.program_ast == 0 or state.instruction_pointer > #state.program_ast then
-    state.instruction_pointer = 1
+  local length = #state.program_ast
+  if length == 0 or length < value then
+    state.instruction_pointer = state.program_begin or 1
     Controller.update_state(state, PSTATE_HALTED)
     state.do_step = false
     script.raise_event(Controller.event_halt, {['entity'] = state.entity})
   else
-    local next_ast = state.program_ast[state.instruction_pointer]
-    while(next_ast and (next_ast.type == 'nop' or next_ast.type == 'label')) do
-      state.instruction_pointer = state.instruction_pointer + 1
-      if state.instruction_pointer > #state.program_ast then
-        break
-      end
-      next_ast = state.program_ast[state.instruction_pointer]
-    end
-    if state.instruction_pointer > #state.program_ast then
+    local i = SkipNOPs(state.program_ast, value, length - value + 1)
+    if i == false then
+      state.instruction_pointer = state.program_begin or 1
       Controller.update_state(state, PSTATE_HALTED)
       state.do_step = false
       script.raise_event(Controller.event_halt, {['entity'] = state.entity})
+    else
+      state.instruction_pointer = i
     end
   end
   Controller.update_ip(state)
 end
 
-function Controller.tick(state)
+function Controller.do_defferred(state, frames)
+  local count = 0
+  if state.deffered then
+    for k, op in pairs(state.deffered) do
+      if op.delay <= frames then
+        if op.action == 'disable' then
+          if op.ic and op.ic.valid then
+            local control = op.ic.get_or_create_control_behavior()
+            control.enabled = false
+          end
+        elseif op.action == 'enable' then
+          if op.ic and op.ic.valid then
+            local control = op.ic.get_or_create_control_behavior()
+            control.enabled = true
+          end
+        elseif op.action == 'noop' then
+        end
+        state.deffered[k] = nil
+      else
+        state.deffered[k].delay = op.delay - frames
+      end
+      count = count + 1
+    end
+  end
+  return count
+end
+
+function Controller.tick(state, sync_wait)
   state.clock = state.clock + 1
 
   -- Interrupts
-  local control = state.entity.get_control_behavior()
-  local red_input = control.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_input)
-  local green_input = control.get_circuit_network(defines.wire_type.green, defines.circuit_connector_id.combinator_input)
   local get_signal = function(signal)
-    local result = 0
-    if red_input then
-      local r = red_input.get_signal(signal.signal)
-      result = result + r
-    end
-    if green_input then
-      local g = green_input.get_signal(signal.signal)
-      result = result + g
-    end
-    return result
+    return state.entity.get_merged_signal(signal.signal, defines.circuit_connector_id.combinator_input) or 0
   end
   if state.program_state == PSTATE_RUNNING then
     if 0 < get_signal(HALT_SIGNAL) then
@@ -147,9 +189,10 @@ function Controller.tick(state)
   end
 
   -- Run Controller code.
-  if state.program_state == PSTATE_RUNNING then
+  if state.program_state == PSTATE_RUNNING and sync_wait < 1 then
     local ast = state.program_ast[state.instruction_pointer]
-    local success, result = Compiler.eval(ast, control, state)
+    local ics = state.program_ics[state.instruction_pointer]
+    local success, result = Compiler.eval(ast, ics, state)
     if not success then
       Controller.set_error_message(state, result)
       Controller.halt(state)
@@ -176,9 +219,25 @@ function Controller.tick(state)
       elseif result.type == 'block' then
         -- FIXME: should take into account the fcpu_maximum_updates_per_tick limit!
         -- Do nothing, keeping the instruction_pointer the same.
+      elseif result.type == 'xwait' then
+        if sync_wait < 1 then
+          Controller.set_program_counter(state, state.instruction_pointer + 1)
+        end
+      elseif result.type == 'deffer' then
+        Controller.set_program_counter(state, state.instruction_pointer + 1)
+        for _,v in ipairs(result.ops) do
+          table.insert(state.deffered, v)
+        end
+        Controller.do_defferred(state, 0)
       end
     else
       Controller.set_program_counter(state, state.instruction_pointer + 1)
+      if ast.deffer then
+        for _,v in ipairs(ast.deffer) do
+          table.insert(state.deffered, table.deep_copy(v))
+        end
+        Controller.do_defferred(state, 0)
+      end
     end
   elseif state.program_state == PSTATE_SLEEPING then
     state.sleep_time = state.sleep_time - 1
@@ -202,7 +261,7 @@ function Controller.run(state)
 end
 
 function Controller.step(state)
-  if state.instruction_pointer > #state.program_ast then
+  if #state.program_ast < state.instruction_pointer then
     Controller.set_program_counter(state, 1)
   end
   Controller.update_state(state, PSTATE_RUNNING)
@@ -212,9 +271,6 @@ function Controller.step(state)
 end
 
 function Controller.halt(state)
-  if state.program_state == PSTATE_HALTED then
-    Controller.set_program_counter(state, 1)
-  end
   Controller.update_state(state, PSTATE_HALTED)
   state.do_step = false
   script.raise_event(Controller.event_halt, {entity = state.entity})
@@ -222,6 +278,10 @@ end
 
 function Controller.is_running(state)
   return state.program_state ~= PSTATE_HALTED
+end
+
+function Controller.is_first_instruction(state)
+  return state.program_begin == state.instruction_pointer
 end
 
 -------------------------------------------------------------------------------------------------------
@@ -234,8 +294,8 @@ function Controller.update_ip(state)
 end
 
 function Controller.update_state(state, pstate)
-  if state.output_fcpu then
-    local control = state.output_fcpu.get_control_behavior()
+  if state.program_ics.output and state.program_ics.output.valid then
+    local control = state.program_ics.output.get_control_behavior()
     control.enabled = not state.disabled
   end
 
@@ -244,24 +304,23 @@ function Controller.update_state(state, pstate)
       state.program_state = pstate
     end
 
-    fcpu_update_blueprint(state.entity)
-
     local str = pstateStr[state.program_state]
-    if state.error_message and state.program_state == PSTATE_HALTED then
-      local control = state.entity.get_control_behavior()
-      local param = control.parameters
-      param.parameters.first_signal = nil
-      param.parameters.first_constant = state.instruction_pointer
-      param.parameters.output_signal = { type="virtual", name='signal-fcpu-error' }
-      control.parameters = param
-    elseif str then
-      local control = state.entity.get_control_behavior()
-      local param = control.parameters
-      param.parameters.first_signal = { type="virtual", name=str }
+    local control = state.entity.get_control_behavior()
+    local param = control.parameters
+    if state.disabled then
       param.parameters.first_constant = nil
+      param.parameters.first_signal = nil
       param.parameters.output_signal = nil
-      control.parameters = param
+    elseif state.error_message and state.program_state == PSTATE_HALTED then
+      param.parameters.first_constant = state.instruction_pointer
+      param.parameters.first_signal = nil
+      param.parameters.output_signal = { type="virtual", name='signal-fcpu-error' }
+    elseif str then
+      param.parameters.first_constant = nil
+      param.parameters.first_signal = { type="virtual", name=str }
+      param.parameters.output_signal = nil
     end
+    control.parameters = param
   end
 end
 

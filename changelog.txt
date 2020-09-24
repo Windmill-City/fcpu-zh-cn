@@ -1,4 +1,22 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.3.0
+Date: ????
+  Features:
+    - Added memory viewer.
+    - Added GUI refresh rate setting.
+    - Added `btr`, `btg` mnemonics.
+    - Added SIMD mnemonics.
+  Changes:
+    - Added disabled state into blueprint.
+    - fCPU program now saved in tags. No more `fcpu-imposter` entities needed. Please update your blueprints.
+    - Better performance on repeated state changes (hlt, run, hlt...) be external signals.
+  Bugfixes:
+    - Escape key handling.
+    - Pause/Stop button depicts reset state correctly now.
+    - Properly skip begin/end `nop` and comments in stepping mode.
+    - On/Off switch mess with `ipc` register. Should run program if in reset state.
+    - Pause fCPU until there is sufficient power in electric network.
+---------------------------------------------------------------------------------------------------
 Version: 0.2.14
 Date: 2020-09-24
   Bugfixes:

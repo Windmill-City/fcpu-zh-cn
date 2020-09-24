@@ -18,7 +18,7 @@ function assert.deprecated(since_ver, ...)
 end
 
 function assert.todo(msg)
-  exception("NOT IMPLEMENTED")
+  exception("NOT IMPLEMENTED".. (msg and (': '..msg) or ''))
 end
 
 function assert.check(b, ...)
@@ -72,15 +72,27 @@ function assert.type(_, valid)
         assert.todo()
         return
       end
+    elseif v == 'register' and _.type == 'memory' and _.addr ~= nil then
+      return
     end
   end
   exception("Expecting parameter to be a "..(table.concat(valid, ' or ')))
 end
 
 function assert.is_register(...)
-  for i,v in ipairs(...) do
+  for _,v in ipairs(table.pack(...)) do
     if v.type ~= "register" then
-      exception("Expecting parameter to be a register")
+      if not (v.type == 'memory' and v.addr ~= nil) then
+        exception("Expecting parameter to be a register")
+      end
+    end
+  end
+end
+
+function assert.is_memory(...)
+  for _,v in ipairs(table.pack(...)) do
+    if v.type ~= "memory" or v.index == nil or v.addr ~= nil then
+      exception("Expecting parameter to be a memory")
     end
   end
 end
