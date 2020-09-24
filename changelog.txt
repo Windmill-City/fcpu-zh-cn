@@ -14,6 +14,7 @@ Date: ????
     - Properly skip begin/end `nop` and comments in stepping mode.
     - On/Off switch mess with `ipc` register. Should run program if in reset state.
     - Pause fCPU until there is sufficient power in electric network.
+    - Possible fix for surface cloning (https://mods.factorio.com/mod/fcpu/discussion/5f6a720161a727b5e735e6af)
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.13
 Date: 2020-09-03

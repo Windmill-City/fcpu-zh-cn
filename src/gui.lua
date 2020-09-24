@@ -411,16 +411,18 @@ function GuiWidgetClose(player_index, silent)
       return
     end
 
-    fcpu_update_program(player_data.current_fcpu, player_data.gui_program_input.text)
-    player_data.current_fcpu.operable = true
+    if player_data.current_fcpu.valid then
+      fcpu_update_program(player_data.current_fcpu, player_data.gui_program_input.text)
+      player_data.current_fcpu.operable = true
 
+      if not silent then
+        player.play_sound{path="entity-close/"..player_data.current_fcpu.prototype.name, volume_modifier=0.85}
+      end
+    end
+ 
     player_data.gui_fcpu.destroy()
     player_data.gui_fcpu = nil
     set_player_data(player.index, player_data)
-
-    if not silent then
-      player.play_sound{path="entity-close/"..player_data.current_fcpu.prototype.name, volume_modifier=0.85}
-    end
   end
 end
 
