@@ -132,25 +132,27 @@ end
 
 function Controller.do_defferred(state, frames)
   local count = 0
-  for k, op in pairs(state.deffered) do
-    if op.delay <= frames then
-      if op.action == 'disable' then
-        if op.ic and op.ic.valid then
-          local control = op.ic.get_or_create_control_behavior()
-          control.enabled = false
+  if state.deffered then
+    for k, op in pairs(state.deffered) do
+      if op.delay <= frames then
+        if op.action == 'disable' then
+          if op.ic and op.ic.valid then
+            local control = op.ic.get_or_create_control_behavior()
+            control.enabled = false
+          end
+        elseif op.action == 'enable' then
+          if op.ic and op.ic.valid then
+            local control = op.ic.get_or_create_control_behavior()
+            control.enabled = true
+          end
+        elseif op.action == 'noop' then
         end
-      elseif op.action == 'enable' then
-        if op.ic and op.ic.valid then
-          local control = op.ic.get_or_create_control_behavior()
-          control.enabled = true
-        end
-      elseif op.action == 'noop' then
+        state.deffered[k] = nil
+      else
+        state.deffered[k].delay = op.delay - frames
       end
-      state.deffered[k] = nil
-    else
-      state.deffered[k].delay = op.delay - frames
+      count = count + 1
     end
-    count = count + 1
   end
   return count
 end
