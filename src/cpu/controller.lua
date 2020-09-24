@@ -161,20 +161,8 @@ function Controller.tick(state, sync_wait)
   state.clock = state.clock + 1
 
   -- Interrupts
-  local control = state.entity.get_control_behavior()
-  local red_input = control.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_input)
-  local green_input = control.get_circuit_network(defines.wire_type.green, defines.circuit_connector_id.combinator_input)
   local get_signal = function(signal)
-    local result = 0
-    if red_input then
-      local r = red_input.get_signal(signal.signal)
-      result = result + r
-    end
-    if green_input then
-      local g = green_input.get_signal(signal.signal)
-      result = result + g
-    end
-    return result
+    return state.entity.get_merged_signal(signal.signal, defines.circuit_connector_id.combinator_input) or 0
   end
   if state.program_state == PSTATE_RUNNING then
     if 0 < get_signal(HALT_SIGNAL) then
@@ -204,7 +192,7 @@ function Controller.tick(state, sync_wait)
   if state.program_state == PSTATE_RUNNING and sync_wait < 1 then
     local ast = state.program_ast[state.instruction_pointer]
     local ics = state.program_ics[state.instruction_pointer]
-    local success, result = Compiler.eval(ast, ics, state, control)
+    local success, result = Compiler.eval(ast, ics, state)
     if not success then
       Controller.set_error_message(state, result)
       Controller.halt(state)

@@ -300,7 +300,8 @@ function compiler.build(state, force)
   end
 end
 
-function compiler.eval(ast, ics, state, control)
+function compiler.eval(ast, ics, state)
+  local control = state.entity.get_control_behavior()
   io.setup(state, control)
 
   local status, results = pcall(eval, ast, ics)

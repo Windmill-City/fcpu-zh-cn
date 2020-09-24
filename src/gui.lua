@@ -419,7 +419,7 @@ function GuiWidgetClose(player_index, silent)
         player.play_sound{path="entity-close/"..player_data.current_fcpu.prototype.name, volume_modifier=0.85}
       end
     end
- 
+
     player_data.gui_fcpu.destroy()
     player_data.gui_fcpu = nil
     set_player_data(player.index, player_data)
