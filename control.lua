@@ -55,9 +55,13 @@ script.on_nth_tick(10, function(event)
   for _, player in pairs(game.players) do
     local player_data = get_player_data(player.index)
     if player_data and player_data.current_fcpu and player_data.gui_fcpu then
-      local state = Entity.get_data(player_data.current_fcpu)
-      if state then
-        GuiWidgetUpdate(player_data, state)
+      if player_data.current_fcpu.valid then
+        local state = Entity.get_data(player_data.current_fcpu)
+        if state then
+          GuiWidgetUpdate(player_data, state)
+        end
+      else
+        GuiWidgetClose(player.index)
       end
     end
   end
@@ -138,6 +142,43 @@ local function on_entity_settings_pasted(event)
   end
 end
 
+local function on_entity_cloned(event)
+  local dst_entity = event.destination
+  if not (dst_entity and dst_entity.valid) then return end
+
+  if string.find(dst_entity.name, '-fcpu') then
+    dst_entity.destroy()
+    return
+  end
+
+  if dst_entity.name == "fcpu" then
+    local src_entity = event.source
+    if not (src_entity and src_entity.valid) then return end
+
+    if src_entity.name == "fcpu" then
+      local src_state = Entity.get_data(src_entity)
+      if src_state then
+        local dst_state = table.deep_copy(src_state)
+
+        if src_entity.name == "fcpu" then
+          table.insert(global.fcpus, dst_entity)
+          dst_state.entity = dst_entity
+          dst_state.output_fcpu = nil
+          dst_state.imposter_fcpu = nil
+          Controller.compile(dst_state)
+        else
+          dst_state.entity = dst_entity
+        end
+
+        Entity.set_data(dst_entity, dst_state)
+        if src_entity.name == "fcpu" then
+          fcpu_verify_utility(dst_entity)
+        end
+      end
+    end
+  end
+end
+
 -------------------------------------------------------------------------------------------------------
 local function on_picker_dolly_moved(event)
   if event and event.moved_entity then
@@ -209,4 +250,9 @@ event.register(
 event.register(
   defines.events.on_entity_settings_pasted,
   on_entity_settings_pasted
+)
+
+event.register(
+  defines.events.on_entity_cloned,
+  on_entity_cloned
 )
