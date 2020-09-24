@@ -8,7 +8,8 @@
             "type": "factoriomod",
             "request": "launch",
             "name": "Factorio Mod Debug",
-            "factorioPath": "G:/SteamLibrary/steamapps/common/Factorio/bin/x64/factorio.exe"
+            "factorioPath": "G:/SteamLibrary/steamapps/common/Factorio/bin/x64/factorio.exe",
+            "modsPath": "${workspaceFolder}/../.factorio_mods"
         },
         {
             "type": "factoriomod",
