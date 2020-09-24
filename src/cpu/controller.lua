@@ -144,6 +144,7 @@ function Controller.do_defferred(state, frames)
           local control = op.ic.get_or_create_control_behavior()
           control.enabled = true
         end
+      elseif op.action == 'noop' then
       end
       state.deffered[k] = nil
     else
@@ -198,7 +199,7 @@ function Controller.tick(state, sync_wait)
   end
 
   -- Run Controller code.
-  if state.program_state == PSTATE_RUNNING then
+  if state.program_state == PSTATE_RUNNING and sync_wait < 1 then
     local ast = state.program_ast[state.instruction_pointer]
     local ics = state.program_ics[state.instruction_pointer]
     local success, result = Compiler.eval(ast, ics, state, control)
@@ -303,7 +304,7 @@ function Controller.update_ip(state)
 end
 
 function Controller.update_state(state, pstate)
-  if state.program_ics.output then
+  if state.program_ics.output and state.program_ics.output.valid then
     local control = state.program_ics.output.get_control_behavior()
     control.enabled = not state.disabled
   end

@@ -12,31 +12,36 @@ local empty_picture = {
 }
 
 
+local fcpu = table.merge(table.deepcopy(data.raw['arithmetic-combinator']['arithmetic-combinator']), generate_fcpu_combinator{
+  name = "fcpu",
+  icon = "__fcpu__/graphics/icons/fcpu.png",
+  minable = {hardness = 0.2, mining_time = 0.5, result = "fcpu"},
+  max_health = 300,
+  collision_box = {{-0.65, -0.65}, {0.65, 0.65}},
+  selection_box = {{-1, -1}, {1, 1}},
+  additional_pastable_entities = {"fcpu", "arithmetic-combinator", "decider-combinator", "constant-combinator"},
+
+  active_energy_usage = "20KW",
+
+  and_symbol_sprites = empty_picture,
+  divide_symbol_sprites = empty_picture,
+  left_shift_symbol_sprites = empty_picture,
+  minus_symbol_sprites = empty_picture,
+  modulo_symbol_sprites = empty_picture,
+  multiply_symbol_sprites = empty_picture,
+  or_symbol_sprites = empty_picture,
+  plus_symbol_sprites = empty_picture,
+  power_symbol_sprites = empty_picture,
+  right_shift_symbol_sprites = empty_picture,
+  xor_symbol_sprites = empty_picture,
+})
+if MC_DEBUG then fcpu = table.merge(fcpu, {
+  circuit_wire_max_distance = 10000,
+})
+end
+
 data:extend{
-  table.merge(table.deepcopy(data.raw['arithmetic-combinator']['arithmetic-combinator']), generate_fcpu_combinator
-  {
-    name = "fcpu",
-    icon = "__fcpu__/graphics/icons/fcpu.png",
-    minable = {hardness = 0.2, mining_time = 0.5, result = "fcpu"},
-    max_health = 300,
-    collision_box = {{-0.65, -0.65}, {0.65, 0.65}},
-    selection_box = {{-1, -1}, {1, 1}},
-    additional_pastable_entities = {"fcpu", "arithmetic-combinator", "decider-combinator", "constant-combinator"},
-
-    active_energy_usage = "20KW",
-
-    and_symbol_sprites = empty_picture,
-    divide_symbol_sprites = empty_picture,
-    left_shift_symbol_sprites = empty_picture,
-    minus_symbol_sprites = empty_picture,
-    modulo_symbol_sprites = empty_picture,
-    multiply_symbol_sprites = empty_picture,
-    or_symbol_sprites = empty_picture,
-    plus_symbol_sprites = empty_picture,
-    power_symbol_sprites = empty_picture,
-    right_shift_symbol_sprites = empty_picture,
-    xor_symbol_sprites = empty_picture,
-  }),
+  fcpu,
   {
     type = "item",
     name = "fcpu",

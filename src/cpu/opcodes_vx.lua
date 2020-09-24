@@ -5,6 +5,13 @@ local io
 
 local function vector_scalar_op(operand)
   return function(_, ics)
+    if operand then
+      assert.one(_)
+    else
+      assert.two(_)
+      assert.type(_[2], {'value', 'register', 'input'})
+    end
+
     if ics and ics.out then
       local src = operand or io.getcount(_[2])
 

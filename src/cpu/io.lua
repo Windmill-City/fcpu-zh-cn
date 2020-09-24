@@ -277,7 +277,7 @@ function io.each_ics(proc, name)
 end
 
 function io.ics_control(index)
-  local ics = hdlbuilder.get_ics(state, index)
+  local ics = state.program_ics[index]
   return ics, ics and ics.get_or_create_control_behavior()
 end
 
