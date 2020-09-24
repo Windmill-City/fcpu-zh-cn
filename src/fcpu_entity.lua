@@ -3,7 +3,7 @@ local HdlBuilder = require('src/cpu/hdl_builder')
 -------------------------------------------------------------------------------------------------------
 
 function fcpu_verify_utility(entity)
-  local state = Entity.get_data(entity)
+  local state = get_fcpu_state(entity)
 
   if not (state.program_ics.output and state.program_ics.output.valid) then
     local output_fcpu = HdlBuilder.create_node(entity, 'output', false)
@@ -66,13 +66,14 @@ local function handle_fcpu_create_v2(ent, tags)
       Controller.run(state)
     end
 
-    Entity.set_data(ent, state)
+    set_fcpu_state(ent, state)
   end
 end
 
 function handle_fcpu_create(ent, tags)
   if ent.name == "fcpu" then
-    Entity.set_data(ent, Controller.init(ent))
+    local state = Controller.init(ent)
+    set_fcpu_state(ent, state)
     local didFind = false
     for _, v in ipairs(global.fcpus) do
       if v == ent then
@@ -99,9 +100,9 @@ end
 -------------------------------------------------------------------------------------------------------
 
 function fcpu_update_program(fcpu, program_text)
-  local state = Entity.get_data(fcpu)
+  local state = get_fcpu_state(fcpu)
   local modified = Controller.update_program_text(state, program_text)
-  Entity.set_data(fcpu, state)
+  set_fcpu_state(fcpu, state)
 
   if modified then
     fcpu_verify_utility(fcpu)

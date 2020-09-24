@@ -14,7 +14,7 @@ local function get_debug_offset(entity, d_next_node)
   local x = 0
   local y = 0
   if MC_DEBUG then
-    local state = Entity.get_data(entity)
+    local state = get_fcpu_state(entity)
     if MC_DEBUG == true then
       if d_next_node == true then
         state.d_i = 1
@@ -35,7 +35,7 @@ local function get_debug_offset(entity, d_next_node)
       x = math.cos(a) * r
       y = math.sin(a) * r
     end
-    Entity.set_data(entity, state)
+    set_fcpu_state(entity, state)
   end
   return x, y
 end
@@ -58,8 +58,8 @@ end
 function builder.destroy_nodes(entity)
   if not (entity and entity.valid) then return end
   if entity.name == "fcpu" then
-    local state = Entity.get_data(entity)
-    if state.program_ics then
+    local state = get_fcpu_state(entity)
+    if state and state.program_ics then
       for _, v in pairs(state.program_ics) do
         builder.destroy_ics(v)
       end

@@ -34,7 +34,7 @@ script.on_nth_tick(fcpu_gui_updates_every_tick, function(event)
     local player_data = get_player_data(player.index)
     if player_data and player_data.current_fcpu and player_data.gui_fcpu then
       if player_data.current_fcpu.valid then
-        local state = Entity.get_data(player_data.current_fcpu)
+        local state = get_fcpu_state(player_data.current_fcpu)
         if state then
           GuiWidgetUpdate(player_data, state)
         end
@@ -63,7 +63,7 @@ script.on_event(defines.events.on_tick, function(event)
     -- Iterate through stored fcpus
     local cpu = global.fcpus[global.last_index]
     if cpu.valid then
-      local state = Entity.get_data(cpu)
+      local state = get_fcpu_state(cpu)
       if state then
         local need_sync = 0
         if state.deffered and next(state.deffered) ~= nil then
@@ -73,13 +73,12 @@ script.on_event(defines.events.on_tick, function(event)
         if not state.disabled and cpu.active then
           if sufficient_power(cpu) then
             Controller.tick(state, need_sync)
-            Entity.set_data(cpu, state)
+            set_fcpu_state(cpu, state)
           end
           i = i + 1
         end
       end
     else
-      GuiEntityCloseWidget(cpu)
       --table.remove(global.fcpus, global.last_index)
       global.fcpus[global.last_index] = global.fcpus[#global.fcpus]
       global.fcpus[#global.fcpus] = nil
@@ -113,8 +112,8 @@ local function on_entity_settings_pasted(event)
     -- TODO: handle "arithmetic-combinator", "decider-combinator", "constant-combinator"
 
     if src_entity.name == "fcpu" then
-      local src_state = Entity.get_data(src_entity)
-      local dst_state = Entity.get_data(dst_entity)
+      local src_state = get_fcpu_state(src_entity)
+      local dst_state = get_fcpu_state(dst_entity)
 
       if src_state and dst_state then
         fcpu_update_program(dst_entity, src_state.program_text)
@@ -123,7 +122,7 @@ local function on_entity_settings_pasted(event)
         if Controller.is_running(src_state) then
           Controller.run(dst_state)
         end
-        Entity.set_data(dst_entity, dst_state)
+        set_fcpu_state(dst_entity, dst_state)
       end
     end
   end
@@ -168,7 +167,7 @@ local function on_entity_cloned(event)
     if not (src_entity and src_entity.valid) then return end
 
     if src_entity.name == "fcpu" then
-      local src_state = Entity.get_data(src_entity)
+      local src_state = get_fcpu_state(src_entity)
       if src_state then
         local dst_state = table.deep_copy(src_state)
 
@@ -182,7 +181,7 @@ local function on_entity_cloned(event)
           dst_state.entity = dst_entity
         end
 
-        Entity.set_data(dst_entity, dst_state)
+        set_fcpu_state(dst_entity, dst_state)
         if src_entity.name == "fcpu" then
           fcpu_verify_utility(dst_entity)
         end

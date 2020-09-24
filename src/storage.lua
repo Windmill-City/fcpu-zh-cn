@@ -1,9 +1,3 @@
---[[
-[table] state               = Entity.get_data([entity name="fcpu"])
-[table] imposter_state      = Entity.get_data([entity name="imposter-fcpu"])
-[entity] fcpu               = imposter_state.fcpu
-[entity] imposter_fcpu      = state.imposter_fcpu
---]]
 
 -------------------------------------------------------------------------------------------------------
 
@@ -29,14 +23,9 @@ end
 
 function get_fcpu_state(entity)
   if not (entity and entity.valid) then return end
-  if entity.name == "fcpu" then
-    local state = Entity.get_data(entity)
-    return state
-  end
-  if entity.name == "imposter-fcpu" then
-    local imposter_state = Entity.get_data(entity)
-    if imposter_state then
-      return get_fcpu_state(imposter_state.fcpu)
-    end
-  end
+  return Entity.get_data(entity)
+end
+
+function set_fcpu_state(entity, state)
+  Entity.set_data(entity, state)
 end

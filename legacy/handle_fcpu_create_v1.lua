@@ -2,12 +2,6 @@ require('__fcpu__/legacy/3rdparty/blueprintdata')
 
 -------------------------------------------------------------------------------------------------------
 
-local function fcpu_set_imposter(entity, imposter_fcpu)
-  local state = Entity.get_data(entity) or {}
-  state.imposter_fcpu = imposter_fcpu
-  Entity.set_data(entity, state)
-end
-
 local function fcpu_create_imposter(entity)
   local surf = entity.surface
   local imposter_fcpu = surf.create_entity({
@@ -44,11 +38,11 @@ end
 local function update_fcpu_target(imposter_fcpu, new_fcpu)
   local imposter_state = Entity.get_data(imposter_fcpu)
 
-  local state = Entity.get_data(new_fcpu) or { ['entity'] = new_fcpu }
+  local state = get_fcpu_state(new_fcpu) or { ['entity'] = new_fcpu }
   state.imposter_fcpu = nil
   state.disabled = imposter_state.disabled
 
-  Entity.set_data(new_fcpu, state)
+  set_fcpu_state(new_fcpu, state)
   state = fcpu_verify_utility(new_fcpu)
 
   if imposter_state.target_program then
@@ -61,7 +55,7 @@ local function update_fcpu_target(imposter_fcpu, new_fcpu)
   else
     debug_print('--- can not update program')
   end
-  Entity.set_data(new_fcpu, state)
+  set_fcpu_state(new_fcpu, state)
 
   Entity.set_data(imposter_fcpu, nil)
   imposter_fcpu.destroy()
@@ -167,7 +161,9 @@ return function(ent)
     local fcpu_state = fcpu_verify_utility(ent)
     if not (fcpu_state.imposter_fcpu and fcpu_state.imposter_fcpu.valid) then
       local imposter_fcpu = fcpu_create_imposter(ent)
-      fcpu_set_imposter(ent, imposter_fcpu)
+      fcpu_state = fcpu_state or {}
+      fcpu_state.imposter_fcpu = imposter_fcpu
+      set_fcpu_state(ent, fcpu_state)
     end
   else
     debug_print("skip handling "..ent.name)

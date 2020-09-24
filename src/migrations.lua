@@ -1,9 +1,9 @@
 local function foreach_fcpu(proc)
   for _, fcpu in pairs(global.fcpus) do
     if fcpu.valid then
-      local state = Entity.get_data(fcpu)
+      local state = get_fcpu_state(fcpu)
       if state then
-        proc(fcpu, state)
+        proc(state.entity, state)
       end
     end
   end
@@ -23,14 +23,14 @@ return {
     foreach_fcpu(function(fcpu, state)
       state.instruction_pointer = state.program_counter
       state.program_counter = nil
-      Entity.set_data(fcpu, state)
+      set_fcpu_state(fcpu, state)
     end)
   end,
 
   ["0.1.13"] = function()
     foreach_fcpu(function(fcpu, state)
       state.entity = fcpu
-      Entity.set_data(fcpu, state)
+      set_fcpu_state(fcpu, state)
     end)
   end,
 
@@ -58,7 +58,7 @@ return {
       Controller.compile(state)
       Controller.update_ip(state)
       Controller.update_state(state)
-      Entity.set_data(fcpu, state)
+      set_fcpu_state(fcpu, state)
       state = fcpu_verify_utility(fcpu)
 
       if signal then
@@ -83,7 +83,7 @@ return {
       state.gui_inspector = nil
       state.gui_line_numbers = nil
       state.gui_program_input = nil
-      Entity.set_data(fcpu, state)
+      set_fcpu_state(fcpu, state)
     end)
   end,
 
@@ -104,7 +104,7 @@ return {
         state.imposter_fcpu = nil
       end
 
-      Entity.set_data(fcpu, state)
+      set_fcpu_state(fcpu, state)
     end)
     foreach_player(function(player, player_data)
       if player_data.gui_fcpu then
