@@ -12,8 +12,7 @@
     "stdlib",
     "flib",
     "? informatron >= 0.1.13",
-    "? booktorio >= 1.0.0",
-    "(?) profiler"
+    "? booktorio >= 1.0.0"
   ],
   "package": {
     "ignore": [ "tests/**", "*.psd", "todos.md"],

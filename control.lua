@@ -51,13 +51,10 @@ local function sufficient_power(cpu)
   end
 end
 
-global.profile = false
-
 script.on_event(defines.events.on_tick, function(event)
   global.last_index = global.last_index or #global.fcpus
-  if global.profile_ticks and Profiler then Profiler.Start(true) end
 
-  local limit = math.min(#global.fcpus, global.profile_ticks or fcpu_maximum_updates_per_tick)
+  local limit = math.min(#global.fcpus, fcpu_maximum_updates_per_tick)
   local i = 1
   local c = 1
   while i <= limit and c <= #global.fcpus do
@@ -90,8 +87,6 @@ script.on_event(defines.events.on_tick, function(event)
 
     c = c + 1
   end
-
-  if global.profile_ticks and Profiler then Profiler.Stop(false, "") global.profile_ticks = nil end
 end)
 
 script.on_event(Controller.event_error, function(event)
