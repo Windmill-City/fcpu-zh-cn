@@ -107,6 +107,48 @@ function builder.validate_ics(ics)
   end
 end
 
+function builder.verify(state)
+  state.program_ics = state.program_ics or {}
+
+  if not (state.program_ics.output and state.program_ics.output.valid) then
+    local output_fcpu = builder.create_node(state.entity, 'output', false)
+    state.program_ics.output = output_fcpu
+
+    state.entity.connect_neighbour({
+      wire = defines.wire_type.green,
+      target_entity = output_fcpu,
+      source_circuit_id = defines.circuit_connector_id.combinator_output,
+      target_circuit_id = defines.circuit_connector_id.constant_combinator
+    })
+    state.entity.connect_neighbour({
+      wire = defines.wire_type.red,
+      target_entity = output_fcpu,
+      source_circuit_id = defines.circuit_connector_id.combinator_output,
+      target_circuit_id = defines.circuit_connector_id.constant_combinator
+    })
+  end
+
+  for i = 1, MC_MEMORY_CHANNELS  do
+    local name = 'mem'..i
+    if not (state.program_ics[name] and state.program_ics[name].out and state.program_ics[name].out.valid) then
+      local ent_mem, ctrl_mem = builder.create_node(state.entity, 'decider', i)
+
+      state.program_ics[name] = { out = ent_mem }
+
+      ctrl_mem.parameters = {
+        parameters = {
+          first_signal = {type='virtual', name='signal-fcpu-error'},
+          second_signal = nil,
+          constant = 0,
+          comparator = "=",
+          output_signal = {type='virtual', name='signal-everything'},
+          copy_count_from_input = true
+        }
+      }
+    end
+  end
+end
+
 -------------------------------------------------------------------------------------------------------
 
 function builder.create_memory_cell(entity, input_ent, input_color, input_port, proxy_output)

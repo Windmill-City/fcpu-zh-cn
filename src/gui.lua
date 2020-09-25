@@ -440,7 +440,9 @@ end
 function GuiEntityCloseWidget(entity)
   for player_index, player in pairs(game.players) do
     local player_data = get_player_data(player_index)
-    if entity.valid and Entity._are_equal(entity, player_data.current_fcpu) then
+    if not (player_data.current_fcpu and player_data.current_fcpu.valid)
+    or player_data.current_fcpu.unit_number == entity.unit_number
+    or entity.valid and Entity._are_equal(entity, player_data.current_fcpu) then
       if player_data.gui_fcpu and player_data.gui_fcpu.valid then
         player_data.gui_fcpu.destroy()
         player_data.gui_fcpu = nil

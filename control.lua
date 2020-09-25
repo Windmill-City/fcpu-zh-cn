@@ -19,12 +19,18 @@ local function on_build_fcpu(event)
   handle_fcpu_create(entity, event.tags and event.tags.fcpu)
 end
 
-local function on_destroy_fcpu(event)
+local function on_destroy_fcpu(unit_number, soft)
+  local fake = { unit_number = unit_number, valid = true, name = 'fcpu' }
+  GuiEntityCloseWidget(fake)
+  handle_fcpu_destroy(fake, soft)
+end
+
+local function on_died_fcpu(event)
   local entity = event.entity
-  if not (entity and entity.valid and entity.unit_number) then return end
+  if not (entity and entity.valid) then return end
 
   GuiEntityCloseWidget(entity)
-  handle_fcpu_destroy(entity)
+  handle_fcpu_died(entity)
 end
 
 script.on_nth_tick(fcpu_gui_updates_every_tick, function(event)
@@ -51,34 +57,48 @@ end
 
 script.on_event(defines.events.on_tick, function(event)
   local HandleSTATE = function(state)
-    if state then
-      local need_sync = 0
-      if state.deffered and next(state.deffered) ~= nil then
-        need_sync = Controller.do_defferred(state, 1)
+    local need_sync = 0
+    if state.deffered and next(state.deffered) ~= nil then
+      need_sync = Controller.do_defferred(state, 1)
+    end
+    if not state.disabled and state.entity.active then
+      if sufficient_power(state.entity) then
+        Controller.tick(state, need_sync)
+        set_fcpu_state(state.entity, state)
       end
-      if not state.disabled and state.entity.active then
-        if sufficient_power(state.entity) then
-          Controller.tick(state, need_sync)
-          set_fcpu_state(state.entity, state)
-        end
-        return true
-      end
+      return true
     end
   end
 
   local handled = 0
   local enabled = 0
-  local HandleCPU = function(cpu)
+  local HandleCPU = function(state, key)
     handled = handled + 1
-    if cpu.valid then
-      local state = get_fcpu_state(cpu)
+    if state.entity and state.entity.valid then
       if HandleSTATE(state) then
         enabled = enabled + 1
       end
-    else
+    elseif not state.destroy_regnum then
       return nil, true
     end
   end
+
+--[[
+  if not global.migrated then
+    global.migrated = true
+
+    local fcpus = {}
+    for _,v in pairs(global.fcpus) do
+      local state = Entity.get_data(v)
+      if state then
+        state.index = #fcpus + 1
+        fcpus[state.index] = state
+        Entity.set_data(state.entity, state.index)
+      end
+    end
+    global.fcpus = fcpus
+  end
+]]
 
   local limit = math.min(#global.fcpus, fcpu_maximum_updates_per_tick)
   local ended
@@ -171,20 +191,13 @@ local function on_entity_cloned(event)
       if src_state then
         local dst_state = table.deep_copy(src_state)
 
-        if src_entity.name == "fcpu" then
-          table.insert(global.fcpus, dst_entity)
-          dst_state.entity = dst_entity
-          dst_state.imposter_fcpu = nil
-          dst_state.program_ics = {}
-          Controller.compile(dst_state)
-        else
-          dst_state.entity = dst_entity
-        end
+        dst_state.imposter_fcpu = nil
+        dst_state.program_ics = {}
+        register_fcpu(dst_entity, dst_state)
+        Controller.verify(dst_state)
+        Controller.compile(dst_state)
 
         set_fcpu_state(dst_entity, dst_state)
-        if src_entity.name == "fcpu" then
-          fcpu_verify_utility(dst_entity)
-        end
       end
     end
   end
@@ -242,22 +255,49 @@ event.register({
   defines.events.script_raised_destroy,
   },
   function(event)
-    on_destroy_fcpu(event)
+    --on_destroy_fcpu(event.unit_number)
   end
 )
 
 event.register({
+  defines.events.on_entity_destroyed},
+  function(event)
+    on_destroy_fcpu(event.unit_number, true)
+  end
+)
+
+event.register({
+  defines.events.on_pre_ghost_deconstructed,
+  defines.events.on_player_mined_entity
+  },
+  function(event)
+    if event.ghost then
+      on_destroy_fcpu(event.ghost.unit_number)
+    elseif event.entity then
+      if event.entity.name == 'entity-ghost' then
+        on_destroy_fcpu(event.entity.ghost_unit_number)
+      else
+        on_destroy_fcpu(event.entity.unit_number)
+      end
+    end
+  end,
+  {{filter = "name", name = "entity-ghost"}, {filter = "name", name = "fcpu"}}
+)
+
+event.register({
   defines.events.on_built_entity,
-  defines.events.on_robot_built_entity},
+  defines.events.on_robot_built_entity,
+  },
   on_build_fcpu,
   {{filter = "name", name = "entity-ghost"}, unpack(event_filters)}
 )
 
 event.register({
   defines.events.on_entity_died,
-  defines.events.on_robot_pre_mined,
-  defines.events.on_pre_player_mined_item},
-  on_destroy_fcpu,
+  --defines.events.on_robot_pre_mined,
+  --defines.events.on_pre_player_mined_item,
+  },
+  on_died_fcpu,
   {{filter = "name", name = "entity-ghost"}, unpack(event_filters)}
 )
 

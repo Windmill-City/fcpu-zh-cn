@@ -409,16 +409,6 @@ When working with SIMD instructions, the following features should be considered
 - SIMD instructions do not costs additional time for handling, so UPS friendly
 - Some vector instructions are executed for more than 1 tick (`xmov mem1 red` takes 3 ticks for populating `mem1` slot with data from `red` wire)
 - Retrieving effective data from affected memory is possible only after completion of a vector instruction
-  For handling this you may use `xwait` before getting data from memory cell.
-- Vector instructions are executed in parallel with scalar
-
-For example:
-```
-xmov mem2 green ; mem2 will be ready on third tick with data from this tick
-nop ; mem2 is not ready yet
-nop ; mem2 is not ready yet
-mov r1 mem2[1] ; mem2 is ready on this tick
-```
 
 
 ### SIMD Mnemonics
@@ -437,11 +427,6 @@ mov r1 mem2[1] ; mem2 is ready on this tick
 * `xxor` a[**M**/**O**] b[**C**/**R**/**I**]
 * `xsl`  a[**M**/**O**] b[**C**/**R**/**I**]
 * `xsr`  a[**M**/**O**] b[**C**/**R**/**I**]
-
-* `xwait`
-  Wait until vector coprocessor finish it's work.
-  This instructions should be placed between writing and reading from same memory channel.
-
 
 
 [comment]: <> (md2frt-skip-section-begin)

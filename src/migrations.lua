@@ -1,10 +1,20 @@
-local function foreach_fcpu(proc)
+local function foreach_fcpu_v1(proc)
   for _, fcpu in pairs(global.fcpus) do
     if fcpu.valid then
-      local state = get_fcpu_state(fcpu)
+      local state = Entity.get_data(fcpu)
       if state then
-        proc(state.entity, state)
+        proc(fcpu, state)
       end
+    end
+  end
+end
+
+local function foreach_fcpu(proc)
+  for k, state in pairs(global.fcpus) do
+    if state and state.entity and state.entity.valid then
+      proc(state.entity, state)
+    else
+      global.fcpus[k] = nil
     end
   end
 end
@@ -20,22 +30,22 @@ end
 
 return {
   ["0.0.1"] = function()
-    foreach_fcpu(function(fcpu, state)
+    foreach_fcpu_v1(function(fcpu, state)
       state.instruction_pointer = state.program_counter
       state.program_counter = nil
-      set_fcpu_state(fcpu, state)
+      Entity.set_data(fcpu, state)
     end)
   end,
 
   ["0.1.13"] = function()
-    foreach_fcpu(function(fcpu, state)
+    foreach_fcpu_v1(function(fcpu, state)
       state.entity = fcpu
-      set_fcpu_state(fcpu, state)
+      Entity.set_data(fcpu, state)
     end)
   end,
 
   ["0.2.0"] = function()
-    foreach_fcpu(function(fcpu, state)
+    foreach_fcpu_v1(function(fcpu, state)
       local signal
       local control = fcpu.get_or_create_control_behavior()
       if control then
@@ -55,11 +65,11 @@ return {
         }
       end
       state.program_ics = {}
+      Controller.verify(state)
       Controller.compile(state)
       Controller.update_ip(state)
       Controller.update_state(state)
-      set_fcpu_state(fcpu, state)
-      state = fcpu_verify_utility(fcpu)
+      Entity.set_data(fcpu, state)
 
       if signal then
         control = state.program_ics.output.get_control_behavior()
@@ -73,7 +83,7 @@ return {
   end,
 
   ["0.2.9"] = function()
-    foreach_fcpu(function(fcpu, state)
+    foreach_fcpu_v1(function(fcpu, state)
       state.gui_fcpu = nil
       state.gui_exit_button = nil
       state.gui_halt_button = nil
@@ -83,11 +93,21 @@ return {
       state.gui_inspector = nil
       state.gui_line_numbers = nil
       state.gui_program_input = nil
-      set_fcpu_state(fcpu, state)
+      Entity.set_data(fcpu, state)
     end)
   end,
 
   ["0.3.0"] = function()
+    local fcpus = {}
+    for _,v in pairs(global.fcpus) do
+      local state = Entity.get_data(v)
+      state.destroy_regnum = script.register_on_entity_destroyed(v)
+      state.index = #fcpus + 1
+      fcpus[state.index] = state
+      Entity.set_data(state.entity, state.index)
+    end
+    global.fcpus = fcpus
+
     foreach_fcpu(function(fcpu, state)
       state.program_begin = 1
       state.program_ics = state.program_ics or {}
@@ -103,8 +123,6 @@ return {
         end
         state.imposter_fcpu = nil
       end
-
-      set_fcpu_state(fcpu, state)
     end)
     foreach_player(function(player, player_data)
       if player_data.gui_fcpu then

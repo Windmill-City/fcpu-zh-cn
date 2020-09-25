@@ -2,50 +2,6 @@ local HdlBuilder = require('src/cpu/hdl_builder')
 
 -------------------------------------------------------------------------------------------------------
 
-function fcpu_verify_utility(entity)
-  local state = get_fcpu_state(entity)
-
-  if not (state.program_ics.output and state.program_ics.output.valid) then
-    local output_fcpu = HdlBuilder.create_node(entity, 'output', false)
-    state.program_ics.output = output_fcpu
-
-    entity.connect_neighbour({
-      wire = defines.wire_type.green,
-      target_entity = output_fcpu,
-      source_circuit_id = defines.circuit_connector_id.combinator_output,
-      target_circuit_id = defines.circuit_connector_id.constant_combinator
-    })
-    entity.connect_neighbour({
-      wire = defines.wire_type.red,
-      target_entity = output_fcpu,
-      source_circuit_id = defines.circuit_connector_id.combinator_output,
-      target_circuit_id = defines.circuit_connector_id.constant_combinator
-    })
-  end
-
-  for i = 1, MC_MEMORY_CHANNELS  do
-    local name = 'mem'..i
-    if not (state.program_ics[name] and state.program_ics[name].out and state.program_ics[name].out.valid) then
-      local ent_mem, ctrl_mem = HdlBuilder.create_node(entity, 'decider', i)
-
-      state.program_ics[name] = { out = ent_mem }
-
-      ctrl_mem.parameters = {
-        parameters = {
-          first_signal = {type='virtual', name='signal-fcpu-error'},
-          second_signal = nil,
-          constant = 0,
-          comparator = "=",
-          output_signal = {type='virtual', name='signal-everything'},
-          copy_count_from_input = true
-        }
-      }
-    end
-  end
-
-  return state
-end
-
 local handle_fcpu_create_v1 = require('legacy/handle_fcpu_create_v1')
 
 local function handle_fcpu_create_v2(ent, tags)
@@ -55,10 +11,11 @@ local function handle_fcpu_create_v2(ent, tags)
   end
 
   if ent.name == "fcpu" then
-    local state = fcpu_verify_utility(ent)
+    local state = get_fcpu_state(ent)
     state.entity = ent
     state.disabled = tags.d
 
+    Controller.verify(state)
     Controller.update_program_text(state, tags.t)
     Controller.compile(state)
     Controller.set_program_counter(state, 1)
@@ -72,16 +29,13 @@ end
 
 function handle_fcpu_create(ent, tags)
   if ent.name == "fcpu" then
-    local state = Controller.init(ent)
-    set_fcpu_state(ent, state)
-    local didFind = false
-    for _, v in ipairs(global.fcpus) do
-      if v == ent then
-        didFind = true
-      end
-    end
-    if not didFind then
-      table.insert(global.fcpus, ent)
+    local state = get_fcpu_state(ent)
+    if state and state.may_be_revived then
+      state.may_be_revived = false
+      state.entity = ent
+    else
+      state = Controller.init(ent)
+      register_fcpu(ent, state)
     end
   end
 
@@ -92,9 +46,18 @@ function handle_fcpu_create(ent, tags)
   end
 end
 
-function handle_fcpu_destroy(entity)
-  -- TODO: add undo information save
+function handle_fcpu_died(entity)
+  local state = get_fcpu_state(entity)
+  state.may_be_revived = true
+end
+
+function handle_fcpu_destroy(entity, soft)
+  local state = get_fcpu_state(entity)
+  if state and soft and state.may_be_revived then
+    return
+  end
   HdlBuilder.destroy_nodes(entity)
+  destroy_fcpu(entity, state)
 end
 
 -------------------------------------------------------------------------------------------------------
@@ -102,9 +65,10 @@ end
 function fcpu_update_program(fcpu, program_text)
   local state = get_fcpu_state(fcpu)
   local modified = Controller.update_program_text(state, program_text)
-  set_fcpu_state(fcpu, state)
 
   if modified then
-    fcpu_verify_utility(fcpu)
+    Controller.verify(state)
   end
+
+  set_fcpu_state(fcpu, state)
 end

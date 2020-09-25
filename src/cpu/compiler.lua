@@ -300,6 +300,10 @@ function compiler.build(state, force)
   end
 end
 
+function compiler.verify(state)
+  hdlBuilder.verify(state)
+end
+
 function compiler.eval(ast, ics, state)
   local control = state.entity.get_control_behavior()
   io.setup(state, control)

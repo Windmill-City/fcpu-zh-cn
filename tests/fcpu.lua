@@ -117,6 +117,7 @@ end
 function ExecuteTest(test_title, program_text, input_signals, probe_result, max_ticks)
   local fcpu = createFCPU(input_signals)
   local state = Controller.init(fcpu)
+  state.entity = fcpu
 
   state.program_ics.output = createFCPU_Output()
   state.program_ics.output.get_or_create_control_behavior()

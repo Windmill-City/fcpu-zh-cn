@@ -51,6 +51,10 @@ function Controller.init(mc)
   return state
 end
 
+function Controller.verify(state)
+  Compiler.verify(state)
+end
+
 function Controller.init_registers(state)
   if state.regs == nil then
     state.regs = {}
