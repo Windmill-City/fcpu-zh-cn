@@ -23,10 +23,16 @@ function createFCPU(input)
   end
 
   local MakeBus = function(bus)
+    local signals = {}
     local out = {
-      signals = {},
+      signals = signals,
       get_signal = function(signal)
-        return bus and bus[signal.name] or 0
+        for _, v in ipairs(signals or {}) do
+          if v.signal.type == signal.type and v.signal.name == signal.name then
+            return v.count
+          end
+        end
+        return 0
       end
     }
     if bus then
@@ -38,7 +44,7 @@ function createFCPU(input)
           break
         end
         local t, n = string.match(k, '(%a+)=([%a%-]+)')
-        table.insert(out.signals, { signal = { type = t, name = n }, count = v })
+        table.insert(signals, { signal = { type = t, name = n }, count = v })
       end
     end
     return out
@@ -48,6 +54,12 @@ function createFCPU(input)
     [defines.wire_type.red] = MakeBus(input[defines.wire_type.red]),
   }
 
+  fcpu.get_merged_signal = function(signal)
+    local control = fcpu.get_control_behavior()
+    return 
+      control.get_circuit_network(defines.wire_type.green).get_signal(signal)
+    + control.get_circuit_network(defines.wire_type.red).get_signal(signal)
+  end
   fcpu.get_or_create_control_behavior = function()
     if fcpu._control_behavior == nil then
       fcpu._control_behavior = {
@@ -122,7 +134,7 @@ function ExecuteTest(test_title, program_text, input_signals, probe_result, max_
         break
       end
     end
-    Controller.tick(state)
+    Controller.tick(state, 0)
   end
   if state.error_message then
     error(state.error_message[3])
