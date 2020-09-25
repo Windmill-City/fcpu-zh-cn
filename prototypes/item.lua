@@ -1,6 +1,26 @@
 require('prototypes/entities/pictures')
 require('src/constants')
 
+function table.shallow_merge(tblA, tblB, array_merge, raw)
+  if not tblB then
+      return tblA
+  end
+  if array_merge then
+      for _, v in pairs(tblB) do
+          Table.insert(tblA, v)
+      end
+  else
+      for k, v in pairs(tblB) do
+          if raw then
+              rawset(tblA, k, v)
+          else
+              tblA[k] = v
+          end
+      end
+  end
+  return tblA
+end
+
 local empty_picture = {
   filename = "__fcpu__/graphics/empty.png",
   x = 0,
@@ -12,7 +32,7 @@ local empty_picture = {
 }
 
 
-local fcpu = table.deep_merge{table.deep_copy(data.raw['arithmetic-combinator']['arithmetic-combinator']), generate_fcpu_combinator{
+local fcpu = table.shallow_merge(table.deep_copy(data.raw['arithmetic-combinator']['arithmetic-combinator']), generate_fcpu_combinator{
   name = "fcpu",
   icon = "__fcpu__/graphics/icons/fcpu.png",
   minable = {hardness = 0.2, mining_time = 0.5, result = "fcpu"},
@@ -34,10 +54,10 @@ local fcpu = table.deep_merge{table.deep_copy(data.raw['arithmetic-combinator'][
   power_symbol_sprites = empty_picture,
   right_shift_symbol_sprites = empty_picture,
   xor_symbol_sprites = empty_picture,
-}}
-if MC_DEBUG then fcpu = table.deep_merge{fcpu, {
+})
+if MC_DEBUG then fcpu = table.shallow_merge(fcpu, {
   circuit_wire_max_distance = 10000,
-}}
+})
 end
 
 data:extend{
@@ -91,11 +111,11 @@ data:extend{
 
 require('legacy/imposter_fcpu')
 
-local hdl_output_fcpu = table.deep_merge{table.deep_copy(data.raw['constant-combinator']['constant-combinator']), {
+local hdl_output_fcpu = table.shallow_merge(table.deep_copy(data.raw['constant-combinator']['constant-combinator']), {
   name = "output-fcpu",
   circuit_wire_max_distance = 10000,
-}}
-if not MC_DEBUG then hdl_output_fcpu = table.deep_merge{hdl_output_fcpu, {
+})
+if not MC_DEBUG then hdl_output_fcpu = table.shallow_merge(hdl_output_fcpu, {
   icon = "__fcpu__/graphics/icons/fcpu.png",
   icon_size = 1,
   icon_mipmaps = 0,
@@ -134,10 +154,10 @@ if not MC_DEBUG then hdl_output_fcpu = table.deep_merge{hdl_output_fcpu, {
       south = empty_picture,
       west = empty_picture,
   },
-}}
+})
 end
 
-local hdl_constant_fcpu = table.deep_merge{table.deep_copy(data.raw['constant-combinator']['constant-combinator']), {
+local hdl_constant_fcpu = table.shallow_merge(table.deep_copy(data.raw['constant-combinator']['constant-combinator']), {
   name = "constant-fcpu",
   icon = "__fcpu__/graphics/icons/fcpu.png",
   icon_size = 1,
@@ -153,8 +173,8 @@ local hdl_constant_fcpu = table.deep_merge{table.deep_copy(data.raw['constant-co
   },
 
   collision_mask = {"not-colliding-with-itself"},
-}}
-if not MC_DEBUG then hdl_constant_fcpu = table.deep_merge{hdl_constant_fcpu, {
+})
+if not MC_DEBUG then hdl_constant_fcpu = table.shallow_merge(hdl_constant_fcpu, {
   selectable_in_game = false,
   draw_circuit_wires = false,
 
@@ -186,10 +206,10 @@ if not MC_DEBUG then hdl_constant_fcpu = table.deep_merge{hdl_constant_fcpu, {
       south = empty_picture,
       west = empty_picture,
   },
-}}
+})
 end
 
-local hdl_decider_fcpu = table.deep_merge{table.deep_copy(data.raw['decider-combinator']['decider-combinator']), {
+local hdl_decider_fcpu = table.shallow_merge(table.deep_copy(data.raw['decider-combinator']['decider-combinator']), {
   name = "decider-fcpu",
   icon = "__fcpu__/graphics/icons/fcpu.png",
   icon_size = 1,
@@ -204,8 +224,8 @@ local hdl_decider_fcpu = table.deep_merge{table.deep_copy(data.raw['decider-comb
   },
 
   collision_mask = {"not-colliding-with-itself"},
-}}
-if not MC_DEBUG then hdl_decider_fcpu = table.deep_merge{hdl_decider_fcpu, {
+})
+if not MC_DEBUG then hdl_decider_fcpu = table.shallow_merge(hdl_decider_fcpu, {
   selectable_in_game = false,
   draw_circuit_wires = false,
 
@@ -243,10 +263,10 @@ if not MC_DEBUG then hdl_decider_fcpu = table.deep_merge{hdl_decider_fcpu, {
       south = empty_picture,
       west = empty_picture,
   },
-}}
+})
 end
 
-local hdl_arithmetic_fcpu = table.deep_merge{table.deep_copy(data.raw['arithmetic-combinator']['arithmetic-combinator']), {
+local hdl_arithmetic_fcpu = table.shallow_merge(table.deep_copy(data.raw['arithmetic-combinator']['arithmetic-combinator']), {
   name = "arithmetic-fcpu",
   icon = "__fcpu__/graphics/icons/fcpu.png",
   icon_size = 1,
@@ -261,8 +281,8 @@ local hdl_arithmetic_fcpu = table.deep_merge{table.deep_copy(data.raw['arithmeti
   },
 
   collision_mask = {"not-colliding-with-itself"},
-}}
-if not MC_DEBUG then hdl_arithmetic_fcpu = table.deep_merge{hdl_arithmetic_fcpu, {
+})
+if not MC_DEBUG then hdl_arithmetic_fcpu = table.shallow_merge(hdl_arithmetic_fcpu, {
   selectable_in_game = false,
   draw_circuit_wires = false,
 
@@ -305,7 +325,7 @@ if not MC_DEBUG then hdl_arithmetic_fcpu = table.deep_merge{hdl_arithmetic_fcpu,
       south = empty_picture,
       west = empty_picture,
   },
-}}
+})
 end
 
 data:extend{
