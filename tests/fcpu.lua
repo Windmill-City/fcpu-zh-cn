@@ -14,7 +14,7 @@ assert = require('../src/cpu/assert')
 unit_number = 0
 
 function createFCPU(input)
-  local fcpu = table.deepcopy(require('__stdlib__/faketorio/raw/arithmetic-combinator')['arithmetic-combinator'])
+  local fcpu = table.deep_copy(require('__stdlib__/faketorio/raw/arithmetic-combinator')['arithmetic-combinator'])
   unit_number = unit_number + 1
   fcpu.unit_number = unit_number
   fcpu.name = 'fcpu'
@@ -70,7 +70,7 @@ function createFCPU(input)
 end
 
 function createFCPU_Output(input)
-  local ent = table.deepcopy(require('__stdlib__/faketorio/raw/constant-combinator')['constant-combinator'])
+  local ent = table.deep_copy(require('__stdlib__/faketorio/raw/constant-combinator')['constant-combinator'])
   unit_number = unit_number + 1
   ent.unit_number = unit_number
   ent.name = 'output-fcpu'

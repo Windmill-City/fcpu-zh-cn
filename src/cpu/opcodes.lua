@@ -88,9 +88,9 @@ local opcodes = {
       end
     else
       for i = 1, io.register_last_index() do
-        io.register_setraw(i, table.deepcopy(NULL_SIGNAL))
+        io.register_setraw(i, table.deep_copy(NULL_SIGNAL))
       end
-      io.control_set(table.deepcopy(NULL_SIGNAL))
+      io.control_set(table.deep_copy(NULL_SIGNAL))
       io.output_clear()
       return memory_clear()
     end

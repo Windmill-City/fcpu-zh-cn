@@ -14,6 +14,17 @@ local signalToSpritePath = function(signal)
   end
 end
 
+local function dictionary_combine(...)
+  local tables = {...}
+  local new = {}
+  for _, tab in pairs(tables) do
+      for k, v in pairs(tab) do
+          new[k] = v
+      end
+  end
+  return new
+end
+
 -------------------------------------------------------------------------------------------------------
 
 gui.add_templates{
@@ -31,7 +42,7 @@ gui.add_templates{
     return {type="sprite-button", style="tool_button"..(color and "_"..color or ""), name=name.."-program", sprite="fcpu-"..sprite.."-sprite", save_as="gui_"..name.."_button", handlers="widget."..(handler or name.."_program")}
   end,
   tool_button = function(name, sprite, color, ...)
-    return table.merge({type="sprite-button", style="shortcut_bar_button_small"..(color and "_"..color or ""), name=name.."-program", sprite="fcpu-"..sprite.."-sprite", handlers="widget."..name.."_program"}, ...)
+    return table.deep_merge{{type="sprite-button", style="shortcut_bar_button_small"..(color and "_"..color or ""), name=name.."-program", sprite="fcpu-"..sprite.."-sprite", handlers="widget."..name.."_program"}, ...}
   end,
 
   heading_2 = {type="frame", style="invisible_frame_with_title"},
@@ -300,7 +311,7 @@ function GuiWidgetOpen(player, entity)
   if 0 < fcpu_debug_enabled then
     elems.gui_fcpu.titlebar.label.caption = elems.gui_fcpu.titlebar.label.caption.." #"..entity.unit_number
   end
-  player_data = table.dictionary_combine(player_data, elems, CreateWidget_MemoryView(elems.gui_fcpu["fcpu-panels"]))
+  player_data = dictionary_combine(player_data, elems, CreateWidget_MemoryView(elems.gui_fcpu["fcpu-panels"]))
 
   player_data.gui_program_input.text = state.program_text
   GuiWidgetUpdate(player_data, state)
@@ -582,7 +593,7 @@ gui.add_handlers{
         else
           local rootGui = player_data.gui_fcpu["fcpu-panels"]
           local elems = CreateWidget_MemoryView(rootGui)
-          return table.dictionary_combine(player_data, elems)
+          return dictionary_combine(player_data, elems)
         end
       end)
     },

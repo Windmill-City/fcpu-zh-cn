@@ -20,7 +20,7 @@ local imposter_fcpu_item ={
   stack_size = 1,
 }
 
-local imposter_fcpu = table.merge(table.deepcopy(data.raw['constant-combinator']['constant-combinator']), {
+local imposter_fcpu = table.deep_merge{table.deep_copy(data.raw['constant-combinator']['constant-combinator']), {
   name = "imposter-fcpu",
   icon = "__fcpu__/graphics/icons/fcpu.png",
   icon_size = 1,
@@ -54,7 +54,7 @@ local imposter_fcpu = table.merge(table.deepcopy(data.raw['constant-combinator']
       south = empty_picture,
       west = empty_picture,
   },
-})
+}}
 
 data:extend{
   imposter_fcpu_item,

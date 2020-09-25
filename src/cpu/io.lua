@@ -231,18 +231,18 @@ function io.register_get(index_expr)
   assert.check(index_expr.type == 'register', "Register expected")
   local addr = addr_deref(index_expr)
   if MC_REGS < addr then
-    local result = table.deepcopy(NULL_SIGNAL)
+    local result = table.deep_copy(NULL_SIGNAL)
     result.count = readOnlyRegister(addr)
     return result
   else
-    return table.deepcopy(io.register_getraw(addr))
+    return table.deep_copy(io.register_getraw(addr))
   end
 end
 
 function io.register_set(index_expr, value)
   assert.check(index_expr.type == 'register', "Register expected")
   local addr = addr_deref(index_expr)
-  local signal = table.deepcopy(value)
+  local signal = table.deep_copy(value)
   io.register_setraw(addr, signal)
 end
 
@@ -308,7 +308,7 @@ end
 function io.memory_get(address)
   assert.check(address.index ~= nil, "Should be addressable memory cell")
   local addr = addr_deref(address)
-  return table.deepcopy(io.memory_getraw(address.index, addr))
+  return table.deep_copy(io.memory_getraw(address.index, addr))
 end
 
 

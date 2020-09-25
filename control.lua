@@ -1,7 +1,5 @@
 Entity = require('__stdlib__/stdlib/entity/entity')
-Surface = require('__stdlib__/stdlib/area/surface')
-require('__stdlib__/stdlib/area/tile')
-table = require('__stdlib__/stdlib/utils/table')
+table = require('__flib__.table')
 
 require('src/constants')
 Profiler = require('src/debug')
@@ -52,39 +50,41 @@ local function sufficient_power(cpu)
 end
 
 script.on_event(defines.events.on_tick, function(event)
-  global.last_index = global.last_index or #global.fcpus
+  local HandleSTATE = function(state)
+    if state then
+      local need_sync = 0
+      if state.deffered and next(state.deffered) ~= nil then
+        need_sync = Controller.do_defferred(state, 1)
+      end
+      if not state.disabled and state.entity.active then
+        if sufficient_power(state.entity) then
+          Controller.tick(state, need_sync)
+          set_fcpu_state(state.entity, state)
+        end
+        return true
+      end
+    end
+  end
 
-  local limit = math.min(#global.fcpus, fcpu_maximum_updates_per_tick)
-  local i = 1
-  local c = 1
-  while i <= limit and c <= #global.fcpus do
-    global.last_index = (global.last_index + #global.fcpus - 2) % #global.fcpus + 1
-
-    -- Iterate through stored fcpus
-    local cpu = global.fcpus[global.last_index]
+  local handled = 0
+  local enabled = 0
+  local HandleCPU = function(cpu)
+    handled = handled + 1
     if cpu.valid then
       local state = get_fcpu_state(cpu)
-      if state then
-        local need_sync = 0
-        if state.deffered and next(state.deffered) ~= nil then
-          need_sync = Controller.do_defferred(state, 1)
-        end
-        -- Tick the Controller
-        if not state.disabled and cpu.active then
-          if sufficient_power(cpu) then
-            Controller.tick(state, need_sync)
-            set_fcpu_state(cpu, state)
-          end
-          i = i + 1
-        end
+      if HandleSTATE(state) then
+        enabled = enabled + 1
       end
     else
-      --table.remove(global.fcpus, global.last_index)
-      global.fcpus[global.last_index] = global.fcpus[#global.fcpus]
-      global.fcpus[#global.fcpus] = nil
+      return nil, true
     end
+  end
 
-    c = c + 1
+  local limit = math.min(#global.fcpus, fcpu_maximum_updates_per_tick)
+  local ended
+  global.last_index, _, ended = table.for_n_of(global.fcpus, global.last_index, limit, HandleCPU)
+  if handled < limit and ended then
+    global.last_index = table.for_n_of(global.fcpus, nil, limit - handled, HandleCPU)
   end
 end)
 
@@ -250,7 +250,7 @@ event.register({
   defines.events.on_built_entity,
   defines.events.on_robot_built_entity},
   on_build_fcpu,
-  table.merge(event_filters, {{filter = "name", name = "entity-ghost"}}, true)
+  {{filter = "name", name = "entity-ghost"}, unpack(event_filters)}
 )
 
 event.register({
@@ -258,7 +258,7 @@ event.register({
   defines.events.on_robot_pre_mined,
   defines.events.on_pre_player_mined_item},
   on_destroy_fcpu,
-  table.merge(event_filters, {{filter = "name", name = "entity-ghost"}}, true)
+  {{filter = "name", name = "entity-ghost"}, unpack(event_filters)}
 )
 
 event.register(
