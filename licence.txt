@@ -1,25 +1,23 @@
 Limited Distribution Only Licence
-https://docs.google.com/document/d/1ngMMo0RHpcQE_u6S1M5jq_rRczpdt3tPkWsWX0dHI0c
+Priority copy: https://docs.google.com/document/d/1ngMMo0RHpcQE_u6S1M5jq_rRczpdt3tPkWsWX0dHI0c
 
 Copyright (c) 2020, KonStg
 
 Commercial Use: Yes, but with the following conditions:
-You should specify a direct link to the Factorio Mod Portal page of the mod.
-
-Modification: Restricted.
-You may make alterations for your own private personal use only.
-You are not allowed to distribute anything altered, or derived from this mod with the following exception:
-You may post partial modified sections of this mod in KonStg's discord https://discord.gg/ypvJvAf
-for the purpose of providing bug fixes or enhancements.
+You should specify a direct link to the Factorio Mod Portal page of the mod (https://mods.factorio.com/mod/fcpu).
+Any help to mod developers is appreciated (https://www.buymeacoffee.com/konstg).
 
 Distribution: Yes, but with the following conditions:
-The mod must not be modified. (Repackaging the mod does not count as modification. It can be used in mod packs.)
-You must disclose the source by providing a link to the mod on the mod portal https://mods.factorio.com,
-a link to the KonStg's discord https://discord.gg/ypvJvAf for bug reporting and discussion,
-and a link to KonStg's BuyMeACoffee https://www.buymeacoffee.com/konstg to support further development.
+The mod must not be modified (except for mod developers). Repackaging the mod does not count as modification. It can be used in mod packs.
+You must disclose the source by providing a link to the mod on the mod portal https://gitlab.com/konstg/fcpu and/or a link to KonStg's BuyMeACoffee https://www.buymeacoffee.com/konstg for supporting further development.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+Modification: No, but with the following exceptions:
+You may make alterations for your own private personal use only.
+You may post partial modified sections of this mod in fCPU Discord https://discord.gg/vPnDPhV channels.
+You may post source code for the purpose of providing bug fixes or enhancements at https://mods.factorio.com/mod/fcpu/discussion.
+You may be an approved developer member of GitLab repository https://gitlab.com/konstg/fcpu. Members are allowed to modify and distribute modified versions of the mod only if modifications have already been pushed to the associated repository, if it does not contradict other clauses of the agreement.
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 
 THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
