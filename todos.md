@@ -1,6 +1,4 @@
-# Upcoming  (in v0.3.0)
-* Memory browser for SIMD instructions.
-* Single instruction, multiple data (SIMD).
+# Upcoming  (in v0.3.1)
 * New min, max, avg, etc SIMD opcodes.
 
 # TODO list, fCPU
@@ -22,3 +20,5 @@
 * Output multiple signals (DONE in v0.2.0)
 * `Informatron` support (DONE in v0.2.7)
 * `Booktorio` support (DONE in v0.2.8)
+* Memory browser for SIMD instructions (DONE in v0.3.0)
+* Single instruction, multiple data - SIMD (DONE in v0.3.0)
