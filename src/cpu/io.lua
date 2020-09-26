@@ -115,19 +115,13 @@ end
 
 -- Output wire access
 local function output_get(index)
-  local params = control_out.parameters
-  local signal_id = params.parameters[index].signal
-  local count = params.parameters[index].count
-  return io.make_signal(signal_id, count)
+  local signal = control_out.get_signal(index)
+  return io.make_signal(signal.signal, signal.count)
 end
 
 local function output_set(index, signal)
   assert.check(math.abs(signal.count or 0) ~= 1/0, "Division by zero")
-  local params = control_out.parameters
-  params.parameters[index].signal = signal.signal
-  params.parameters[index].count = signal.count
-  params.parameters[index].index = index
-  control_out.parameters = params
+  control_out.set_signal(index, signal)
 end
 
 function io.output_clear()
@@ -399,7 +393,7 @@ function io.setup(state_, control_)
     green = control_.get_circuit_network(defines.wire_type.green, defines.circuit_connector_id.combinator_input),
   }
 
-  if state_.program_ics.output then
+  if state_.program_ics.output and state_.program_ics.output.valid then
     control_out = state_.program_ics.output.get_control_behavior()
   end
 end
