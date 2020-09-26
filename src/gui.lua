@@ -526,7 +526,6 @@ gui.add_handlers{
             Controller.halt(state)
             Controller.update_state(state)
           end
-          set_fcpu_state(player_data.current_fcpu, state)
         end
       end)
     },
@@ -536,7 +535,6 @@ gui.add_handlers{
         player_data.gui_error_message.caption = ""
         Controller.compile(state)
         Controller.run(state)
-        set_fcpu_state(player_data.current_fcpu, state)
       end)
     },
     halt_program = {
@@ -547,7 +545,6 @@ gui.add_handlers{
           Controller.set_program_counter(state, 1)
         end
         Controller.halt(state)
-        set_fcpu_state(player_data.current_fcpu, state)
       end)
     },
     step_program = {
@@ -556,7 +553,6 @@ gui.add_handlers{
         player_data.gui_error_message.caption = ""
         Controller.compile(state)
         Controller.step(state)
-        set_fcpu_state(player_data.current_fcpu, state)
       end)
     },
     copy_program = {

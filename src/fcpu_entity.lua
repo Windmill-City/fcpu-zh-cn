@@ -22,8 +22,6 @@ local function handle_fcpu_create_v2(ent, tags)
     if tags.r then
       Controller.run(state)
     end
-
-    set_fcpu_state(ent, state)
   end
 end
 
@@ -69,6 +67,4 @@ function fcpu_update_program(fcpu, program_text)
   if modified then
     Controller.verify(state)
   end
-
-  set_fcpu_state(fcpu, state)
 end

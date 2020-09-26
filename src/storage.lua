@@ -41,7 +41,3 @@ function get_fcpu_state(entity)
   local index = Entity.get_data(entity)
   return global.fcpus[index]
 end
-
-function set_fcpu_state(entity, state)
-  --Entity.set_data(entity, state.index)
-end

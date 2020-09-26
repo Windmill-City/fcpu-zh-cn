@@ -35,7 +35,6 @@ local function get_debug_offset(entity, d_next_node)
       x = math.cos(a) * r
       y = math.sin(a) * r
     end
-    set_fcpu_state(entity, state)
   end
   return x, y
 end

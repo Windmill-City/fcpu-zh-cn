@@ -13,15 +13,15 @@ Date: 2020-09-25
   Changes:
     - Added disabled state into blueprint.
     - fCPU program now saved in tags. No more `fcpu-imposter` entities needed. Please update your blueprints.
-    - Better performance on repeated state changes (hlt, run, hlt...) be external signals.
+    - Better performance on repeated state changes (hlt, run, hlt...) by external signals.
   Bugfixes:
     - Escape key handling.
-    - Pause/Stop button depicts reset state correctly now.
-    - Properly skip begin/end `nop` and comments in stepping mode.
-    - On/Off switch mess with `ipc` register. Should run program if in reset state.
-    - Pause fCPU until there is sufficient power in electric network.
-    - Better tick handling with `for_n_of`.
-    - Program and state do not cleared after fCPU destroyed.
+    - The Pause/Stop button now correctly displays the reset status.
+    - Correctly skips empty instructions and comments.
+    - Fixed on/off switch, ipc register mess. When turned on, the program runs if it is in a reset state.
+    - If there is no energy in the mains (accumulator), the fCPU stops until there is enough energy in the mains.
+    - Program and state are not removed after fCPU crash.
+    - Improved tick handling with `for_n_of`.
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.14
 Date: 2020-09-24

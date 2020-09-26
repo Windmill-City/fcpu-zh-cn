@@ -56,26 +56,19 @@ local function sufficient_power(cpu)
 end
 
 script.on_event(defines.events.on_tick, function(event)
-  local HandleSTATE = function(state)
-    local need_sync = 0
-    if state.deffered and next(state.deffered) ~= nil then
-      need_sync = Controller.do_defferred(state, 1)
-    end
-    if not state.disabled and state.entity.active then
-      if sufficient_power(state.entity) then
-        Controller.tick(state, need_sync)
-        set_fcpu_state(state.entity, state)
-      end
-      return true
-    end
-  end
-
   local handled = 0
   local enabled = 0
-  local HandleCPU = function(state, key)
+  local HandleCPU = function(state)
     handled = handled + 1
     if state.entity and state.entity.valid then
-      if HandleSTATE(state) then
+      local need_sync = 0
+      if state.deffered and next(state.deffered) ~= nil then
+        need_sync = Controller.do_defferred(state, 1)
+      end
+      if not state.disabled and state.entity.active then
+        if sufficient_power(state.entity) then
+          Controller.tick(state, need_sync)
+        end
         enabled = enabled + 1
       end
     elseif not state.destroy_regnum then
@@ -142,7 +135,6 @@ local function on_entity_settings_pasted(event)
         if Controller.is_running(src_state) then
           Controller.run(dst_state)
         end
-        set_fcpu_state(dst_entity, dst_state)
       end
     end
   end
@@ -196,8 +188,6 @@ local function on_entity_cloned(event)
         register_fcpu(dst_entity, dst_state)
         Controller.verify(dst_state)
         Controller.compile(dst_state)
-
-        set_fcpu_state(dst_entity, dst_state)
       end
     end
   end

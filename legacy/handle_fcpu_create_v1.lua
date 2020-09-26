@@ -55,7 +55,6 @@ local function update_fcpu_target(imposter_fcpu, new_fcpu)
   else
     debug_print('--- can not update program')
   end
-  set_fcpu_state(new_fcpu, state)
 
   Entity.set_data(imposter_fcpu, nil)
   imposter_fcpu.destroy()
@@ -169,7 +168,6 @@ return function(ent)
       end
       fcpu_state = fcpu_state or {}
       fcpu_state.imposter_fcpu = imposter_fcpu
-      set_fcpu_state(ent, fcpu_state)
     end]]
   else
     debug_print("skip handling "..ent.name)
