@@ -275,20 +275,33 @@ function io.ics_control(index)
   return ics, ics and ics.get_or_create_control_behavior()
 end
 
-function io.memory_getchannel_signals(channel)
-  assert.check(1 <= channel and channel <= MC_MEMORY_CHANNELS, "Memory channel is out of range")
-  local ics = hdlbuilder.get_node(state, "mem" .. channel)
-  if ics and ics.out and ics.out.valid then
-    local control = ics.out.get_control_behavior()
-    if ics.color_out then
-      local output = control.get_circuit_network(ics.color_out, defines.circuit_connector_id.combinator_output)
-      if output then
-        return output.signals
+function io.memory_getchannel_signals(_)
+  if type(_) == 'number' then
+    local channel = _
+    assert.check(1 <= channel and channel <= MC_MEMORY_CHANNELS, "Memory channel is out of range")
+    local ics = hdlbuilder.get_node(state, "mem" .. channel)
+    if ics and ics.out and ics.out.valid then
+      local control = ics.out.get_control_behavior()
+      if ics.color_out then
+        local output = control.get_circuit_network(ics.color_out, defines.circuit_connector_id.combinator_output)
+        if output then
+          return output.signals
+        end
       end
+      return control.signals_last_tick
+    else
+      assert.exception("Memory channel do not exists")
     end
-    return control.signals_last_tick
+  elseif _.type == 'wire' then
+    if _.color == 'out' then
+      return control_out.parameters.parameters
+    end
+    if not wires[_.color] then
+      assert.exception("Tried to access ".._.color.." wire when input not present.")
+    end
+    return wires[_.color].signals
   else
-    assert.exception("Memory channel do not exists yet")
+    assert.todo()
   end
 end
 

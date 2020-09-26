@@ -280,6 +280,12 @@ function Controller.halt(state)
   script.raise_event(Controller.event_halt, {entity = state.entity})
 end
 
+function Controller.disable(state, disable)
+  state.disabled = (disable == nil or disable)
+  Controller.halt(state)
+  Controller.update_state(state)
+end
+
 function Controller.is_running(state)
   return state.program_state ~= PSTATE_HALTED
 end

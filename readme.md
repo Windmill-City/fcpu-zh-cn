@@ -428,6 +428,13 @@ When working with SIMD instructions, the following features should be considered
 * `xsl`  a[**M**/**O**] b[**C**/**R**/**I**]
 * `xsr`  a[**M**/**O**] b[**C**/**R**/**I**]
 
+* `xmin` dst[**R**/**O**] src[**M**/**I**]
+  Searches minimum signal in `src` and copy it to `dst`.
+* `xmax` dst[**R**/**O**] src[**M**/**I**]
+  Searches maximum signal in `src` and copy it to `dst`.
+* `xavg` dst[**R**/**O**] src[**M**/**I**]
+  Compute average value in `src` and assign `src` to it.
+
 
 [comment]: <> (md2frt-skip-section-begin)
 
