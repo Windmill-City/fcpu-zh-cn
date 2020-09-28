@@ -254,12 +254,12 @@ function io.get_node(name)
   return state.program_ics[state.ics_stack[name]]
 end
 
-function io.set_ics(name, index)
-  -- same as HdlBuilder.set_ics
+function io.ics_set(name, index)
+  -- same as HdlBuilder.ics_set
   state.ics_stack[name] = index
 end
 
-function io.each_ics(proc, name)
+function io.ics_each(proc, name)
   local index = name and state.ics_stack[name]
   for k, ics in pairs(state.program_ics) do
     if type(k) == 'number' then
@@ -328,7 +328,7 @@ function io.memory_getchannel_signals(_)
   end
 end
 
-function io.memory_getraw(channel, index)
+local function memory_getraw(channel, index)
   local signals = io.memory_getchannel_signals(channel)
   assert.check(signals ~= nil, "Trying to retrieve nil memory cell")
   assert.check(1 <= index and index <= #signals, "Memory cell index is out of range")
@@ -338,7 +338,7 @@ end
 function io.memory_get(address)
   assert.check(address.index ~= nil, "Should be addressable memory cell")
   local addr = addr_deref(address)
-  return table.deep_copy(io.memory_getraw(address.index, addr))
+  return table.deep_copy(memory_getraw(address.index, addr))
 end
 
 

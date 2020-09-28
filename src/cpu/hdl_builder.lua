@@ -313,8 +313,8 @@ function builder.get_node(state_, name)
   return state_.program_ics[name] or state_.program_ics[state_.ics_stack[name]]
 end
 
-function builder.set_ics(name, index)
-  -- same as io.set_ics
+function builder.ics_set(name, index)
+  -- same as io.ics_set
   state.ics_stack[name] = index
 end
 

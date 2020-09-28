@@ -195,7 +195,7 @@ end
 local function update_ics_stack(subsystem, push_ics)
   if push_ics then
     for _,v in ipairs(push_ics) do
-      subsystem.set_ics(v.name, v.index)
+      subsystem.ics_set(v.name, v.index)
     end
   end
 end
