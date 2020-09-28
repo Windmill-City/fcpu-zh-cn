@@ -3,7 +3,8 @@ Version: 0.3.1
 Date: ????
   Features:
     - Added `xmin`, `xmax`, `xavg` mnemonics.
-    - Added `fim` mnemonics.
+    - Added `fim` mnemonic.
+    - Added `rnd` mnemonic (https://mods.factorio.com/mod/fcpu/discussion/5f70ee95fdf18a7b9c41d0d1).
   Changes:
     - Performance improvements for signal get\set.
     - Deffer power check once in 10 ticks.

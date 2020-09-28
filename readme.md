@@ -175,7 +175,7 @@ Each instruction take one or more operands and modify them or state of fCPU.
 
 * `emit` src[**V**/**T**/**S**/**R**/**I**]  
   Copy signal from source to output.  
-  Same as `mov out src`.  
+  Same as `mov out1 src`.  
 
 * `ssv` dst...[**R**/**O**] val[**V**/**S**/**R**/**I**]  
   Set signal value.  
@@ -189,8 +189,8 @@ Each instruction take one or more operands and modify them or state of fCPU.
   `fig` dst[**R**/**O**] type[**T**/**R**/**I**]  
   Find type in red/green input wire.
 
-* `fim` dst[**R**/**O**] type[**T**/**R**/**I**] mem[**M**]  
-  Find type in memory slot input wire.
+* `fim` mem[**M**] dst[**R**/**O**] type[**T**/**R**/**I**]  
+  Find type in memory slot.
 
 
 ### Swap
@@ -231,6 +231,9 @@ Each instruction take one or more operands and modify them or state of fCPU.
   *dst = src % dst*
 * `powi` dst[**R**] src[**C**/**R**/**I**]  
   *dst = src ^ dst*
+
+* `rnd` dst[**R**] min[**C**/**R**/**I**] max[**C**/**R**/**I**]  
+  Assigns into *dst* a pseudo-random value in range [*min* to *max*] (inclusive).  
 
 * `dig` dst[**R**] num[**C**/**R**/**I**]  
   Get digit *num*ber from *dest*inatination and write to dst.  

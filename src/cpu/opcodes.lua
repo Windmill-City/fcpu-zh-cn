@@ -133,12 +133,12 @@ local opcodes = {
   fig = function(_) -- fig dst[R/O] type[T/R/I]
     find_in_wire(_, 'green')
   end,
-  fim = function(_) -- fim dst[R/O] type[T/R/I] mem[M]
+  fim = function(_) -- fim mem[M] dst[R/O] type[T/R/I]
     assert.three(_)
-    local _dst = _[1]
+    local _dst = _[2]
     assert.type(_dst, {'register', 'output'})
-    local _type = io.gettype(_[2], {'type', 'register', 'input'})
-    local control = io.memory_getchannel_control(_[3])
+    local _type = io.gettype(_[3], {'type', 'register', 'input'})
+    local control = io.memory_getchannel_control(_[1])
     local count = control.get_signal(_type)
     if count ~= 0 then
       io.setsignal(_dst, {signal = _type, count = count})
@@ -227,6 +227,21 @@ local opcodes = {
     io.register_set_count(_dst, io.getcount(_src) ^ io.getcount(_dst))
   end,
 
+  rnd = function(_) -- rnd dst[R/O] min[C/R/I] max[C/R/I]
+    assert.three(_)
+    local _dst = _[1]
+    assert.is_register(_dst)
+    local _min = _[2]
+    local _max = _[3]
+    assert.type(_min, {'register', 'value', 'input'})
+    assert.type(_max, {'register', 'value', 'input'})
+    local min = io.getcount(_min)
+    local range  = io.getcount(_max) - min + 1
+    assert.check(0 <= range, "Minimum limit should be less or queal than the maximum limit")
+    local r = min + (math.random() % range)
+    io.register_set_count(_dst, r)
+  end,
+  
   dig = function(_) -- dig dst[R] num[C/R/I]
     assert.two(_)
     assert.type(_[1], {'register'})
@@ -368,13 +383,13 @@ local opcodes = {
     end
   end,
 
-  beq = branch_mnemonic(function(a, b) return io.getcount(a) == io.getcount(b) end), -- beq a[C/R/I] b[C/R/I] addr[**C**/**A**/**L**/**R**]
-  bne = branch_mnemonic(function(a, b) return io.getcount(a) ~= io.getcount(b) end), -- bne a[C/R/I] b[C/R/I] addr[**C**/**A**/**L**/**R**]
-  bgt = branch_mnemonic(function(a, b) return io.getcount(a) > io.getcount(b) end), -- bgt a[C/R/I] b[C/R/I]  addr[**C**/**A**/**L**/**R**]
-  blt = branch_mnemonic(function(a, b) return io.getcount(a) < io.getcount(b) end), -- blt a[C/R/I] b[C/R/I] addr[**C**/**A**/**L**/**R**]
-  bge = branch_mnemonic(function(a, b) return io.getcount(a) >= io.getcount(b) end), -- bge a[C/R/I] b[C/R/I] addr[**C**/**A**/**L**/**R**]
-  ble = branch_mnemonic(function(a, b) return io.getcount(a) <= io.getcount(b) end), -- ble a[C/R/I] b[C/R/I] addr[**C**/**A**/**L**/**R**]
-  bas = function(_) -- bas a[T/R/I] b[T/R/I]
+  beq = branch_mnemonic(function(a, b) return io.getcount(a) == io.getcount(b) end), -- beq a[C/R/I] b[C/R/I] addr[L/A/R]
+  bne = branch_mnemonic(function(a, b) return io.getcount(a) ~= io.getcount(b) end), -- bne a[C/R/I] b[C/R/I] addr[L/A/R]
+  bgt = branch_mnemonic(function(a, b) return io.getcount(a) > io.getcount(b) end), -- bgt a[C/R/I] b[C/R/I]  addr[L/A/R]
+  blt = branch_mnemonic(function(a, b) return io.getcount(a) < io.getcount(b) end), -- blt a[C/R/I] b[C/R/I]  addr[L/A/R]
+  bge = branch_mnemonic(function(a, b) return io.getcount(a) >= io.getcount(b) end), -- bge a[C/R/I] b[C/R/I] addr[L/A/R]
+  ble = branch_mnemonic(function(a, b) return io.getcount(a) <= io.getcount(b) end), -- ble a[C/R/I] b[C/R/I] addr[L/A/R]
+  bas = function(_) -- bas a[T/R/I] b[T/R/I] addr[L/A/R]
     assert.three(_)
     local as = io.gettype(_[1], {'type', 'input', 'register'})
     local bs = io.gettype(_[2], {'type', 'input', 'register'})
@@ -389,7 +404,7 @@ local opcodes = {
     end
     return jump_op(_[3])
   end,
-  bad = function(_) -- bad a[T/R/I] b[T/R/I]
+  bad = function(_) -- bad a[T/R/I] b[T/R/I] addr[L/A/R]
     assert.three(_)
     local as = io.gettype(_[1], {'type', 'input', 'register'})
     local bs = io.gettype(_[2], {'type', 'input', 'register'})
@@ -427,6 +442,14 @@ local opcodes = {
     end
   end,
   bkg = function(_)
+    assert.one(_)
+    assert.type(_[1], {'value', 'register'})
+    local count = io.getcount(_[1])
+    if io.wire_count('green') < count then
+      return {type = 'block'}
+    end
+  end,
+  bkm = function(_)
     assert.one(_)
     assert.type(_[1], {'value', 'register'})
     local count = io.getcount(_[1])
