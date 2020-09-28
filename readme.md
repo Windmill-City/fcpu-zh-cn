@@ -235,6 +235,15 @@ Each instruction take one or more operands and modify them or state of fCPU.
 * `rnd` dst[**R**] min[**C**/**R**/**I**] max[**C**/**R**/**I**]  
   Assigns into *dst* a pseudo-random value in range [*min* to *max*] (inclusive).  
 
+* `fract` reg[**R**]  
+  Get the fraction part of a real number in register.  
+* `floor` reg[**R**]  
+  Get the greatest integer less than or equal to real number in register.  
+* `round` reg[**R**]  
+  Get the closest integer to real number in register.  
+* `ceil` reg[**R**]  
+  Get the lowest integer greater than or equal to real number in register.  
+
 * `dig` dst[**R**] num[**C**/**R**/**I**]  
   Get digit *num*ber from *dest*inatination and write to dst.  
   *dst = dst / 10^num % 10*

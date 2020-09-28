@@ -227,6 +227,27 @@ local opcodes = {
     io.register_set_count(_dst, io.getcount(_src) ^ io.getcount(_dst))
   end,
 
+  fract = function(_)
+    assert.one(_)
+    local r = io.getcount(_[1], {'register'})
+    io.register_set_count(_[1], r - math.floor(r))
+  end,
+  floor = function(_)
+    assert.one(_)
+    local r = io.getcount(_[1], {'register'})
+    io.register_set_count(_[1], math.floor(r))
+  end,
+  round = function(_)
+    assert.one(_)
+    local r = io.getcount(_[1], {'register'})
+    io.register_set_count(_[1], math.floor(r + 0.5))
+  end,
+  ceil = function(_)
+    assert.one(_)
+    local r = io.getcount(_[1], {'register'})
+    io.register_set_count(_[1], math.ceil(r))
+  end,
+
   rnd = function(_) -- rnd dst[R/O] min[C/R/I] max[C/R/I]
     assert.three(_)
     local _dst = _[1]
@@ -238,10 +259,10 @@ local opcodes = {
     local min = io.getcount(_min)
     local range  = io.getcount(_max) - min + 1
     assert.check(0 <= range, "Minimum limit should be less or queal than the maximum limit")
-    local r = min + (math.random() % range)
+    local r = min + (math.random() * range)
     io.register_set_count(_dst, r)
   end,
-  
+
   dig = function(_) -- dig dst[R] num[C/R/I]
     assert.two(_)
     assert.type(_[1], {'register'})
