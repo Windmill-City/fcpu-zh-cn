@@ -8,7 +8,7 @@
 * supports [Informatron](https://mods.factorio.com/mod/informatron) and [Booktorio](https://mods.factorio.com/mod/Booktorio) in-game wiki
 * 64 instructions for whole program
 * 8 general purpose registers
-* 4 memory slots for vector processing
+* 4 memory channels for vector processing
 * 50+ opcodes
 * rich math instructions
 * SIMD instructions
@@ -45,7 +45,7 @@ The following can be used as operands:
   `123` - signal value represented by number
   `[item=copper-ore]` - type can be represented by pictogram or text
 - **Register**: this is a special cell that store the transmitted signal indefinitely (`reg1`, `r2`, ...)
-- **Memory** slot: one memory slot consists of multiple cells (array) that store the signal indefinitely (`mem1`, `m2`, ...)
+- **Memory** channel: one memory channel consists of multiple cells (array) that store the signal indefinitely (`mem1`, `m2`, ...)
 - **Input** wire: you can receive signals on wires connected to a combinator's input (`red`,` green`, `red1`, `green@3`, ...)
 - **Output** wire: sets the values ​​at the output of a combinator (`out1`, `out2`, ..., `out256`)
 - **Address**: instruction address (line number `34`)
@@ -79,17 +79,17 @@ For processing several signals at the same time, the fCPU provides a vector copr
 Unlike scalar operations, which process a limited number of signals at a time, vector operations can process hundreds of signals in the same amount of time.  
 fCPU Memory is an analogue of registers but for vector instructions.  
 
-There are 4 memory slots available for use.  
-Each slot consists of multiple memory cells.  
+There are 4 memory channels available for use.  
+Each channel consists of multiple memory cells.  
 Each cell stores a signal type and a numeric value.  
-Memory slots are addressed: `mem1`, ...,` mem4`.  
+Memory channels are addressed: `mem1`, ...,` mem4`.  
 To access one cell: `mem2[44]` or `mem1@3` (see Arrays)  
 
 
 ## Arrays\indirect addressing
-Each register or memory slot could be adressed not only by direct name:
+Each register or memory channel could be addressed not only by direct name:
 * **regN** (**reg1**, **r2**, etc... `N` is a register index)
-* **memS[M]** (**mem1[32]**, **m4[97]**, etc.. `S` is a memory slot number, `M` is a memory cell index)
+* **memC[M]** (**mem1[32]**, **m4[97]**, etc.. `C` is a memory channel number, `M` is a memory cell index)
 But also with indirect pointer:
 * **reg@R** (**reg@3**, **r@7**, etc... `R` is a register index)
 * **memS@R** (**mem1@3**, **mem4@8**, etc... `R` is a register index)
@@ -115,7 +115,7 @@ mov r8 r@5 # r8 will be equal to r5, which is 5
 mov r4 m3@5 # r4 will be equal to mem3[5]
 ```
 
-This approach is also could be used with `red`, `green` input wires and memory slots, for example: `red@1`, `green@8`, `mem1@3`.  
+This approach is also could be used with `red`, `green` input wires and memory channels, for example: `red@1`, `green@8`, `mem1@3`.  
 
 
 
@@ -190,7 +190,7 @@ Each instruction take one or more operands and modify them or state of fCPU.
   Find type in red/green input wire.
 
 * `fim` mem[**M**] dst[**R**/**O**] type[**T**/**R**/**I**]  
-  Find type in memory slot.
+  Find type in memory channel.
 
 
 ### Swap
@@ -422,7 +422,7 @@ SIMD instructions process several signals in parallel at once, unlike scalar ins
 
 When working with SIMD instructions, the following features should be considered:  
 - SIMD instructions do not costs additional time for handling, so UPS friendly
-- Some vector instructions are executed for more than 1 tick (`xmov mem1 red` takes 3 ticks for populating `mem1` slot with data from `red` wire)
+- Some vector instructions are executed for more than 1 tick (`xmov mem1 red` takes 3 ticks for populating `mem1` channel with data from `red` wire)
 - Retrieving effective data from affected memory is possible only after completion of a vector instruction
 
 
