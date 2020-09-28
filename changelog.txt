@@ -6,6 +6,8 @@ Date: ????
   Changes:
     - Performance improvements for signal get\set.
     - Deffer power check once in 10 ticks.
+  Bugfixes:
+    - Fixed broken `clr outN`.
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.0
 Date: 2020-09-25

@@ -120,7 +120,7 @@ local function output_get(index)
 end
 
 local function output_set(index, signal)
-  assert.check(math.abs(signal.count or 0) ~= 1/0, "Division by zero")
+  assert.check(math.abs(signal and signal.count or 0) ~= 1/0, "Division by zero")
   control_out.set_signal(index, signal)
 end
 
@@ -346,7 +346,7 @@ function io.setsignal(_, signal, types)
     types = {'register', 'wire'}
   end
   assert.type(_, types)
-  if _.type == 'wire' then 
+  if _.type == 'wire' then
     io.wire_set(_, signal)
   elseif _.type == 'register' then
     assert.check(_.location == 'reg', 'expecting location `reg`')

@@ -77,8 +77,12 @@ local opcodes = {
       for i, expr in ipairs(_) do
         if expr then
           assert.type(expr, {'register', 'memory', 'output'})
-          if expr.addr == nil and expr.color == 'out' then
-            io.output_clear()
+          if expr.color == 'out' then
+            if expr.addr == nil then
+              io.output_clear()
+            else
+              io.wire_set(_[i], nil)
+            end
           elseif expr.type == 'register' then
             io.setsignal(_[i], NULL_SIGNAL, {'register', 'wire'})
           elseif expr.type == 'memory' then
