@@ -8,6 +8,7 @@ Date: ????
     - Deffer power check once in 10 ticks.
   Bugfixes:
     - Fixed broken `clr outN`.
+    - Fixed `hlt` interrupt handling while sleeping.
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.0
 Date: 2020-09-25

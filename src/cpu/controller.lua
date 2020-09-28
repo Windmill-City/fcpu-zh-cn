@@ -184,6 +184,10 @@ function Controller.tick(state, sync_wait)
     elseif 0 < get_signal(STEP_SIGNAL) then
       Controller.step(state)
     end
+  elseif state.program_state == PSTATE_SLEEPING then
+    if 0 < get_signal(HALT_SIGNAL) then
+      Controller.halt(state)
+    end
   end
   if true then
     local value = get_signal(JUMP_SIGNAL)
