@@ -137,17 +137,17 @@ If fCPU encounter error in program it will emit `[virtual-signal=signal-fcpu-err
 Instructions which can be executed one by one on per frame basis.  
 Each instruction take one or more operands and modify them or state of fCPU.  
 
-### Legend
+**Legend**
 
 - **S**, signal: consists of **V**alue and **T**ype (`123[item=copper-ore]`)
   - **V**, value: signal value, same as **C**
   - **T**, type: signal type
 
 * **C**, value: integer constant [-2^31..2^31), same as **V** (`-3500`)
-* **R**, register: (`reg1`, `reg2`, ..., `reg8`)
-* **M**, memory: (`mem1`, `mem2`, ..., `mem4`)
+* **R**, register: (`reg1`, `r3`, ..., `reg8` or `r@4` notation, or one memory cell `m1[23]`)
+* **M**, memory: (`mem1`, `m2`, ..., `mem4`)
 * **I**, wire: input wire (`red`, `green`)
-* **O**, wire: output wire (`out1`, `out2`, ..., `out256`)
+* **O**, wire: output buffer (`out1`, `out2`, ..., `out256`)
 
 - **A**, address: instruction address (`5`)
 - **L**, label: instruction label (`:labelname`)
@@ -188,6 +188,9 @@ Each instruction take one or more operands and modify them or state of fCPU.
 * `fir` dst[**R**/**O**] type[**T**/**R**/**I**]  
   `fig` dst[**R**/**O**] type[**T**/**R**/**I**]  
   Find type in red/green input wire.
+
+* `fim` dst[**R**/**O**] type[**T**/**R**/**I**] mem[**M**]  
+  Find type in memory slot input wire.
 
 
 ### Swap

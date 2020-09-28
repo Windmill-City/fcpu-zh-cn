@@ -2,7 +2,8 @@
 Version: 0.3.1
 Date: ????
   Features:
-    - Added xmin, xmax, xavg mnemonics.
+    - Added `xmin`, `xmax`, `xavg` mnemonics.
+    - Added `fim` mnemonics.
   Changes:
     - Performance improvements for signal get\set.
     - Deffer power check once in 10 ticks.

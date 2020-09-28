@@ -133,6 +133,19 @@ local opcodes = {
   fig = function(_) -- fig dst[R/O] type[T/R/I]
     find_in_wire(_, 'green')
   end,
+  fim = function(_) -- fim dst[R/O] type[T/R/I] mem[M]
+    assert.three(_)
+    local _dst = _[1]
+    assert.type(_dst, {'register', 'output'})
+    local _type = io.gettype(_[2], {'type', 'register', 'input'})
+    local control = io.memory_getchannel_control(_[3])
+    local count = control.get_signal(_type)
+    if count ~= 0 then
+      io.setsignal(_dst, {signal = _type, count = count})
+    else
+      io.setsignal(_dst, NULL_SIGNAL)
+    end
+  end,
 
   swp = function(_) -- swp reg1[R] reg2[R]
     assert.two(_)

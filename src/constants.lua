@@ -1,4 +1,4 @@
-MC_DEBUG = false
+MC_DEBUG = true
 
 MC_LINES = 64
 MC_OUTPUT = 256

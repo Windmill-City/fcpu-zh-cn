@@ -275,6 +275,29 @@ function io.ics_control(index)
   return ics, ics and ics.get_or_create_control_behavior()
 end
 
+function io.memory_getchannel_control(_)
+  if _.type == 'memory' then
+    local ics = hdlbuilder.get_node(state, _.location .. _.index)
+    if ics and ics.out and ics.out.valid then
+      local control = ics.out.get_control_behavior()
+      local network = control.get_circuit_network(ics.color_out or defines.wire_type.red, defines.circuit_connector_id.combinator_output)
+      return network or control
+    else
+      assert.exception("Memory channel does not exists")
+    end
+  elseif _.type == 'wire' then
+    if _.color == 'out' then
+      return control_out
+    end
+    if not wires[_.color] then
+      assert.exception("Tried to access ".._.color.." wire when input not present.")
+    end
+    return wires[_.color]
+  else
+    assert.todo()
+  end
+end
+
 function io.memory_getchannel_signals(_)
   if type(_) == 'number' then
     local channel = _
@@ -290,7 +313,7 @@ function io.memory_getchannel_signals(_)
       end
       return control.signals_last_tick
     else
-      assert.exception("Memory channel do not exists")
+      assert.exception("Memory channel does not exists")
     end
   elseif _.type == 'wire' then
     if _.color == 'out' then
