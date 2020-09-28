@@ -187,6 +187,12 @@ function Controller.tick(state, sync_wait)
   elseif state.program_state == PSTATE_SLEEPING then
     if 0 < get_signal(HALT_SIGNAL) then
       Controller.halt(state)
+    elseif 0 < get_signal(STEP_SIGNAL) then
+      if 1 < state.sleep_time then
+        state.sleep_time = 0
+        Controller.set_program_counter(state, state.instruction_pointer + 1)
+        Controller.step(state)
+      end
     end
   end
   if true then
