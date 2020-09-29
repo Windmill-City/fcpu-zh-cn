@@ -10,8 +10,8 @@
 * 8 general purpose registers
 * 4 memory channels for vector processing
 * 50+ opcodes
-* rich math instructions
-* SIMD instructions
+* rich math instructions, trigonometry, rounding
+* SIMD instructions, `min`, `max`
 * two input wires (Red, Green)
 * two output wires (Red, Green) have same output signals and values
 * parallel output, allows output multiple signals simultaneously (up to 256 signals)

@@ -1,19 +1,22 @@
 # Upcoming  (in v0.3.2)
-* Increase lines count up to 100.
-* Breakpoints
+* Extend x* semantics  for copying registers and composing memory with separate signals.
+* `xmov mem1[23] r1` mnemonics.
+* Vector comare mnemonics.
+
+# Upcoming  (in v0.3.3)
+* Breakpoints.
 
 # TODO list, fCPU
-* Add `call`, `ret` semantics.
-* Profiling & optimization.
+* Profiling & optimization (less ticks for `x*` operations).
+* Asyncronous SIMD operations.
+* Add call, ret semantics.
 * Test result flags to extend one condition line limitation.
 * Examples, demos and docs.
 * Code highlighting.
 * Program library for storing subprograms outside of a fCPU units.
 * Factorio modules support.
-* Assign a power cost to groups of instructions, and lower base cost (nop=200w, mov=2kW, xmov=30kW)
 * Mimic vanilla blueprint bahavior when stamped ontop of fCPU (copy blueprint program).
 * Add drag and drop GUI for newbies.
-
 
 # Done
 * Output multiple signals (DONE in v0.2.0)
@@ -22,3 +25,4 @@
 * Memory browser for SIMD instructions (DONE in v0.3.0)
 * Single instruction, multiple data - SIMD (DONE in v0.3.0)
 * New `xmin`, `xmax`, `xavg`, `fim`, `rnd` SIMD opcodes (DONE in v0.3.1)
+* Increase lines count up to 99 (DONE in v0.3.1)

@@ -12,8 +12,8 @@ default_gui["fcpu_notice_textbox"] = {
   font_color={r=0.8, g=0.9, b=0.8},
   minimal_width=40,
   maximal_width=40,
-  minimal_height = 1300,
-  maximal_height = 1552,
+  minimal_height = 1988,
+  maximal_height = 2552,
   padding = 0,
 }
 
@@ -30,8 +30,8 @@ default_gui["fcpu_program_input"] = {
   selection_background_color = {r=0.3, g=0.3, b=0.3},
   minimal_width = 280,
   maximal_width = 300,
-  minimal_height = 1300,
-  maximal_height = 1552,
+  minimal_height = 1988,
+  maximal_height = 2552,
   word_wrap = false,
   padding = 0,
 }

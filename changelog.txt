@@ -1,6 +1,9 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.1
 Date: ????
+---------------------------------------------------------------------------------------------------
+Version: 0.3.1
+Date: 2020-09-29
   Features:
     - Added `xmin`, `xmax`, `xavg` mnemonics.
     - Added `fim` mnemonic.
@@ -9,7 +12,7 @@ Date: ????
   Changes:
     - Performance improvements for signal get\set.
     - Deffer power check once in 10 ticks.
-    - Increased program lines from 64 up to 100.
+    - Increased program lines from 64 up to 99.
   Bugfixes:
     - Fixed broken `clr outN`.
     - Fixed `hlt` interrupt handling while sleeping.
