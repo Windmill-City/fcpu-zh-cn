@@ -9,6 +9,7 @@ Date: ????
   Changes:
     - Performance improvements for signal get\set.
     - Deffer power check once in 10 ticks.
+    - Increased program lines from 64 up to 100.
   Bugfixes:
     - Fixed broken `clr outN`.
     - Fixed `hlt` interrupt handling while sleeping.
