@@ -173,7 +173,7 @@ end
 -------------------------------------------------------------------------------------------------------
 
 function builder.create_memory_cell(entity, input_a, proxy_output)
-  local wire1 = input_a.color or defines.wire_type.red
+  local wire1 = input_a.wire or defines.wire_type.red
   local wire2 = inverse_wire_color(wire1)
 
   local d_key, control_key = builder.create_node(entity, 'decider', true)

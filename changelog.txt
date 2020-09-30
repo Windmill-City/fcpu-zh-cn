@@ -4,6 +4,7 @@ Date: ????
   Changes:
   Bugfixes:
     - Fixed disconnected memory channel output error (https://discordapp.com/channels/705695217512349768/749991013950554233/760774462219485206).
+    - Fixed `xmov m1 green` always used red input.
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.1
 Date: 2020-09-29
