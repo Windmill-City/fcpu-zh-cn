@@ -2,6 +2,8 @@
 Version: 0.3.2
 Date: ????
   Changes:
+  Bugfixes:
+    - Fixed disconnected memory channel output error (https://discordapp.com/channels/705695217512349768/749991013950554233/760774462219485206).
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.1
 Date: 2020-09-29

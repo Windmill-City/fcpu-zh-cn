@@ -2,6 +2,7 @@
 * Extend x* semantics  for copying registers and composing memory with separate signals.
 * `xmov mem1[23] r1` mnemonics.
 * Vector compare mnemonics.
+* `xflt` mnemonic for filtering signals.
 
 # Upcoming  (in v0.3.3)
 * Breakpoints.

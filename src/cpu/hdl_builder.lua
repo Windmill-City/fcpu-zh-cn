@@ -17,15 +17,15 @@ local function get_debug_offset(entity, d_next_node)
     local state = get_fcpu_state(entity)
     if MC_DEBUG == true then
       if d_next_node == true then
-        state.d_i = 1
+        state.d_i = 2
         state.d_j = (state.d_j or 0) + 1
       elseif state.d_j == nil or d_next_node == false or type(d_next_node) == 'number' then
         state.d_i = d_next_node or 1
         state.d_j = 0
       else
-        state.d_i = (state.d_i or 0) + 1
+        state.d_i = (((state.d_i / 2) or 0) + 1) * 2
       end
-      x = state.d_i * 2
+      x = state.d_i
       y = state.d_j * 2
     else
       state.d_i = (state.d_i or 0) % 30 + 1
@@ -129,10 +129,12 @@ function builder.verify(state)
 
   for i = 1, MC_MEMORY_CHANNELS  do
     local name = 'mem'..i
-    if not (state.program_ics[name] and state.program_ics[name].out and state.program_ics[name].out.valid) then
-      local ent_mem, ctrl_mem = builder.create_node(state.entity, 'decider', i)
+    state.program_ics[name] = state.program_ics[name] or {}
 
-      state.program_ics[name] = { out = ent_mem }
+    if not (state.program_ics[name].out and state.program_ics[name].out.valid) then
+      local ent_mem, ctrl_mem = builder.create_node(state.entity, 'decider', i * 2)
+
+      state.program_ics[name].out = ent_mem
 
       ctrl_mem.parameters = {
         parameters = {
@@ -144,6 +146,26 @@ function builder.verify(state)
           copy_count_from_input = true
         }
       }
+    end
+
+    if not (state.program_ics[name].value and state.program_ics[name].value.valid) then
+      local ent_val, ctrl_val = builder.create_node(state.entity, 'constant', i * 2 + 1)
+
+      state.program_ics[name].value = ent_val
+      ctrl_val.enabled = false
+
+      ent_val.connect_neighbour({
+        wire = defines.wire_type.green,
+        target_entity = state.program_ics[name].out,
+        source_circuit_id = defines.circuit_connector_id.constant_combinator,
+        target_circuit_id = defines.circuit_connector_id.combinator_output
+      })
+      ent_val.connect_neighbour({
+        wire = defines.wire_type.red,
+        target_entity = state.program_ics[name].out,
+        source_circuit_id = defines.circuit_connector_id.constant_combinator,
+        target_circuit_id = defines.circuit_connector_id.combinator_output
+      })
     end
   end
 end

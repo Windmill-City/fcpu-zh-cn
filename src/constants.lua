@@ -1,4 +1,4 @@
-MC_DEBUG = false
+MC_DEBUG = __DebugAdapter ~= nil
 
 MC_LINES = 99
 MC_OUTPUT = 256
