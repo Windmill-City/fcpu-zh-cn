@@ -58,7 +58,9 @@ end
 script.on_event(defines.events.on_tick, function(event)
   local handled = 0
   local enabled = 0
-  local HandleCPU = function(state)
+  local start = global.last_index
+
+  local HandleCPU = function(state, k)
     handled = handled + 1
     if state.entity and state.entity.valid then
       local need_sync = 0
@@ -74,32 +76,14 @@ script.on_event(defines.events.on_tick, function(event)
         end
         enabled = enabled + 1
       end
-    elseif not state.destroy_regnum then
-      return nil, true
     end
+    return nil, not state.destroy_regnum, start == k
   end
 
---[[
-  if not global.migrated then
-    global.migrated = true
-
-    local fcpus = {}
-    for _,v in pairs(global.fcpus) do
-      local state = Entity.get_data(v)
-      if state then
-        state.index = #fcpus + 1
-        fcpus[state.index] = state
-        Entity.set_data(state.entity, state.index)
-      end
-    end
-    global.fcpus = fcpus
-  end
-]]
-
-  local limit = math.min(#global.fcpus, fcpu_maximum_updates_per_tick)
+  local limit = fcpu_maximum_updates_per_tick
   local ended
   global.last_index, _, ended = table.for_n_of(global.fcpus, global.last_index, limit, HandleCPU)
-  if handled < limit and ended then
+  if start and ended and handled < limit then
     global.last_index = table.for_n_of(global.fcpus, nil, limit - handled, HandleCPU)
   end
 end)
