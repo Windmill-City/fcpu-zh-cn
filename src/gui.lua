@@ -39,7 +39,7 @@ gui.add_templates{
   },
 
   control_button = function(name, sprite, color, handler)
-    return {type="sprite-button", style="tool_button"..(color and "_"..color or ""), name=name.."-program", sprite="fcpu-"..sprite.."-sprite", save_as="gui_"..name.."_button", handlers="widget."..(handler or name.."_program")}
+    return {type="sprite-button", style="tool_button"..(color and "_"..color or ""), name=name.."-program", sprite="fcpu-"..sprite.."-sprite", save_as="gui_"..name.."_button", tooltip={"gui-fcpu."..name.."-program"}, handlers="widget."..(handler or name.."_program")}
   end,
   tool_button = function(name, sprite, color, ...)
     return table.deep_merge{{type="sprite-button", style="shortcut_bar_button_small"..(color and "_"..color or ""), name=name.."-program", sprite="fcpu-"..sprite.."-sprite", handlers="widget."..name.."_program"}, ...}
