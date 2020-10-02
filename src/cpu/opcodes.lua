@@ -138,7 +138,7 @@ local opcodes = {
     local _dst = _[2]
     assert.type(_dst, {'register', 'output'})
     local _type = io.gettype(_[3], {'type', 'register', 'input'})
-    local control = io.memory_getchannel_control(_[1])
+    local control = io.memory_getchannel_read(_[1])
     local count = control.get_signal(_type)
     if count ~= 0 then
       io.setsignal(_dst, {signal = _type, count = count})

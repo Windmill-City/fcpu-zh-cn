@@ -149,7 +149,7 @@ function builder.verify(state)
     end
 
     if not (state.program_ics[name].value and state.program_ics[name].value.valid) then
-      local ent_val, ctrl_val = builder.create_node(state.entity, 'constant', i * 2 + 1)
+      local ent_val, ctrl_val = builder.create_node(state.entity, 'output', i * 2 + 1)
 
       state.program_ics[name].value = ent_val
       ctrl_val.enabled = false

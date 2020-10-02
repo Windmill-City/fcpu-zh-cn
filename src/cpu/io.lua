@@ -200,7 +200,7 @@ local function readOnlyRegister(index)
   elseif index == REG_CLK then
     return state.clock
   elseif REG_CNM <= index then
-    local signals = io.memory_getchannel_signals(index - REG_CNM + 1)
+    local signals = io.memory_getchannel_signals({ type = 'memory', location = 'mem', index = index - REG_CNM + 1 })
     return signals and #signals or 0
   else
     assert.exception('Unknown register with internal index '.. index)
@@ -279,7 +279,7 @@ function io.ics_control(index)
   return ics, ics and ics.get_or_create_control_behavior()
 end
 
-function io.memory_getchannel_control(_)
+function io.memory_getchannel_read(_)
   if _.type == 'memory' then
     local ics = hdlbuilder.get_node(state, _.location .. _.index)
     if ics and ics.out and ics.out.valid then
@@ -302,11 +302,28 @@ function io.memory_getchannel_control(_)
   end
 end
 
+function io.memory_getchannel_write(_)
+  if _.type == 'memory' then
+    local ics = hdlbuilder.get_node(state, _.location .. _.index)
+    if ics and ics.value and ics.value.valid then
+      return ics.value.get_control_behavior()
+    else
+      assert.exception("Memory channel does not support writing")
+    end
+  elseif _.type == 'wire' then
+    if _.color == 'out' then
+      return control_out
+    end
+    assert.exception("Could not write to ".._.color.." input wire.")
+  else
+    assert.todo()
+  end
+end
+
 function io.memory_getchannel_signals(_)
-  if type(_) == 'number' then
-    local channel = _
-    assert.check(1 <= channel and channel <= MC_MEMORY_CHANNELS, "Memory channel is out of range")
-    local ics = hdlbuilder.get_node(state, "mem" .. channel)
+  -- DEPRECATED
+  if _.type == 'memory' then
+    local ics = hdlbuilder.get_node(state, _.location .. _.index)
     if ics and ics.out and ics.out.valid then
       local control = ics.out.get_control_behavior()
       if ics.color_out then
@@ -332,17 +349,34 @@ function io.memory_getchannel_signals(_)
   end
 end
 
-local function memory_getraw(channel, index)
+local function memory_getraw(channel, addr)
   local signals = io.memory_getchannel_signals(channel)
   assert.check(signals ~= nil, "Trying to retrieve nil memory channel")
-  assert.check(1 <= index and index <= #signals, "Memory cell index is out of range")
-  return signals[index] or NULL_SIGNAL
+  assert.check(1 <= addr and addr <= #signals, "Memory cell index is out of range")
+  return signals[addr] or NULL_SIGNAL
+end
+
+local function memory_setraw(channel, addr, signal)
+  local control = io.memory_getchannel_write(channel)
+  assert.check(control ~= nil, "Trying to access nil memory channel")
+  if signal and signal.count then
+    assert.check(signal.signal, "Memory accepts only valid signal types.")
+    control.set_signal(addr, signal)
+  else
+    control.set_signal(addr, nil)
+  end
 end
 
 function io.memory_get(address)
   assert.check(address.index ~= nil, "Should be addressable memory cell")
   local addr = addr_deref(address)
-  return table.deep_copy(memory_getraw(address.index, addr))
+  return table.deep_copy(memory_getraw(address, addr))
+end
+
+function io.memory_set(address, signal)
+  assert.check(address.index ~= nil, "Should be addressable memory cell")
+  local addr = addr_deref(address)
+  memory_setraw(address, addr, signal)
 end
 
 
@@ -379,7 +413,8 @@ function io.setsignal(_, signal, types)
     assert.check(_.location == 'reg', 'expecting location `reg`')
     io.register_set(_, signal)
   elseif _.type == 'memory' then
-    assert.exception('Memory cell could not be changed. Not supported yet.')
+    io.memory_set(_, signal)
+    --assert.exception('Memory cell could not be changed. Not supported yet.')
   elseif _.type == 'output' then
     assert.todo()
   else

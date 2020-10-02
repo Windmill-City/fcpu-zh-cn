@@ -142,4 +142,19 @@ return {
       end
     end
   end,
+
+  ["0.3.6"] = function()
+    local fcpus = {}
+    for _,v in pairs(global.fcpus) do
+      for i = 1,4 do
+        local mem = v.program_ics['mem'..i]
+        if mem and mem.value then
+          if mem.value.valid then
+            mem.value.destroy()
+          end
+          mem.value = nil
+        end
+      end
+    end
+  end,
 }
