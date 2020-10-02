@@ -120,8 +120,8 @@ local function output_get(index)
 end
 
 local function output_set(index, signal)
-  assert.check(math.abs(signal and signal.count or 0) ~= 1/0, "Division by zero")
-  if signal.count and signal.count ~= 0 and signal.signal then
+  if signal and signal.count and signal.count ~= 0 and signal.signal then
+    assert.check(math.abs(signal.count) ~= 1/0, "Division by zero")
     control_out.set_signal(index, signal)
   else
     control_out.set_signal(index, nil)

@@ -6,7 +6,7 @@
 * supports copy & paste
 * supports multiplayer
 * supports [Informatron](https://mods.factorio.com/mod/informatron) and [Booktorio](https://mods.factorio.com/mod/Booktorio) in-game wiki
-* 64 instructions for whole program
+* 99 instructions for whole program
 * 8 general purpose registers
 * 4 memory channels for vector processing
 * 50+ opcodes
@@ -14,8 +14,8 @@
 * SIMD instructions, `min`, `max`
 * two input wires (Red, Green)
 * two output wires (Red, Green) have same output signals and values
-* parallel output, allows output multiple signals simultaneously (up to 256 signals)
-* could be controlled through special input signals
+* parallel output, allows output multiple signals simultaneously
+* could be controlled through special input signals (interrupts)
 * one tick = one instruction (except for SIMD ones)
 * made for geeks
 
@@ -25,7 +25,8 @@
 fCPU is a combinator that includes:
 
 - program text
-- a set of registers (for storing signals and numbers)
+- a set of registers (for storing signals or\and numbers)
+- couple of memory channels (for storing not zero signals and numbers)
 - processor (command processor and vector coprocessor)
 
 
@@ -472,6 +473,7 @@ See [here](https://www.buymeacoffee.com/p/100444)
 * Lukáš Venhoda (v0.2.0 update)
 * Someone (v0.2.12 update)
 * kKdH (v0.3.0 update)
+* Quorzar (v0.4.0 update)
 
 
 # Support fCPU
