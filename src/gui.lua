@@ -273,11 +273,12 @@ local function CreateWidget_Main(rootGui)
           }},
 
           -- Error message
-          {type="label", name="error_message", save_as="gui_error_message", caption="", style="bold_red_label", style_mods={
+          {type="label", name="error_message", save_as="gui_error_message", caption="", style="label", style_mods={
             top_margin=10,
             horizontally_stretchable=true,
             horizontally_squashable=true,
             single_line=false,
+            font_color={1,0.4,0.4}
           }},
         }},
 
@@ -346,7 +347,7 @@ local function UpdateLines(element, state)
     local line = tostring(i)
     if i < 10 then line = " "..i end
     if i == state.error_line then
-      line = '[color=red]'..line..'![/color]'
+      line = '[color=1,0.4,0.4]'..line..'![/color]'
     elseif i == state.instruction_pointer then
       line = '[color=blue]'..line..'>[/color]'
     else
