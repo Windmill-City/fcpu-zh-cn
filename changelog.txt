@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.6
-Date: ????
+Date: 2020-10-03
   Changes:
     - Improved comments parsing, no space needed as delimiter.
     - Reduced contrast for error color.
