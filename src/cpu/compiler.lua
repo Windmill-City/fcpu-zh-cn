@@ -33,8 +33,20 @@ end
 -- Split a string in to tokens using whitespace as a seperator.
 local function split(str)
   local result = {}
+
+  local comment
+  str = string.gsub(str, ';', '#', 1)
+  local i, j = string.find(str, '#')
+  if i then
+    comment = string.sub(str, j)
+    str = string.sub(str, 1, i - 1)
+  end
+
   for v in string.gmatch(str, '%S+') do
     table.insert(result, v)
+  end
+  if comment then
+    table.insert(result, comment)
   end
   return result
 end
@@ -154,7 +166,7 @@ local function parse(tokens)
   parseExpr = function()
     if peek() then
       local fc = string.sub(peek(), 1, 1)
-      if fc == '#' or fc == ';' then
+      if fc == '#' then
         return OP_COMMENT
       elseif fc == ':' then
         return parseLabel()
