@@ -125,7 +125,7 @@ return {
       end
     end)
     foreach_player(function(player, player_data)
-      if player_data.gui_fcpu then
+      if player_data.gui_fcpu and player_data.gui_fcpu.valid then
         player_data.gui_error_message = player_data.gui_fcpu['error_message']
         player_data.gui_editor_toolbar = player_data.gui_fcpu['editor-toolbar']
         set_player_data(player.index, player_data)

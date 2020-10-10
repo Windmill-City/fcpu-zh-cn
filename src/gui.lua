@@ -415,7 +415,7 @@ end
 function GuiWidgetClose(player_index, silent)
   local player_data, player = get_player_data(player_index)
   if player_data and player_data.current_fcpu then
-    if not player_data.gui_fcpu then
+    if not (player_data.gui_fcpu and player_data.gui_fcpu.valid) then
       local rootGui = player.gui.screen -- mod_gui.get_frame_flow({gui={left=player.gui.screen}})
       if rootGui["fcpu-widget"] then
         rootGui["fcpu-widget"].destroy()
@@ -608,7 +608,7 @@ script.on_event(defines.events.on_gui_opened, function(event)
   local entity = event.entity
   if entity and entity.valid and entity.name == "fcpu" then
     local player_data, player = get_player_data(event.player_index)
-    if player_data and player_data.gui_fcpu then
+    if player_data and player_data.gui_fcpu and player_data.gui_fcpu.valid then
       player.opened = player_data.gui_fcpu
     end
   end
@@ -624,7 +624,7 @@ script.on_event("fcpu-open", function(event)
       if player.can_reach_entity(entity) then
         local player_data = get_player_data(event.player_index)
 
-        if player_data.gui_fcpu and Entity._are_equal(player_data.current_fcpu, entity) then return end
+        if player_data.gui_fcpu and player_data.gui_fcpu.valid and Entity._are_equal(player_data.current_fcpu, entity) then return end
 
         player_data = GuiWidgetOpen(player, entity)
 

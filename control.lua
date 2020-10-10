@@ -36,7 +36,7 @@ end
 script.on_nth_tick(fcpu_gui_updates_every_tick, function(event)
   for _, player in pairs(game.players) do
     local player_data = get_player_data(player.index)
-    if player_data and player_data.current_fcpu and player_data.gui_fcpu then
+    if player_data and player_data.current_fcpu and player_data.gui_fcpu and player_data.gui_fcpu.valid then
       if player_data.current_fcpu.valid then
         local state = get_fcpu_state(player_data.current_fcpu)
         if state then
@@ -92,7 +92,7 @@ script.on_event(Controller.event_error, function(event)
   local entity = event.entity
   for _, player in pairs(game.players) do
     local player_data = get_player_data(player.index)
-    if player_data.gui_fcpu then
+    if player_data.gui_fcpu and player_data.gui_fcpu.valid then
       if Entity._are_equal(entity, player_data.current_fcpu) then
         player_data.gui_error_message.caption = event.message
       end
