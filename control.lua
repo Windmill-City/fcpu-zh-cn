@@ -72,6 +72,11 @@ script.on_event(defines.events.on_tick, function(event)
           state.out_out_power = not sufficient_power(state.entity)
         end
         if not state.out_out_power then
+          if state.modified then
+            Controller.compile(state)
+            Controller.set_program_counter(state, state.instruction_pointer)
+            Controller.update_state(state)
+          end
           Controller.tick(state, need_sync)
         end
         enabled = enabled + 1

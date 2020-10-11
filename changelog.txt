@@ -11,6 +11,7 @@ Date: ????
   Bugfixes:
     - Booktorio2 crash when toggled without fCPU widget close.
     - Minor wiki fixes.
+    - Possible fix for `attempt to index local 'ast' (a nil value)` (https://mods.factorio.com/mod/fcpu/discussion/5f776ae7f3f086498c4a6b36).
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.6
 Date: 2020-10-03
