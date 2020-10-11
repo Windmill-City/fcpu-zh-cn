@@ -145,8 +145,8 @@ Each instruction take one or more operands and modify them or state of fCPU.
   - **T**, type: signal type
 
 * **C**, value: integer constant [-2^31..2^31), same as **V** (`-3500`)
-* **R**, register: (`reg1`, `r3`, ..., `reg8` or `r@4` notation, or one memory cell `m1[23]`)
-* **M**, memory: (`mem1`, `m2`, ..., `mem4`)
+* **R**, register: (`reg1`, `r3`, ..., `reg8` or `r@4` notation, or one memory cell `m1[23]` or one input wire signal `red34`, `green@3`)
+* **M**, memory: channel (`mem1`, `m2`, ..., `mem4`)
 * **I**, wire: input wire (`red`, `green`)
 * **O**, wire: output buffer (`out1`, `out2`, ..., `out256`)
 
@@ -170,28 +170,32 @@ Each instruction take one or more operands and modify them or state of fCPU.
 * `clr` dst...[**R**/**M**/**O**]  
   Clear specified registers or output wires.
 
-* `mov` dst...[**R**/**O**] src[**V**/**T**/**S**/**R**/**I**]  
+* `mov` dst...[**R**/**O**] src[**V**/**T**/**S**/**R**]  
   Copy signal from source to destination.  
   *dst... = src*
 
-* `emit` src[**V**/**T**/**S**/**R**/**I**]  
+* `emit` src[**V**/**T**/**S**/**R**]  
   Copy signal from source to output.  
   Same as `mov out1 src`.  
 
-* `ssv` dst...[**R**/**O**] val[**V**/**S**/**R**/**I**]  
+* `ssv` dst...[**R**/**O**] val[**V**/**S**/**R**]  
   Set signal value.  
   *dst... = val*
 
-* `sst` dst...[**R**/**O**] type[**T**/**S**/**R**/**I**]  
+* `sst` dst...[**R**/**O**] type[**T**/**S**/**R**]  
   Set signal type.  
   *dst... = type*
 
-* `fir` dst[**R**/**O**] type[**T**/**R**/**I**]  
-  `fig` dst[**R**/**O**] type[**T**/**R**/**I**]  
-  Find type in red/green input wire.
+* `fid` dst[**R**/**O**] mem[**I**/**M**] type[**T**/**R**]  
+  Find type in memory or red/green input wire, assign signal type and number value.
 
-* `fim` mem[**M**] dst[**R**/**O**] type[**T**/**R**/**I**]  
-  Find type in memory channel.
+* `idx` dst[**R**] mem[**I**/**M**] type[**T**/**R**]  
+  Find type in memory or red/green input wire, assing index of memory cell or input wire location.
+
+
+* `fir` dst[**R**/**O**] type[**T**/**R**]  
+  `fig` dst[**R**/**O**] type[**T**/**R**]  
+  Shorthands for `fid ... red ...` and `fid ... green ...`.  
 
 
 ### Swap
@@ -206,17 +210,17 @@ Each instruction take one or more operands and modify them or state of fCPU.
 
 ### Arithmetic
 
-* `add` dst[**R**] src[**C**/**R**/**I**]  
+* `add` dst[**R**] src[**C**/**R**]  
   *dst = dst + src*
-* `sub` dst[**R**] src[**C**/**R**/**I**]  
+* `sub` dst[**R**] src[**C**/**R**]  
   *dst = dst - src*
-* `mul` dst[**R**] src[**C**/**R**/**I**]  
+* `mul` dst[**R**] src[**C**/**R**]  
   *dst = dst \* src*
-* `div` dst[**R**] src[**C**/**R**/**I**]  
+* `div` dst[**R**] src[**C**/**R**]  
   *dst = dst / src*
-* `mod` dst[**R**] src[**C**/**R**/**I**]  
+* `mod` dst[**R**] src[**C**/**R**]  
   *dst = dst % src*
-* `pow` dst[**R**] src[**C**/**R**/**I**]  
+* `pow` dst[**R**] src[**C**/**R**]  
   *dst = dst ^ src*
 
 * `inc` dst[**R**]  
@@ -224,16 +228,16 @@ Each instruction take one or more operands and modify them or state of fCPU.
 * `dec` dst[**R**]  
   *dst = dst - 1*
 
-* `subi` dst[**R**] src[**C**/**R**/**I**]  
+* `subi` dst[**R**] src[**C**/**R**]  
   *dst = src - dst*
-* `divi` dst[**R**] src[**C**/**R**/**I**]  
+* `divi` dst[**R**] src[**C**/**R**]  
   *dst = src / dst*
-* `modi` dst[**R**] src[**C**/**R**/**I**]  
+* `modi` dst[**R**] src[**C**/**R**]  
   *dst = src % dst*
-* `powi` dst[**R**] src[**C**/**R**/**I**]  
+* `powi` dst[**R**] src[**C**/**R**]  
   *dst = src ^ dst*
 
-* `rnd` dst[**R**] min[**C**/**R**/**I**] max[**C**/**R**/**I**]  
+* `rnd` dst[**R**] min[**C**/**R**] max[**C**/**R**]  
   Assigns into *dst* a pseudo-random value in range [*min* to *max*] (inclusive).  
 
 * `fract` reg[**R**]  
@@ -245,43 +249,43 @@ Each instruction take one or more operands and modify them or state of fCPU.
 * `ceil` reg[**R**]  
   Get the lowest integer greater than or equal to real number in register.  
 
-* `dig` dst[**R**] num[**C**/**R**/**I**]  
+* `dig` dst[**R**] num[**C**/**R**]  
   Get digit *num*ber from *dest*inatination and write to dst.  
   *dst = dst / 10^num % 10*
-* `dis` dst[**R**] num[**C**/**R**/**I**] val[**C**/**R**/**I**]  
+* `dis` dst[**R**] num[**C**/**R**] val[**C**/**R**]  
   Set digit to *val*ue at *num*ber in *dest*inatination.  
   *dst = dst + (val % 10 - dst / 10^num % 10) * 10^num*
 
 
 ### Trigonometry
 
-* `cos` dst[**R**] src[**C**/**R**/**I**]  
+* `cos` dst[**R**] src[**C**/**R**]  
   *dst = cos(src)*
-* `sin` dst[**R**] src[**C**/**R**/**I**]  
+* `sin` dst[**R**] src[**C**/**R**]  
   *dst = sin(src)*
-* `tan` dst[**R**] src[**C**/**R**/**I**]  
+* `tan` dst[**R**] src[**C**/**R**]  
   *dst = tan(src)*
-* `atan2` dst[**R**] y[**C**/**R**/**I**] x[**C**/**R**/**I**]  
+* `atan2` dst[**R**] y[**C**/**R**] x[**C**/**R**]  
   *dst = atan2(y, x)*
-* `sqrt` dst[**R**] src[**C**/**R**/**I**]  
+* `sqrt` dst[**R**] src[**C**/**R**]  
   *dst = sqrt(src)*
-* `exp` dst[**R**] src[**C**/**R**/**I**]  
+* `exp` dst[**R**] src[**C**/**R**]  
   *dst = exp(src)*
-* `ln` dst[**R**] src[**C**/**R**/**I**]  
+* `ln` dst[**R**] src[**C**/**R**]  
   *dst = ln(src)*
 
 
 ### Bitwise
 
-* `band` dst[**R**] src[**C**/**R**/**I**]  
+* `band` dst[**R**] src[**C**/**R**]  
   AND.  
   *dst = dst & src*
 
-* `bor` dst[**R**] src[**C**/**R**/**I**]  
+* `bor` dst[**R**] src[**C**/**R**]  
   OR.  
   *dst = dst | src*
 
-* `bxor` dst[**R**] src[**C**/**R**/**I**]  
+* `bxor` dst[**R**] src[**C**/**R**]  
   XOR.  
   *dst = dst ^ src*
 
@@ -289,19 +293,19 @@ Each instruction take one or more operands and modify them or state of fCPU.
   NOT.  
   *dst = ~dst*
 
-* `bsl` dst[**R**] src[**C**/**R**/**I**]  
+* `bsl` dst[**R**] src[**C**/**R**]  
   Shift left.  
   *dst = dst << src*
 
-* `bsr` dst[**R**] src[**C**/**R**/**I**]  
+* `bsr` dst[**R**] src[**C**/**R**]  
   Shift right.  
   *dst = dst >> src*
 
-* `brl` dst[**R**] src[**C**/**R**/**I**]  
+* `brl` dst[**R**] src[**C**/**R**]  
   Rotate left.  
   *dst = dst rot<< src*
 
-* `brr` dst[**R**] src[**C**/**R**/**I**]  
+* `brr` dst[**R**] src[**C**/**R**]  
   Rotate right.  
   *dst = dst rot>> src*
 
@@ -339,37 +343,37 @@ jmp :counter
 ; r1 now equal to 10
 ```
 
-* `teq` a[**C**/**R**/**I**] b[**C**/**R**/**I**]  
+* `teq` a[**C**/**R**] b[**C**/**R**]  
   Equal.  
   *a == b*
 
-* `tne` a[**C**/**R**/**I**] b[**C**/**R**/**I**]  
+* `tne` a[**C**/**R**] b[**C**/**R**]  
   Not equal.  
   *a != b*
 
-* `tgt` a[**C**/**R**/**I**] b[**C**/**R**/**I**]  
+* `tgt` a[**C**/**R**] b[**C**/**R**]  
   Greater than.  
   *a > b*
 
-* `tlt` a[**C**/**R**/**I**] b[**C**/**R**/**I**]  
+* `tlt` a[**C**/**R**] b[**C**/**R**]  
   Less than.  
   *a < b*
 
-* `tge` a[**C**/**R**/**I**] b[**C**/**R**/**I**]  
+* `tge` a[**C**/**R**] b[**C**/**R**]  
   Greater or equal than.  
   *a >= b*
 
-* `tle` a[**C**/**R**/**I**] b[**C**/**R**/**I**]  
+* `tle` a[**C**/**R**] b[**C**/**R**]  
   Less or equal than.  
   *a <= b*
 
 
 ### Testing operands types
 
-* `tas` a[**T**/**R**/**I**] b[**T**/**R**/**I**]  
+* `tas` a[**T**/**R**] b[**T**/**R**]  
   Types are same.  
 
-* `tad` a[**T**/**R**/**I**] b[**T**/**R**/**I**]  
+* `tad` a[**T**/**R**] b[**T**/**R**]  
   Types are different.  
 
 
@@ -386,33 +390,33 @@ blt r1 10 :counter
 ; r1 now equal to 10
 ```
 
-* `beq` a[**C**/**R**/**I**] b[**C**/**R**/**I**] addr[**C**/**A**/**L**/**R**]  
+* `beq` a[**C**/**R**] b[**C**/**R**] addr[**C**/**A**/**L**/**R**]  
   Equal.  
   *a == b*
-* `bne` a[**C**/**R**/**I**] b[**C**/**R**/**I**] addr[**C**/**A**/**L**/**R**]  
+* `bne` a[**C**/**R**] b[**C**/**R**] addr[**C**/**A**/**L**/**R**]  
   Not equal.  
   *a != b*
 
-* `bgt` a[**C**/**R**/**I**] b[**C**/**R**/**I**] addr[**C**/**A**/**L**/**R**]  
+* `bgt` a[**C**/**R**] b[**C**/**R**] addr[**C**/**A**/**L**/**R**]  
   Greater than.  
   *a > b*
 
-* `blt` a[**C**/**R**/**I**] b[**C**/**R**/**I**] addr[**C**/**A**/**L**/**R**]  
+* `blt` a[**C**/**R**] b[**C**/**R**] addr[**C**/**A**/**L**/**R**]  
   Less than.  
   *a < b*
 
-* `bge` a[**C**/**R**/**I**] b[**C**/**R**/**I**] addr[**C**/**A**/**L**/**R**]  
+* `bge` a[**C**/**R**] b[**C**/**R**] addr[**C**/**A**/**L**/**R**]  
   Greater or equal than.  
   *a >= b*
 
-* `ble` a[**C**/**R**/**I**] b[**C**/**R**/**I**] addr[**C**/**A**/**L**/**R**]  
+* `ble` a[**C**/**R**] b[**C**/**R**] addr[**C**/**A**/**L**/**R**]  
   Less or equal than.  
   *a <= b*
 
-* `bas` a[**T**/**R**/**I**] b[**T**/**R**/**I**] addr[**C**/**A**/**L**/**R**]  
+* `bas` a[**T**/**R**] b[**T**/**R**] addr[**C**/**A**/**L**/**R**]  
   Branch if types are same.  
 
-* `bad` a[**T**/**R**/**I**] b[**T**/**R**/**I**] addr[**C**/**A**/**L**/**R**]  
+* `bad` a[**T**/**R**] b[**T**/**R**] addr[**C**/**A**/**L**/**R**]  
   Branch if types are different.  
 
 
@@ -428,28 +432,28 @@ When working with SIMD instructions, the following features should be considered
 
 
 ### SIMD Mnemonics
-* `xmov` a[**M**/**O**] b[**M**/**I**]
-* `xadd` a[**M**/**O**] b[**C**/**R**/**I**]
-* `xsub` a[**M**/**O**] b[**C**/**R**/**I**]
-* `xmul` a[**M**/**O**] b[**C**/**R**/**I**]
-* `xdiv` a[**M**/**O**] b[**C**/**R**/**I**]
-* `xmod` a[**M**/**O**] b[**C**/**R**/**I**]
-* `xpow` a[**M**/**O**] b[**C**/**R**/**I**]
+* `xmov` a[**M**/**O**] b[**I**/**M**]
+* `xadd` a[**M**/**O**] b[**C**/**R**]
+* `xsub` a[**M**/**O**] b[**C**/**R**]
+* `xmul` a[**M**/**O**] b[**C**/**R**]
+* `xdiv` a[**M**/**O**] b[**C**/**R**]
+* `xmod` a[**M**/**O**] b[**C**/**R**]
+* `xpow` a[**M**/**O**] b[**C**/**R**]
 * `xinc` dst[**O**]
 * `xdec` dst[**O**]
 
-* `xand` a[**M**/**O**] b[**C**/**R**/**I**]
-* `xor`  a[**M**/**O**] b[**C**/**R**/**I**]
-* `xxor` a[**M**/**O**] b[**C**/**R**/**I**]
-* `xsl`  a[**M**/**O**] b[**C**/**R**/**I**]
-* `xsr`  a[**M**/**O**] b[**C**/**R**/**I**]
+* `xand` a[**M**/**O**] b[**C**/**R**]
+* `xor`  a[**M**/**O**] b[**C**/**R**]
+* `xxor` a[**M**/**O**] b[**C**/**R**]
+* `xsl`  a[**M**/**O**] b[**C**/**R**]
+* `xsr`  a[**M**/**O**] b[**C**/**R**]
 
-* `xmin` dst[**R**/**O**] src[**M**/**I**]
+* `xmin` dst[**R**/**O**] src[**I**/**M**]
   Searches minimum signal in `src` and copy it to `dst`.
-* `xmax` dst[**R**/**O**] src[**M**/**I**]
+* `xmax` dst[**R**/**O**] src[**I**/**M**]
   Searches maximum signal in `src` and copy it to `dst`.
-* `xavg` dst[**R**/**O**] src[**M**/**I**]
-  Compute average value in `src` and assign `src` to it.
+* `xavg` dst[**R**/**O**] src[**I**/**M**]
+  Compute average value in `src` and assign `dst` to it.
 
 
 [comment]: <> (md2frt-skip-section-begin)

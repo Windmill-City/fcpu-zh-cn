@@ -1,7 +1,11 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.7
 Date: ????
+  Features:
+    - Added `idx` mnemonic.
   Changes:
+    - Renamed mnemonic `fim` to `fid` and swapped two first and seccond operand (check your programs before save!).
+    - Added support for `red`/`green` input wire into `fid` mnemonic.
     - Increased program lines from 99 up to 128.
   Bugfixes:
     - Booktorio2 crash when toggled without fCPU widget close.

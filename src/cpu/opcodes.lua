@@ -49,6 +49,41 @@ local find_in_wire = function(_, color)
   io.setsignal(_dst, sig)
 end
 
+local find_in_channel = function(_)
+  assert.three(_)
+  local _dst = _[1]
+  assert.type(_dst, {'register', 'output'})
+  local _chan = _[2]
+  assert.type(_chan, {'input', 'memory'})
+  local _type = io.gettype(_[3], {'type', 'register', 'input'})
+  local control = io.memory_getchannel_read(_chan)
+  local count = control.get_signal(_type)
+  if count and count ~= 0 then
+    io.setsignal(_dst, {signal = _type, count = count})
+  else
+    io.setsignal(_dst, NULL_SIGNAL)
+  end
+end
+
+local index_in_channel = function(_)
+  assert.three(_)
+  local _dst = _[1]
+  assert.type(_dst, {'register', 'output'})
+  local _chan = _[2]
+  assert.type(_chan, {'input', 'memory'})
+  local _type = io.gettype(_[3], {'type', 'register', 'input'})
+  local signals = io.memory_getchannel_signals(_chan)
+  if signals then
+    for k, v in ipairs(signals) do
+      if v.signal and v.signal.name == _type.name and v.signal.type == _type.type then
+        io.setsignal(_dst, {signal = _type, count = k})
+        return
+      end
+    end
+  end
+  io.setsignal(_dst, NULL_SIGNAL)
+end
+
 local memory_clear = function(channel)
   local deffer = { type = 'deffer', ops = {} }
   io.ics_each(function(ics)
@@ -133,18 +168,12 @@ local opcodes = {
   fig = function(_) -- fig dst[R/O] type[T/R/I]
     find_in_wire(_, 'green')
   end,
-  fim = function(_) -- fim mem[M] dst[R/O] type[T/R/I]
-    assert.three(_)
-    local _dst = _[2]
-    assert.type(_dst, {'register', 'output'})
-    local _type = io.gettype(_[3], {'type', 'register', 'input'})
-    local control = io.memory_getchannel_read(_[1])
-    local count = control.get_signal(_type)
-    if count ~= 0 then
-      io.setsignal(_dst, {signal = _type, count = count})
-    else
-      io.setsignal(_dst, NULL_SIGNAL)
-    end
+
+  fid = function(_) -- fid dst[R/O] mem[W/M] type[T/R/I]
+    find_in_channel(_)
+  end,
+  idx = function(_) -- idx dst[R/O] mem[W/M] type[T/R/I]
+    index_in_channel(_)
   end,
 
   swp = function(_) -- swp reg1[R] reg2[R]

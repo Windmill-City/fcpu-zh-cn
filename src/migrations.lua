@@ -28,6 +28,10 @@ local function foreach_player(proc)
   end
 end
 
+local function replace_word(str, pattern, target)
+  return string.sub(string.gsub(' '..str..' ', '([^%w])'..pattern..'([^%w])', '%1'..target..'%2'), 2, -2)
+end
+
 return {
   ["0.0.1"] = function()
     foreach_fcpu_v1(function(fcpu, state)
@@ -156,5 +160,25 @@ return {
         end
       end
     end
+  end,
+
+  ["0.3.7"] = function()
+    foreach_fcpu(function(fcpu, state)
+      local t = state.program_text
+      state.program_text = replace_word(state.program_text, 'fim', 'fid')
+      state.program_text = string.gsub(state.program_text, '(fid%s+)([^%s]+)(%s+)([^%s]+)', '%1%4%3%2')
+      if t ~= state.program_text then
+        local y = 0
+      end
+
+      if state.program_ast then
+        for k,v in pairs(state.program_ast) do
+          if v.type == 'op' and v.name == 'fim' then
+            v.name = 'fid';
+            v.expr[1], v.expr[2] = v.expr[2], v.expr[1]
+          end
+        end
+      end
+    end)
   end,
 }

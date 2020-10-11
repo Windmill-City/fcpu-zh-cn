@@ -186,7 +186,7 @@ local function parse(tokens)
 
         elseif string.find(peek(), 'mem') then
           return parseMemory('mem')
-        elseif string.find(peek(), 'm%d[@%[]?%d') == 1 then
+        elseif string.find(peek(), 'm%d[@%[]?%d?') == 1 then
           return parseMemory('mem', 'm')
 
         elseif string.find(peek(), 'reg') then
