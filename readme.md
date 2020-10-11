@@ -211,7 +211,7 @@ Each instruction take one or more operands and modify them or state of fCPU.
 * `sub` dst[**R**] src[**C**/**R**/**I**]  
   *dst = dst - src*
 * `mul` dst[**R**] src[**C**/**R**/**I**]  
-  *dst = dst * src*
+  *dst = dst \* src*
 * `div` dst[**R**] src[**C**/**R**/**I**]  
   *dst = dst / src*
 * `mod` dst[**R**] src[**C**/**R**/**I**]  

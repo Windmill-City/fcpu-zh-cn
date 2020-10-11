@@ -94,17 +94,36 @@ local function findDelim(str, start, max)
     for i = 1, #lineDelimiters do
         local pos, fin = find(str, lineDelimiters[i], start, true)
         if pos and pos < min and pos <= max then
-            min = pos
-            finish = fin
-            delim = lineDelimiters[i]
+            if string.sub(str, pos - 1, pos - 1) == '\\' then
+                start = pos + 2
+            else
+                min = pos
+                finish = fin
+                delim = lineDelimiters[i]
+            end
         end
     end
     return delim, min, finish
 end
 
+local function findDelimEnd(str, delim, start)
+    while start <= #str do
+        local pos, fin = find(str, delim, start, true)
+        if pos then
+            if string.sub(str, pos - 1, pos - 1) == '\\' then
+                start = pos + 2
+            else
+                return pos, fin
+            end
+        else
+            break
+        end
+    end
+end
+
 local function externalLinkEscape(str, t)
     local nomatches = true
-    for m1, m2, m3 in gmatch(str, '(.*)%[(.*)%](.*)') do
+    for m1, m2, m3 in gmatch(str, '(!?)%[([^%]]*)%]%s*%[(%d+)%]') do
         if nomatches then t[#t + 1] = match(m1, '^(.-)!?$'); nomatches = false end
         if byte(m1, #m1) == byte '!' then
             t[#t + 1] = {type = 'img', attributes = {alt = m2}}
@@ -118,7 +137,7 @@ end
 
 local function linkEscape(str, t)
     local nomatches = true
-    for m1, m2, m3, m4 in gmatch(str, '(.*)%[(.*)%]%((.*)%)(.*)') do
+    for m1, m2, m3, m4 in gmatch(str, '(!?)%[([^%]]+)%]%(([^%)]*)%)([^!%[]*)') do
         if nomatches then externalLinkEscape(match(m1, '^(.-)!?$'), t); nomatches = false end
         if byte(m1, #m1) == byte '!' then
             t[#t + 1] = {type = 'img', attributes = {
@@ -157,13 +176,15 @@ local function lineRead(str, start, finish)
     while true do
         local delim, dstart, dfinish = findDelim(str, searchIndex, finish)
         if not delim then
-            linkEscape(sub(str, searchIndex, finish), tree)
+            local substr = sub(str, searchIndex, finish)
+            substr = string.gsub(substr, '\\([`_%*~])', '%1')
+            linkEscape(substr, tree)
             break
         end
         if dstart > searchIndex then
             linkEscape(sub(str, searchIndex, dstart - 1), tree)
         end
-        local nextdstart, nextdfinish = find(str, delim, dfinish + 1, true)
+        local nextdstart, nextdfinish = findDelimEnd(str, delim, dfinish + 1)
         if nextdstart then
             local subtree
             if delim == '`' then
