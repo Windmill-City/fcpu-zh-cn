@@ -1,10 +1,11 @@
 # Upcoming  (in v0.4.0)
 * Extend x* semantics  for copying registers and composing memory with separate signals.
-* Vector compare mnemonics.
 * `xflt` mnemonic for filtering signals.
+* Vector compare mnemonics.
 
 # Upcoming  (in v0.5.0)
 * Breakpoints.
+* Debugging, hotkeys, auto switch memory channel.
 
 # TODO list, fCPU
 * Profiling & optimization (less ticks for `x*` operations).
@@ -25,4 +26,4 @@
 * Memory browser for SIMD instructions (DONE in v0.3.0)
 * Single instruction, multiple data - SIMD (DONE in v0.3.0)
 * New `xmin`, `xmax`, `xavg`, `fim`, `rnd` SIMD opcodes (DONE in v0.3.1)
-* Increase lines count up to 99 (DONE in v0.3.1)
+* Increase lines count, implement modern blueprint tags (DONE in v0.3.1)

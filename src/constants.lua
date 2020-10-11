@@ -1,4 +1,4 @@
-MC_DEBUG = __DebugAdapter ~= nil
+MC_DEBUG = __DebugAdapter ~= nil and __DebugAdapter.instrument
 
 MC_LINES = 128
 MC_OUTPUT = 256
