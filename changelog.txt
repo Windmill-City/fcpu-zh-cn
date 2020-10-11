@@ -7,6 +7,7 @@ Date: ????
     - Renamed mnemonic `fim` to `fid` and swapped two first and seccond operand (check your programs before save!).
     - Added support for `red`/`green` input wire into `fid` mnemonic.
     - Increased program lines from 99 up to 128.
+    - `emit` mnemonics is now deprecated (should be replaced by `mov out1 ...`). It will be reused for memory manipulations.
   Bugfixes:
     - Booktorio2 crash when toggled without fCPU widget close.
     - Minor wiki fixes.

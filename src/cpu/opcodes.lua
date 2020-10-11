@@ -142,11 +142,11 @@ local opcodes = {
       io.setsignal(_[i], sig, {'register', 'wire'})
     end
   end,
-  emit = function(_) -- emit src[V/T/S/R/I]
+  --[[emit = function(_) -- emit src[V/T/S/R/I]
     assert.one(_)
     local sig = io.getsignal(_[1], {'value', 'type', 'signal', 'register', 'input'})
     io.wire_set({type='wire', color='out', addr=1, pointer=false}, sig)
-  end,
+  end,]]
   ssv = function(_) -- ssv dst...[R] val[V/S/R/I]
     assert.two_or_more(_)
     local sigcount = io.getcount(_[#_], {'value', 'signal', 'register', 'input'})

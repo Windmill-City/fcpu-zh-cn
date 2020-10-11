@@ -174,10 +174,6 @@ Each instruction take one or more operands and modify them or state of fCPU.
   Copy signal from source to destination.  
   *dst... = src*
 
-* `emit` src[**V**/**T**/**S**/**R**]  
-  Copy signal from source to output.  
-  Same as `mov out1 src`.  
-
 * `ssv` dst...[**R**/**O**] val[**V**/**S**/**R**]  
   Set signal value.  
   *dst... = val*

@@ -164,18 +164,22 @@ return {
 
   ["0.3.7"] = function()
     foreach_fcpu(function(fcpu, state)
-      local t = state.program_text
+      state.program_text = replace_word(state.program_text, 'emit', 'mov out1')
+
       state.program_text = replace_word(state.program_text, 'fim', 'fid')
       state.program_text = string.gsub(state.program_text, '(fid%s+)([^%s]+)(%s+)([^%s]+)', '%1%4%3%2')
-      if t ~= state.program_text then
-        local y = 0
-      end
 
       if state.program_ast then
         for k,v in pairs(state.program_ast) do
-          if v.type == 'op' and v.name == 'fim' then
-            v.name = 'fid';
-            v.expr[1], v.expr[2] = v.expr[2], v.expr[1]
+          if v.type == 'op' then
+            if v.name == 'emit' then
+              v.name = 'mov'
+              v.expr[2] = v.expr[1]
+              v.expr[1] = { type='wire', color='out', addr=1, pointer=false }
+            elseif v.name == 'fim' then
+              v.name = 'fid';
+              v.expr[1], v.expr[2] = v.expr[2], v.expr[1]
+            end
           end
         end
       end
