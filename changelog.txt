@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.7
 Date: ????
+  Changes:
+    - Increased program lines from 99 up to 128.
   Bugfixes:
     - Booktorio2 crash when toggled without fCPU widget close.
 ---------------------------------------------------------------------------------------------------

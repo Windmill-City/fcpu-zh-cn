@@ -1,6 +1,6 @@
 MC_DEBUG = __DebugAdapter ~= nil
 
-MC_LINES = 99
+MC_LINES = 128
 MC_OUTPUT = 256
 MC_REGS = 8
 MC_REGS_RO_FIRST = MC_REGS + 1 -- 9
