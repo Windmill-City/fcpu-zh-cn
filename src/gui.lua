@@ -4,12 +4,18 @@ local gui = require("__flib__.gui")
 
 local defaultToolbarInsertSignal = {type='virtual', name='signal-dot'}
 
-local signalToSpritePath = function(signal)
+local signalToSpritePath = function(player_data, signal)
   if signal then
+    local path
     if signal.type == "virtual" then
-      return "virtual-signal/" .. signal.name
+      path = "virtual-signal/" .. signal.name
     elseif signal.name then
-      return signal.type .. '/' .. signal.name
+      path = signal.type .. '/' .. signal.name
+    end
+    if path and (player_data and player_data.gui_fcpu and player_data.gui_fcpu.gui) then
+      if player_data.gui_fcpu.gui.is_valid_sprite_path(path) then
+        return path
+      end
     end
   end
 end
@@ -106,7 +112,7 @@ local function MemoryView_UpdateFromTable(player_data, signals, no_sort)
       for _, v in ipairs(signals) do
         local cell = cells[i]
         if v and cell then
-          local sprite = signalToSpritePath(v.signal)
+          local sprite = signalToSpritePath(player_data, v.signal)
           cell.visible = true
           cell.sprite = sprite
           cell.number = (sprite or no_sort) and v.count
@@ -310,7 +316,7 @@ function GuiWidgetOpen(player, entity)
 
   local elems = CreateWidget_Main(rootGui)
   if 0 < fcpu_debug_enabled then
-    elems.gui_fcpu.titlebar.label.caption = elems.gui_fcpu.titlebar.label.caption.." #"..entity.unit_number
+    elems.gui_fcpu.titlebar.label.caption = elems.gui_fcpu.titlebar.label.caption.." #"..entity.unit_number..' ⇨ '..state.index
   end
   player_data = dictionary_combine(player_data, elems, CreateWidget_MemoryView(elems.gui_fcpu["fcpu-panels"]))
 
@@ -379,7 +385,7 @@ function GuiWidgetUpdate(player_data, state)
       local reg = state.regs[i]
       if reg then
         local button = player_data.gui_inspector['reg'..i..'-inspect']
-        button.sprite = signalToSpritePath(reg.signal)
+        button.sprite = signalToSpritePath(player_data, reg.signal)
         button.number = reg.count
       end
     end

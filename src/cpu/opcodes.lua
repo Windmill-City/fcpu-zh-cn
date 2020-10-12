@@ -86,10 +86,11 @@ end
 
 local memory_clear = function(channel)
   local deffer = { type = 'deffer', ops = {} }
-  io.ics_each(function(ics)
+  local DisableICS = function(ics)
     deffer.ops[#deffer.ops + 1] = {action='enable', ic=ics.fix, delay = 0}
     deffer.ops[#deffer.ops + 1] = {action='disable', ic=ics.fix, delay = 1}
-  end, channel)
+  end
+  io.ics_each(DisableICS, channel)
   return deffer
 end
 

@@ -24,7 +24,9 @@ end
 function register_fcpu(entity, state)
   state.destroy_regnum = script.register_on_entity_destroyed(entity)
   state.entity = entity
-  state.index = #global.fcpus + 1
+  if not (state.index and global.fcpus[state.index]) then
+    state.index = #global.fcpus + 1
+  end
   global.fcpus[state.index] = state
   Entity.set_data(entity, state.index)
 end

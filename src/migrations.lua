@@ -151,7 +151,7 @@ return {
     local fcpus = {}
     for _,v in pairs(global.fcpus) do
       for i = 1,4 do
-        local mem = v.program_ics['mem'..i]
+        local mem = v.program_ics and v.program_ics['mem'..i]
         if mem and mem.value then
           if mem.value.valid then
             mem.value.destroy()
@@ -184,5 +184,31 @@ return {
         end
       end
     end)
+  end,
+
+  ["0.3.8"] = function()
+    local valids = {}
+    for _, surface in pairs(game.surfaces) do
+      for _, fcpu in pairs(surface.find_entities_filtered{ name="fcpu" }) do
+        if fcpu and fcpu.valid then
+          local index = Entity.get_data(fcpu, nil)
+          valids[index] = fcpu
+        end
+      end
+    end
+    local invalids = {}
+    for k,v in pairs(global.fcpus) do
+      if not (v and v.index == k) then
+        invalids[#invalids + 1] = k
+      else
+        local fcpu = valids[k]
+        if fcpu == nil then
+          invalids[#invalids + 1] = k
+        end
+      end
+    end
+    for k,v in ipairs(invalids) do
+      global.fcpus[v] = nil
+    end
   end,
 }

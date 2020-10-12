@@ -23,6 +23,9 @@ function UpdateModSetting(event)
   if event.setting == "fcpu-debug-enabled" then
     local log_format_map = {d=0, c=1, l=2, b=3}
     fcpu_debug_enabled = log_format_map[settings.global[event.setting].value]
+    if MC_DEBUG and fcpu_debug_enabled == 0 then
+      fcpu_debug_enabled = 1
+    end
     update_debug_enabled()
   end
   if event.setting == "fcpu-gui-updates-every-tick" then
