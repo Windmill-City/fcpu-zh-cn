@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.8
 Date: ????
+  Changes:
+    - Added memory view for `vector output` and `composite output`.
   Bugfixes:
     - Fixed `clr out` after `xmov out ...`.
     - Fixed bug with handling when using old fCPU entities, created from before v0.3.0 .

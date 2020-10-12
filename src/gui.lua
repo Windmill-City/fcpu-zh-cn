@@ -71,6 +71,8 @@ local function CreateWidget_MemoryView(rootGui)
   memchannels[#memchannels+1] = { 'gui-fcpu-memviewer.channel-registers' }
   memchannels[#memchannels+1] = { 'gui-fcpu-memviewer.channel-input-red' }
   memchannels[#memchannels+1] = { 'gui-fcpu-memviewer.channel-input-green' }
+  memchannels[#memchannels+1] = { 'gui-fcpu-memviewer.channel-output-scalar' }
+  memchannels[#memchannels+1] = { 'gui-fcpu-memviewer.channel-output-vector' }
   memchannels[#memchannels+1] = { 'gui-fcpu-memviewer.channel-output' }
 
   local elems = gui.build(rootGui, {
@@ -148,6 +150,7 @@ local function UpdateWidget_MemoryView(player_data)
     index = math.max(1, index)
 
     if index <= MC_MEMORY_CHANNELS then
+      -- Memory channels
       local ici = state.ics_stack['mem' .. index]
       local ics = ici and state.program_ics[ici]
       if ics and ics.out and ics.out.valid then
@@ -162,37 +165,52 @@ local function UpdateWidget_MemoryView(player_data)
             MemoryView_UpdateFromTable(player_data, control.signals_last_tick)
           end
         end
-      else
-        MemoryView_UpdateFromTable(player_data, {})
+        return
       end
     elseif index == MC_MEMORY_CHANNELS + 1 then
-      -- TODO: this is draft implementation for GUI design check
+      -- Registers
       MemoryView_UpdateFromTable(player_data, state.regs, true)
+      return
+    elseif index == MC_MEMORY_CHANNELS + 2 then
+      -- Input wires (RED)
+      local control = state.entity.get_control_behavior()
+      local input = control.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_input)
+      MemoryView_UpdateFromTable(player_data, input and input.signals)
+      return
+    elseif index == MC_MEMORY_CHANNELS + 3 then
+      -- Input wires (GREEN)
+      local control = state.entity.get_control_behavior()
+      local input = control.get_circuit_network(defines.wire_type.green, defines.circuit_connector_id.combinator_input)
+      MemoryView_UpdateFromTable(player_data, input and input.signals)
+      return
     elseif index == MC_MEMORY_CHANNELS + 4 then
+      -- Output buffer
       if state.program_ics.output then
         local control = state.program_ics.output.get_control_behavior()
         MemoryView_UpdateFromTable(player_data, control and control.parameters and control.parameters.parameters)
-      else
-        MemoryView_UpdateFromTable(player_data, {})
+        return
       end
-  else
-      local control = state.entity.get_control_behavior()
-
-      local wire_type
-      if index == MC_MEMORY_CHANNELS + 2 then
-        wire_type = defines.wire_type.red
-      elseif index == MC_MEMORY_CHANNELS + 3 then
-        wire_type = defines.wire_type.green
+    elseif index == MC_MEMORY_CHANNELS + 5 then
+      -- Vector output
+      if state.ics_stack.output and state.program_ics[state.ics_stack.output] then
+        local control = state.program_ics[state.ics_stack.output].out.get_control_behavior()
+        MemoryView_UpdateFromTable(player_data, control and control.parameters and control.signals_last_tick)
+        return
       end
-
-      if wire_type then
-        local input = control.get_circuit_network(wire_type, defines.circuit_connector_id.combinator_input)
-        MemoryView_UpdateFromTable(player_data, input and input.signals)
-      else
-        MemoryView_UpdateFromTable(player_data, {})
+    elseif index == MC_MEMORY_CHANNELS + 6 then
+      -- Output
+      if state.program_ics.output then
+        local control = state.program_ics.output.get_control_behavior()
+        local network = control.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.constant_combinator)
+        if network then
+          MemoryView_UpdateFromTable(player_data, network.signals)
+          return
+        end
       end
     end
   end
+
+  MemoryView_UpdateFromTable(player_data, {})
 end
 
 -------------------------------------------------------------------------------------------------------
