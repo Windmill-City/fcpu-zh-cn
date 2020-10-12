@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.8
-Date: ????
+Date: 2020-10-12
   Changes:
     - Added memory view for `vector output` and `composite output`.
   Bugfixes:
