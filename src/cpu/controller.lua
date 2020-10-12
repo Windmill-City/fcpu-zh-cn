@@ -239,7 +239,7 @@ function Controller.tick(state, sync_wait)
         end
       elseif result.type == 'deffer' then
         Controller.set_program_counter(state, state.instruction_pointer + 1)
-        for _,v in ipairs(result.ops) do
+        for _,v in ipairs(result.deffer) do
           table.insert(state.deffered, v)
         end
         Controller.do_defferred(state, 0)

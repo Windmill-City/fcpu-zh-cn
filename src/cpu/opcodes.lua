@@ -85,13 +85,13 @@ local index_in_channel = function(_)
 end
 
 local memory_clear = function(channel)
-  local deffer = { type = 'deffer', ops = {} }
+  local action = { type = 'deffer', deffer = {} }
   local DisableICS = function(ics)
-    deffer.ops[#deffer.ops + 1] = {action='enable', ic=ics.fix, delay = 0}
-    deffer.ops[#deffer.ops + 1] = {action='disable', ic=ics.fix, delay = 1}
+    action.deffer[#action.deffer + 1] = {action='enable', ic=ics.fix, delay = 0}
+    action.deffer[#action.deffer + 1] = {action='disable', ic=ics.fix, delay = 1}
   end
   io.ics_each(DisableICS, channel)
-  return deffer
+  return action
 end
 
 local opcodes = {
@@ -115,7 +115,7 @@ local opcodes = {
           assert.type(expr, {'register', 'memory', 'output'})
           if expr.color == 'out' then
             if expr.addr == nil then
-              io.output_clear()
+              return io.output_clear()
             else
               io.wire_set(_[i], nil)
             end
@@ -131,8 +131,15 @@ local opcodes = {
         io.register_setraw(i, table.deep_copy(NULL_SIGNAL))
       end
       io.control_set(table.deep_copy(NULL_SIGNAL))
-      io.output_clear()
-      return memory_clear()
+      local d1 = io.output_clear() or {deffer={}}
+      local d2 = memory_clear() or {deffer={}}
+      local d = {type='deffer', deffer={}}
+      for _, t in ipairs{d1, d2} do
+        for _, v in ipairs(t.deffer) do
+          table.insert(d.deffer, v)
+        end
+      end
+      return d
     end
   end,
 

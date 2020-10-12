@@ -2,6 +2,7 @@
 Version: 0.3.8
 Date: ????
   Bugfixes:
+    - Fixed `clr out` after `xmov out ...`.
     - Fixed bug with handling when using old fCPU entities, created from before v0.3.0 .
     - Removed smoke clouds while building or modifying fCPU.
     - Fixed crash when mod with signals extensions were removed.

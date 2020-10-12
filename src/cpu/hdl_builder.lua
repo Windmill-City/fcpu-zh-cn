@@ -271,13 +271,13 @@ function builder.create_memory_cell(entity, input_a, proxy_output)
       }
     }
 
-    ics.out.connect_neighbour{
-      source_circuit_id = defines.circuit_connector_id.combinator_output,
+    proxy.connect_neighbour{
+      source_circuit_id = defines.circuit_connector_id.combinator_input,
+      target_entity = ics.out,
+      target_circuit_id = defines.circuit_connector_id.combinator_output,
       wire = wire1,
-      target_entity = proxy,
-      target_circuit_id = defines.circuit_connector_id.combinator_input,
     }
-
+  
     ics[#ics + 1] = ics.out
     ics.out = proxy
   end

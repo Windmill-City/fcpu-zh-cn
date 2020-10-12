@@ -1,7 +1,7 @@
 local assert
 local hdlbuilder
-local control_out
-local control
+local state_control
+local output_control
 local wires
 local state
 local io = {}
@@ -99,37 +99,44 @@ end
 
 -- Control output
 function io.control_get()
-  local params = control.parameters
+  local params = state_control.parameters
   local signal_id = params.parameters.output_signal
   local count = params.parameters.first_constant
   return io.make_signal(signal_id, count)
 end
 
 function io.control_set(signal)
-  local params = control.parameters
+  local params = state_control.parameters
   params.parameters.first_constant = signal.count
   params.parameters.output_signal = signal.signal
-  control.parameters = params
+  state_control.parameters = params
 end
 
 
 -- Output wire access
 local function output_get(index)
-  local signal = control_out.get_signal(index)
+  local signal = output_control.get_signal(index)
   return io.make_signal(signal.signal, signal.count)
 end
 
 local function output_set(index, signal)
   if signal and signal.count and signal.count ~= 0 and signal.signal then
     assert.check(math.abs(signal.count) ~= 1/0, "Division by zero")
-    control_out.set_signal(index, signal)
+    output_control.set_signal(index, signal)
   else
-    control_out.set_signal(index, nil)
+    output_control.set_signal(index, nil)
   end
 end
 
 function io.output_clear()
-  control_out.parameters = nil
+  -- Output buffer
+  output_control.parameters = nil
+
+  -- Vector output
+  local node = io.get_node('output')
+  if node then
+    return { type = 'deffer', deffer = { {action='enable', ic=node.fix, delay = 0} } }
+  end
 end
 
 
@@ -264,12 +271,15 @@ function io.ics_set(name, index)
 end
 
 function io.ics_each(proc, name)
-  local index = name and state.ics_stack[name]
-  for k, ics in pairs(state.program_ics) do
-    if type(k) == 'number' then
-      if not index or k == index then
-        proc(ics)
-      end
+  if name then
+    local index = state.ics_stack[name]
+    local ics = state.program_ics[index]
+    if ics then
+      proc(ics)
+    end
+  else
+    for _, ics in ipairs(state.program_ics) do
+      proc(ics)
     end
   end
 end
@@ -291,7 +301,7 @@ function io.memory_getchannel_read(_)
     end
   elseif _.type == 'wire' then
     if _.color == 'out' then
-      return control_out
+      return output_control
     end
     if not wires[_.color] then
       assert.exception("Tried to access ".._.color.." wire when input not present.")
@@ -312,7 +322,7 @@ function io.memory_getchannel_write(_)
     end
   elseif _.type == 'wire' then
     if _.color == 'out' then
-      return control_out
+      return output_control
     end
     assert.exception("Could not write to ".._.color.." input wire.")
   else
@@ -338,7 +348,7 @@ function io.memory_getchannel_signals(_)
     end
   elseif _.type == 'wire' then
     if _.color == 'out' then
-      return control_out.parameters.parameters
+      return output_control.parameters.parameters
     end
     if not wires[_.color] then
       assert.exception("Tried to access ".._.color.." wire when input not present.")
@@ -461,7 +471,7 @@ end
 
 function io.setup(state_, control_)
   state = state_
-  control = control_
+  state_control = control_
 
   wires = {
     red = control_.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_input),
@@ -469,7 +479,7 @@ function io.setup(state_, control_)
   }
 
   if state_.program_ics.output and state_.program_ics.output.valid then
-    control_out = state_.program_ics.output.get_control_behavior()
+    output_control = state_.program_ics.output.get_control_behavior()
   end
 end
 
