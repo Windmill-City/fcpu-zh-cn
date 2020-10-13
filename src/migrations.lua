@@ -198,16 +198,21 @@ return {
     end
     local invalids = {}
     for k,v in pairs(global.fcpus) do
-      if not (v and v.index == k) then
+      if not v then
         invalids[#invalids + 1] = k
+      elseif v.index ~= k then
+        invalids[#invalids + 1] = k
+        Entity.set_data(v.entity, v.index)
       else
         local fcpu = valids[k]
         if fcpu == nil then
           invalids[#invalids + 1] = k
+        else
+          Controller.verify(v)
         end
       end
     end
-    for k,v in ipairs(invalids) do
+    for _,v in ipairs(invalids) do
       global.fcpus[v] = nil
     end
   end,

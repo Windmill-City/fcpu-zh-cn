@@ -42,7 +42,6 @@ local function update_fcpu_target(imposter_fcpu, new_fcpu)
   state.imposter_fcpu = nil
   state.disabled = imposter_state.disabled
 
-  register_fcpu(new_fcpu, state)
   Controller.verify(state)
 
   if imposter_state.target_program then
@@ -159,16 +158,6 @@ return function(ent)
 
     local fcpu_state = get_fcpu_state(ent)
     Controller.verify(fcpu_state)
-
-    --[[if not (fcpu_state.imposter_fcpu and fcpu_state.imposter_fcpu.valid) then
-      local imposter_fcpu = fcpu_create_imposter(ent)
-      if fcpu_state == nil then
-        assert.todo()
-        register_fcpu(ent, fcpu_state)
-      end
-      fcpu_state = fcpu_state or {}
-      fcpu_state.imposter_fcpu = imposter_fcpu
-    end]]
   else
     debug_print("skip handling "..ent.name)
   end

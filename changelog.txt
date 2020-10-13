@@ -6,6 +6,7 @@ Date: ????
     - Added memory assignment support `mov mem1[23] 4[item=copper-ore]`.
   Bugfixes:
     - Allow indexing of empty memory cells.
+    - Fixed fCPU clone operation.
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.8
 Date: 2020-10-12

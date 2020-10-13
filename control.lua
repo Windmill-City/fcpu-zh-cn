@@ -177,6 +177,7 @@ local function on_entity_cloned(event)
 
         dst_state.imposter_fcpu = nil
         dst_state.program_ics = {}
+        dst_state.index = nil
         register_fcpu(dst_entity, dst_state)
         Controller.verify(dst_state)
         Controller.compile(dst_state)

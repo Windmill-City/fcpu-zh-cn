@@ -20,7 +20,10 @@ local function get_debug_offset(entity, d_next_node)
         if d_next_node == true then
           state.d_i = 2
           state.d_j = (state.d_j or 0) + 1
-        elseif state.d_j == nil or d_next_node == false or type(d_next_node) == 'number' then
+        elseif state.d_j == nil or d_next_node == false then
+          state.d_i = d_next_node or 1
+          state.d_j = 0
+        elseif type(d_next_node) == 'number' then
           local i = math.floor(d_next_node)
           state.d_i = i or 1
           state.d_j = 0
