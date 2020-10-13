@@ -100,9 +100,33 @@ local function DestroyWidget_MemoryView(player_data)
   player_data.gui_memory_cells = nil
 end
 
-local function MemoryView_UpdateFromTable(player_data, signals, no_sort)
+local function MemoryView_UpdateFromTable(player_data, signals, sort, order)
   local cells = player_data.gui_memory_cells.children
   if cells then
+    local no_sort = (sort == nil or sort == false)
+
+    if order ~= nil then
+      -- TODO: order is different than in Factorio
+      local t = {}
+      for _,v in ipairs(signals) do
+        t[v.signal.type..'='..v.signal.name] = v
+      end
+      local n = {}
+      for k,v in ipairs(order) do
+        local s = t[v.signal.type..'='..v.signal.name]
+        if s then
+          n[k] = s
+          t[v.signal.type..'='..v.signal.name] = nil
+        else
+          n[k] = NULL_SIGNAL
+        end
+      end
+      for _,v in pairs(t) do
+        n[#n+1] = v
+      end
+      signals = n
+    end
+
     -- add extra
     for i = #cells + 1, math.max(MC_MEMORY_SLOTS_MIN, (signals and #signals or 0)) do
       gui.build(player_data.gui_memory_cells, { gui.templates.slot_inventory('index-'..i, '['..i..']') })
@@ -117,7 +141,7 @@ local function MemoryView_UpdateFromTable(player_data, signals, no_sort)
           local sprite = signalToSpritePath(player_data, v.signal)
           cell.visible = true
           cell.sprite = sprite
-          cell.number = (sprite or no_sort) and v.count
+          cell.number = (sprite or no_sort) and v.count or nil
           if sprite or no_sort then
             i = i + 1
           end
@@ -151,25 +175,37 @@ local function UpdateWidget_MemoryView(player_data)
 
     if index <= MC_MEMORY_CHANNELS then
       -- Memory channels
-      local ici = state.ics_stack['mem' .. index]
-      local ics = ici and state.program_ics[ici]
+      local ics = state.program_ics['mem' .. index]
       if ics and ics.out and ics.out.valid then
         local control = ics.out.get_control_behavior()
-        if control.signals_last_tick and not ics.color_out then
-          MemoryView_UpdateFromTable(player_data, control.signals_last_tick)
-        else
-          local output = control.get_circuit_network(ics.color_out, defines.circuit_connector_id.combinator_output)
-          if output then
-            MemoryView_UpdateFromTable(player_data, output.signals)
+        if control.signals_last_tick then
+          local network = control.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_output)
+          if network then
+            MemoryView_UpdateFromTable(player_data, network.signals)
+            --MemoryView_UpdateFromTable(player_data, network.signals, false, control.signals_last_tick)
           else
             MemoryView_UpdateFromTable(player_data, control.signals_last_tick)
           end
+          return
+        else
+          if ics.value then
+            local vc = ics.value.get_control_behavior()
+            if vc.enabled and vc.parameters then
+              MemoryView_UpdateFromTable(player_data, vc.parameters.parameters, false)
+              return
+            end
+          end
+
+          local network = control.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_output)
+          if network then
+            MemoryView_UpdateFromTable(player_data, network.signals)
+            return
+          end
         end
-        return
       end
     elseif index == MC_MEMORY_CHANNELS + 1 then
       -- Registers
-      MemoryView_UpdateFromTable(player_data, state.regs, true)
+      MemoryView_UpdateFromTable(player_data, state.regs, false)
       return
     elseif index == MC_MEMORY_CHANNELS + 2 then
       -- Input wires (RED)

@@ -84,7 +84,7 @@ local index_in_channel = function(_)
   io.setsignal(_dst, NULL_SIGNAL)
 end
 
-local memory_clear = function(channel)
+local ics_clear = function(channel)
   local action = { type = 'deffer', deffer = {} }
   local DisableICS = function(ics)
     action.deffer[#action.deffer + 1] = {action='enable', ic=ics.fix, delay = 0}
@@ -109,6 +109,7 @@ local opcodes = {
   end,
 
   clr = function(_)
+    local actions = {}
     if 0 < #_ then
       for i, expr in ipairs(_) do
         if expr then
@@ -122,7 +123,8 @@ local opcodes = {
           elseif expr.type == 'register' then
             io.setsignal(_[i], NULL_SIGNAL, {'register', 'wire'})
           elseif expr.type == 'memory' then
-            return memory_clear(expr.index and (expr.location .. expr.index))
+            io.memory_clear(expr)
+            actions[#actions + 1] = ics_clear(expr.index and (expr.location .. expr.index))
           end
         end
       end
@@ -131,12 +133,20 @@ local opcodes = {
         io.register_setraw(i, table.deep_copy(NULL_SIGNAL))
       end
       io.control_set(table.deep_copy(NULL_SIGNAL))
-      local d1 = io.output_clear() or {deffer={}}
-      local d2 = memory_clear() or {deffer={}}
+      for i = 1, MC_MEMORY_CHANNELS do
+        io.memory_clear({type='memory', location='mem', index=i})
+      end
+      actions[#actions + 1] = io.output_clear()
+      actions[#actions + 1] = ics_clear()
+    end
+    -- TODO: implement return {type='actions', ...}
+    if 0 < #actions then
       local d = {type='deffer', deffer={}}
-      for _, t in ipairs{d1, d2} do
-        for _, v in ipairs(t.deffer) do
-          table.insert(d.deffer, v)
+      for _, a in ipairs(actions) do
+        if a and a.deffer then
+          for _, v in ipairs(a.deffer) do
+            table.insert(d.deffer, v)
+          end
         end
       end
       return d

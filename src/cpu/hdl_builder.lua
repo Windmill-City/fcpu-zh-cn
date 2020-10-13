@@ -21,13 +21,15 @@ local function get_debug_offset(entity, d_next_node)
           state.d_i = 2
           state.d_j = (state.d_j or 0) + 1
         elseif state.d_j == nil or d_next_node == false or type(d_next_node) == 'number' then
-          state.d_i = d_next_node or 1
+          local i = math.floor(d_next_node)
+          state.d_i = i or 1
           state.d_j = 0
+          y = -(d_next_node - i) * 2
         else
           state.d_i = (((state.d_i / 2) or 0) + 1) * 2
         end
         x = state.d_i
-        y = state.d_j * 2
+        y = state.d_j * 2 + y
       else
         state.d_i = (state.d_i or 0) % 30 + 1
         local c = math.floor((state.d_i - 1) * 0.125)
@@ -151,18 +153,38 @@ function builder.verify(state)
     end
 
     if not (state.program_ics[name].value and state.program_ics[name].value.valid) then
-      local ent_val, ctrl_val = builder.create_node(state.entity, 'output', i * 2 + 1)
+      local ent_val1, ctrl_val1 = builder.create_node(state.entity, 'output', i * 2 + 1)
 
-      state.program_ics[name].value = ent_val
-      ctrl_val.enabled = false
+      state.program_ics[name].value = ent_val1
+      ctrl_val1.enabled = false
 
-      ent_val.connect_neighbour({
+      ent_val1.connect_neighbour({
         wire = defines.wire_type.green,
         target_entity = state.program_ics[name].out,
         source_circuit_id = defines.circuit_connector_id.constant_combinator,
         target_circuit_id = defines.circuit_connector_id.combinator_output
       })
-      ent_val.connect_neighbour({
+      ent_val1.connect_neighbour({
+        wire = defines.wire_type.red,
+        target_entity = state.program_ics[name].out,
+        source_circuit_id = defines.circuit_connector_id.constant_combinator,
+        target_circuit_id = defines.circuit_connector_id.combinator_output
+      })
+    end
+
+    if not (state.program_ics[name].value2 and state.program_ics[name].value2.valid) then
+      local ent_val2, ctrl_val2 = builder.create_node(state.entity, 'output', i * 2 + 1.5)
+
+      state.program_ics[name].value2 = ent_val2
+      ctrl_val2.enabled = false
+
+      ent_val2.connect_neighbour({
+        wire = defines.wire_type.green,
+        target_entity = state.program_ics[name].out,
+        source_circuit_id = defines.circuit_connector_id.constant_combinator,
+        target_circuit_id = defines.circuit_connector_id.combinator_output
+      })
+      ent_val2.connect_neighbour({
         wire = defines.wire_type.red,
         target_entity = state.program_ics[name].out,
         source_circuit_id = defines.circuit_connector_id.constant_combinator,

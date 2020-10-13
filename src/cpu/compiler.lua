@@ -233,6 +233,9 @@ local function eval(ast, ics)
               local control = node.fix.get_control_behavior()
               control.enabled = true
             end
+            if string.sub(v.name, 1, 3) == 'mem' then
+              io.memory_clear({type='memory', location='mem', index=string.sub(v.name, 4, 4)})
+            end
           end
         end
         update_ics_stack(io, _.push_ics)

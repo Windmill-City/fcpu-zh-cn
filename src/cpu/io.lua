@@ -313,14 +313,21 @@ function io.memory_getchannel_read(_)
   end
 end
 
-function io.memory_getchannel_write(_)
+function io.memory_getchannel_write(_, corrective)
   if _.type == 'memory' then
     local ics = hdlbuilder.get_node(state, _.location .. _.index)
-    if ics and ics.value and ics.value.valid then
-      return ics.value.get_control_behavior()
-    else
-      assert.exception("Memory channel does not support writing")
+    if ics then
+      if corrective then
+        if ics.value2 and ics.value2.valid then
+          return ics.value2.get_control_behavior()
+        end
+      else
+        if ics.value and ics.value.valid then
+          return ics.value.get_control_behavior()
+        end
+      end
     end
+    assert.exception("Memory channel does not support writing")
   elseif _.type == 'wire' then
     if _.color == 'out' then
       return output_control
@@ -366,15 +373,23 @@ local function memory_getraw(channel, addr)
   return signals and signals[addr] or NULL_SIGNAL
 end
 
-local function memory_setraw(channel, addr, signal)
-  local control = io.memory_getchannel_write(channel)
+local function memory_setraw(channel, addr, signal, corrective)
+  local control = io.memory_getchannel_write(channel, corrective)
   assert.check(control ~= nil, "Trying to access nil memory channel")
-  assert.check(1 <= addr and addr <= MC_OUTPUT, "Memory cell index is out of range")
-  if signal and signal.signal and signal.count then
-    assert.check(math.abs(signal.count) ~= 1/0, "Division by zero")
-    control.set_signal(addr, signal)
+  if addr == nil and signal == nil then
+    -- Clear entire memory
+    control.enabled = false
+    control.parameters = nil
   else
-    control.set_signal(addr, nil)
+    control.enabled = true
+    assert.check(1 <= addr and addr <= MC_OUTPUT, "Memory cell index is out of range")
+    if signal and signal.count then
+      assert.check(signal.signal ~= nil, "Signal type should be specified when assigning to a memory cell")
+      assert.check(math.abs(signal.count) ~= 1/0, "Division by zero")
+      control.set_signal(addr, signal)
+    else
+      control.set_signal(addr, nil)
+    end
   end
 end
 
@@ -387,7 +402,19 @@ end
 function io.memory_set(address, signal)
   assert.check(address.index ~= nil, "Should be addressable memory cell")
   local addr = addr_deref(address)
+  local was = memory_getraw(address, addr)
+  if was and was.signal then
+    was = table.deep_copy(was)
+    was.count = -was.count;
+    memory_setraw(address, addr, was, true)
+  end
   memory_setraw(address, addr, signal)
+end
+
+function io.memory_clear(address)
+  assert.check(address.index ~= nil, "Should be addressable memory cell")
+  memory_setraw(address, nil, nil, true)
+  memory_setraw(address, nil, nil, false)
 end
 
 
