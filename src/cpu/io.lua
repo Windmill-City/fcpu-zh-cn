@@ -120,6 +120,7 @@ local function output_get(index)
 end
 
 local function output_set(index, signal)
+  assert.check(1 <= index and index <= MC_OUTPUT, "Output cell index is out of range")
   if signal and signal.count and signal.count ~= 0 and signal.signal then
     assert.check(math.abs(signal.count) ~= 1/0, "Division by zero")
     output_control.set_signal(index, signal)
@@ -361,16 +362,16 @@ end
 
 local function memory_getraw(channel, addr)
   local signals = io.memory_getchannel_signals(channel)
-  assert.check(signals ~= nil, "Trying to retrieve nil memory channel")
-  assert.check(1 <= addr and addr <= #signals, "Memory cell index is out of range")
-  return signals[addr] or NULL_SIGNAL
+  --assert.check(signals ~= nil, "Trying to retrieve nil memory channel")
+  return signals and signals[addr] or NULL_SIGNAL
 end
 
 local function memory_setraw(channel, addr, signal)
   local control = io.memory_getchannel_write(channel)
   assert.check(control ~= nil, "Trying to access nil memory channel")
-  if signal and signal.count then
-    assert.check(signal.signal, "Memory accepts only valid signal types.")
+  assert.check(1 <= addr and addr <= MC_OUTPUT, "Memory cell index is out of range")
+  if signal and signal.signal and signal.count then
+    assert.check(math.abs(signal.count) ~= 1/0, "Division by zero")
     control.set_signal(addr, signal)
   else
     control.set_signal(addr, nil)

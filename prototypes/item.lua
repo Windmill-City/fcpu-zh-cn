@@ -114,6 +114,7 @@ require('legacy/imposter_fcpu')
 local hdl_output_fcpu = table.shallow_merge(table.deep_copy(data.raw['constant-combinator']['constant-combinator']), {
   name = "output-fcpu",
   circuit_wire_max_distance = 10000,
+  item_slot_count = MC_OUTPUT,
 })
 if not MC_DEBUG then hdl_output_fcpu = table.shallow_merge(hdl_output_fcpu, {
   icon = "__fcpu__/graphics/icons/fcpu.png",
@@ -139,7 +140,6 @@ if not MC_DEBUG then hdl_output_fcpu = table.shallow_merge(hdl_output_fcpu, {
   },
   collision_mask = {"not-colliding-with-itself"},
 
-  item_slot_count = MC_OUTPUT,
   sprites =
   {
       north = empty_picture,
