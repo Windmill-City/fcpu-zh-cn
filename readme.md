@@ -451,6 +451,11 @@ When working with SIMD instructions, the following features should be considered
 * `xavg` dst[**R**/**O**] src[**I**/**M**]
   Compute average value in `src` and assign `dst` to it.
 
+* `xmini` dst[**R**/**O**] src[**I**/**M**]
+  Searches minimum signal in `src` and assing its index into `dst`.
+* `xmaxi` dst[**R**/**O**] src[**I**/**M**]
+  Searches maximum signal in `src` and assing its index into `dst`.
+
 
 [comment]: <> (md2frt-skip-section-begin)
 

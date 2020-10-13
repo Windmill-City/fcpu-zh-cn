@@ -111,6 +111,43 @@ local opcodes_vx = {
       io.setcount(_[1], s / c)
     end
   end,
+
+  xmini = function(_, ics)
+    assert.two(_)
+    assert.type(_[1], {'register', 'output'})
+    assert.type(_[2], {'memory', 'input'})
+
+    local signals = io.memory_getchannel_signals(_[2])
+    assert.check(signals ~= nil, "Input channel is unavailable")
+
+    local m, i
+    for k,v in ipairs(signals) do
+      if v.signal.name and (not m or v.count < m.count) then
+        m = v
+        i = k
+      end
+    end
+
+    io.setcount(_[1], i)
+  end,
+  xmaxi = function(_, ics)
+    assert.two(_)
+    assert.type(_[1], {'register', 'output'})
+    assert.type(_[2], {'memory', 'input'})
+
+    local signals = io.memory_getchannel_signals(_[2])
+    assert.check(signals ~= nil, "Input channel is unavailable")
+
+    local m, i
+    for k,v in ipairs(signals) do
+      if v.signal.name and (not m or v.count > m.count) then
+        m = v
+        i = k
+      end
+    end
+
+    io.setcount(_[1], i)
+  end,
 }
 
 
