@@ -315,11 +315,22 @@ local function CreateWidget_Main(rootGui)
               children={
                 {type="text-box", style="fcpu_notice_textbox", save_as="gui_line_numbers",
                   ignored_by_interaction=true,
+                  style_mods={
+                    minimal_width=42,
+                    maximal_width=52,
+                    minimal_height = 2568,
+                    maximal_height = 2568,
+                    horizontally_stretchable=true,
+                  }
                 },
                 {type="text-box", name="program-input", style="fcpu_program_input",
                   style_mods={
+                    minimal_width = 282,
+                    maximal_width = 292,
+                    minimal_height = 2568,
+                    maximal_height = 2568,
+                    horizontally_squashable=true,
                     vertically_stretchable=false,
-                    horizontally_stretchable=true,
                     rich_text_setting=defines.rich_text_setting.enabled
                   },
                   horizontal_scroll_policy="never",
@@ -405,7 +416,7 @@ local function UpdateLines(element, state)
   local lines = {}
   for i = 1, MC_LINES do
     local line = tostring(i)
-    if i < 10 then line = " "..i end
+    if i < 10 then line = "  "..i elseif i < 100 then line = " "..i end
     if i == state.error_line then
       line = '[color=1,0.4,0.4]'..line..'![/color]'
     elseif i == state.instruction_pointer then
