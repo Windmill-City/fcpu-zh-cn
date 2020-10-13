@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.9
-Date: ????
+Date: 2020-10-13
   Features:
     - New `xmini` and `xmaxi`, same as `xmin` `xmax` but assigns index as a result.
     - Added memory assignment support `mov mem1[23] 4[item=copper-ore]`.
