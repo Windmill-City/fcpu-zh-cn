@@ -200,9 +200,13 @@ local function on_picker_dolly_moved(event)
 
         if state.program_ics then
           for _, ics in pairs(state.program_ics) do
-            for _, e in pairs(ics) do
-              if e and type(e) == 'table' and e.valid then
-                e.teleport{x = e.position.x + offset_x, y = e.position.y + offset_y}
+            if ics and type(ics) == 'table' and ics.valid then
+              ics.teleport{x = ics.position.x + offset_x, y = ics.position.y + offset_y}
+            else
+              for _, e in pairs(ics) do
+                if e and type(e) == 'table' and e.valid then
+                  e.teleport{x = e.position.x + offset_x, y = e.position.y + offset_y}
+                end
               end
             end
           end
