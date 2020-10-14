@@ -108,13 +108,21 @@ function Controller.compile(state)
   state.modified = false
 end
 
-function Controller.set_error_message(state, error_message)
-  state.error_message = {"gui-fcpu.program_error", state.instruction_pointer, error_message}
-  state.error_line = state.instruction_pointer
-  script.raise_event(Controller.event_error, {['entity'] = state.entity, message = state.error_message})
+function Controller.set_error_message(state, err_message)
+  if err_message == nil then
+    Controller.GuiCache_InvalidateLine(state, state.error_line)
+    state.error_line = nil
+    state.error_message = nil
+  else
+    state.error_line = state.instruction_pointer
+    state.error_message = {"gui-fcpu.program_error", state.instruction_pointer, err_message}
+    Controller.GuiCache_InvalidateLine(state, state.error_line)
+    script.raise_event(Controller.event_error, {['entity'] = state.entity, message = state.error_message})
+  end
 end
 
 function Controller.set_program_counter(state, value)
+  Controller.GuiCache_InvalidateLine(state, state.instruction_pointer)
   local length = #state.program_ast
   if length == 0 or length < value then
     state.instruction_pointer = state.program_begin or 1
@@ -133,6 +141,7 @@ function Controller.set_program_counter(state, value)
     end
   end
   Controller.update_ip(state)
+  Controller.GuiCache_InvalidateLine(state, state.instruction_pointer)
 end
 
 function Controller.do_defferred(state, frames)
@@ -281,9 +290,8 @@ end
 
 function Controller.run(state)
   Controller.update_state(state, PSTATE_RUNNING)
-  state.error_message = nil
-  state.error_line = nil
   state.do_step = false
+  Controller.set_error_message(state, nil)
 end
 
 function Controller.step(state)
@@ -292,8 +300,7 @@ function Controller.step(state)
   end
   Controller.update_state(state, PSTATE_RUNNING)
   state.do_step = true
-  state.error_message = nil
-  state.error_line = nil
+  Controller.set_error_message(state, nil)
 end
 
 function Controller.halt(state)
@@ -317,6 +324,18 @@ function Controller.is_first_instruction(state)
 end
 
 -------------------------------------------------------------------------------------------------------
+
+function Controller.GuiCache_InvalidateLine(state, line)
+  if state.gui_cache then
+    if line and state.gui_cache.invalid_lines then
+      -- do not add cache until gui initialize it
+      state.gui_cache.invalid_lines[line] = true
+    else
+      -- update all lines
+      state.gui_cache.invalid_lines = nil
+    end
+  end
+end
 
 function Controller.update_ip(state)
   --local control = state.entity.get_control_behavior()

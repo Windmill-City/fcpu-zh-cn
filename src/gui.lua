@@ -139,9 +139,7 @@ end
 local function MemoryView_UpdateFromTable(player_data, signals, sort, order)
   local cells = player_data.gui_memory_cells.children
   if cells then
-    local no_sort = (sort == nil or sort == false)
-
-    if order ~= nil then
+    --[[if order ~= nil then
       -- TODO: order is different than in Factorio
       local t = {}
       for _,v in ipairs(signals) do
@@ -161,12 +159,13 @@ local function MemoryView_UpdateFromTable(player_data, signals, sort, order)
         n[#n+1] = v
       end
       signals = n
-    end
+    end]]
 
     -- add extra
     for i = #cells + 1, math.max(MC_MEMORY_SLOTS_MIN, (signals and #signals or 0)) do
       gui.build(player_data.gui_memory_cells, { gui.templates.slot_inventory('index-'..i, '['..i..']') })
     end
+    cells = player_data.gui_memory_cells.children
 
     local i = 1
     -- show and setup visible
@@ -177,8 +176,14 @@ local function MemoryView_UpdateFromTable(player_data, signals, sort, order)
           local sprite = signalToSpritePath(player_data, v.signal)
           cell.visible = true
           cell.sprite = sprite
-          cell.number = (sprite or no_sort) and v.count or nil
-          if sprite or no_sort then
+          if sort == 0 then
+            cell.number = v.count
+          elseif sort == 1 then
+            cell.number = sprite and v.count or nil
+          else
+            cell.number = (sprite or sort) and v.count or nil
+          end
+          if sprite or sort then
             i = i + 1
           end
         end
@@ -201,15 +206,33 @@ local function MemoryView_UpdateFromTable(player_data, signals, sort, order)
   end
 end
 
-local function UpdateWidget_MemoryView(player_data)
+local function UpdateWidget_MemoryView(player_data, state, initial)
   if not player_data.gui_memory_channel then return end
   local index = player_data.gui_memory_channel.selected_index
-  local state = get_fcpu_state(player_data.current_fcpu)
 
   if state then
     index = math.max(1, index)
 
     if index <= MC_MEMORY_CHANNELS then
+      local ValidateGuiCache = function(channel)
+        if state.gui_cache then
+          if state.gui_cache.invalid_memory == nil then
+            state.gui_cache.invalid_memory = {}
+            return false
+          elseif initial then
+            state.gui_cache.invalid_memory[channel] = nil
+            return false
+          elseif state.gui_cache.invalid_memory[channel] then
+            if state.gui_cache.invalid_memory[channel] + 5 < state.clock then
+              state.gui_cache.invalid_memory[channel] = nil
+              return false
+            end
+          end
+          return true
+        end
+      end
+
+      if ValidateGuiCache('mem'..index) then return end
       -- Memory channels
       local ics = state.program_ics['mem' .. index]
       if ics and ics.out and ics.out.valid then
@@ -218,7 +241,7 @@ local function UpdateWidget_MemoryView(player_data)
           local network = control.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_output)
           if network then
             MemoryView_UpdateFromTable(player_data, network.signals)
-            --MemoryView_UpdateFromTable(player_data, network.signals, false, control.signals_last_tick)
+            --MemoryView_UpdateFromTable(player_data, network.signals, 0, control.signals_last_tick)
           else
             MemoryView_UpdateFromTable(player_data, control.signals_last_tick)
           end
@@ -227,7 +250,7 @@ local function UpdateWidget_MemoryView(player_data)
           if ics.value then
             local vc = ics.value.get_control_behavior()
             if vc.enabled and vc.parameters then
-              MemoryView_UpdateFromTable(player_data, vc.parameters.parameters, false)
+              MemoryView_UpdateFromTable(player_data, vc.parameters.parameters, 1)
               return
             end
           end
@@ -241,7 +264,7 @@ local function UpdateWidget_MemoryView(player_data)
       end
     elseif index == MC_MEMORY_CHANNELS + 1 then
       -- Registers
-      MemoryView_UpdateFromTable(player_data, state.regs, false)
+      MemoryView_UpdateFromTable(player_data, state.regs, 0)
       return
     elseif index == MC_MEMORY_CHANNELS + 2 then
       -- Input wires (RED)
@@ -283,6 +306,28 @@ local function UpdateWidget_MemoryView(player_data)
   end
 
   MemoryView_UpdateFromTable(player_data, {})
+end
+
+-------------------------------------------------------------------------------------------------------
+local function UpdateWidget_Breakpoints(player_data, state, initial)
+  if state.gui_cache then
+    local update_line = function(i)
+      local line = player_data.gui_breakpoints.children[i]
+      if line then
+        line.caption = FormatBreakpointTitle(state, i)
+      end
+    end
+    if initial or state.gui_cache.invalid_lines == nil then
+      for i = 1,MC_LINES do
+        update_line(i)
+      end
+    else
+      for k,_ in pairs(state.gui_cache.invalid_lines) do
+        update_line(k)
+      end
+    end
+    state.gui_cache.invalid_lines = {}
+  end
 end
 
 -------------------------------------------------------------------------------------------------------
@@ -429,7 +474,7 @@ function GuiWidgetOpen(player, entity)
   player_data = dictionary_combine(player_data, elems, CreateWidget_MemoryView(elems.gui_fcpu["fcpu-panels"]))
 
   player_data.gui_program_input.text = state.program_text
-  GuiWidgetUpdate(player_data, state)
+  GuiWidgetUpdate(player_data, state, true)
 
   if state.error_message then
     player_data.gui_error_message.caption = state.error_message
@@ -455,7 +500,7 @@ function GuiWidgetOpen(player, entity)
   return player_data
 end
 
-function GuiWidgetUpdate(player_data, state)
+function GuiWidgetUpdate(player_data, state, initial)
   -- Enable/Disable the run/step button
   if player_data.gui_run_button and player_data.gui_run_button.valid then
     if Controller.is_running(state) then
@@ -500,17 +545,12 @@ function GuiWidgetUpdate(player_data, state)
     player_data.gui_program_input.read_only = Controller.is_running(state)
   end
   -- Update the program lines in the GUI
-  if false and player_data.gui_breakpoints and player_data.gui_breakpoints.valid then
-    for i = 1, MC_LINES do
-      local line = player_data.gui_breakpoints.children[i]
-      if line then
-        line.caption = FormatBreakpointTitle(state, i)
-      end
-    end
+  if player_data.gui_breakpoints and player_data.gui_breakpoints.valid then
+    UpdateWidget_Breakpoints(player_data, state, initial)
   end
 
   if player_data.gui_memory_view and player_data.gui_memory_view.valid then
-    UpdateWidget_MemoryView(player_data, state)
+    UpdateWidget_MemoryView(player_data, state, initial)
   end
 end
 
@@ -576,7 +616,8 @@ gui.add_handlers{
     memory_channel = {
       on_gui_selection_state_changed = mixPlayerData(function(player_data, player, event)
         if player_data.gui_memory_view then
-          UpdateWidget_MemoryView(player_data)
+          local state = get_fcpu_state(player_data.current_fcpu)
+          UpdateWidget_MemoryView(player_data, state, true)
         end
       end)
     },

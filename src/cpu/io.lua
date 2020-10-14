@@ -323,6 +323,7 @@ function io.memory_getchannel_write(_, corrective)
         end
       else
         if ics.value and ics.value.valid then
+          io.GuiCache_InvalidateMemory(_.location .. _.index)
           return ics.value.get_control_behavior()
         end
       end
@@ -409,12 +410,26 @@ function io.memory_set(address, signal)
     memory_setraw(address, addr, was, true)
   end
   memory_setraw(address, addr, signal)
+  io.GuiCache_InvalidateMemory(address.location .. address.index)
 end
 
 function io.memory_clear(address)
   assert.check(address.index ~= nil, "Should be addressable memory cell")
   memory_setraw(address, nil, nil, true)
   memory_setraw(address, nil, nil, false)
+  io.GuiCache_InvalidateMemory(address.location .. address.index)
+end
+
+function io.GuiCache_InvalidateMemory(channel)
+  if state.gui_cache then
+    if channel and state.gui_cache.invalid_memory then
+      -- do not add cache until gui initialize it
+      state.gui_cache.invalid_memory[channel] = state.clock
+    else
+      -- update all channels
+      state.gui_cache.invalid_memory = nil
+    end
+  end
 end
 
 
