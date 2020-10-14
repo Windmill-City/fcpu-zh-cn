@@ -426,7 +426,9 @@ function io.GuiCache_InvalidateMemory(channel)
   if state.gui_cache then
     if channel and state.gui_cache.invalid_memory then
       -- do not add cache until gui initialize it
-      state.gui_cache.invalid_memory[channel] = state.clock
+      if (state.gui_cache.invalid_memory[channel] or 0) < state.clock then
+        state.gui_cache.invalid_memory[channel] = state.clock + 6
+      end
     else
       -- update all channels
       state.gui_cache.invalid_memory = nil

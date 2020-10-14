@@ -223,7 +223,7 @@ local function UpdateWidget_MemoryView(player_data, state, initial)
             state.gui_cache.invalid_memory[channel] = nil
             return false
           elseif state.gui_cache.invalid_memory[channel] then
-            if state.gui_cache.invalid_memory[channel] + 5 < state.clock then
+            if state.gui_cache.invalid_memory[channel] < state.clock then
               state.gui_cache.invalid_memory[channel] = nil
               return false
             end
