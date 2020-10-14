@@ -16,31 +16,22 @@ local function get_debug_offset(entity, d_next_node)
   if MC_DEBUG then
     local state = get_fcpu_state(entity)
     if state then
-      if MC_DEBUG == true then
-        if d_next_node == true then
-          state.d_i = 2
-          state.d_j = (state.d_j or 0) + 1
-        elseif state.d_j == nil or d_next_node == false then
-          state.d_i = d_next_node or 1
-          state.d_j = 0
-        elseif type(d_next_node) == 'number' then
-          local i = math.floor(d_next_node)
-          state.d_i = i or 1
-          state.d_j = 0
-          y = -(d_next_node - i) * 2
-        else
-          state.d_i = (((state.d_i / 2) or 0) + 1) * 2
-        end
-        x = state.d_i
-        y = state.d_j * 2 + y
+      if d_next_node == true then
+        state.d_i = 2
+        state.d_j = (state.d_j or 0) + 1
+      elseif state.d_j == nil or d_next_node == false then
+        state.d_i = d_next_node or 1
+        state.d_j = 0
+      elseif type(d_next_node) == 'number' then
+        local i = math.floor(d_next_node)
+        state.d_i = i or 1
+        state.d_j = 0
+        y = -(d_next_node - i) * 2
       else
-        state.d_i = (state.d_i or 0) % 30 + 1
-        local c = math.floor((state.d_i - 1) * 0.125)
-        local r = (c + 1) * 1.5
-        local a = (state.d_i - 1) * math.pi * 0.25 * (c == 2 and 0.5 or 1)
-        x = math.cos(a) * r
-        y = math.sin(a) * r
+        state.d_i = (((state.d_i / 2) or 0) + 1) * 2
       end
+      x = state.d_i
+      y = state.d_j * 2 + y
     end
   end
   return x, y

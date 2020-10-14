@@ -471,7 +471,11 @@ function GuiWidgetOpen(player, entity)
   if 0 < fcpu_debug_enabled then
     elems.gui_fcpu.titlebar.label.caption = elems.gui_fcpu.titlebar.label.caption.." #"..entity.unit_number..' ⇨ '..state.index
   end
-  player_data = dictionary_combine(player_data, elems, CreateWidget_MemoryView(elems.gui_fcpu["fcpu-panels"]))
+  player_data = dictionary_combine(
+    player_data,
+    elems,
+    {}--CreateWidget_MemoryView(elems.gui_fcpu["fcpu-panels"])
+  )
 
   player_data.gui_program_input.text = state.program_text
   GuiWidgetUpdate(player_data, state, true)
