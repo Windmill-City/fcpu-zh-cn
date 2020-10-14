@@ -116,7 +116,7 @@ local opcodes = {
           assert.type(expr, {'register', 'memory', 'output'})
           if expr.color == 'out' then
             if expr.addr == nil then
-              return io.output_clear()
+              actions[#actions + 1] = io.output_clear()
             else
               io.wire_set(_[i], nil)
             end

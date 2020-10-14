@@ -279,8 +279,10 @@ function io.ics_each(proc, name)
       proc(ics)
     end
   else
-    for _, ics in ipairs(state.program_ics) do
-      proc(ics)
+    for _, ics in pairs(state.program_ics) do
+      if type(_) == 'number' then
+        proc(ics)
+      end
     end
   end
 end

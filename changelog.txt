@@ -5,6 +5,7 @@ Date: ????
     - Added breakpoints support.
   Bugfixes:
     - Line number is crooked when UI scale >100% .
+    - Clear memory when `ics` is a sparse arrays.
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.9
 Date: 2020-10-13
