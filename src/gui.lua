@@ -733,7 +733,10 @@ gui.add_handlers{
         else
           local rootGui = player_data.gui_fcpu["fcpu-panels"]
           local elems = CreateWidget_MemoryView(rootGui)
-          return dictionary_combine(player_data, elems)
+          player_data = dictionary_combine(player_data, elems)
+          local state = get_fcpu_state(player_data.current_fcpu)
+          UpdateWidget_MemoryView(player_data, state, true)
+          return player_data
         end
       end)
     },
