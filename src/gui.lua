@@ -31,6 +31,30 @@ local function dictionary_combine(...)
   return new
 end
 
+local function FormatBreakpointTitle(state, i)
+  local line = tostring(i)
+  if i < 10 then line = "  "..i elseif i < 100 then line = " "..i end
+  line = '[font=fcpu-mono]'..line..'[/font]'
+
+  if state and i == state.error_line then
+    line = '[color=1,0.4,0.4]'..line..'⚠[/color]'
+  elseif state and i == state.instruction_pointer then
+    line = '[color=blue]'..line..'➧[/color]'
+  else
+    line = line..' '
+  end
+
+  if state and state.breakpoints[i] then
+    --line = '[img=fcpu-breakpoint-on]'.. line
+    line = '[color=1,0.4,0.4]●[/color]'..line
+  else
+    --line = '[img=fcpu-breakpoint-empty]'.. line
+    line = ' '..line
+  end
+
+  return line
+end
+
 -------------------------------------------------------------------------------------------------------
 
 gui.add_templates{
@@ -58,6 +82,18 @@ gui.add_templates{
   end,
   slot_inventory = function(name, title)
     return {type="sprite-button", style="inventory_slot", name=name .."-inspect", tooltip=(title or name)}
+  end,
+  breakpoints_button = function(state, num)
+    return {type="label", name="break-"..num, caption=FormatBreakpointTitle(state, num),
+      style="fcpu_breakpoint_label",
+      tooltip={'gui-fcpu.breakpoint-toggle'},
+      handlers="widget.breakpoint",
+      style_mods={
+        minimal_width=42,
+        maximal_width=52,
+        height=16.5,
+      }
+    }
   end,
 }
 
@@ -250,11 +286,15 @@ local function UpdateWidget_MemoryView(player_data)
 end
 
 -------------------------------------------------------------------------------------------------------
-
 local function CreateWidget_Main(rootGui)
   local regslots = {}
   for i = 1, MC_REGS do
     table.insert(regslots, gui.templates.slot_button('reg'..i))
+  end
+
+  local breakpoints = {}
+  for i = 1, MC_LINES do
+    table.insert(breakpoints, gui.templates.breakpoints_button(nil, i))
   end
 
   local elems = gui.build(rootGui, {
@@ -313,20 +353,23 @@ local function CreateWidget_Main(rootGui)
           {type="scroll-pane", horizontal_scroll_policy="never", style="scroll_pane_in_shallow_frame", children={
             {type="flow", name="inner", direction="horizontal",
               children={
-                {type="text-box", style="fcpu_notice_textbox", save_as="gui_line_numbers",
-                  ignored_by_interaction=true,
+                {type="flow", name="inner", save_as="gui_breakpoints", direction="vertical",
                   style_mods={
-                    minimal_width=42,
+                    minimal_width=44,
                     maximal_width=52,
                     minimal_height = 2568,
                     maximal_height = 2568,
                     horizontally_stretchable=true,
+                    top_padding=4,
+                  },
+                  children={
+                    table.unpack(breakpoints)
                   }
                 },
                 {type="text-box", name="program-input", style="fcpu_program_input",
                   style_mods={
                     minimal_width = 282,
-                    maximal_width = 292,
+                    maximal_width = 290,
                     minimal_height = 2568,
                     maximal_height = 2568,
                     horizontally_squashable=true,
@@ -412,23 +455,6 @@ function GuiWidgetOpen(player, entity)
   return player_data
 end
 
-local function UpdateLines(element, state)
-  local lines = {}
-  for i = 1, MC_LINES do
-    local line = tostring(i)
-    if i < 10 then line = "  "..i elseif i < 100 then line = " "..i end
-    if i == state.error_line then
-      line = '[color=1,0.4,0.4]'..line..'![/color]'
-    elseif i == state.instruction_pointer then
-      line = '[color=blue]'..line..'>[/color]'
-    else
-      line = line..' '
-    end
-    table.insert(lines, line)
-  end
-  element.text = table.concat(lines, "\n")
-end
-
 function GuiWidgetUpdate(player_data, state)
   -- Enable/Disable the run/step button
   if player_data.gui_run_button and player_data.gui_run_button.valid then
@@ -474,8 +500,13 @@ function GuiWidgetUpdate(player_data, state)
     player_data.gui_program_input.read_only = Controller.is_running(state)
   end
   -- Update the program lines in the GUI
-  if player_data.gui_line_numbers and player_data.gui_line_numbers.valid then
-    UpdateLines(player_data.gui_line_numbers, state)
+  if false and player_data.gui_breakpoints and player_data.gui_breakpoints.valid then
+    for i = 1, MC_LINES do
+      local line = player_data.gui_breakpoints.children[i]
+      if line then
+        line.caption = FormatBreakpointTitle(state, i)
+      end
+    end
   end
 
   if player_data.gui_memory_view and player_data.gui_memory_view.valid then
@@ -662,6 +693,16 @@ gui.add_handlers{
           local rootGui = player_data.gui_fcpu["fcpu-panels"]
           local elems = CreateWidget_MemoryView(rootGui)
           return dictionary_combine(player_data, elems)
+        end
+      end)
+    },
+    breakpoint = {
+      on_gui_click = mixPlayerData(function(player_data, player, event)
+        if player_data.gui_breakpoints and event.element then
+          local num = tonumber(string.match(event.element.name, 'break%-(%d+)$'))
+          local state = get_fcpu_state(player_data.current_fcpu)
+          state.breakpoints[num] = not state.breakpoints[num] or nil;
+          event.element.caption = FormatBreakpointTitle(state, num)
         end
       end)
     },

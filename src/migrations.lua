@@ -216,4 +216,10 @@ return {
       global.fcpus[v] = nil
     end
   end,
+
+  ["0.3.10"] = function()
+    for _,state in pairs(global.fcpus) do
+      state.breakpoints = state.breakpoints or {}
+    end
+  end,
 }

@@ -22,7 +22,7 @@ function table.shallow_merge(tblA, tblB, array_merge, raw)
 end
 
 local empty_picture = {
-  filename = "__fcpu__/graphics/empty.png",
+  filename = "__core__/graphics/empty.png",
   x = 0,
   y = 0,
   width = 1,

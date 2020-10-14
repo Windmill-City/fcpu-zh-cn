@@ -88,44 +88,50 @@ data:extend{
   },
 }
 --[[
-for i = 1, MC_LINES do
-  local y = ((i-1) * 21)
-  if i >= 11 then
-      y = y - 1
-  end
-  local h = 21
-  data:extend{
-      {
-          type = "sprite",
-          name = "fcpu-line-sprite-default-"..i,
-          filename = "__fcpu__/graphics/icons/gui/lines.png",
-          width = 42,
-          height = h,
-          x = 0,
-          y = y
-      }
-  }
-  data:extend{
-      {
-          type = "sprite",
-          name = "fcpu-line-sprite-active-"..i,
-          filename = "__fcpu__/graphics/icons/gui/lines.png",
-          width = 42,
-          height = h,
-          x = 42,
-          y = y
-      }
-  }
-  data:extend{
-      {
-          type = "sprite",
-          name = "fcpu-line-sprite-error-"..i,
-          filename = "__fcpu__/graphics/icons/gui/lines.png",
-          width = 42,
-          height = h,
-          x = 84,
-          y = y   
-      }
-  }
-end
+data:extend{
+  {
+    type = "sprite",
+    name = "fcpu-breakpoint-empty",
+    filename = "__core__/graphics/empty.png",
+    flags = {'gui'},
+    x = 0,
+    y = 0,
+    width = 1,
+    height = 1,
+  },
+  {
+    type = "sprite",
+    name = "fcpu-breakpoint-current",
+    filename = "__core__/graphics/icons/mip/expand.png",
+    flags = {'gui'},
+    x = 0,
+    y = 0,
+    width = 32,
+    height = 32,
+    scale = 0.25
+  },
+  {
+    type = "sprite",
+    name = "fcpu-breakpoint-on",
+    filename = "__base__/graphics/icons/list-dot.png",
+    flags = {'gui'},
+    tint = {r=1, g=0.3, b=0.3, a=1},
+    x = 64,
+    y = 0,
+    width = 32,
+    height = 32,
+    scale = 0.25
+  },
+  {
+    type = "sprite",
+    name = "fcpu-breakpoint-error",
+    filename = "__core__/graphics/icons/mip/not-available.png",
+    flags = {'gui'},
+    x = 0,
+    y = 0,
+    width = 32,
+    height = 32,
+    scale = 0.25
+  },
+}
 ]]

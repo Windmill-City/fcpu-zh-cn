@@ -28,6 +28,18 @@ default_gui["fcpu_program_input"] = {
   padding = 0,
 }
 
+default_gui["fcpu_breakpoint_label"] = {
+  type = "label_style",
+  parent = "label",
+  rich_text_setting = "enabled",
+  single_line = true,
+  font='fcpu-mono-small',
+  --font='default-small',
+  top_padding=0,
+  bottom_padding=0,
+  horizontal_align='right',
+}
+
 default_gui["fcpu_toolbar_copy"] = {
   type = "button_style",
   parent = "shortcut_bar_button_small",

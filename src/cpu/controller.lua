@@ -5,6 +5,7 @@ Compiler.bind()
 PSTATE_HALTED = 0
 PSTATE_RUNNING = 1
 PSTATE_SLEEPING = 2
+PSTATE_BREAKPOINT = 3
 
 local pstateStr = {
   [PSTATE_HALTED] = 'signal-fcpu-halt',
@@ -164,6 +165,11 @@ end
 function Controller.tick(state, sync_wait)
   state.clock = state.clock + 1
 
+  -- Breakpoints
+  if state.program_state == PSTATE_BREAKPOINT then
+    return
+  end
+
   -- Interrupts
   local get_signal = function(signal)
     return state.entity.get_merged_signal(signal.signal, defines.circuit_connector_id.combinator_input) or 0
@@ -265,6 +271,12 @@ function Controller.tick(state, sync_wait)
     state.do_step = false
     Controller.halt(state)
   end
+
+  -- Stop on next instruction if breakpoint found
+  if state.breakpoints[state.instruction_pointer] then
+    Controller.halt(state)
+    state.program_state = PSTATE_BREAKPOINT
+  end
 end
 
 function Controller.run(state)
@@ -297,7 +309,7 @@ function Controller.disable(state, disable)
 end
 
 function Controller.is_running(state)
-  return state.program_state ~= PSTATE_HALTED
+  return state.program_state ~= PSTATE_HALTED and state.program_state ~= PSTATE_BREAKPOINT
 end
 
 function Controller.is_first_instruction(state)
