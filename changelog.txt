@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.11
-Date: ????
+Date: 2020-10-14
   Bugfixes:
     - PickerDollies move whole internal scheme.
     - Removed smoke clouds while building or modifying fCPU.
