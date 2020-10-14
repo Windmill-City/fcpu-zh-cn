@@ -3,6 +3,7 @@ Version: 0.3.10
 Date: ????
   Features:
     - Added breakpoints support.
+    - Easter egg.
   Bugfixes:
     - Line number is crooked when UI scale >100% .
     - Clear memory when `ics` is a sparse arrays.

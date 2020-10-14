@@ -540,6 +540,16 @@ local opcodes = {
       return {type = 'block'}
     end
   end,
+
+  nmd = function(_) -- Nuclear Meltdown
+    assert.one(_)
+    assert.type(_[1], {'type'})
+    assert.check(_[1].signal.type == 'item' and (_[1].signal.name == 'uranium-fuel-cell' or _[1].signal.name == 'atomic-bomb'), 'Argument is pretty impoverished. Please, use enriched one!')
+    io.for_entity(function(entity)
+      entity.surface.create_entity({name='atomic-rocket', amount=1, position={entity.position.x, entity.position.y}, force=game.forces.enemy, target=entity, speed=1})
+      --entity.surface.create_entity({name='nuke-explosion', amount=1, position={entity.position.x, entity.position.y}})
+    end)
+  end,
 }
 
 

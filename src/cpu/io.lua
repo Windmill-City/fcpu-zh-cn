@@ -23,6 +23,10 @@ local io = {}
 -- }
 
 
+function io.for_entity(proc)
+  proc(state.entity, state)
+end
+
 -- Makers
 function io.make_label(label)
   return { type = 'label', label = label }

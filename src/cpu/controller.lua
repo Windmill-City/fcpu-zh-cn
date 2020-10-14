@@ -34,6 +34,7 @@ function Controller.init(mc)
     program_ics = {},
     ics_stack = {},
     deffered = {},
+    breakpoints = {},
     instruction_pointer = 1
   }
 
