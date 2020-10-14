@@ -53,7 +53,8 @@ function builder.create_node(entity, type, debug_next_node)
     name = type .."-fcpu",
     position = { x = entity.position.x + x, y = entity.position.y + y },
     direction = defines.direction.south,
-    force = entity.force
+    force = entity.force,
+    create_build_effect_smoke = false
   })
   node_fcpu.destructible = false
   node_fcpu.operable = true

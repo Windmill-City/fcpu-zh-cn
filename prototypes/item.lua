@@ -1,5 +1,4 @@
 require('prototypes/entities/pictures')
-require('src/constants')
 
 function table.shallow_merge(tblA, tblB, array_merge, raw)
   if not tblB then
