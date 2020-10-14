@@ -213,25 +213,25 @@ local function UpdateWidget_MemoryView(player_data, state, initial)
   if state then
     index = math.max(1, index)
 
-    if index <= MC_MEMORY_CHANNELS then
-      local ValidateGuiCache = function(channel)
-        if state.gui_cache then
-          if state.gui_cache.invalid_memory == nil then
-            state.gui_cache.invalid_memory = {}
-            return false
-          elseif initial then
+    local ValidateGuiCache = function(channel)
+      if state.gui_cache then
+        if state.gui_cache.invalid_memory == nil then
+          state.gui_cache.invalid_memory = {}
+          return false
+        elseif initial then
+          state.gui_cache.invalid_memory[channel] = nil
+          return false
+        elseif state.gui_cache.invalid_memory[channel] then
+          if state.gui_cache.invalid_memory[channel] <= state.clock then
             state.gui_cache.invalid_memory[channel] = nil
             return false
-          elseif state.gui_cache.invalid_memory[channel] then
-            if state.gui_cache.invalid_memory[channel] < state.clock then
-              state.gui_cache.invalid_memory[channel] = nil
-              return false
-            end
           end
-          return true
         end
+        return true
       end
+    end
 
+    if index <= MC_MEMORY_CHANNELS then
       if ValidateGuiCache('mem'..index) then return end
       -- Memory channels
       local ics = state.program_ics['mem' .. index]
@@ -279,10 +279,11 @@ local function UpdateWidget_MemoryView(player_data, state, initial)
       MemoryView_UpdateFromTable(player_data, input and input.signals)
       return
     elseif index == MC_MEMORY_CHANNELS + 4 then
+      if ValidateGuiCache('output') then return end
       -- Output buffer
       if state.program_ics.output then
         local control = state.program_ics.output.get_control_behavior()
-        MemoryView_UpdateFromTable(player_data, control and control.parameters and control.parameters.parameters)
+        MemoryView_UpdateFromTable(player_data, control and control.parameters and control.parameters.parameters, 1, true)
         return
       end
     elseif index == MC_MEMORY_CHANNELS + 5 then

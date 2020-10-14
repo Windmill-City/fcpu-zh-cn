@@ -1,5 +1,6 @@
 local assert = require('src/cpu/assert')
 local io = require('src/cpu/io')
+local emitter = require('src/cpu/emitter')
 local ops = require('src/cpu/opcodes')
 local ops_vx = require('src/cpu/opcodes_vx')
 local hdlBuilder = require('src/cpu/hdl_builder')
@@ -90,15 +91,15 @@ local function parse(tokens)
     return node
   end
   local parseLabel = function()
-    return io.make_label(consume())
+    return emitter.make_label(consume())
   end
   local parseConstant = function(fp)
-    return io.make_value(consume(), fp)
+    return emitter.make_value(consume(), fp)
   end
   local parseAddress = function(name)
     local token = consume()
     local a, b = string.match(token, name..'(@?)(%d+)')
-    return io.make_address(b or '', a == '@')
+    return emitter.make_address(b or '', a == '@')
   end
   local parseSignal = function(name)
     local token = consume()
@@ -109,23 +110,23 @@ local function parse(tokens)
     if m[2] == 'virtual-signal' then
       m[2] = 'virtual'
     end
-    return io.make_signal({type = m[2], name = m[3]}, m[1])
+    return emitter.make_signal({type = m[2], name = m[3]}, m[1])
   end
   local parseRegister = function(name, alias)
     local address = parseAddress(alias or name)
-    return io.make_register(name, address)
+    return emitter.make_register(name, address)
   end
   local parseReadOnlyRegister = function(name)
     if string.find(name, 'ipt') then
-      return io.make_register_ro(REG_IP)
+      return emitter.make_register_ro(REG_IP)
     elseif string.find(name, 'clk') then
-      return io.make_register_ro(REG_CLK)
+      return emitter.make_register_ro(REG_CLK)
     else
       local w, i = string.match(name, 'cn([rgm])(%d*)')
       if w == 'm' and i ~= nil then
-        return io.make_register_ro(REG_CNM + tonumber(i) - 1)
+        return emitter.make_register_ro(REG_CNM + tonumber(i) - 1)
       elseif w ~= 'm' then
-        return io.make_register_ro(w == 'r' and REG_CNR or w == 'g' and REG_CNG)
+        return emitter.make_register_ro(w == 'r' and REG_CNR or w == 'g' and REG_CNG)
       else
         assert.exception('Unknown register `'..name..'`')
       end
@@ -140,16 +141,11 @@ local function parse(tokens)
     if b == '@' or b == '[' and e == ']' then
       addr = d
     end
-
-    if b == '@' then
-      return io.make_memory(name, index, addr, true)
-    else
-      return io.make_memory(name, index, addr, false)
-    end
+    return emitter.make_memory(name, index, addr, b == '@')
   end
   local parseInput = function(name)
     local address = parseAddress(name)
-    return io.make_wire(name, address)
+    return emitter.make_wire(name, address)
   end
   local parseOutput = function(name)
     local address
@@ -160,7 +156,7 @@ local function parse(tokens)
     else
       address = parseAddress(name)
     end
-    return io.make_wire(name, address)
+    return emitter.make_wire(name, address)
   end
 
   parseExpr = function()
@@ -216,7 +212,7 @@ end
 local function eval(ast, ics)
   local node = function(_)
     if _.type == 'value' then
-      return io.value_get(_)
+      return _.count
     elseif _.type == 'op' then
       if ops[_.name] then
         return ops[_.name](_.expr)
@@ -335,7 +331,8 @@ end
 
 function compiler.bind()
   assert.bind()
-  io.bind(assert, hdlBuilder)
+  emitter.bind(assert)
+  io.bind(assert, hdlBuilder, emitter)
   ops.bind(assert, io)
   ops_vx.bind(assert, io, hdlBuilder)
 end

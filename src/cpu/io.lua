@@ -1,5 +1,6 @@
 local assert
 local hdlbuilder
+local emitter
 local state_control
 local output_control
 local wires
@@ -27,77 +28,82 @@ function io.for_entity(proc)
   proc(state.entity, state)
 end
 
--- Makers
-function io.make_label(label)
-  return { type = 'label', label = label }
-end
 
-function io.make_value(numstr, fixedpoint)
-  local number = tonumber(numstr)
-  if number == nil then
-    assert.exception("Can't parse number '".. numstr .."'")
-  end
-  return { type = 'value', count = number }
-end
-
-function io.make_address(addr, is_ptr)
-  assert.check(addr ~= nil)
-  return { type = 'address', addr = tonumber(addr), pointer = is_ptr }
-end
-
-function io.make_signal(signal_id, countstr)
-  if countstr == '' then
-    return { type = 'type', signal = signal_id }
-  else
-    local count = tonumber(countstr)
-    if count == nil then
-      assert.exception("Can't parse count '".. (countstr or 'nil') .."'")
+-- Registers
+local function register_getreadonly(index)
+  if index == REG_IP then
+    return state.instruction_pointer
+  elseif index == REG_CNR then
+    if wires.red and wires.red.signals then
+      return #wires.red.signals
+    else
+      return 0
     end
-    return { type = 'signal', signal = signal_id, count = count or 0 }
+  elseif index == REG_CNG then
+    if wires.green and wires.green.signals then
+      return #wires.green.signals
+    else
+      return 0
+    end
+  elseif index == REG_CLK then
+    return state.clock
+  elseif REG_CNM <= index then
+    local signals = io.memory_getchannel_signals({ type = 'memory', location = 'mem', index = index - REG_CNM + 1 })
+    return signals and #signals or 0
+  else
+    assert.exception('Unknown register with internal index '.. index)
   end
 end
 
-function io.make_register(name, address)
-  return { type = 'register', location = name, addr = address.addr, pointer = address.pointer }
+local function register_getraw(index)
+  assert.regs_index_range(index, MC_REGS)
+  if state.regs[index] and not state.regs[index].count then
+    state.regs[index].count = 0
+  end
+  return state.regs[index]
 end
 
-function io.make_register_ro(addr)
-  return { type = 'register', location = 'readonly', addr = tonumber(addr), pointer = false }
+local function register_setraw(index, signal)
+  assert.regs_index_range(index, MC_REGS)
+  assert.check(math.abs(signal.count or 0) ~= 1/0, "Division by zero")
+  state.regs[index] = signal
 end
 
-function io.make_memory(name, index, addr, is_ptr)
-  return { type = 'memory', location = name, index = tonumber(index), addr = tonumber(addr), pointer = is_ptr }
-end
-
-function io.make_wire(name, address)
-  return { type = 'wire', color = name, addr = address.addr, pointer = address.pointer}
-end
-
-
--- Address, Value and Signal decomposition
 local function addr_deref(_)
   assert.check(_.addr ~= nil and _.pointer ~= nil, "Invalid address")
   if _.pointer then
     assert.check(_.addr <= MC_REGS)
-    return io.register_getraw(_.addr).count
+    return register_getraw(_.addr).count
   else
     return _.addr
   end
 end
 
-function io.value_get(_)
-  assert.check(_.type == 'value')
-  return _.count
+
+function io.register_get(index_expr)
+  assert.check(index_expr.type == 'register', "Register expected")
+  local addr = addr_deref(index_expr)
+  if MC_REGS < addr then
+    local result = table.deep_copy(NULL_SIGNAL)
+    result.count = register_getreadonly(addr)
+    return result
+  else
+    return table.deep_copy(register_getraw(addr))
+  end
 end
 
-function io.signal_name(_)
-  assert.check(_.type == 'signal')
-  return _.signal.name
+function io.register_set(index_expr, value)
+  assert.check(index_expr.type == 'register', "Register expected")
+  local addr = addr_deref(index_expr)
+  local signal = table.deep_copy(value)
+  register_setraw(addr, signal)
 end
 
-function io.signal_count(_)
-  assert.check(_.type == 'signal')
-  return _.signal.count
+function io.register_set_count(index_expr, count)
+  local value = io.register_get(index_expr)
+  assert.check(count == count, "Division by zero")
+  value.count = count
+  io.register_set(index_expr, value)
 end
 
 
@@ -106,7 +112,7 @@ function io.control_get()
   local params = state_control.parameters
   local signal_id = params.parameters.output_signal
   local count = params.parameters.first_constant
-  return io.make_signal(signal_id, count)
+  return emitter.make_signal(signal_id, count)
 end
 
 function io.control_set(signal)
@@ -120,7 +126,7 @@ end
 -- Output wire access
 local function output_get(index)
   local signal = output_control.get_signal(index)
-  return io.make_signal(signal.signal, signal.count)
+  return emitter.make_signal(signal.signal, signal.count)
 end
 
 local function output_set(index, signal)
@@ -131,11 +137,13 @@ local function output_set(index, signal)
   else
     output_control.set_signal(index, nil)
   end
+  io.GuiCache_InvalidateMemory('output', 0)
 end
 
 function io.output_clear()
   -- Output buffer
   output_control.parameters = nil
+  io.GuiCache_InvalidateMemory('output', 0)
 
   -- Vector output
   local node = io.get_node('output')
@@ -190,77 +198,6 @@ end
 
 function io.wire_count(color)
   return wires[color] and wires[color].signals and #wires[color].signals or 0
-end
-
-
--- Registers
-local function readOnlyRegister(index)
-  if index == REG_IP then
-    return state.instruction_pointer
-  elseif index == REG_CNR then
-    if wires.red and wires.red.signals then
-      return #wires.red.signals
-    else
-      return 0
-    end
-  elseif index == REG_CNG then
-    if wires.green and wires.green.signals then
-      return #wires.green.signals
-    else
-      return 0
-    end
-  elseif index == REG_CLK then
-    return state.clock
-  elseif REG_CNM <= index then
-    local signals = io.memory_getchannel_signals({ type = 'memory', location = 'mem', index = index - REG_CNM + 1 })
-    return signals and #signals or 0
-  else
-    assert.exception('Unknown register with internal index '.. index)
-  end
-end
-
-function io.register_last_index()
-  return #state.regs
-end
-
-function io.register_getraw(index)
-  assert.regs_index_range(index, MC_REGS)
-  if state.regs[index] and not state.regs[index].count then
-    state.regs[index].count = 0
-  end
-  return state.regs[index]
-end
-
-function io.register_setraw(index, signal)
-  assert.regs_index_range(index, MC_REGS)
-  assert.check(math.abs(signal.count or 0) ~= 1/0, "Division by zero")
-  state.regs[index] = signal
-end
-
-function io.register_get(index_expr)
-  assert.check(index_expr.type == 'register', "Register expected")
-  local addr = addr_deref(index_expr)
-  if MC_REGS < addr then
-    local result = table.deep_copy(NULL_SIGNAL)
-    result.count = readOnlyRegister(addr)
-    return result
-  else
-    return table.deep_copy(io.register_getraw(addr))
-  end
-end
-
-function io.register_set(index_expr, value)
-  assert.check(index_expr.type == 'register', "Register expected")
-  local addr = addr_deref(index_expr)
-  local signal = table.deep_copy(value)
-  io.register_setraw(addr, signal)
-end
-
-function io.register_set_count(index_expr, count)
-  local value = io.register_get(index_expr)
-  assert.check(count == count, "Division by zero")
-  value.count = count
-  io.register_set(index_expr, value)
 end
 
 
@@ -329,7 +266,7 @@ function io.memory_getchannel_write(_, corrective)
         end
       else
         if ics.value and ics.value.valid then
-          io.GuiCache_InvalidateMemory(_.location .. _.index)
+          io.GuiCache_InvalidateMemory(_.location .. _.index, 6)
           return ics.value.get_control_behavior()
         end
       end
@@ -416,22 +353,28 @@ function io.memory_set(address, signal)
     memory_setraw(address, addr, was, true)
   end
   memory_setraw(address, addr, signal)
-  io.GuiCache_InvalidateMemory(address.location .. address.index)
+  io.GuiCache_InvalidateMemory(address.location .. address.index, 6)
 end
 
 function io.memory_clear(address)
-  assert.check(address.index ~= nil, "Should be addressable memory cell")
-  memory_setraw(address, nil, nil, true)
-  memory_setraw(address, nil, nil, false)
-  io.GuiCache_InvalidateMemory(address.location .. address.index)
+  if address == nil or address.index == nil then
+    for i = 1, MC_MEMORY_CHANNELS do
+      io.memory_clear{type='memory', location='mem', index=i}
+    end
+  else
+    assert.check(address.index ~= nil, "Should be addressable memory cell")
+    memory_setraw(address, nil, nil, true)
+    memory_setraw(address, nil, nil, false)
+    io.GuiCache_InvalidateMemory(address.location .. address.index, 6)
+  end
 end
 
-function io.GuiCache_InvalidateMemory(channel)
+function io.GuiCache_InvalidateMemory(channel, delay)
   if state.gui_cache then
     if channel and state.gui_cache.invalid_memory then
       -- do not add cache until gui initialize it
-      if (state.gui_cache.invalid_memory[channel] or 0) < state.clock then
-        state.gui_cache.invalid_memory[channel] = state.clock + 6
+      if (state.gui_cache.invalid_memory[channel] or 0) <= state.clock then
+        state.gui_cache.invalid_memory[channel] = state.clock + (delay or 0)
       end
     else
       -- update all channels
@@ -486,7 +429,7 @@ end
 
 function io.getcount(_, types)
   if _.type == 'value' then
-    return io.value_get(_)
+    return _.count
   else
     local signal = io.getsignal(_, types)
     if type(signal) ~= 'table' or signal.count == nil then
@@ -535,8 +478,9 @@ function io.setup(state_, control_)
 end
 
 
-function io.bind(assert_, hdlbuilder_)
+function io.bind(assert_, hdlbuilder_, emitter_)
   assert = assert_
   hdlbuilder = hdlbuilder_
+  emitter = emitter_
 end
 return io

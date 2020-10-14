@@ -114,14 +114,14 @@ local opcodes = {
       for i, expr in ipairs(_) do
         if expr then
           assert.type(expr, {'register', 'memory', 'output'})
-          if expr.color == 'out' then
+          if expr.type == 'register' then
+            io.register_set(expr, NULL_SIGNAL)
+          elseif expr.color == 'out' then
             if expr.addr == nil then
               actions[#actions + 1] = io.output_clear()
             else
-              io.wire_set(_[i], nil)
+              io.wire_set(expr, nil)
             end
-          elseif expr.type == 'register' then
-            io.setsignal(_[i], NULL_SIGNAL, {'register', 'wire'})
           elseif expr.type == 'memory' then
             io.memory_clear(expr)
             actions[#actions + 1] = ics_clear(expr.index and (expr.location .. expr.index))
@@ -129,13 +129,11 @@ local opcodes = {
         end
       end
     else
-      for i = 1, io.register_last_index() do
-        io.register_setraw(i, table.deep_copy(NULL_SIGNAL))
+      for i = 1, MC_REGS do
+        io.register_set({type='register', addr=i, pointer=false}, NULL_SIGNAL)
       end
       io.control_set(table.deep_copy(NULL_SIGNAL))
-      for i = 1, MC_MEMORY_CHANNELS do
-        io.memory_clear({type='memory', location='mem', index=i})
-      end
+      io.memory_clear()
       actions[#actions + 1] = io.output_clear()
       actions[#actions + 1] = ics_clear()
     end

@@ -5,6 +5,7 @@ Date: ????
     - Do not open memory viewer by default.
   Bugfixes:
     - Fixed toggling memory viewer.
+    - Fixed `clr mem`.
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.11
 Date: 2020-10-14
