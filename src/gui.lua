@@ -80,8 +80,8 @@ gui.add_templates{
   slot_button = function(name, title)
     return {type="sprite-button", style="slot_button_in_shallow_frame", name=name.."-inspect", tooltip=(title or name)}
   end,
-  slot_inventory = function(name, title)
-    return {type="sprite-button", style="inventory_slot", name=name .."-inspect", tooltip=(title or name)}
+  slot_inventory = function(name, title, ...)
+    return table.deep_merge{{type="sprite-button", style="inventory_slot", name=name .."-inspect", tooltip=(title or name)}, ...}
   end,
   breakpoints_button = function(state, num)
     return {type="label", name="break-"..num, caption=FormatBreakpointTitle(state, num),
@@ -136,7 +136,7 @@ local function DestroyWidget_MemoryView(player_data)
   player_data.gui_memory_cells = nil
 end
 
-local function MemoryView_UpdateFromTable(player_data, signals, sort, order)
+local function MemoryView_UpdateFromTable(player_data, signals, sort, sparse, order)
   local cells = player_data.gui_memory_cells.children
   if cells then
     --[[if order ~= nil then
@@ -163,7 +163,7 @@ local function MemoryView_UpdateFromTable(player_data, signals, sort, order)
 
     -- add extra
     for i = #cells + 1, math.max(MC_MEMORY_SLOTS_MIN, (signals and #signals or 0)) do
-      gui.build(player_data.gui_memory_cells, { gui.templates.slot_inventory('index-'..i, '['..i..']') })
+      gui.build(player_data.gui_memory_cells, { gui.templates.slot_inventory('index-'..i, '['..i..']', {visible=false}) })
     end
     cells = player_data.gui_memory_cells.children
 
@@ -178,13 +178,13 @@ local function MemoryView_UpdateFromTable(player_data, signals, sort, order)
           cell.sprite = sprite
           if sort == 0 then
             cell.number = v.count
-          elseif sort == 1 then
-            cell.number = sprite and v.count or nil
           else
-            cell.number = (sprite or sort) and v.count or nil
+            cell.number = sprite and v.count or nil
           end
           if sprite or sort then
             i = i + 1
+          elseif not sparse then
+            break
           end
         end
       end
@@ -241,7 +241,7 @@ local function UpdateWidget_MemoryView(player_data, state, initial)
           local network = control.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_output)
           if network then
             MemoryView_UpdateFromTable(player_data, network.signals)
-            --MemoryView_UpdateFromTable(player_data, network.signals, 0, control.signals_last_tick)
+            --MemoryView_UpdateFromTable(player_data, network.signals, 0, true, control.signals_last_tick)
           else
             MemoryView_UpdateFromTable(player_data, control.signals_last_tick)
           end
@@ -264,7 +264,7 @@ local function UpdateWidget_MemoryView(player_data, state, initial)
       end
     elseif index == MC_MEMORY_CHANNELS + 1 then
       -- Registers
-      MemoryView_UpdateFromTable(player_data, state.regs, 0)
+      MemoryView_UpdateFromTable(player_data, state.regs, 0, true)
       return
     elseif index == MC_MEMORY_CHANNELS + 2 then
       -- Input wires (RED)
