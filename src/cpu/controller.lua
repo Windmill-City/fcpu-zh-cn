@@ -172,12 +172,11 @@ function Controller.do_defferred(state, frames)
 end
 
 function Controller.tick(state, sync_wait)
-  state.clock = state.clock + 1
-
-  -- Breakpoints
   if state.program_state == PSTATE_BREAKPOINT then
     return
   end
+
+  state.clock = state.clock + 1
 
   -- Interrupts
   local get_signal = function(signal)
