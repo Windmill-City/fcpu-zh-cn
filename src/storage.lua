@@ -14,13 +14,6 @@ function get_player_data(player_index)
   end
 end
 
-function set_player_data(player_index, data)
-  if global.player_data == nil then
-    global.player_data = {}
-  end
-  global.player_data[player_index] = data
-end
-
 -------------------------------------------------------------------------------------------------------
 
 function register_fcpu(entity, state)

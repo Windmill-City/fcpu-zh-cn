@@ -20,15 +20,15 @@ local signalToSpritePath = function(player_data, signal)
   end
 end
 
-local function dictionary_combine(...)
+local function inplace_dictionary_combine(dst, ...)
   local tables = {...}
-  local new = {}
+  --local new = {}
   for _, tab in pairs(tables) do
       for k, v in pairs(tab) do
-          new[k] = v
+        dst[k] = v
       end
   end
-  return new
+  --return new
 end
 
 local function FormatBreakpointTitle(state, i)
@@ -472,7 +472,7 @@ function GuiWidgetOpen(player, entity)
   if 0 < fcpu_debug_enabled then
     elems.gui_fcpu.titlebar.label.caption = elems.gui_fcpu.titlebar.label.caption.." #"..entity.unit_number..' ⇨ '..state.index
   end
-  player_data = dictionary_combine(
+  inplace_dictionary_combine(
     player_data,
     elems,
     {}--CreateWidget_MemoryView(elems.gui_fcpu["fcpu-panels"])
@@ -501,8 +501,6 @@ function GuiWidgetOpen(player, entity)
 
   player_data.current_fcpu = entity
   player_data.gui_fcpu = player_data.gui_fcpu
-
-  return player_data
 end
 
 function GuiWidgetUpdate(player_data, state, initial)
@@ -581,7 +579,6 @@ function GuiWidgetClose(player_index, silent)
 
     player_data.gui_fcpu.destroy()
     player_data.gui_fcpu = nil
-    set_player_data(player.index, player_data)
   end
 end
 
@@ -596,7 +593,6 @@ function GuiEntityCloseWidget(entity)
         player_data.gui_fcpu = nil
       end
       player_data.current_fcpu = nil
-      set_player_data(player_index, player_data)
     end
   end
 end
@@ -610,9 +606,7 @@ end
 local function mixPlayerData(proc)
   return function(event)
     local player_data, player = get_player_data(event.player_index)
-    local newData = proc(player_data, player, event)
-    player_data = newData or player_data
-    set_player_data(event.player_index, player_data)
+    proc(player_data, player, event)
   end
 end
 
@@ -638,7 +632,7 @@ gui.add_handlers{
         local element = event.element
         local lines = {};
         for m in (element.text..'\n'):gmatch("(.-)\n") do
-            table.insert(lines, m);
+          table.insert(lines, m);
         end
         if #lines > MC_LINES or #lines == MC_LINES and lines[#lines] == '\n' then
           local c = #lines - MC_LINES
@@ -738,10 +732,9 @@ gui.add_handlers{
         else
           local rootGui = player_data.gui_fcpu["fcpu-panels"]
           local elems = CreateWidget_MemoryView(rootGui)
-          player_data = dictionary_combine(player_data, elems)
+          inplace_dictionary_combine(player_data, elems)
           local state = get_fcpu_state(player_data.current_fcpu)
           UpdateWidget_MemoryView(player_data, state, true)
-          return player_data
         end
       end)
     },
@@ -787,9 +780,7 @@ script.on_event("fcpu-open", function(event)
 
         if player_data.gui_fcpu and player_data.gui_fcpu.valid and Entity._are_equal(player_data.current_fcpu, entity) then return end
 
-        player_data = GuiWidgetOpen(player, entity)
-
-        set_player_data(event.player_index, player_data)
+        GuiWidgetOpen(player, entity)
       end
     end
   elseif entity then

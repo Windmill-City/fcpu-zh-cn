@@ -132,7 +132,6 @@ return {
       if player_data.gui_fcpu and player_data.gui_fcpu.valid then
         player_data.gui_error_message = player_data.gui_fcpu['error_message']
         player_data.gui_editor_toolbar = player_data.gui_fcpu['editor-toolbar']
-        set_player_data(player.index, player_data)
       end
     end)
     for _, surface in pairs(game.surfaces) do
