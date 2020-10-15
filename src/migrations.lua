@@ -223,4 +223,10 @@ return {
       state.gui_cache = state.gui_cache or {}
     end)
   end,
+
+  ["0.3.12"] = function()
+    foreach_player(function(player, player_data)
+      player_data.gui_cache = player_data.gui_cache or {}
+    end)
+  end,
 }

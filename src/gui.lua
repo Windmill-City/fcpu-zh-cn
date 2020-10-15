@@ -214,21 +214,21 @@ local function UpdateWidget_MemoryView(player_data, state, initial)
     index = math.max(1, index)
 
     local ValidateGuiCache = function(channel)
-      if state.gui_cache then
-        if state.gui_cache.invalid_memory == nil then
-          state.gui_cache.invalid_memory = {}
-          return false
-        elseif initial then
-          state.gui_cache.invalid_memory[channel] = nil
-          return false
-        elseif state.gui_cache.invalid_memory[channel] then
-          if state.gui_cache.invalid_memory[channel] <= state.clock then
-            state.gui_cache.invalid_memory[channel] = nil
-            return false
-          end
-        end
-        return true
+      if player_data.gui_cache.memory_changed == nil or initial then
+        player_data.gui_cache.memory_changed = {}
       end
+      if state.gui_cache.memory_changed == nil then
+        return false
+      end
+
+      local pmc = player_data.gui_cache.memory_changed[channel]
+      local smc = state.gui_cache.memory_changed[channel]
+
+      if not (pmc and smc) or (pmc < smc) and (smc <= game.tick) then
+        player_data.gui_cache.memory_changed[channel] = smc
+        return false
+      end
+      return true
     end
 
     if index <= MC_MEMORY_CHANNELS then

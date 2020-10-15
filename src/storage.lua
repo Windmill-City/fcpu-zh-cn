@@ -7,8 +7,10 @@ function get_player_data(player_index)
   end
   local player = game.players[player_index]
   if (player and player.valid) then
-    local player_data = global.player_data[player_index] or {}
-    return player_data, player
+    if not global.player_data[player_index] then
+      global.player_data[player_index] = {}
+    end
+    return global.player_data[player_index], player
   end
 end
 

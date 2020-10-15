@@ -266,7 +266,7 @@ function io.memory_getchannel_write(_, corrective)
         end
       else
         if ics.value and ics.value.valid then
-          io.GuiCache_InvalidateMemory(_.location .. _.index, 6)
+          io.GuiCache_InvalidateMemory(_.location .. _.index, 5)
           return ics.value.get_control_behavior()
         end
       end
@@ -353,7 +353,7 @@ function io.memory_set(address, signal)
     memory_setraw(address, addr, was, true)
   end
   memory_setraw(address, addr, signal)
-  io.GuiCache_InvalidateMemory(address.location .. address.index, 6)
+  io.GuiCache_InvalidateMemory(address.location .. address.index, 5)
 end
 
 function io.memory_clear(address)
@@ -365,21 +365,22 @@ function io.memory_clear(address)
     assert.check(address.index ~= nil, "Should be addressable memory cell")
     memory_setraw(address, nil, nil, true)
     memory_setraw(address, nil, nil, false)
-    io.GuiCache_InvalidateMemory(address.location .. address.index, 6)
+    io.GuiCache_InvalidateMemory(address.location .. address.index, 5)
   end
 end
 
 function io.GuiCache_InvalidateMemory(channel, delay)
-  if state.gui_cache then
-    if channel and state.gui_cache.invalid_memory then
-      -- do not add cache until gui initialize it
-      if (state.gui_cache.invalid_memory[channel] or 0) <= state.clock then
-        state.gui_cache.invalid_memory[channel] = state.clock + (delay or 0)
-      end
-    else
-      -- update all channels
-      state.gui_cache.invalid_memory = nil
+  if channel then
+    if not state.gui_cache.memory_changed then
+      state.gui_cache.memory_changed = {}
     end
+    if state.gui_cache.memory_changed[channel] < game.tick then
+      -- do not add cache until gui initialize it
+      state.gui_cache.memory_changed[channel] = game.tick + (delay or 0)
+    end
+  else
+    -- update all channels
+    state.gui_cache.memory_changed = nil
   end
 end
 
