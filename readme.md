@@ -69,6 +69,7 @@ Besides general purpose registers there are some read only registers:
 - **ipt**: current instruction line numer  
 - **clk**: clock, value increases every tick  
 - **cnr**, **cng**: signals number on red `cnr` or green `cng` input wire  
+- **cnm1**, ..., **cnm4**: signals number in memory  
 
 Output registers (write only):
 
