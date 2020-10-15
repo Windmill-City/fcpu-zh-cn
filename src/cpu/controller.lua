@@ -35,7 +35,8 @@ function Controller.init(mc)
     ics_stack = {},
     deffered = {},
     breakpoints = {},
-    instruction_pointer = 1
+    instruction_pointer = 1,
+    gui_cache = {}
   }
 
   local control = mc.get_or_create_control_behavior()

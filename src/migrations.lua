@@ -218,9 +218,9 @@ return {
   end,
 
   ["0.3.10"] = function()
-    for _,state in pairs(global.fcpus) do
+    foreach_fcpu(function(fcpu, state)
       state.breakpoints = state.breakpoints or {}
       state.gui_cache = state.gui_cache or {}
-    end
+    end)
   end,
 }
