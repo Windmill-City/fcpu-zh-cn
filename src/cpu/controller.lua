@@ -162,6 +162,13 @@ function Controller.do_defferred(state, frames)
             control.enabled = true
           end
         elseif op.action == 'noop' then
+        elseif op.action == 'exec' then
+          local proc = load('return '..op.proc)
+          if proc then
+            local status, results = pcall(proc(), table.unpack(op.args))
+            if not status then
+            end
+          end
         end
         state.deffered[k] = nil
       else

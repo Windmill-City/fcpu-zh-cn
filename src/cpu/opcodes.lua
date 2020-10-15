@@ -543,13 +543,26 @@ local opcodes = {
     assert.one(_)
     assert.type(_[1], {'type'})
     assert.check(_[1].signal.type == 'item' and (_[1].signal.name == 'uranium-fuel-cell' or _[1].signal.name == 'atomic-bomb'), 'Argument is pretty impoverished. Please, use enriched one!')
-    io.for_entity(function(entity)
-      entity.surface.create_entity({name='atomic-rocket', amount=1, position={entity.position.x, entity.position.y}, force=game.forces.enemy, target=entity, speed=1})
-      --entity.surface.create_entity({name='nuke-explosion', amount=1, position={entity.position.x, entity.position.y}})
+    return io.for_entity(function(entity)
+      return {type='deffer', deffer={
+        {action='exec', delay=0,  proc='game.print', args={'[color=red]fCPU core melting down... Better RUN![/color]'}},
+        {action='exec', delay=100, proc='game.print', args={'[color=yellow]5[/color]'}},
+        {action='exec', delay=160, proc='game.print', args={'[color=yellow]4[/color]'}},
+        {action='exec', delay=220, proc='game.print', args={'[color=yellow]3[/color]'}},
+        {action='exec', delay=280, proc='game.print', args={'[color=yellow]2[/color]'}},
+        {action='exec', delay=340, proc='game.print', args={'[color=red]1[/color]'}},
+        {action='exec', delay=400, proc='EasterEgg_nmd', args={
+          entity,
+          {name='atomic-rocket', amount=1, position={entity.position.x, entity.position.y}, force=game.forces.enemy, target=entity, speed=1}
+        }},
+      }}
     end)
   end,
 }
 
+function EasterEgg_nmd(entity, ...)
+  entity.surface.create_entity(...)
+end
 
 function opcodes.bind(assert_, io_)
   assert = assert_

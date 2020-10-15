@@ -25,7 +25,7 @@ local io = {}
 
 
 function io.for_entity(proc)
-  proc(state.entity, state)
+  return proc(state.entity, state)
 end
 
 
@@ -374,7 +374,7 @@ function io.GuiCache_InvalidateMemory(channel, delay)
     if not state.gui_cache.memory_changed then
       state.gui_cache.memory_changed = {}
     end
-    if state.gui_cache.memory_changed[channel] < game.tick then
+    if (state.gui_cache.memory_changed[channel] or 0) < game.tick then
       -- do not add cache until gui initialize it
       state.gui_cache.memory_changed[channel] = game.tick + (delay or 0)
     end
