@@ -288,11 +288,9 @@ function io.memory_getchannel_signals(_)
     local ics = hdlbuilder.get_node(state, _.location .. _.index)
     if ics and ics.out and ics.out.valid then
       local control = ics.out.get_control_behavior()
-      if ics.color_out then
-        local output = control.get_circuit_network(ics.color_out, defines.circuit_connector_id.combinator_output)
-        if output then
-          return output.signals
-        end
+      local output = control.get_circuit_network(ics.color_out or defines.wire_type.red, defines.circuit_connector_id.combinator_output)
+      if output then
+        return output.signals
       end
       return control.signals_last_tick
     else
