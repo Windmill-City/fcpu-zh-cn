@@ -505,6 +505,8 @@ local opcodes = {
     local count = io.getcount(_[1])
     if io.wire_count('red') < count then
       return {type = 'block'}
+    else
+      return {type = 'next'}
     end
   end,
   bkg = function(_)
@@ -513,6 +515,8 @@ local opcodes = {
     local count = io.getcount(_[1])
     if io.wire_count('green') < count then
       return {type = 'block'}
+    else
+      return {type = 'next'}
     end
   end,
   bkm = function(_)
@@ -521,6 +525,8 @@ local opcodes = {
     local count = io.getcount(_[1])
     if io.wire_count('green') < count then
       return {type = 'block'}
+    else
+      return {type = 'next'}
     end
   end,
 
@@ -529,6 +535,8 @@ local opcodes = {
     local type = io.gettype(_[1], {'type', 'register'})
     if io.wire_find_signal('red', type) == NULL_SIGNAL then
       return {type = 'block'}
+    else
+      return {type = 'next'}
     end
   end,
   btg = function(_)
@@ -536,6 +544,8 @@ local opcodes = {
     local type = io.gettype(_[1], {'type', 'register'})
     if io.wire_find_signal('green', type) == NULL_SIGNAL then
       return {type = 'block'}
+    else
+      return {type = 'next'}
     end
   end,
 

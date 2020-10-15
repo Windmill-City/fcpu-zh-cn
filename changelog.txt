@@ -2,6 +2,7 @@
 Version: 0.3.15
 Date: ????
   Changes:
+    - `bkr`,` bkg`, `btr`,` btg` now execute next instruction on same tick the condition were met..
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.14
 Date: 2020-10-15

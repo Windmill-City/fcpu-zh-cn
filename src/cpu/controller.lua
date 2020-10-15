@@ -225,6 +225,8 @@ function Controller.tick(state, sync_wait)
     end
   end
 
+::repeat_eval::
+
   -- Run Controller code.
   if state.program_state == PSTATE_RUNNING and sync_wait < 1 then
     local ast = state.program_ast[state.instruction_pointer]
@@ -251,11 +253,14 @@ function Controller.tick(state, sync_wait)
         else
           Controller.set_program_counter(state, result.val)
         end
-      elseif result.type == 'skip' then
-        Controller.set_program_counter(state, state.instruction_pointer + 2)
       elseif result.type == 'block' then
         -- FIXME: should take into account the fcpu_maximum_updates_per_tick limit!
         -- Do nothing, keeping the instruction_pointer the same.
+      elseif result.type == 'skip' then
+        Controller.set_program_counter(state, state.instruction_pointer + 2)
+      elseif result.type == 'next' then
+        Controller.set_program_counter(state, state.instruction_pointer + 1)
+        goto repeat_eval
       elseif result.type == 'xwait' then
         if sync_wait < 1 then
           Controller.set_program_counter(state, state.instruction_pointer + 1)
