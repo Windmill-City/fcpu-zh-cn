@@ -214,6 +214,7 @@ local function UpdateWidget_MemoryView(player_data, state, initial)
     index = math.max(1, index)
 
     local ValidateGuiCache = function(channel)
+      player_data.gui_cache = player_data.gui_cache or {}
       if player_data.gui_cache.memory_changed == nil or initial then
         player_data.gui_cache.memory_changed = {}
       end
