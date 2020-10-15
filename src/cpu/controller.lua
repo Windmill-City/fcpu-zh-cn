@@ -165,9 +165,7 @@ function Controller.do_defferred(state, frames)
         elseif op.action == 'exec' then
           local proc = load('return '..op.proc)
           if proc then
-            local status, results = pcall(proc(), table.unpack(op.args))
-            if not status then
-            end
+            pcall(proc(), table.unpack(op.args))
           end
         end
         state.deffered[k] = nil
@@ -293,12 +291,6 @@ function Controller.tick(state, sync_wait)
     state.do_step = false
     Controller.halt(state)
   end
-
-  -- Stop on next instruction if breakpoint found
-  if state.breakpoints[state.instruction_pointer] then
-    Controller.halt(state)
-    state.program_state = PSTATE_BREAKPOINT
-  end
 end
 
 function Controller.run(state)
@@ -324,7 +316,9 @@ end
 
 function Controller.disable(state, disable)
   state.disabled = (disable == nil or disable)
-  Controller.halt(state)
+  if state.disabled then
+    Controller.halt(state)
+  end
   Controller.update_state(state)
 end
 
@@ -355,6 +349,12 @@ function Controller.update_ip(state)
   --local param = control.parameters
   --param.parameters.second_constant = state.instruction_pointer
   --control.parameters = param
+
+  -- Stop on next instruction if breakpoint found
+  if state.breakpoints[state.instruction_pointer] then
+    Controller.halt(state)
+    state.program_state = PSTATE_BREAKPOINT
+  end
 end
 
 function Controller.update_state(state, pstate)
