@@ -148,7 +148,7 @@ function io.output_clear()
   -- Vector output
   local node = io.get_node('output')
   if node then
-    return { type = 'deffer', deffer = { {action='enable', ic=node.fix, delay = 0} } }
+    return { type = 'deffer', deffer = { {action='enable', ic=node.clr, delay = 0} } }
   end
 end
 

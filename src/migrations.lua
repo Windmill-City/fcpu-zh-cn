@@ -147,10 +147,9 @@ return {
   end,
 
   ["0.3.6"] = function()
-    local fcpus = {}
-    for _,v in pairs(global.fcpus) do
+    foreach_fcpu(function(fcpu, state)
       for i = 1,4 do
-        local mem = v.program_ics and v.program_ics['mem'..i]
+        local mem = state.program_ics and state.program_ics['mem'..i]
         if mem and mem.value then
           if mem.value.valid then
             mem.value.destroy()
@@ -158,7 +157,7 @@ return {
           mem.value = nil
         end
       end
-    end
+    end)
   end,
 
   ["0.3.7"] = function()
@@ -226,6 +225,16 @@ return {
   ["0.3.12"] = function()
     foreach_player(function(player, player_data)
       player_data.gui_cache = player_data.gui_cache or {}
+    end)
+  end,
+
+  ["0.3.15"] = function()
+    foreach_fcpu(function(fcpu, state)
+      state.gui_cache = state.gui_cache or {}
+
+      state.modified = true
+      Controller.compile(state)
+      Controller.set_program_counter(state, 1)
     end)
   end,
 }

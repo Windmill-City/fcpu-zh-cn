@@ -196,18 +196,11 @@ function builder.create_memory_cell(entity, input_a, proxy_output)
   local wire2 = inverse_wire_color(wire1)
 
   local d_key, control_key = builder.create_node(entity, 'decider', true)
-  local c_in, control_in = builder.create_node(entity, 'constant')
-  local c_fix, control_fix = builder.create_node(entity, 'constant')
+  local c_clr, control_clr = builder.create_node(entity, 'constant')
   local d_out, control_out = builder.create_node(entity, 'decider')
 
-  control_in.enabled = false
-  control_in.set_signal(1, {
-    signal = {type='virtual', name='signal-fcpu-error'},
-    count = 1
-  })
-
-  control_fix.enabled = false
-  control_fix.set_signal(1, {
+  control_clr.enabled = false
+  control_clr.set_signal(1, {
     signal = {type='virtual', name='signal-fcpu-error'},
     count = -1
   })
@@ -247,13 +240,7 @@ function builder.create_memory_cell(entity, input_a, proxy_output)
     target_circuit_id = defines.circuit_connector_id.combinator_input,
     wire = wire1,
   }
-  c_in.connect_neighbour{
-    source_circuit_id = defines.circuit_connector_id.constant_combinator,
-    target_entity = d_key,
-    target_circuit_id = defines.circuit_connector_id.combinator_input,
-    wire = wire2,
-  }
-  c_fix.connect_neighbour{
+  c_clr.connect_neighbour{
     source_circuit_id = defines.circuit_connector_id.constant_combinator,
     target_entity = d_key,
     target_circuit_id = defines.circuit_connector_id.combinator_output,
@@ -268,9 +255,9 @@ function builder.create_memory_cell(entity, input_a, proxy_output)
 
   local ics = {
     color_out = wire1,
-    d_key,
-    ctrl = c_in,
-    fix = c_fix,
+    kin = d_key,
+    clr = c_clr,
+    kout = d_out,
     out = d_out,
   }
 
@@ -294,7 +281,7 @@ function builder.create_memory_cell(entity, input_a, proxy_output)
       target_circuit_id = defines.circuit_connector_id.combinator_output,
       wire = wire1,
     }
-  
+
     ics[#ics + 1] = ics.out
     ics.out = proxy
   end
@@ -420,11 +407,12 @@ local function vector_scalar_op(operation, check)
     end
 
     local deffer = {
-      {action='enable', ic=ics.ctrl, delay = 0},
-      {action='enable', ic=ics.fix, delay = 0},
-      {action='disable', ic=ics.ctrl, delay = 1},
-      {action='disable', ic=ics.fix, delay = 2},
-      {action='noop', delay = 4},
+      {action='disable', ic=ics.clr, delay = 0},
+      {action='tune', ic=ics.kin, value=0, delay = 0},
+      {action='tune', ic=ics.kout, value=1, delay = 0},
+      {action='tune', ic=ics.kin, value=1, delay = 1},
+      {action='tune', ic=ics.kout, value=0, delay = 1},
+      {action='noop', delay = 3},
     }
 
     return ics_name, ics, deffer
@@ -473,11 +461,12 @@ local function vector_decide_op(operation)
     end
 
     local deffer = {
-      {action='enable', ic=ics.ctrl, delay = 0},
-      {action='enable', ic=ics.fix, delay = 0},
-      {action='disable', ic=ics.ctrl, delay = 1},
-      {action='disable', ic=ics.fix, delay = 2},
-      {action='noop', delay = 4},
+      {action='disable', ic=ics.clr, delay = 0},
+      {action='tune', ic=ics.kin, value=0, delay = 0},
+      {action='tune', ic=ics.kout, value=1, delay = 0},
+      {action='tune', ic=ics.kin, value=1, delay = 1},
+      {action='tune', ic=ics.kout, value=0, delay = 1},
+      {action='noop', delay = 3},
     }
 
     return ics_name, ics, deffer
@@ -541,11 +530,12 @@ local ops = {
     end
 
     local deffer = {
-      {action='enable', ic=ics.ctrl, delay = 0},
-      {action='enable', ic=ics.fix, delay = 0},
-      {action='disable', ic=ics.ctrl, delay = 1},
-      {action='disable', ic=ics.fix, delay = 2},
-      {action='noop', delay = wire_to and 5 or 4},
+      {action='disable', ic=ics.clr, delay = 0},
+      {action='tune', ic=ics.kin, value=0, delay = 0},
+      {action='tune', ic=ics.kout, value=1, delay = 0},
+      {action='tune', ic=ics.kin, value=1, delay = 1},
+      {action='tune', ic=ics.kout, value=0, delay = 1},
+      {action='noop', delay = wire_to and 4 or 3},
     }
 
     return ics_name, ics, deffer

@@ -161,6 +161,13 @@ function Controller.do_defferred(state, frames)
             local control = op.ic.get_or_create_control_behavior()
             control.enabled = true
           end
+        elseif op.action == 'tune' then
+          if op.ic and op.ic.valid then
+            local control = op.ic.get_or_create_control_behavior()
+            local params = control.parameters
+            params.parameters.constant = op.value
+            control.parameters = params
+          end
         elseif op.action == 'noop' then
         elseif op.action == 'exec' then
           local proc = load('return '..op.proc)

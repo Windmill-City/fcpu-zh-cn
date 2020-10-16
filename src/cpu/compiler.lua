@@ -225,8 +225,8 @@ local function eval(ast, ics)
         if _.push_ics then
           for _,v in ipairs(_.push_ics) do
             local node = io.get_node(v.name)
-            if node and node.fix then
-              local control = node.fix.get_control_behavior()
+            if node and node.clr then
+              local control = node.clr.get_control_behavior()
               control.enabled = true
             end
             if string.sub(v.name, 1, 3) == 'mem' then
