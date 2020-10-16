@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.15
-Date: ????
+Date: 2020-10-16
   Changes:
     - `bkr`,` bkg`, `btr`,` btg` now execute next instruction on same tick the condition were met.
     - `xmov` now catch signal on 0 tick and have 1 tick less to settle (3 ticks).
