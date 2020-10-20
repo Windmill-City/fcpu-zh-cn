@@ -350,7 +350,9 @@ function io.memory_set(address, signal)
     was.count = -was.count;
     memory_setraw(address, addr, was, true)
   end
+  if signal.count ~= 0 then
     memory_setraw(address, addr, signal)
+  end
   io.GuiCache_InvalidateMemory(address.location .. address.index, 5)
 end
 

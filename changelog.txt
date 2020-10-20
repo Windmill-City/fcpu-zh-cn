@@ -3,6 +3,7 @@ Version: 0.3.16
 Date: ????
   Bugfixes:
     - Correct error message when trying to `clr` memory cell.
+    - Allow `mov ... 0` to memory cell without signal type.
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.15
 Date: 2020-10-16
