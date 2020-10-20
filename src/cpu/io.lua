@@ -350,7 +350,7 @@ function io.memory_set(address, signal)
     was.count = -was.count;
     memory_setraw(address, addr, was, true)
   end
-  memory_setraw(address, addr, signal)
+    memory_setraw(address, addr, signal)
   io.GuiCache_InvalidateMemory(address.location .. address.index, 5)
 end
 
@@ -360,7 +360,7 @@ function io.memory_clear(address)
       io.memory_clear{type='memory', location='mem', index=i}
     end
   else
-    assert.check(address.index ~= nil, "Should be addressable memory cell")
+    assert.check(address.addr == nil, "Should be a memory channel")
     memory_setraw(address, nil, nil, true)
     memory_setraw(address, nil, nil, false)
     io.GuiCache_InvalidateMemory(address.location .. address.index, 5)

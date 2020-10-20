@@ -1,10 +1,10 @@
 # Upcoming  (in v0.4.0)
 * Breakpoints.
+* Debugging, hotkeys, auto switch memory channel.
+* New conditional break until signal of a certain type has changed its value
 
 # Upcoming  (in v0.5.0)
-* Debugging, hotkeys, auto switch memory channel.
 * Vector compare mnemonics.
-* Nuclear meltdown easter egg (`nmd`)
 * `xflt` mnemonic for filtering signals.
 
 # TODO list, fCPU

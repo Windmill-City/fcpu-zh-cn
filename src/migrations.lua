@@ -190,7 +190,11 @@ return {
       for _, fcpu in pairs(surface.find_entities_filtered{ name="fcpu" }) do
         if fcpu and fcpu.valid then
           local index = Entity.get_data(fcpu, nil)
-          valids[index] = fcpu
+          if index then
+            valids[index] = fcpu
+          else
+            fcpu.destroy()
+          end
         end
       end
     end
