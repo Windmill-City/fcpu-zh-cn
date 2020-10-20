@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.16
 Date: ????
+  Features:
+    - Added *Utility Item Stack Size* `uiss`.
   Bugfixes:
     - Correct error message when trying to `clr` memory cell.
     - Allow `mov ... 0` to memory cell without signal type.

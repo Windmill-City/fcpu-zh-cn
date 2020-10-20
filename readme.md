@@ -164,13 +164,16 @@ Each instruction take one or more operands and modify them or state of fCPU.
   No operation.
 
 * `clr`  
-  Clear all registers and output.
+  Clear all registers, memory channels and output.
 
 * `clr` out  
   Clear all output values.
 
+* `clr` mem  
+  Clear all memory channels.
+
 * `clr` dst...[**R**/**M**/**O**]  
-  Clear specified registers or output wires.
+  Clear specified registers, memory channels or output wires (`mem3`, `r2`, `out4`).
 
 * `mov` dst...[**R**/**O**] src[**V**/**T**/**S**/**R**]  
   Copy signal from source to destination.  
@@ -416,6 +419,11 @@ blt r1 10 :counter
 
 * `bad` a[**T**/**R**] b[**T**/**R**] addr[**C**/**A**/**L**/**R**]  
   Branch if types are different.  
+
+
+### Utility mnemonics
+* `uiss` dst[**R**] type[**T**/**R**]
+  Assign stack size to *dst* for specified item *type*.
 
 
 ## SIMD instructions
