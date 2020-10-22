@@ -24,6 +24,17 @@ Controller.event_error = script.generate_event_name()
 Controller.event_halt = script.generate_event_name()
 
 function Controller.init(mc)
+  local control = mc.get_or_create_control_behavior()
+  control.parameters = {
+    parameters = {
+      first_signal = nil,
+      second_signal = nil,
+      first_constant = nil,
+      second_constant = nil,
+      operation = "+",
+      output_signal = nil
+    }
+  }
   local state = {
     entity = mc,
     program_text = "",
@@ -36,18 +47,11 @@ function Controller.init(mc)
     deffered = {},
     breakpoints = {},
     instruction_pointer = 1,
-    gui_cache = {}
-  }
-
-  local control = mc.get_or_create_control_behavior()
-  control.parameters = {
-    parameters = {
-      first_signal = nil,
-      second_signal = nil,
-      first_constant = nil,
-      second_constant = nil,
-      operation = "+",
-      output_signal = nil
+    gui_cache = {},
+    cache = {
+      control = {
+        indication = control
+      }
     }
   }
   Controller.init_registers(state)
@@ -185,10 +189,42 @@ function Controller.do_defferred(state, frames)
   return count
 end
 
+function Controller.validate_cache(state)
+  local cache = state.cache
+
+  -- Cache.Control
+  cache.control = cache.control or {} -- TODO: remove
+  local control = cache.control
+
+  if not (control.output and control.output.valid) then
+    if state.program_ics.output and state.program_ics.output.valid then
+      control.output = state.program_ics.output.get_control_behavior()
+    end
+  end
+
+  if not (control.indication and control.indication.valid) then
+    control.indication = state.entity.get_control_behavior()
+  end
+
+  -- Cache.Wires
+  cache.wires = cache.wires or {} -- TODO: remove
+  local wires = cache.wires
+
+  if not (wires.red and wires.red.valid) then
+    wires.red = control.indication.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_input)
+  end
+
+  if not (wires.green and wires.green.valid) then
+    wires.green = control.indication.get_circuit_network(defines.wire_type.green, defines.circuit_connector_id.combinator_input)
+  end
+end
+
 function Controller.tick(state, sync_wait)
   if state.program_state == PSTATE_BREAKPOINT then
     return
   end
+
+  Controller.validate_cache(state)
 
   state.clock = state.clock + 1
 
@@ -352,7 +388,7 @@ function Controller.GuiCache_InvalidateLine(state, line)
 end
 
 function Controller.update_ip(state)
-  --local control = state.entity.get_control_behavior()
+  --local control = state.cache.control.indication
   --local param = control.parameters
   --param.parameters.second_constant = state.instruction_pointer
   --control.parameters = param
@@ -365,8 +401,8 @@ function Controller.update_ip(state)
 end
 
 function Controller.update_state(state, pstate)
-  if state.program_ics.output and state.program_ics.output.valid then
-    local control = state.program_ics.output.get_control_behavior()
+  if state.cache.control.output then
+    local control = state.cache.control.output
     control.enabled = not state.disabled
   end
 
@@ -376,7 +412,7 @@ function Controller.update_state(state, pstate)
     end
 
     local str = pstateStr[state.program_state]
-    local control = state.entity.get_control_behavior()
+    local control = state.cache.control.indication
     local param = control.parameters
     if state.disabled then
       param.parameters.first_constant = nil

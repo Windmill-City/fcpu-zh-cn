@@ -2,6 +2,7 @@
 Version: 0.3.17
 Date: ????
   Changes:
+    - Performance optimization and basic caching.
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.16
 Date: 2020-10-20

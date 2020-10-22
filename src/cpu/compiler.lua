@@ -316,8 +316,7 @@ function compiler.verify(state)
 end
 
 function compiler.eval(ast, ics, state)
-  local control = state.entity.get_control_behavior()
-  io.setup(state, control)
+  io.setup(state)
 
   local status, results = pcall(eval, ast, ics)
   --local status, results = true, eval(ast)

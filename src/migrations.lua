@@ -241,4 +241,10 @@ return {
       Controller.set_program_counter(state, 1)
     end)
   end,
+
+  ["0.3.17"] = function()
+    foreach_fcpu(function(fcpu, state)
+      state.cache = state.cache or {}
+    end)
+  end,
 }

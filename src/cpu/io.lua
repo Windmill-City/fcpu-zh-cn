@@ -1,9 +1,8 @@
 local assert
 local hdlbuilder
 local emitter
-local state_control
+local indication_control
 local output_control
-local wires
 local state
 local io = {}
 
@@ -34,14 +33,14 @@ local function register_getreadonly(index)
   if index == REG_IP then
     return state.instruction_pointer
   elseif index == REG_CNR then
-    if wires.red and wires.red.signals then
-      return #wires.red.signals
+    if state.cache.wires.red and state.cache.wires.red.signals then
+      return #state.cache.wires.red.signals
     else
       return 0
     end
   elseif index == REG_CNG then
-    if wires.green and wires.green.signals then
-      return #wires.green.signals
+    if state.cache.wires.green and state.cache.wires.green.signals then
+      return #state.cache.wires.green.signals
     else
       return 0
     end
@@ -109,17 +108,17 @@ end
 
 -- Control output
 function io.control_get()
-  local params = state_control.parameters
+  local params = indication_control.parameters
   local signal_id = params.parameters.output_signal
   local count = params.parameters.first_constant
   return emitter.make_signal(signal_id, count)
 end
 
 function io.control_set(signal)
-  local params = state_control.parameters
+  local params = indication_control.parameters
   params.parameters.first_constant = signal.count
   params.parameters.output_signal = signal.signal
-  state_control.parameters = params
+  indication_control.parameters = params
 end
 
 
@@ -161,12 +160,12 @@ function io.wire_get(_)
   elseif _.type == 'output' then
     assert.todo()
   end
-  if not wires[_.color] then
+  if not state.cache.wires[_.color] then
     assert.exception("Tried to access ".._.color.." wire when input not present.")
   end
-  if wires[_.color].signals then
+  if state.cache.wires[_.color].signals then
     local addr = addr_deref(_)
-    return wires[_.color].signals[addr] or NULL_SIGNAL
+    return state.cache.wires[_.color].signals[addr] or NULL_SIGNAL
   end
   return NULL_SIGNAL
 end
@@ -183,10 +182,10 @@ function io.wire_set(_, signal)
 end
 
 function io.wire_find_signal(color, signal_to_find)
-  if not wires[color] then
+  if not state.cache.wires[color] then
     assert.exception("Tried to access "..color.." wire when input not present.")
   end
-  local wire = wires[color]
+  local wire = state.cache.wires[color]
   if signal_to_find then
     local count = wire.get_signal(signal_to_find)
     if count ~= 0 then
@@ -197,7 +196,7 @@ function io.wire_find_signal(color, signal_to_find)
 end
 
 function io.wire_count(color)
-  return wires[color] and wires[color].signals and #wires[color].signals or 0
+  return state.cache.wires[color] and state.cache.wires[color].signals and #state.cache.wires[color].signals or 0
 end
 
 
@@ -247,10 +246,10 @@ function io.memory_getchannel_read(_)
     if _.color == 'out' then
       return output_control
     end
-    if not wires[_.color] then
+    if not state.cache.wires[_.color] then
       assert.exception("Tried to access ".._.color.." wire when input not present.")
     end
-    return wires[_.color]
+    return state.cache.wires[_.color]
   else
     assert.todo()
   end
@@ -300,10 +299,10 @@ function io.memory_getchannel_signals(_)
     if _.color == 'out' then
       return output_control.parameters.parameters
     end
-    if not wires[_.color] then
+    if not state.cache.wires[_.color] then
       assert.exception("Tried to access ".._.color.." wire when input not present.")
     end
-    return wires[_.color].signals
+    return state.cache.wires[_.color].signals
   else
     assert.todo()
   end
@@ -464,18 +463,10 @@ function io.settype(_, sigtype, types)
 end
 
 
-function io.setup(state_, control_)
+function io.setup(state_)
   state = state_
-  state_control = control_
-
-  wires = {
-    red = control_.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_input),
-    green = control_.get_circuit_network(defines.wire_type.green, defines.circuit_connector_id.combinator_input),
-  }
-
-  if state_.program_ics.output and state_.program_ics.output.valid then
-    output_control = state_.program_ics.output.get_control_behavior()
-  end
+  output_control = state_.cache.control.output
+  indication_control = state_.cache.control.indication
 end
 
 

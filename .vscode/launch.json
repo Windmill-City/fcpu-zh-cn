@@ -9,14 +9,16 @@
             "request": "launch",
             "name": "Factorio Mod Debug",
             "factorioPath": "G:/SteamLibrary/steamapps/common/Factorio/bin/x64/factorio.exe",
-            "hookData": true
+            "hookData": true,
+            "hookControl": ["fcpu"]
         },
         {
             "type": "factoriomod",
             "request": "launch",
             "name": "Factorio Mod Profile",
             "factorioPath": "G:/SteamLibrary/steamapps/common/Factorio/bin/x64/factorio.exe",
-            "hookMode": "profile"
+            "hookMode": "profile",
+            "hookControl": ["fcpu"]
         },
         {
             "type": "factoriomod",
@@ -24,7 +26,8 @@
             "name": "Factorio Mod Debug (custom modPath)",
             "factorioPath": "G:/SteamLibrary/steamapps/common/Factorio/bin/x64/factorio.exe",
             "modsPath": "S:/Work/KonStg/.factorio_mods",
-            "hookData": true
+            "hookData": true,
+            "hookControl": ["fcpu"]
         },
         {
             "type": "factoriomod",
@@ -32,7 +35,8 @@
             "name": "Factorio Mod Profile (custom modPath)",
             "factorioPath": "G:/SteamLibrary/steamapps/common/Factorio/bin/x64/factorio.exe",
             "modsPath": "S:/Work/KonStg/.factorio_mods",
-            "hookMode": "profile"
+            "hookMode": "profile",
+            "hookControl": ["fcpu"]
         },
         {
             "name": "Convert Readme to Wiki",
