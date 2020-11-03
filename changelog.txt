@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.18
-Date: ????
+Date: 2020-11-03
   Features:
     - Added relative `jmp` mnemonic variant.
     - Added support for Nanobots (https://mods.factorio.com/mod/Nanobots).
