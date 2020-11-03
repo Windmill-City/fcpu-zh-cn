@@ -470,8 +470,21 @@ When working with SIMD instructions, the following features should be considered
   Searches maximum signal in `src` and assing its index into `dst`.
 
 
-### SIMD Memory
+### SIMD Memory (Explanation)
+I'll try to explain how the mod works with memory and why it's done this way.  
 
+Each Factorio wire can contain a huge number of signals simultaneously (hundreds). These signals are not sorted in any way and in fact have a random indices. To make everything look more beautiful, GUI panels sort signals in descending order (power poles and ⓘ tooltips).  
+
+To process a large number of signals in the game, vanilla combinators optimized inside the game itself in C++. If you try to process a similar number of signals in the LUA mod, there will be significant overhead and performance degradation. This applies to any Factorio mod.  
+
+To get around this, fCPU uses a trick - it partially compiles the written program (SIMD mnemonics `x*`) into invisible circuits with vanilla combinators and coordinates their execution line-by-line. This part of fCPU called coprocessor. It provides better performance than similar calculations on the LUA.  
+
+Unlike registers, which are implemented as ordinary variables and always retain their indices, the memory for SIMD commands is also implemented using vanilla combinators.  
+
+Here comes the most important thing:  
+To modify the memory, you need to subtract one signal and add another (it is shown on the video https://youtu.be/xOADSQPs4Z4).
+Like any other vanilla combinator operation, this breaks the signal indices.  
+That is why, if you change the state of memory, then the indexes will also change.  
 
 
 [comment]: <> (md2frt-skip-section-begin)

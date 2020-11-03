@@ -2,6 +2,7 @@
 * Breakpoints.
 * Hotkeys, auto switch memory channel for debugging.
 * New conditional break until signal of a certain type has changed its value.
+* SIMD `x*` with 3 arguments.
 
 # Upcoming  (in v0.5.0)
 * Memory array with constant memory indices.
