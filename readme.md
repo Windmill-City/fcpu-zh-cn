@@ -166,6 +166,9 @@ Each instruction take one or more operands and modify them or state of fCPU.
 * `clr`  
   Clear all registers, memory channels and output.
 
+* `clr` reg  
+  Clear all registers.
+
 * `clr` out  
   Clear all output values.
 
@@ -467,6 +470,10 @@ When working with SIMD instructions, the following features should be considered
   Searches maximum signal in `src` and assing its index into `dst`.
 
 
+### SIMD Memory
+
+
+
 [comment]: <> (md2frt-skip-section-begin)
 
 # Examples
@@ -485,10 +492,12 @@ See [here](https://www.buymeacoffee.com/p/100444)
 
 
 # Dear supporters
-* Lukáš Venhoda (v0.2.0 update)
-* Someone (v0.2.12 update)
-* kKdH (v0.3.0 update)
+* cid0rz (v0.4.0 update)
 * Quorzar (v0.4.0 update)
+* kKdH (v0.3.0 update)
+* Someone (v0.2.12 update)
+* Lukáš Venhoda (v0.2.0 update)
+**Thank you for supporting fCPU!**
 
 
 # Support fCPU

@@ -1,16 +1,17 @@
 # Upcoming  (in v0.4.0)
 * Breakpoints.
-* Debugging, hotkeys, auto switch memory channel.
-* New conditional break until signal of a certain type has changed its value
+* Hotkeys, auto switch memory channel for debugging.
+* New conditional break until signal of a certain type has changed its value.
 
 # Upcoming  (in v0.5.0)
+* Memory array with constant memory indices.
+* Add push, pop, call, ret semantics for subroutines and stacks.
 * Vector compare mnemonics.
 * `xflt` mnemonic for filtering signals.
 
 # TODO list, fCPU
 * Profiling & optimization (less ticks for `x*` operations).
 * Asyncronous SIMD operations.
-* Add call, ret semantics.
 * Test result flags to extend one condition line limitation.
 * Examples, demos and docs.
 * Code highlighting.

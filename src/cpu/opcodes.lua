@@ -115,7 +115,13 @@ local opcodes = {
         if expr then
           assert.type(expr, {'register', 'memory', 'output'})
           if expr.type == 'register' then
-            io.register_set(expr, NULL_SIGNAL)
+            if expr.addr then
+              io.register_set(expr, NULL_SIGNAL)
+            else
+              for i = 1, MC_REGS do
+                io.register_set({type='register', addr=i, pointer=false}, NULL_SIGNAL)
+              end
+            end
           elseif expr.color == 'out' then
             if expr.addr == nil then
               actions[#actions + 1] = io.output_clear()
