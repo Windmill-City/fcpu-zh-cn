@@ -10,12 +10,18 @@ local standard_op = function(_)
   assert.type(_src, {'register', 'value', 'input'})
   return _dst, _src
 end
-local jump_op = function(addr)
+local jump_op = function(addr, offset)
   assert.type(addr, {'label', 'value', 'register'})
-  if addr.type == 'label' then
-    return { type = 'jump', label = addr.label }
+  if offset then
+    assert.type(offset, {'value', 'register'})
+    offset = io.getcount(offset) or 0
   else
-    return { type = 'jump', val = io.getcount(addr) }
+    offset = 0
+  end
+  if addr.type == 'label' then
+    return { type = 'jump', val = offset, label = addr.label }
+  else
+    return { type = 'jump', val = io.getcount(addr) + offset }
   end
 end
 
@@ -493,8 +499,8 @@ local opcodes = {
   end,
 
   jmp = function(_)
-    assert.one(_)
-    return jump_op(_[1])
+    assert.one_or_two(_)
+    return jump_op(_[1], _[2])
   end,
   hlt = function(_)
     return { type = 'halt' }

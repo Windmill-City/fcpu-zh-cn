@@ -319,6 +319,10 @@ Each instruction take one or more operands and modify them or state of fCPU.
 * `jmp` addr[**C**/**A**/**L**/**R**]  
   Jump to address or label.
 
+* `jmp` addr[**C**/**A**/**L**/**R**] offset[**C**/**R**]  
+  Jump to address + offset or label + offset.  
+  For example: `jmp ipt -2`, jump at two lines before current instruction (`ipt`).
+
 * `hlt`  
   *Halt* program execution until it will be resumed by player or by *Run* signal from any **i**nput wire.
 

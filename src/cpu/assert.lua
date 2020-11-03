@@ -43,6 +43,15 @@ function assert.two(_)
   end
 end
 
+function assert.one_or_two(_)
+  if #_ < 1 then
+    exception("Expecting at least one parameters after opcode")
+  end
+  if 2 < #_ then
+    exception("Expecting no more than two parameters after opcode")
+  end
+end
+
 function assert.two_or_more(_)
   if #_ < 2 then
     exception("Expecting at least two parameters after opcode")

@@ -130,7 +130,7 @@ end
 function Controller.set_program_counter(state, value)
   Controller.GuiCache_InvalidateLine(state, state.instruction_pointer)
   local length = #state.program_ast
-  if length == 0 or length < value then
+  if length == 0 or length < value or value < 1 then
     state.instruction_pointer = state.program_begin or 1
     Controller.update_state(state, PSTATE_HALTED)
     state.do_step = false
@@ -287,7 +287,7 @@ function Controller.tick(state, sync_wait)
         if result.label then
           for line_num, node in ipairs(state.program_ast) do
             if node.type == 'label' and node.label == result.label then
-              Controller.set_program_counter(state, line_num + 1)
+              Controller.set_program_counter(state, line_num + 1 + (result.val or 0))
               break
             end
           end
