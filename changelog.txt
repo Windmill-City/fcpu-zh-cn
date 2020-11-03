@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.17
 Date: ????
+  Features:
+    - Registers tooltips now show exact count and type (click to paste in code RMB or LMB, see https://mods.factorio.com/mod/fcpu/discussion/5f79ff3e92eab70c66c8b8af).
   Changes:
     - Performance optimization and basic caching.
     - `uiss` now handle only `item` type signals other will be zeroed.

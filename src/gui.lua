@@ -4,7 +4,7 @@ local gui = require("__flib__.gui")
 
 local defaultToolbarInsertSignal = {type='virtual', name='signal-dot'}
 
-local signalToSpritePath = function(player_data, signal)
+local function signalToSpritePath(player_data, signal)
   if signal then
     local path
     if signal.type == "virtual" then
@@ -20,6 +20,22 @@ local signalToSpritePath = function(player_data, signal)
   end
 end
 
+local function signalToTooltip(signal, prefix)
+  local str = signal.count
+  if signal.signal then
+    if signal.signal.type == 'virtual' then
+      str = str .. '[virtual-signal='.. signal.signal.name ..']'
+    else
+      str = str .. '['.. signal.signal.type ..'='.. signal.signal.name ..']'
+    end
+  end
+  if prefix then
+    return prefix .. (str and ('='.. str) or '')
+  else
+    return (str or '')
+  end
+end
+
 local function inplace_dictionary_combine(dst, ...)
   local tables = {...}
   --local new = {}
@@ -29,6 +45,13 @@ local function inplace_dictionary_combine(dst, ...)
       end
   end
   --return new
+end
+
+local function InsertTextInProgram(player_data, signal_str)
+  -- see: https://forums.factorio.com/viewtopic.php?f=28&t=88330
+  local pos = player_data.gui_program_input.text:len()
+  player_data.gui_program_input.text = string.insert(player_data.gui_program_input.text, signal_str, pos)
+  fcpu_update_program(player_data.current_fcpu, player_data.gui_program_input.text)
 end
 
 local function FormatBreakpointTitle(state, i)
@@ -78,7 +101,7 @@ gui.add_templates{
   heading_2 = {type="frame", style="invisible_frame_with_title"},
   heading_3 = {type="label", style="heading_3_label", style_mods={padding=4}},
   slot_button = function(name, title)
-    return {type="sprite-button", style="slot_button_in_shallow_frame", name=name.."-inspect", tooltip=(title or name)}
+    return {type="sprite-button", style="slot_button_in_shallow_frame", name=name.."-inspect", tooltip=(title or name), handlers="widget.insert_register_to_program"}
   end,
   slot_inventory = function(name, title, ...)
     return table.deep_merge{{type="sprite-button", style="inventory_slot", name=name .."-inspect", tooltip=(title or name)}, ...}
@@ -505,18 +528,22 @@ function GuiWidgetOpen(player, entity)
 end
 
 function GuiWidgetUpdate(player_data, state, initial)
+  local isRunning = Controller.is_running(state)
+
   -- Enable/Disable the run/step button
   if player_data.gui_run_button and player_data.gui_run_button.valid then
-    if Controller.is_running(state) then
+    if isRunning then
       --player_data.gui_halt_button.style = "highlighted_tool_button"
       player_data.gui_halt_button.sprite = "fcpu-pause-sprite"
       player_data.gui_halt_button.enabled = true
       player_data.gui_run_button.enabled = false
+      player_data.gui_inspector.ignored_by_interaction = true
     else
       --player_data.gui_halt_button.style = "tool_button_red"
       player_data.gui_halt_button.sprite = "fcpu-stop-sprite"
       player_data.gui_halt_button.enabled = not Controller.is_first_instruction(state)
       player_data.gui_run_button.enabled = true
+      player_data.gui_inspector.ignored_by_interaction = false
     end
   end
   -- Update the inspector GUI
@@ -527,6 +554,11 @@ function GuiWidgetUpdate(player_data, state, initial)
         local button = player_data.gui_inspector['reg'..i..'-inspect']
         button.sprite = signalToSpritePath(player_data, reg.signal)
         button.number = reg.count
+        if isRunning then
+          button.tooltip = 'r'..i
+        else
+          button.tooltip = signalToTooltip(reg, 'r'..i)
+        end
       end
     end
   end
@@ -536,17 +568,17 @@ function GuiWidgetUpdate(player_data, state, initial)
     if toolbar then
       local button_istp = toolbar['insert-signal-to-program']
       if button_istp and button_istp.valid then
-        button_istp.enabled = not Controller.is_running(state)
+        button_istp.enabled = not isRunning
       end
       local button_paste = toolbar['paste-program']
       if button_paste and button_paste.valid then
-        button_paste.enabled = not Controller.is_running(state)
+        button_paste.enabled = not isRunning
       end
     end
   end
   -- Make text read-only while running
   if player_data.gui_program_input and player_data.gui_program_input.valid then
-    player_data.gui_program_input.read_only = Controller.is_running(state)
+    player_data.gui_program_input.read_only = isRunning
   end
   -- Update the program lines in the GUI
   if player_data.gui_breakpoints and player_data.gui_breakpoints.valid then
@@ -719,10 +751,17 @@ gui.add_handlers{
           end
           local signal_str = '['.. signal.type ..'='.. signal.name ..']'
           event.element.elem_value = defaultToolbarInsertSignal
-          -- see: https://forums.factorio.com/viewtopic.php?f=28&t=88330
-          local pos = player_data.gui_program_input.text:len()
-          player_data.gui_program_input.text = string.insert(player_data.gui_program_input.text, signal_str, pos)
-          fcpu_update_program(player_data.current_fcpu, player_data.gui_program_input.text)
+          InsertTextInProgram(player_data, signal_str)
+        end
+      end)
+    },
+    insert_register_to_program = {
+      on_gui_click = mixPlayerData(function(player_data, player, event)
+        local k, v = string.match(event.element.tooltip, '([^=]+)=(.+)')
+        if event.button == defines.mouse_button_type.left then
+          InsertTextInProgram(player_data, k)
+        else
+          InsertTextInProgram(player_data, v)
         end
       end)
     },
