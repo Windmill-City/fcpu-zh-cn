@@ -445,8 +445,8 @@ When working with SIMD instructions, the following features should be considered
 * `xdiv` a[**M**/**O**] b[**C**/**R**]
 * `xmod` a[**M**/**O**] b[**C**/**R**]
 * `xpow` a[**M**/**O**] b[**C**/**R**]
-* `xinc` dst[**O**]
-* `xdec` dst[**O**]
+* `xinc` dst[**M**]
+* `xdec` dst[**M**]
 
 * `xand` a[**M**/**O**] b[**C**/**R**]
 * `xor`  a[**M**/**O**] b[**C**/**R**]

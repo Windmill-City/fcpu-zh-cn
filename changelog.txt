@@ -6,6 +6,8 @@ Date: ????
   Changes:
     - Performance optimization and basic caching.
     - `uiss` now handle only `item` type signals other will be zeroed.
+  Bugfixes:
+    - `xinc`, `xdec` docs updated.
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.16
 Date: 2020-10-20
