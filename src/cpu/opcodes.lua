@@ -573,17 +573,19 @@ local opcodes = {
     assert.two(_)
     local signal = io.gettype(_[2], {'type', 'register'})
     if signal.type ~= 'item' then
-      local str
-      if signal.type == 'virtual' then
-        str = '[virtual-signal='.. signal.name ..']'
-      else
-        str = '['.. signal.type ..'='.. signal.name ..']'
-      end
-      assert.exception('Expecting `[item=...]` signal type, got \''.. str ..'\'.')
+      io.setsignal(_[1], NULL_SIGNAL)
+      --local str
+      --if signal.type == 'virtual' then
+      --  str = '[virtual-signal='.. signal.name ..']'
+      --else
+      --  str = '['.. signal.type ..'='.. signal.name ..']'
+      --end
+      --assert.exception('Expecting `[item=...]` signal type, got \''.. str ..'\'.')
+    else
+      local proto = game.item_prototypes[signal.name]
+      assert.check(proto ~= nil, 'Unknown item name specified.')
+      io.setsignal(_[1], { signal=signal, count=proto.stack_size })
     end
-    local proto = game.item_prototypes[signal.name]
-    assert.check(proto ~= nil, 'Unknown item name specified.')
-    io.setsignal(_[1], { signal=signal, count=proto.stack_size })
   end
 }
 
