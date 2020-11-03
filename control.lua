@@ -234,7 +234,10 @@ event.register({
   defines.events.script_raised_revive,
   },
   function(event)
-    on_build_fcpu({ created_entity = event.entity })
+    on_build_fcpu({
+      created_entity = event.entity,
+      tags = event.tags
+    })
   end
 )
 
