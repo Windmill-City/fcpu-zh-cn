@@ -1,7 +1,9 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.19
 Date: ????
-  Changes:
+  Bugfixes:
+    - Typo in docs (https://mods.factorio.com/mod/fcpu/discussion/5fa3e5b23ededbcdb59dd237).
+    - Nil value when no number specified (https://mods.factorio.com/mod/fcpu/discussion/5fa3d9945969b495fb130816).
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.18
 Date: 2020-11-03

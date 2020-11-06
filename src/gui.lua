@@ -21,7 +21,7 @@ local function signalToSpritePath(player_data, signal)
 end
 
 local function signalToTooltip(signal, prefix)
-  local str = signal.count
+  local str = signal.count or ''
   if signal.signal then
     if signal.signal.type == 'virtual' then
       str = str .. '[virtual-signal='.. signal.signal.name ..']'

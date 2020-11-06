@@ -11,6 +11,7 @@
 * `xflt` mnemonic for filtering signals.
 
 # TODO list, fCPU
+* Factorio v1.1.0 support.
 * Profiling & optimization (less ticks for `x*` operations).
 * Asyncronous SIMD operations.
 * Test result flags to extend one condition line limitation.
