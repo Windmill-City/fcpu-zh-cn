@@ -399,32 +399,40 @@ blt r1 10 :counter
 ```
 
 * `beq` a[**C**/**R**] b[**C**/**R**] addr[**C**/**A**/**L**/**R**]  
+* `beq` a[**C**/**R**] b[**C**/**R**] addr[**C**/**A**/**L**/**R**] offset[**C**/**R**]  
   Equal.  
-  *a == b*
+  If *a == b* then `jmp addr offset`
 * `bne` a[**C**/**R**] b[**C**/**R**] addr[**C**/**A**/**L**/**R**]  
+* `bne` a[**C**/**R**] b[**C**/**R**] addr[**C**/**A**/**L**/**R**] offset[**C**/**R**]  
   Not equal.  
-  *a != b*
+  If *a != b* then `jmp addr offset`
 
 * `bgt` a[**C**/**R**] b[**C**/**R**] addr[**C**/**A**/**L**/**R**]  
+* `bgt` a[**C**/**R**] b[**C**/**R**] addr[**C**/**A**/**L**/**R**] offset[**C**/**R**]  
   Greater than.  
-  *a > b*
+  If *a > b* then `jmp addr offset`
 
 * `blt` a[**C**/**R**] b[**C**/**R**] addr[**C**/**A**/**L**/**R**]  
+* `blt` a[**C**/**R**] b[**C**/**R**] addr[**C**/**A**/**L**/**R**] offset[**C**/**R**]  
   Less than.  
-  *a < b*
+  If *a < b* then `jmp addr offset`
 
 * `bge` a[**C**/**R**] b[**C**/**R**] addr[**C**/**A**/**L**/**R**]  
+* `bge` a[**C**/**R**] b[**C**/**R**] addr[**C**/**A**/**L**/**R**] offset[**C**/**R**]  
   Greater or equal than.  
-  *a >= b*
+  If *a >= b* then `jmp addr offset`
 
 * `ble` a[**C**/**R**] b[**C**/**R**] addr[**C**/**A**/**L**/**R**]  
+* `ble` a[**C**/**R**] b[**C**/**R**] addr[**C**/**A**/**L**/**R**] offset[**C**/**R**]  
   Less or equal than.  
-  *a <= b*
+  If *a <= b* then `jmp addr offset`
 
 * `bas` a[**T**/**R**] b[**T**/**R**] addr[**C**/**A**/**L**/**R**]  
+* `bas` a[**T**/**R**] b[**T**/**R**] addr[**C**/**A**/**L**/**R**] offset[**C**/**R**]  
   Branch if types are same.  
 
 * `bad` a[**T**/**R**] b[**T**/**R**] addr[**C**/**A**/**L**/**R**]  
+* `bad` a[**T**/**R**] b[**T**/**R**] addr[**C**/**A**/**L**/**R**] offset[**C**/**R**]  
   Branch if types are different.  
 
 

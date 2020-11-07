@@ -37,11 +37,11 @@ local test_mnemonic = function(condition)
 end
 local branch_mnemonic = function(condition)
   return function(_)
-    assert.three(_)
+    assert.three_or_four(_)
     assert.type(_[1], {'value', 'input', 'register'})
     assert.type(_[2], {'value', 'input', 'register'})
     if condition(_[1], _[2]) then
-      return jump_op(_[3])
+      return jump_op(_[3], _[4])
     end
   end
 end

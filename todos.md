@@ -21,6 +21,7 @@
 * Factorio modules support.
 * Mimic vanilla blueprint bahavior when stamped ontop of fCPU (copy blueprint program).
 * Add drag and drop GUI for newbies.
+* Being able to give a name/label to each processor (https://discordapp.com/channels/705695217512349768/749028842869489776/773806128919609355)
 
 # Done
 * Output multiple signals (DONE in v0.2.0)

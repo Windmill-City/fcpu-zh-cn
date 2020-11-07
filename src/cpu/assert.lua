@@ -64,6 +64,12 @@ function assert.three(_)
   end
 end
 
+function assert.three_or_four(_)
+  if #_ ~= 3 and #_ ~= 4 then
+    exception("Expecting three or four parameters after opcode")
+  end
+end
+
 function assert.type(_, valid)
   -- wire, register, memory
   for i,v in ipairs(valid) do
