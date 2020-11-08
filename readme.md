@@ -446,21 +446,75 @@ When working with SIMD instructions, the following features should be considered
 
 
 ### SIMD Mnemonics
-* `xmov` a[**M**/**O**] b[**I**/**M**]
-* `xadd` a[**M**/**O**] b[**C**/**R**]
-* `xsub` a[**M**/**O**] b[**C**/**R**]
-* `xmul` a[**M**/**O**] b[**C**/**R**]
-* `xdiv` a[**M**/**O**] b[**C**/**R**]
-* `xmod` a[**M**/**O**] b[**C**/**R**]
-* `xpow` a[**M**/**O**] b[**C**/**R**]
-* `xinc` dst[**M**]
-* `xdec` dst[**M**]
 
-* `xand` a[**M**/**O**] b[**C**/**R**]
-* `xor`  a[**M**/**O**] b[**C**/**R**]
-* `xxor` a[**M**/**O**] b[**C**/**R**]
-* `xsl`  a[**M**/**O**] b[**C**/**R**]
-* `xsr`  a[**M**/**O**] b[**C**/**R**]
+*Pseudocode legend*
+- `dst()`, `src()`, etc: unordered memory (set)
+- `dst[]`, `src[]`, etc: ordered memory (array) *NOT IMPLEMENTED YET*
+
+
+* `xmov` dst[**M**/**O**] src[**I**/**M**]
+  *dst(each) = src(each)*
+
+* `xadd` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]
+  *dst(each) = dst + val* 
+  *dst(each) = src + val* (if src specified)
+
+* `xsub` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]
+  *dst(each) = dst - val*
+  *dst(each) = src - val* (if src specified)
+
+* `xmul` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]
+  *dst(each) = dst * val*
+  *dst(each) = src * val* (if src specified)
+
+* `xdiv` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]
+  *dst(each) = dst / val*
+  *dst(each) = src / val* (if src specified)
+
+* `xmod` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]
+  *dst(each) = dst % val*
+  *dst(each) = src % val* (if src specified)
+
+* `xpow` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]
+  *dst(each) = dst ^ val*
+  *dst(each) = src ^ val* (if src specified)
+
+**Bitwise**
+
+* `xand` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]
+  AND.  
+  *dst(each) = dst & val* 
+  *dst(each) = src & val* (if src specified)
+
+* `xor`  dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]
+  OR.  
+  *dst(each) = dst | val* 
+  *dst(each) = src | val* (if src specified)
+
+* `xxor` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]
+  XOR.  
+  *dst(each) = dst ^ val* 
+  *dst(each) = src ^ val* (if src specified)
+
+* `xsl`  dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]
+  Shift left.  
+  *dst(each) = dst << val* 
+  *dst(each) = src << val* (if src specified)
+
+* `xsr`  dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]
+  Shift right.  
+  *dst(each) = dst >> val* 
+  *dst(each) = src >> val* (if src specified)
+
+
+
+* `xinc` dst[**M**]
+  *dst() = dst(each) + 1*
+* `xdec` dst[**M**]
+  *dst() = dst(each) - 1*
+
+
+### SIMD statistics
 
 * `xmin` dst[**R**/**O**] src[**I**/**M**]
   Searches minimum signal in `src` and copy it to `dst`.
@@ -475,7 +529,7 @@ When working with SIMD instructions, the following features should be considered
   Searches maximum signal in `src` and assing its index into `dst`.
 
 
-### SIMD Memory (Explanation)
+## SIMD Memory (Explanation)
 I'll try to explain how the mod works with memory and why it's done this way.  
 
 Each Factorio wire can contain a huge number of signals simultaneously (hundreds). These signals are not sorted in any way and in fact have a random indices. To make everything look more beautiful, GUI panels sort signals in descending order (power poles and ⓘ tooltips).  
