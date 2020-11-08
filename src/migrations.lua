@@ -247,4 +247,26 @@ return {
       state.cache = state.cache or {}
     end)
   end,
+
+  ["0.3.20"] = function()
+    foreach_fcpu(function(fcpu, state)
+      local prev = state.program_text
+      state.program_text = string.gsub(state.program_text, 'xinc(%s+[^%s]+)', 'xadd%1 1')
+      state.program_text = string.gsub(state.program_text, 'xdec(%s+[^%s]+)', 'xsub%1 1')
+
+      if state.program_ast then
+        for k,v in pairs(state.program_ast) do
+          if v.type == 'ic' then
+            if v.name == 'xinc' then
+              v.name = 'xadd'
+              v.expr[2] = { type='value', count=1 }
+            elseif v.name == 'xdec' then
+              v.name = 'xsub'
+              v.expr[2] = { type='value', count=1 }
+            end
+          end
+        end
+      end
+    end)
+  end,
 }

@@ -3,17 +3,13 @@ local assert
 local io
 
 
-local function vector_scalar_op(operand)
+local function vector_scalar_op()
   return function(_, ics)
-    if operand then
-      assert.one(_)
-    else
-      assert.two(_)
-      assert.type(_[2], {'value', 'register', 'input'})
-    end
+    assert.two(_)
+    assert.type(_[2], {'value', 'register', 'input'})
 
     if ics and ics.out then
-      local src = operand or io.getcount(_[2])
+      local src = io.getcount(_[2])
 
       local control = ics.out.get_or_create_control_behavior()
       local params = control.parameters
@@ -47,8 +43,6 @@ local opcodes_vx = {
   xdiv = vector_scalar_op(),
   xmod = vector_scalar_op(),
   xpow = vector_scalar_op(),
-  xinc = vector_scalar_op(1),
-  xdec = vector_scalar_op(1),
 
   xand = vector_scalar_op(),
   xor  = vector_scalar_op(),

@@ -5,6 +5,7 @@ Date: ????
     - Added three operands `x*` mnemonics.
   Changes:
     - Added fourth parameter to branch mnemonics (https://mods.factorio.com/mod/fcpu/discussion/5fa6613ce4b0eb8935a026b1).
+    - Removed `xinc`, `xdec` as it is not usefull (replaced with `xadd dst 1` and `xsub dst 1`).
     - Docs for SIMD.
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.19

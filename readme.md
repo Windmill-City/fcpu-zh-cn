@@ -506,7 +506,7 @@ When working with SIMD instructions, the following features should be considered
   *dst(each) = dst >> val* 
   *dst(each) = src >> val* (if src specified)
 
-
+**Legacy since v0.3.20 (not recomended for future usage)**
 
 * `xinc` dst[**M**]
   *dst() = dst(each) + 1*
@@ -564,6 +564,7 @@ See [here](https://www.buymeacoffee.com/p/100444)
 
 
 # Dear supporters
+* Chiko (v0.4.0 update)
 * cid0rz (v0.4.0 update)
 * Quorzar (v0.4.0 update)
 * kKdH (v0.3.0 update)

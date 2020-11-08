@@ -547,14 +547,13 @@ local ops = {
   xdiv = vector_scalar_op('/'),
   xmod = vector_scalar_op('%'),
   xpow = vector_scalar_op('^'),
-  xinc = vector_scalar_op('+'),
-  xdec = vector_scalar_op('-'),
 
   xand = vector_scalar_op('AND'),
   xor  = vector_scalar_op('OR'),
   xxor = vector_scalar_op('XOR'),
   xsl  = vector_scalar_op('<<'),
   xsr  = vector_scalar_op('>>'),
+
 --[[
   xlt = vector_decide_op('<'),
   xle = vector_decide_op('≤'),
