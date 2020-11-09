@@ -314,7 +314,7 @@ function Controller.tick(state, sync_wait)
       end
     else
       Controller.set_program_counter(state, state.instruction_pointer + 1)
-      if ast.deffer then
+      if ast and ast.deffer then
         for _,v in ipairs(ast.deffer) do
           table.insert(state.deffered, table.deep_copy(v))
         end
