@@ -555,7 +555,7 @@ See: https://mods.factorio.com/mod/fcpu/faq and [Discord channel](https://discor
 * [Reddit](https://www.reddit.com/r/factorio/comments/i8e7dh/new_mod_fcpu/)
 
 
-# TODOs
+# Roadmap & TODOs
 See [here](https://www.buymeacoffee.com/p/100444)
 
 
@@ -566,7 +566,8 @@ See [here](https://www.buymeacoffee.com/p/100444)
 * kKdH (v0.3.0 update)
 * Someone (v0.2.12 update)
 * Lukáš Venhoda (v0.2.0 update)
-**Thank you for supporting fCPU!**
+
+**Thanks for supporting fCPU!**
 
 
 # Support fCPU

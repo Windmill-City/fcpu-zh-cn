@@ -51,7 +51,8 @@ function Controller.init(mc)
     cache = {
       control = {
         indication = control
-      }
+      },
+      wires = {},
     }
   }
   Controller.init_registers(state)
