@@ -127,13 +127,13 @@ function builder.verify(state)
   end
 
   for i = 1, MC_MEMORY_CHANNELS  do
-    local name = 'mem'..i
-    state.program_ics[name] = state.program_ics[name] or {}
+    local ics_name = 'mem'..i
+    state.program_ics[ics_name] = state.program_ics[ics_name] or {}
 
-    if not (state.program_ics[name].out and state.program_ics[name].out.valid) then
+    if not (state.program_ics[ics_name].out and state.program_ics[ics_name].out.valid) then
       local ent_mem, ctrl_mem = builder.create_node(state.entity, 'decider', i * 2)
 
-      state.program_ics[name].out = ent_mem
+      state.program_ics[ics_name].out = ent_mem
 
       ctrl_mem.parameters = {
         parameters = {
@@ -147,41 +147,41 @@ function builder.verify(state)
       }
     end
 
-    if not (state.program_ics[name].value and state.program_ics[name].value.valid) then
+    if not (state.program_ics[ics_name].value and state.program_ics[ics_name].value.valid) then
       local ent_val1, ctrl_val1 = builder.create_node(state.entity, 'output', i * 2 + 1)
 
-      state.program_ics[name].value = ent_val1
+      state.program_ics[ics_name].value = ent_val1
       ctrl_val1.enabled = false
 
       ent_val1.connect_neighbour({
         wire = defines.wire_type.green,
-        target_entity = state.program_ics[name].out,
+        target_entity = state.program_ics[ics_name].out,
         source_circuit_id = defines.circuit_connector_id.constant_combinator,
         target_circuit_id = defines.circuit_connector_id.combinator_output
       })
       ent_val1.connect_neighbour({
         wire = defines.wire_type.red,
-        target_entity = state.program_ics[name].out,
+        target_entity = state.program_ics[ics_name].out,
         source_circuit_id = defines.circuit_connector_id.constant_combinator,
         target_circuit_id = defines.circuit_connector_id.combinator_output
       })
     end
 
-    if not (state.program_ics[name].value2 and state.program_ics[name].value2.valid) then
+    if not (state.program_ics[ics_name].value2 and state.program_ics[ics_name].value2.valid) then
       local ent_val2, ctrl_val2 = builder.create_node(state.entity, 'output', i * 2 + 1.5)
 
-      state.program_ics[name].value2 = ent_val2
+      state.program_ics[ics_name].value2 = ent_val2
       ctrl_val2.enabled = false
 
       ent_val2.connect_neighbour({
         wire = defines.wire_type.green,
-        target_entity = state.program_ics[name].out,
+        target_entity = state.program_ics[ics_name].out,
         source_circuit_id = defines.circuit_connector_id.constant_combinator,
         target_circuit_id = defines.circuit_connector_id.combinator_output
       })
       ent_val2.connect_neighbour({
         wire = defines.wire_type.red,
-        target_entity = state.program_ics[name].out,
+        target_entity = state.program_ics[ics_name].out,
         source_circuit_id = defines.circuit_connector_id.constant_combinator,
         target_circuit_id = defines.circuit_connector_id.combinator_output
       })
