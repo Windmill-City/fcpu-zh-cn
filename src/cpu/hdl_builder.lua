@@ -18,7 +18,7 @@ local function get_debug_offset(entity, d_next_node)
     local state = get_fcpu_state(entity)
     if state then
       if d_next_node == true then
-        state.d_i = 2
+        state.d_i = 0
         state.d_j = (state.d_j or 0) + 1
       elseif state.d_j == nil or d_next_node == false then
         state.d_i = d_next_node or 1
@@ -195,11 +195,44 @@ end
 
 -------------------------------------------------------------------------------------------------------
 
+function builder.create_merger_cell(entity, input_a, input_b)
+  local wire1 = input_a.wire or inverse_wire_color(input_b.wire) or defines.wire_type.red
+  local wire2 = inverse_wire_color(wire1)
+
+  local proxy, control_proxy = builder.create_node(entity, 'decider')
+
+  control_proxy.parameters = {
+    parameters = {
+      first_signal = {type='virtual', name='signal-fcpu-error'},
+      second_signal = nil,
+      constant = 0,
+      comparator = "=",
+      output_signal = {type='virtual', name='signal-everything'},
+      copy_count_from_input = true
+    }
+  }
+
+  proxy.connect_neighbour{
+    source_circuit_id = defines.circuit_connector_id.combinator_input,
+    target_circuit_id = input_a.port,
+    target_entity = input_a.entity,
+    wire = wire1,
+  }
+  proxy.connect_neighbour{
+    source_circuit_id = defines.circuit_connector_id.combinator_input,
+    target_circuit_id = input_b.port,
+    target_entity = input_b.entity,
+    wire = wire2,
+  }
+
+  return proxy
+end
+
 function builder.create_memory_cell(entity, input_a, input_b)
   local wire1 = input_a.wire or defines.wire_type.red
   local wire2 = inverse_wire_color(wire1)
 
-  local d_key, control_key = builder.create_node(entity, 'decider', true)
+  local d_key, control_key = builder.create_node(entity, 'decider')
   local c_clr, control_clr = builder.create_node(entity, 'constant')
   local d_out, control_out = builder.create_node(entity, 'decider')
 
@@ -330,15 +363,15 @@ function builder.create_arithmetic_cell(entity, input_a, input_b, operation)
 
   dst.connect_neighbour{
     source_circuit_id = defines.circuit_connector_id.combinator_input,
-    target_entity = ics.out,
     target_circuit_id = defines.circuit_connector_id.combinator_output,
+    target_entity = ics.out,
     wire = ics.color_out,
   }
   if input_b ~= nil and constant == nil then
     control_dst.connect_neighbour{
       source_circuit_id = defines.circuit_connector_id.combinator_input,
-      target_entity = input_b,
       target_circuit_id = defines.circuit_connector_id.combinator_output,
+      target_entity = input_b,
       wire = inverse_wire_color(ics.color_out),
     }
   end
@@ -516,16 +549,22 @@ local ops = {
     local input_a = connect_input_from(state, _[2])
     local input_b = connect_input_from(state, _[3])
 
-    local ics = builder.create_memory_cell(state.entity, input_a, input_b)
+    local merger = builder.create_merger_cell(state.entity, input_a, input_b)
+    local ics = builder.create_memory_cell(state.entity, {
+      entity = merger,
+      wire = input_a.wire,
+      port = defines.circuit_connector_id.combinator_output
+    })
+    ics[#ics + 1] = merger
 
     local ics_name = connect_output_to(state, ics, _[1])
 
     local deffer = {
       {action='disable', ic=ics.clr, delay = 0},
       {action='tune', ic=ics.kin, value=0, delay = 0},
-      {action='tune', ic=ics.kout, value=1, delay = 0},
-      {action='tune', ic=ics.kin, value=1, delay = 1},
-      {action='tune', ic=ics.kout, value=0, delay = 1},
+      {action='tune', ic=ics.kout, value=1, delay = 1},
+      {action='tune', ic=ics.kin, value=1, delay = 2},
+      {action='tune', ic=ics.kout, value=0, delay = 2},
       {action='noop', delay = 4},
     }
 
@@ -560,6 +599,7 @@ function builder.construct(ast, state_)
 
   if ops and ops[ast.name] then
     _destroy_on_error = {}
+    get_debug_offset(state.entity, true)
     local status, name, ics, deffer = pcall(ops[ast.name], state, ast.expr)
     if not status then
       builder.destroy_ics(_destroy_on_error)

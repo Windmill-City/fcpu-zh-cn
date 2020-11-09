@@ -203,6 +203,14 @@ end
 local function update_ics_stack(push_ics)
   for _,v in ipairs(push_ics) do
     local node = io.get_node(v.name)
+    --if node then
+    --  if node.kout.valid then
+    --    local control = node.kout.get_or_create_control_behavior()
+    --    local params = control.parameters
+    --    params.parameters.constant = 1
+    --    control.parameters = params
+    --  end
+    --end
     if node and node.clr then
       local control = node.clr.get_control_behavior()
       control.enabled = true
