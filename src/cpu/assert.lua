@@ -77,7 +77,10 @@ function assert.type(_, valid)
       return
     end
     if v == 'input' then
+      -- Allow reading from output scalar buffer:
       if _.type == 'wire' and _.color ~= nil then
+      -- Block reading from output scalar buffer:
+      --if _.type == 'wire' and (_.color == 'red' or _.color == 'green') then
         return
       end
     elseif v == 'output' then
