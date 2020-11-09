@@ -193,7 +193,6 @@ function Controller.validate_cache(state)
   local cache = state.cache
 
   -- Cache.Control
-  cache.control = cache.control or {} -- TODO: remove
   local control = cache.control
 
   if not (control.output and control.output.valid) then
@@ -207,7 +206,6 @@ function Controller.validate_cache(state)
   end
 
   -- Cache.Wires
-  cache.wires = cache.wires or {} -- TODO: remove
   local wires = cache.wires
 
   if not (wires.red and wires.red.valid) then
