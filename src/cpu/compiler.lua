@@ -278,6 +278,8 @@ function compiler.build(state, force)
     local name, ics, deffer = hdlBuilder.construct(ast, state)
     if name then
       ast.push_ics = { {name=name, index=k} }
+    else
+      ast.push_ics = nil
     end
     return ics, deffer
   end
@@ -290,7 +292,7 @@ function compiler.build(state, force)
         hdlBuilder.destroy_ics(state.program_ics[k])
 
         local status, result, deffer = pcall(construct, k, v)
-        --local status, result, deffer = true, construct(k, v)
+        --local status, result, deffer = construct(k, v)
         if not status then
           local start_index = string.find(result, '@') or 1
           result = string.sub(result, start_index+1, -1)

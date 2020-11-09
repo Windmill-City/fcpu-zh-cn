@@ -401,8 +401,8 @@ function Controller.update_ip(state)
 end
 
 function Controller.update_state(state, pstate)
-  if state.cache.control.output then
-    local control = state.cache.control.output
+  local control = state.cache.control.output
+  if control and control.valid then
     control.enabled = not state.disabled
   end
 

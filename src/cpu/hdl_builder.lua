@@ -3,6 +3,7 @@ local state
 
 assert.bind()
 
+local _destroy_on_error = {}
 local builder = {}
 
 -------------------------------------------------------------------------------------------------------
@@ -47,6 +48,9 @@ function builder.create_node(entity, type, debug_next_node)
     force = entity.force,
     create_build_effect_smoke = false
   })
+
+  table.insert(_destroy_on_error, node_fcpu)
+
   node_fcpu.destructible = false
   node_fcpu.operable = true
   Entity.set_data(node_fcpu, {fcpu = entity})
@@ -523,7 +527,14 @@ function builder.construct(ast, state_)
   state = state_
 
   if ops and ops[ast.name] then
-    return ops[ast.name](state, ast.expr)
+    _destroy_on_error = {}
+    local status, name, ics, deffer = pcall(ops[ast.name], state, ast.expr)
+    if not status then
+      builder.destroy_ics(_destroy_on_error)
+      error(name)
+    else
+      return name, ics, deffer
+    end
   end
 end
 
