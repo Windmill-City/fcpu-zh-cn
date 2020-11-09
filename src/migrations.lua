@@ -249,6 +249,31 @@ return {
   end,
 
   ["0.3.20"] = function()
+    global.migrated = nil
+    -- Validation {
+    for k, v in pairs(global._entity_data) do
+      if type(v) == 'table' and (not v.fcpu or not v.fcpu.valid) then
+        global._entity_data[k] = nil
+      end
+    end
+    local fcpu2ents = {}
+    for k, v in pairs(global._entity_data) do
+      if type(v) == 'number' then
+        if global.fcpus[v] and global.fcpus[v].entity and global.fcpus[v].entity.valid and global.fcpus[v].entity.unit_number == k then
+          -- valid
+          fcpu2ents[v] = fcpu2ents[v] or {}
+          table.insert(fcpu2ents[v], k)
+        else
+          global._entity_data[k] = nil
+        end
+      end
+    end
+    for _, v in pairs(fcpu2ents) do
+      if 1 < #v then
+        error('There are more than one entity referencing one fCPU unit.')
+      end
+    end
+    -- }
     foreach_fcpu(function(fcpu, state)
       local prev = state.program_text
       state.program_text = string.gsub(state.program_text, 'xinc(%s+[^%s]+)', 'xadd%1 1')
