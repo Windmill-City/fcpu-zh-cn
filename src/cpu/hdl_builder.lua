@@ -231,7 +231,7 @@ function builder.create_memory_cell(entity, input_a, proxy_output)
   d_key.connect_neighbour{
     source_circuit_id = defines.circuit_connector_id.combinator_input,
     target_entity = input_a.entity,
-    target_circuit_id = input_a.port or defines.circuit_connector_id.combinator_output,
+    target_circuit_id = input_a.port,
     wire = wire1,
   }
   d_key.connect_neighbour{
@@ -290,7 +290,7 @@ function builder.create_memory_cell(entity, input_a, proxy_output)
 end
 
 
-function builder.create_math_cell(entity, input_a, input_b, operation)
+function builder.create_arithmetic_cell(entity, input_a, input_b, operation)
   local constant
   if input_b then
     if type(input_b) == 'number' then
@@ -369,42 +369,71 @@ function builder.get_node(state_, name)
   return state_.program_ics[name] or state_.program_ics[state_.ics_stack[name]]
 end
 
-function builder.ics_set(name, index)
-  -- same as io.ics_set
-  state.ics_stack[name] = index
+-------------------------------------------------------------------------------------------------------
+
+local function connect_input_from(state, arg)
+  assert.is_memory_readable(arg)
+  if arg.type == 'memory' then
+    local ics_name = arg.location .. arg.index
+    local mem_ics = state.program_ics[ics_name]
+    return {
+      entity = mem_ics.out,
+      wire = defines.wire_type.red,
+      port = defines.circuit_connector_id.combinator_output
+    }
+  elseif arg.type == 'wire' then
+    return {
+      entity = state.entity,
+      wire = defines.wire_type[arg.color],
+      port = defines.circuit_connector_id.combinator_input
+    }
+  else
+    assert.todo()
+  end
+end
+
+local function connect_output_to(state, ics, arg)
+  assert.is_memory_writable(arg)
+  if arg.type == 'memory' then
+    local ics_name = arg.location .. arg.index
+    local mem_ics = state.program_ics[ics_name]
+    ics.out.connect_neighbour{
+      source_circuit_id = defines.circuit_connector_id.combinator_output,
+      target_circuit_id = defines.circuit_connector_id.combinator_input,
+      target_entity = mem_ics.out,
+      wire = ics.color_out,
+    }
+    return ics_name
+  elseif arg.type == 'wire' then
+    ics.out.connect_neighbour{
+      source_circuit_id = defines.circuit_connector_id.combinator_output,
+      target_circuit_id = defines.circuit_connector_id.constant_combinator,
+      target_entity = state.program_ics.output,
+      wire = defines.wire_type.red,
+    }
+    ics.out.connect_neighbour{
+      source_circuit_id = defines.circuit_connector_id.combinator_output,
+      target_circuit_id = defines.circuit_connector_id.constant_combinator,
+      target_entity = state.program_ics.output,
+      wire = defines.wire_type.green,
+    }
+    return 'output'
+  else
+    assert.todo()
+  end
 end
 
 -------------------------------------------------------------------------------------------------------
 
 local function vector_scalar_op(operation, check)
   return function(state, _)
-    assert.is_memory(_[1])
+    local src = (assert.two_or_three(_) == 3 and _[2]) or _[1]
 
-    local input_a = {}
-    if _[1].type == 'memory' then
-      --local mem_ics = builder.get_node(state, _[1].location .. _[1].index)
-      local mem_ics = state.program_ics[_[1].location .. _[1].index]
-      input_a.entity = mem_ics.out
-      input_a.wire = defines.wire_type.red
-    else
-      assert.todo()
-    end
+    local input_a = connect_input_from(state, src)
 
-    local ics = builder.create_math_cell(state.entity, input_a, nil, operation)
+    local ics = builder.create_arithmetic_cell(state.entity, input_a, nil, operation)
 
-    local ics_name
-    if _[1].type == 'memory' then
-      ics_name = _[1].location .. _[1].index
-      local mem_ics = state.program_ics[ics_name]
-      mem_ics.out.connect_neighbour({
-        source_circuit_id = defines.circuit_connector_id.combinator_input,
-        wire = ics.color_out,
-        target_entity = ics.out,
-        target_circuit_id = defines.circuit_connector_id.combinator_output
-      })
-    else
-      assert.todo()
-    end
+    local ics_name = connect_output_to(state, ics, _[1])
 
     local deffer = {
       {action='disable', ic=ics.clr, delay = 0},
@@ -421,44 +450,12 @@ end
 
 local function vector_decide_op(operation)
   return function(state, _)
-    assert.type(_[1], {'memory', 'output'})
-    assert.type(_[2], {'input', 'memory'})
-
-    local input_a = {}
-    if _[2].type == 'memory' then
-      --local mem_ics = builder.get_node(state, _[2].location .. _[2].index)
-      local mem_ics = state.program_ics[_[2].location .. _[2].index]
-      input_a.entity = mem_ics.out
-      input_a.wire = defines.wire_type.red
-    else
-      assert.todo()
-    end
-
-    local input_b = {}
-    if _[3].type == 'memory' then
-      --local mem_ics = builder.get_node(state, _[3].location .. _[3].index)
-      local mem_ics = state.program_ics[_[3].location .. _[3].index]
-      input_b.entity = mem_ics.out
-      input_b.wire = defines.wire_type.red
-    else
-      assert.todo()
-    end
+    local input_a = connect_input_from(state, _[1])
+    local input_b = connect_input_from(state, _[3])
 
     local ics = builder.create_decider_cell(state.entity, input_a, input_b, operation)
 
-    local ics_name
-    if _[1].type == 'memory' then
-      ics_name = _[1].location .. _[1].index
-      local mem_ics = state.program_ics[ics_name]
-      mem_ics.out.connect_neighbour({
-        source_circuit_id = defines.circuit_connector_id.combinator_input,
-        wire = ics.color_out,
-        target_entity = ics.out,
-        target_circuit_id = defines.circuit_connector_id.combinator_output
-      })
-    else
-      assert.todo()
-    end
+    local ics_name = connect_output_to(state, ics, _[1])
 
     local deffer = {
       {action='disable', ic=ics.clr, delay = 0},
@@ -478,56 +475,14 @@ end
 local ops = {
   xmov = function(state, _)
     assert.two(_)
-    assert.type(_[1], {'memory', 'output'})
-    assert.type(_[2], {'input', 'memory'})
 
     local wire_to = (_[1].type == 'wire')
-    local wire_in = (_[2].type == 'wire')
 
-    local input_a = {}
-    if wire_in then
-      input_a.entity = state.entity
-      input_a.wire = defines.wire_type[_[2].color]
-      input_a.port = defines.circuit_connector_id.combinator_input
-    elseif _[2].type == 'memory' then
-      --local ics = builder.get_node(state, _[2].location .. _[2].index)
-      local mem_ics = state.program_ics[_[2].location .. _[2].index]
-      input_a.entity = mem_ics.out
-      input_a.wire = defines.wire_type.red
-      input_a.port = defines.circuit_connector_id.combinator_output
-    else
-      assert.todo()
-    end
+    local input_a = connect_input_from(state, _[2])
 
     local ics = builder.create_memory_cell(state.entity, input_a, wire_to)
 
-    local ics_name
-    if wire_to then
-      ics.out.connect_neighbour({
-        source_circuit_id = defines.circuit_connector_id.combinator_output,
-        wire = defines.wire_type.red,
-        target_entity = state.program_ics.output,
-        target_circuit_id = defines.circuit_connector_id.constant_combinator
-      })
-      ics.out.connect_neighbour({
-        source_circuit_id = defines.circuit_connector_id.combinator_output,
-        wire = defines.wire_type.green,
-        target_entity = state.program_ics.output,
-        target_circuit_id = defines.circuit_connector_id.constant_combinator
-      })
-      ics_name = 'output'
-    elseif _[1].type == 'memory' then
-      ics_name = _[1].location .. _[1].index
-      local mem_ics = state.program_ics[ics_name]
-      mem_ics.out.connect_neighbour({
-        source_circuit_id = defines.circuit_connector_id.combinator_input,
-        wire = ics.color_out,
-        target_entity = ics.out,
-        target_circuit_id = defines.circuit_connector_id.combinator_output
-      })
-    else
-      assert.todo()
-    end
+    local ics_name = connect_output_to(state, ics, _[1])
 
     local deffer = {
       {action='disable', ic=ics.clr, delay = 0},

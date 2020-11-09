@@ -5,15 +5,13 @@ local io
 
 local function vector_scalar_op()
   return function(_, ics)
-    assert.two(_)
-    assert.type(_[2], {'value', 'register', 'input'})
+    local src = (#_ == 3 and _[3]) or _[2]
+    assert.type(src, {'value', 'register', 'input'})
 
     if ics and ics.out then
-      local src = io.getcount(_[2])
-
       local control = ics.out.get_or_create_control_behavior()
       local params = control.parameters
-      params.parameters.second_constant = src
+      params.parameters.second_constant = io.getcount(src)
       control.parameters = params
     end
   end

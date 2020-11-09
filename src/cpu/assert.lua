@@ -50,12 +50,21 @@ function assert.one_or_two(_)
   if 2 < #_ then
     exception("Expecting no more than two parameters after opcode")
   end
+  return #_
+end
+
+function assert.two_or_three(_)
+  if #_ ~= 2 and #_ ~= 3 then
+    exception("Expecting two or three parameters after opcode")
+  end
+  return #_
 end
 
 function assert.two_or_more(_)
   if #_ < 2 then
     exception("Expecting at least two parameters after opcode")
   end
+  return #_
 end
 
 function assert.three(_)
@@ -68,6 +77,7 @@ function assert.three_or_four(_)
   if #_ ~= 3 and #_ ~= 4 then
     exception("Expecting three or four parameters after opcode")
   end
+  return #_
 end
 
 function assert.type(_, valid)
@@ -111,6 +121,26 @@ function assert.is_memory(...)
   for _,v in ipairs(table.pack(...)) do
     if v.type ~= "memory" or v.index == nil or v.addr ~= nil then
       exception("Expecting parameter to be a memory")
+    end
+  end
+end
+
+function assert.is_memory_readable(...)
+  for _,v in ipairs(table.pack(...)) do
+    if v.type ~= "memory" or v.index == nil or v.addr ~= nil then
+      if v.type ~= 'wire' or (v.color ~= 'red' and v.color ~= 'green') then
+        exception("Expecting parameter to be a memory or input wire")
+      end
+    end
+  end
+end
+
+function assert.is_memory_writable(...)
+  for _,v in ipairs(table.pack(...)) do
+    if v.type ~= "memory" or v.index == nil or v.addr ~= nil then
+      if v.type ~= 'wire' or v.color ~= 'out' then
+        exception("Expecting parameter to be a memory or output")
+      end
     end
   end
 end

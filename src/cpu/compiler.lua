@@ -200,11 +200,19 @@ local function parse(tokens)
   return parseExpr()
 end
 
-local function update_ics_stack(subsystem, push_ics)
-  if push_ics then
-    for _,v in ipairs(push_ics) do
-      subsystem.ics_set(v.name, v.index)
+local function update_ics_stack(push_ics)
+  for _,v in ipairs(push_ics) do
+    local node = io.get_node(v.name)
+    if node and node.clr then
+      local control = node.clr.get_control_behavior()
+      control.enabled = true
     end
+    if string.sub(v.name, 1, 3) == 'mem' then
+      io.memory_clear({type='memory', location='mem', index=string.sub(v.name, 4, 4)})
+    end
+  end
+  for _,v in ipairs(push_ics) do
+    io.ics_set(v.name, v.index)
   end
 end
 
@@ -223,18 +231,8 @@ local function eval(ast, ics)
       if ops_vx[_.name] then
         local result = ops_vx[_.name](_.expr, ics)
         if _.push_ics then
-          for _,v in ipairs(_.push_ics) do
-            local node = io.get_node(v.name)
-            if node and node.clr then
-              local control = node.clr.get_control_behavior()
-              control.enabled = true
-            end
-            if string.sub(v.name, 1, 3) == 'mem' then
-              io.memory_clear({type='memory', location='mem', index=string.sub(v.name, 4, 4)})
-            end
-          end
+          update_ics_stack(_.push_ics)
         end
-        update_ics_stack(io, _.push_ics)
         return result
       else
         assert.exception('Unknown opcode: '.._.name)
@@ -280,7 +278,6 @@ function compiler.build(state, force)
     local name, ics, deffer = hdlBuilder.construct(ast, state)
     if name then
       ast.push_ics = { {name=name, index=k} }
-      update_ics_stack(hdlBuilder, ast.push_ics)
     end
     return ics, deffer
   end
