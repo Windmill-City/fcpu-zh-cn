@@ -116,18 +116,18 @@ function builder.verify(state)
     local output_fcpu = builder.create_node(state.entity, 'output', false)
     state.program_ics.output = output_fcpu
 
-    state.entity.connect_neighbour({
+    state.entity.connect_neighbour{
+      source_circuit_id = defines.circuit_connector_id.combinator_output,
+      target_circuit_id = defines.circuit_connector_id.constant_combinator,
+      target_entity = output_fcpu,
       wire = defines.wire_type.green,
-      target_entity = output_fcpu,
+    }
+    state.entity.connect_neighbour{
       source_circuit_id = defines.circuit_connector_id.combinator_output,
-      target_circuit_id = defines.circuit_connector_id.constant_combinator
-    })
-    state.entity.connect_neighbour({
+      target_circuit_id = defines.circuit_connector_id.constant_combinator,
+      target_entity = output_fcpu,
       wire = defines.wire_type.red,
-      target_entity = output_fcpu,
-      source_circuit_id = defines.circuit_connector_id.combinator_output,
-      target_circuit_id = defines.circuit_connector_id.constant_combinator
-    })
+    }
   end
 
   for i = 1, MC_MEMORY_CHANNELS  do
@@ -157,18 +157,18 @@ function builder.verify(state)
       state.program_ics[ics_name].value = ent_val1
       ctrl_val1.enabled = false
 
-      ent_val1.connect_neighbour({
+      ent_val1.connect_neighbour{
+        source_circuit_id = defines.circuit_connector_id.constant_combinator,
+        target_circuit_id = defines.circuit_connector_id.combinator_output,
+        target_entity = state.program_ics[ics_name].out,
         wire = defines.wire_type.green,
-        target_entity = state.program_ics[ics_name].out,
+      }
+      ent_val1.connect_neighbour{
         source_circuit_id = defines.circuit_connector_id.constant_combinator,
-        target_circuit_id = defines.circuit_connector_id.combinator_output
-      })
-      ent_val1.connect_neighbour({
+        target_circuit_id = defines.circuit_connector_id.combinator_output,
+        target_entity = state.program_ics[ics_name].out,
         wire = defines.wire_type.red,
-        target_entity = state.program_ics[ics_name].out,
-        source_circuit_id = defines.circuit_connector_id.constant_combinator,
-        target_circuit_id = defines.circuit_connector_id.combinator_output
-      })
+      }
     end
 
     if not (state.program_ics[ics_name].value2 and state.program_ics[ics_name].value2.valid) then
@@ -177,25 +177,25 @@ function builder.verify(state)
       state.program_ics[ics_name].value2 = ent_val2
       ctrl_val2.enabled = false
 
-      ent_val2.connect_neighbour({
+      ent_val2.connect_neighbour{
+        source_circuit_id = defines.circuit_connector_id.constant_combinator,
+        target_circuit_id = defines.circuit_connector_id.combinator_output,
+        target_entity = state.program_ics[ics_name].out,
         wire = defines.wire_type.green,
-        target_entity = state.program_ics[ics_name].out,
+      }
+      ent_val2.connect_neighbour{
         source_circuit_id = defines.circuit_connector_id.constant_combinator,
-        target_circuit_id = defines.circuit_connector_id.combinator_output
-      })
-      ent_val2.connect_neighbour({
+        target_circuit_id = defines.circuit_connector_id.combinator_output,
+        target_entity = state.program_ics[ics_name].out,
         wire = defines.wire_type.red,
-        target_entity = state.program_ics[ics_name].out,
-        source_circuit_id = defines.circuit_connector_id.constant_combinator,
-        target_circuit_id = defines.circuit_connector_id.combinator_output
-      })
+      }
     end
   end
 end
 
 -------------------------------------------------------------------------------------------------------
 
-function builder.create_memory_cell(entity, input_a, proxy_output)
+function builder.create_memory_cell(entity, input_a, input_b)
   local wire1 = input_a.wire or defines.wire_type.red
   local wire2 = inverse_wire_color(wire1)
 
@@ -234,26 +234,26 @@ function builder.create_memory_cell(entity, input_a, proxy_output)
 
   d_key.connect_neighbour{
     source_circuit_id = defines.circuit_connector_id.combinator_input,
-    target_entity = input_a.entity,
     target_circuit_id = input_a.port,
+    target_entity = input_a.entity,
     wire = wire1,
   }
   d_key.connect_neighbour{
     source_circuit_id = defines.circuit_connector_id.combinator_output,
-    target_entity = d_out,
     target_circuit_id = defines.circuit_connector_id.combinator_input,
+    target_entity = d_out,
     wire = wire1,
   }
   c_clr.connect_neighbour{
     source_circuit_id = defines.circuit_connector_id.constant_combinator,
-    target_entity = d_key,
     target_circuit_id = defines.circuit_connector_id.combinator_output,
+    target_entity = d_key,
     wire = wire1,
   }
   d_out.connect_neighbour{
     source_circuit_id = defines.circuit_connector_id.combinator_output,
-    target_entity = d_out,
     target_circuit_id = defines.circuit_connector_id.combinator_input,
+    target_entity = d_out,
     wire = wire2,
   }
 
@@ -265,7 +265,8 @@ function builder.create_memory_cell(entity, input_a, proxy_output)
     out = d_out,
   }
 
-  if proxy_output then
+  if input_b ~= nil then
+    local isTable = (type(input_b) == 'table')
     local proxy, control_proxy = builder.create_node(entity, 'decider')
 
     control_proxy.parameters = {
@@ -281,10 +282,19 @@ function builder.create_memory_cell(entity, input_a, proxy_output)
 
     proxy.connect_neighbour{
       source_circuit_id = defines.circuit_connector_id.combinator_input,
-      target_entity = ics.out,
       target_circuit_id = defines.circuit_connector_id.combinator_output,
-      wire = wire1,
+      target_entity = ics.out,
+      wire = inverse_wire_color(isTable and input_b.wire),
     }
+
+    if isTable and input_b.entity then
+      proxy.connect_neighbour{
+        source_circuit_id = defines.circuit_connector_id.combinator_input,
+        target_circuit_id = input_b.port,
+        target_entity = input_b.entity,
+        wire = input_b.wire or defines.wire_type.red,
+      }
+    end
 
     ics[#ics + 1] = ics.out
     ics.out = proxy
@@ -429,7 +439,7 @@ end
 
 -------------------------------------------------------------------------------------------------------
 
-local function vector_scalar_op(operation, check)
+local function vector_scalar_op(operation)
   return function(state, _)
     local src = (assert.two_or_three(_) == 3 and _[2]) or _[1]
 
@@ -495,6 +505,28 @@ local ops = {
       {action='tune', ic=ics.kin, value=1, delay = 1},
       {action='tune', ic=ics.kout, value=0, delay = 1},
       {action='noop', delay = wire_to and 4 or 3},
+    }
+
+    return ics_name, ics, deffer
+  end,
+
+  xuni = function(state, _)
+    assert.three(_)
+
+    local input_a = connect_input_from(state, _[2])
+    local input_b = connect_input_from(state, _[3])
+
+    local ics = builder.create_memory_cell(state.entity, input_a, input_b)
+
+    local ics_name = connect_output_to(state, ics, _[1])
+
+    local deffer = {
+      {action='disable', ic=ics.clr, delay = 0},
+      {action='tune', ic=ics.kin, value=0, delay = 0},
+      {action='tune', ic=ics.kout, value=1, delay = 0},
+      {action='tune', ic=ics.kin, value=1, delay = 1},
+      {action='tune', ic=ics.kout, value=0, delay = 1},
+      {action='noop', delay = 4},
     }
 
     return ics_name, ics, deffer

@@ -35,6 +35,9 @@ local opcodes_vx = {
   xmov = function(_, ics)
   end,
 
+  xuni = function(_, ics)
+  end,
+
   xadd = vector_scalar_op(),
   xsub = vector_scalar_op(),
   xmul = vector_scalar_op(),

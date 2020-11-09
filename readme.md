@@ -444,16 +444,18 @@ When working with SIMD instructions, the following features should be considered
 - Some vector instructions are executed for more than 1 tick (`xmov mem1 red` takes 3 ticks for populating `mem1` channel with data from `red` wire)
 - Retrieving effective data from affected memory is possible only after completion of a vector instruction
 
-
-### SIMD Mnemonics
-
-*Pseudocode legend*
+**Pseudocode legend**
 - `dst()`, `src()`, etc: unordered memory (set)
 - `dst[]`, `src[]`, etc: ordered memory (array) *NOT IMPLEMENTED YET*
 
 
+### SIMD Common
+
 * `xmov` dst[**M**/**O**] src[**I**/**M**]
   *dst(each) = src(each)*
+
+* `xuni` dst[**M**/**O**] a[**I**/**M**] b[**I**/**M**]
+  *dst(each) = a(each) + b(each)*
 
 * `xadd` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]
   *dst(each) = dst + val* 
@@ -479,7 +481,8 @@ When working with SIMD instructions, the following features should be considered
   *dst(each) = dst ^ val*
   *dst(each) = src ^ val* (if src specified)
 
-**Bitwise**
+
+### SIMD Bitwise
 
 * `xand` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]
   AND.  
@@ -506,15 +509,8 @@ When working with SIMD instructions, the following features should be considered
   *dst(each) = dst >> val* 
   *dst(each) = src >> val* (if src specified)
 
-**Legacy since v0.3.20 (not recomended for future usage)**
 
-* `xinc` dst[**M**]
-  *dst() = dst(each) + 1*
-* `xdec` dst[**M**]
-  *dst() = dst(each) - 1*
-
-
-### SIMD statistics
+### SIMD Statistics
 
 * `xmin` dst[**R**/**O**] src[**I**/**M**]
   Searches minimum signal in `src` and copy it to `dst`.
