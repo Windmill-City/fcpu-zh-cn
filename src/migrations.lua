@@ -245,6 +245,9 @@ return {
   ["0.3.17"] = function()
     foreach_fcpu(function(fcpu, state)
       state.cache = state.cache or {}
+      state.cache.wires = state.cache.wires or {}
+      state.cache.control = state.cache.control or {}
+      state.cache.control.indication = fcpu.get_control_behavior()
     end)
   end,
 
@@ -292,6 +295,16 @@ return {
           end
         end
       end
+    end)
+  end,
+
+  ["0.3.23"] = function()
+    -- same as in 0.3.17
+    foreach_fcpu(function(fcpu, state)
+      state.cache = state.cache or {}
+      state.cache.wires = state.cache.wires or {}
+      state.cache.control = state.cache.control or {}
+      state.cache.control.indication = fcpu.get_control_behavior()
     end)
   end,
 }

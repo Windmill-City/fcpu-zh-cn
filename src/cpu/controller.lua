@@ -202,9 +202,10 @@ function Controller.validate_cache(state)
     end
   end
 
-  if not (control.indication and control.indication.valid) then
-    control.indication = state.entity.get_control_behavior()
-  end
+  -- should be always valid
+  --if not (control.indication and control.indication.valid) then
+  --  control.indication = state.entity.get_control_behavior()
+  --end
 
   -- Cache.Wires
   local wires = cache.wires
@@ -400,33 +401,41 @@ function Controller.update_ip(state)
 end
 
 function Controller.update_state(state, pstate)
-  local control = state.cache.control.output
-  if control and control.valid then
-    control.enabled = not state.disabled
-  end
+  local control = state.cache.control
 
   if state.program_state ~= pstate then
     if pstate ~= nil then
       state.program_state = pstate
     end
 
-    local str = pstateStr[state.program_state]
-    local control = state.cache.control.indication
-    local param = control.parameters
-    if state.disabled then
-      param.parameters.first_constant = nil
-      param.parameters.first_signal = nil
-      param.parameters.output_signal = nil
-    elseif state.error_message and state.program_state == PSTATE_HALTED then
-      param.parameters.first_constant = state.instruction_pointer
-      param.parameters.first_signal = nil
-      param.parameters.output_signal = { type="virtual", name='signal-fcpu-error' }
-    elseif str then
-      param.parameters.first_constant = nil
-      param.parameters.first_signal = { type="virtual", name=str }
-      param.parameters.output_signal = nil
+    if control then
+      local indication_ctrl = control.indication -- should be always valid
+      --if indication_ctrl and indication_ctrl.valid then
+        local str = pstateStr[state.program_state]
+        local param = indication_ctrl.parameters
+        if state.disabled then
+          param.parameters.first_constant = nil
+          param.parameters.first_signal = nil
+          param.parameters.output_signal = nil
+        elseif state.error_message and state.program_state == PSTATE_HALTED then
+          param.parameters.first_constant = state.instruction_pointer
+          param.parameters.first_signal = nil
+          param.parameters.output_signal = { type="virtual", name='signal-fcpu-error' }
+        elseif str then
+          param.parameters.first_constant = nil
+          param.parameters.first_signal = { type="virtual", name=str }
+          param.parameters.output_signal = nil
+        end
+        indication_ctrl.parameters = param
+      --end
     end
-    control.parameters = param
+  end
+
+  if control then
+    local output_ctrl = control.output
+    if output_ctrl and output_ctrl.valid then
+      output_ctrl.enabled = not state.disabled
+    end
   end
 end
 
