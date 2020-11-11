@@ -132,26 +132,40 @@ local function on_entity_settings_pasted(event)
   end
 end
 
+local function setup_blueprint_tag(blueprint, index, entity)
+  if entity.name == 'fcpu' then
+    local state = get_fcpu_state(entity)
+    if state then
+      blueprint.set_blueprint_entity_tag(index, "fcpu", {
+        t = state.program_text,
+        i = state.instruction_pointer,
+        r = Controller.is_running(state),
+        d = state.disabled
+      })
+    end
+  end
+end
+
 local function on_player_setup_blueprint(event)
   local player = game.players[event.player_index]
-  local blueprint = nil
-  if player and player.blueprint_to_setup and player.blueprint_to_setup.valid_for_read then
-    blueprint = player.blueprint_to_setup
-  elseif player and player.cursor_stack.valid_for_read and player.cursor_stack.name == "blueprint" then
-    blueprint = player.cursor_stack
-  end
-  if blueprint then
-    for index, entity in pairs(event.mapping.get()) do
-      if entity.name == 'fcpu' then
-        local state = get_fcpu_state(entity)
-        if state then
-          blueprint.set_blueprint_entity_tag(index, "fcpu", {
-            t = state.program_text,
-            i = state.instruction_pointer,
-            r = Controller.is_running(state),
-            d = state.disabled
-          })
+  if player then
+    local blueprint = nil
+    if player.blueprint_to_setup and player.blueprint_to_setup.valid_for_read then
+      blueprint = player.blueprint_to_setup
+    elseif player.cursor_stack and player.cursor_stack.valid_for_read and player.cursor_stack.name == "blueprint" then
+      blueprint = player.cursor_stack
+    end
+    if blueprint then
+      local t = event.mapping.get()
+      if game.active_mods['attach-notes'] then
+        local ents = blueprint.get_blueprint_entities()
+        if 0 < #ents and #t == 0 then
+          player.print({"fcpu-errors.blueprint-broken", "Attach Notes"}, {r=0.5, g=0.5})
+          player.print({"fcpu-errors.blueprint-unavailable", "Attach Notes"}, {r=0.5})
         end
+      end
+      for index, entity in pairs(t) do
+        setup_blueprint_tag(blueprint, index, entity)
       end
     end
   end
