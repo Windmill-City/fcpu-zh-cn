@@ -71,7 +71,9 @@ return {
       state.program_ics = {}
       Controller.verify(state)
       Controller.compile(state)
+      state.breakpoints = {} -- backport 0.3.10
       Controller.update_ip(state)
+      state.cache = {} -- backport 0.3.17
       Controller.update_state(state)
       Entity.set_data(fcpu, state)
 

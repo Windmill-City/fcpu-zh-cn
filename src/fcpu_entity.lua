@@ -46,7 +46,9 @@ end
 
 function handle_fcpu_died(entity)
   local state = get_fcpu_state(entity)
-  state.may_be_revived = true
+  if state then
+    state.may_be_revived = true
+  end
 end
 
 function handle_fcpu_destroy(entity, soft)
