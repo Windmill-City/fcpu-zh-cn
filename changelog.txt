@@ -2,7 +2,7 @@
 Version: 0.3.24
 Date: ????
   Features:
-    - Added detection of broken mods, which mess with blueprint data.
+    - Added detection of broken mods, which mess with blueprint data and take care of their shit.
   Bugfixes:
     - Fixed crash when destroying broken fcpu entity.
 ---------------------------------------------------------------------------------------------------
