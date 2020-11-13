@@ -44,7 +44,6 @@ function Controller.init(mc)
     program_begin = 1,
     program_ics = {},
     ics_stack = {},
-    deffered = Heap.new(),
     breakpoints = {},
     instruction_pointer = 1,
     gui_cache = {},
@@ -152,10 +151,15 @@ function Controller.set_program_counter(state, value)
 end
 
 local function run_deffer_command(op)
-  if op.at and op.at + op.delay ~= game.tick then
-    __DebugAdapter.breakpoint()
-  end
-  if op.action == 'disable' then
+  assert(not op.at or op.at + op.delay == game.tick, "Out of order deffered action executed")
+
+  if op.action == 'wake' then
+  elseif op.action == 'sync' then
+    local state = global.fcpus[op.index]
+    if state then
+      state.need_sync = nil
+    end
+  elseif op.action == 'disable' then
     if op.ic and op.ic.valid then
       local control = op.ic.get_or_create_control_behavior()
       control.enabled = false
@@ -182,35 +186,36 @@ local function run_deffer_command(op)
 end
 
 function Controller.add_defferred(state, deffer)
-  for _,op in pairs(deffer) do
+  local sync_at
+  for _, op in ipairs(deffer) do
     if op.delay == 0 then
       run_deffer_command(op)
     else
       local t = table.deep_copy(op)
-      local at_tick = t.delay + game.tick
+      local at_tick = game.tick + t.delay
       t.at = game.tick
-      Heap.put(state.deffered, at_tick, t)
+      Heap.put(global.deffered, at_tick, t)
+      if not sync_at or sync_at < at_tick then
+        sync_at = at_tick
+      end
     end
+  end
+  if sync_at then
+    state.need_sync = true
+    Heap.put(global.deffered, sync_at + 1, {action='sync', index=state.index, at=game.tick, delay=sync_at + 1 - game.tick})
   end
 end
 
 function Controller.do_defferred(state)
-  local count = 0
   while true do
-    local at_tick, op = Heap.pop(state.deffered)
-    if not at_tick then
+    local p = Heap.priority(global.deffered)
+    if not p or game.tick < p then
       break
     end
-    count = count + 1
-    if at_tick == game.tick then
-      run_deffer_command(op)
-    else
-      -- TODO: optimize
-      Heap.put(state.deffered, at_tick, op)
-      break
-    end
+    local at_tick, op = Heap.pop(global.deffered)
+    assert(at_tick == game.tick, "Found missed deffered action")
+    run_deffer_command(op)
   end
-  return count
 end
 
 function Controller.validate_cache(state)
@@ -289,7 +294,7 @@ function Controller.tick(state, sync_wait)
 ::repeat_eval::
 
   -- Run Controller code.
-  if state.program_state == PSTATE_RUNNING and sync_wait < 1 then
+  if state.program_state == PSTATE_RUNNING and not sync_wait then
     local ast = state.program_ast[state.instruction_pointer]
     local ics = state.program_ics[state.instruction_pointer]
     local success, result = Compiler.eval(ast, ics, state)
@@ -322,7 +327,7 @@ function Controller.tick(state, sync_wait)
         Controller.set_program_counter(state, state.instruction_pointer + 1)
         goto repeat_eval
       elseif result.type == 'xwait' then
-        if sync_wait < 1 then
+        if not sync_wait then
           Controller.set_program_counter(state, state.instruction_pointer + 1)
         end
       elseif result.type == 'deffer' then

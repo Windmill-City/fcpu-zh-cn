@@ -61,10 +61,12 @@ script.on_event(defines.events.on_tick, function(event)
   local enabled = 0
   local start = global.last_index
 
+
+  Controller.do_defferred()
+
   local HandleCPU = function(state, k)
     handled = handled + 1
     if state.entity and state.entity.valid then
-      local need_sync = Controller.do_defferred(state)
       if not state.disabled and state.entity.active then
         if state.clock % 10 == 0 then
           state.out_of_power = not sufficient_power(state.entity)
@@ -75,7 +77,7 @@ script.on_event(defines.events.on_tick, function(event)
             Controller.set_program_counter(state, state.instruction_pointer)
             Controller.update_state(state)
           end
-          Controller.tick(state, need_sync)
+          Controller.tick(state, state.need_sync)
         end
         enabled = enabled + 1
       end

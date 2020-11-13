@@ -323,15 +323,23 @@ return {
       end
     end
     -- }
+    global.deffered = Heap.new()
     foreach_fcpu(function(fcpu, state)
       if next(state.deffered) ~= nil then
-        local deffered = Heap.new()
+        local sync_at
         for _,v in pairs(state.deffered) do
           local at_tick = game.tick + v.delay
           v.at = game.tick
-          Heap.put(deffered, at_tick, v)
+          Heap.put(global.deffered, at_tick, v)
+          if not sync_at or sync_at < at_tick then
+            sync_at = at_tick
+          end
         end
-        state.deffered = deffered
+        if sync_at then
+          state.need_sync = true
+          Heap.put(global.deffered, sync_at + 1, {action='sync', index=state.index, at=game.tick, delay=sync_at + 1 - game.tick})
+        end
+        state.deffered = nil
       end
     end)
   end,

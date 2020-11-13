@@ -858,6 +858,7 @@ script.on_init(function()
   gui.init()
   gui.build_lookup_tables()
   global.fcpus = {}
+  global.deffered = Heap.new()
   register_picker_dolly_handler()
   fcpu_wiki_booktorio_init()
 end)
