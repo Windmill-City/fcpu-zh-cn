@@ -44,7 +44,7 @@ function Controller.init(mc)
     program_begin = 1,
     program_ics = {},
     ics_stack = {},
-    deffered = {},
+    deffered = Heap.new(),
     breakpoints = {},
     instruction_pointer = 1,
     gui_cache = {},
@@ -151,40 +151,59 @@ function Controller.set_program_counter(state, value)
   Controller.GuiCache_InvalidateLine(state, state.instruction_pointer)
 end
 
-function Controller.do_defferred(state, frames)
+local function run_deffer_command(op)
+  if op.action == 'disable' then
+    if op.ic and op.ic.valid then
+      local control = op.ic.get_or_create_control_behavior()
+      control.enabled = false
+    end
+  elseif op.action == 'enable' then
+    if op.ic and op.ic.valid then
+      local control = op.ic.get_or_create_control_behavior()
+      control.enabled = true
+    end
+  elseif op.action == 'tune' then
+    if op.ic and op.ic.valid then
+      local control = op.ic.get_or_create_control_behavior()
+      local params = control.parameters
+      params.parameters.constant = op.value
+      control.parameters = params
+    end
+  elseif op.action == 'noop' then
+  elseif op.action == 'exec' then
+    local proc = load('return '..op.proc)
+    if proc then
+      pcall(proc(), table.unpack(op.args))
+    end
+  end
+end
+
+function Controller.add_defferred(state, deffer)
+  for _,op in pairs(deffer) do
+    if op.delay == 0 then
+      run_deffer_command(op)
+    else
+      local t = table.deep_copy(op)
+      local at_tick = t.delay + game.tick
+      Heap.put(state.deffered, at_tick, t)
+    end
+  end
+end
+
+function Controller.do_defferred(state)
   local count = 0
-  if state.deffered then
-    for k, op in pairs(state.deffered) do
-      if op.delay <= frames then
-        if op.action == 'disable' then
-          if op.ic and op.ic.valid then
-            local control = op.ic.get_or_create_control_behavior()
-            control.enabled = false
-          end
-        elseif op.action == 'enable' then
-          if op.ic and op.ic.valid then
-            local control = op.ic.get_or_create_control_behavior()
-            control.enabled = true
-          end
-        elseif op.action == 'tune' then
-          if op.ic and op.ic.valid then
-            local control = op.ic.get_or_create_control_behavior()
-            local params = control.parameters
-            params.parameters.constant = op.value
-            control.parameters = params
-          end
-        elseif op.action == 'noop' then
-        elseif op.action == 'exec' then
-          local proc = load('return '..op.proc)
-          if proc then
-            pcall(proc(), table.unpack(op.args))
-          end
-        end
-        state.deffered[k] = nil
-      else
-        state.deffered[k].delay = op.delay - frames
-      end
-      count = count + 1
+  while true do
+    local at_tick, op = Heap.pop(state.deffered)
+    if not at_tick then
+      break
+    end
+    count = count + 1
+    if at_tick == game.tick then
+      run_deffer_command(op)
+    else
+      -- TODO: optimize
+      Heap.put(state.deffered, at_tick, op)
+      break
     end
   end
   return count
@@ -237,10 +256,7 @@ function Controller.tick(state, sync_wait)
       Controller.halt(state)
     else
       local value = get_signal(SLEEP_SIGNAL)
-      if 0 < value then
-        Controller.update_state(state, PSTATE_SLEEPING)
-        state.sleep_time = value
-      end
+      Controller.sleep(state, value)
     end
   elseif state.program_state == PSTATE_HALTED then
     if 0 < get_signal(RUN_SIGNAL) then
@@ -281,8 +297,7 @@ function Controller.tick(state, sync_wait)
         Controller.halt(state)
         Controller.set_program_counter(state, state.instruction_pointer + 1)
       elseif result.type == 'sleep' then
-        Controller.update_state(state, PSTATE_SLEEPING)
-        state.sleep_time = result.val
+        Controller.sleep(state, result.val)
       elseif result.type == 'jump' then
         if result.label then
           for line_num, node in ipairs(state.program_ast) do
@@ -308,18 +323,12 @@ function Controller.tick(state, sync_wait)
         end
       elseif result.type == 'deffer' then
         Controller.set_program_counter(state, state.instruction_pointer + 1)
-        for _,v in ipairs(result.deffer) do
-          table.insert(state.deffered, v)
-        end
-        Controller.do_defferred(state, 0)
+        Controller.add_defferred(state, result.deffer)
       end
     else
       Controller.set_program_counter(state, state.instruction_pointer + 1)
       if ast and ast.deffer then
-        for _,v in ipairs(ast.deffer) do
-          table.insert(state.deffered, table.deep_copy(v))
-        end
-        Controller.do_defferred(state, 0)
+        Controller.add_defferred(state, ast.deffer)
       end
     end
   elseif state.program_state == PSTATE_SLEEPING then
@@ -349,6 +358,13 @@ function Controller.step(state)
   Controller.update_state(state, PSTATE_RUNNING)
   state.do_step = true
   Controller.set_error_message(state, nil)
+end
+
+function Controller.sleep(state, value)
+  if 0 < value then
+    Controller.update_state(state, PSTATE_SLEEPING)
+    state.sleep_time = value
+  end
 end
 
 function Controller.halt(state)

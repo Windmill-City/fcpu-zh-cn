@@ -1,5 +1,6 @@
 Entity = require('__stdlib__/stdlib/entity/entity')
 table = require('__flib__.table')
+Heap = require('src.utils.Heap')
 
 require('src/constants')
 Profiler = require('src/debug')
@@ -63,10 +64,7 @@ script.on_event(defines.events.on_tick, function(event)
   local HandleCPU = function(state, k)
     handled = handled + 1
     if state.entity and state.entity.valid then
-      local need_sync = 0
-      if state.deffered and next(state.deffered) ~= nil then
-        need_sync = Controller.do_defferred(state, 1)
-      end
+      local need_sync = Controller.do_defferred(state)
       if not state.disabled and state.entity.active then
         if state.clock % 10 == 0 then
           state.out_of_power = not sufficient_power(state.entity)

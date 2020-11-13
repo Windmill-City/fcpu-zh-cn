@@ -309,4 +309,29 @@ return {
       state.cache.control.indication = fcpu.get_control_behavior()
     end)
   end,
+
+  ["0.3.24"] = function()
+    -- Validation {
+    for _, surface in pairs(game.surfaces) do
+      for _, fcpu in pairs(surface.find_entities_filtered{ name="fcpu" }) do
+        if fcpu and fcpu.valid then
+          local index = Entity.get_data(fcpu, nil)
+          if index == nil then
+            fcpu.destroy()
+          end
+        end
+      end
+    end
+    -- }
+    foreach_fcpu(function(fcpu, state)
+      if next(state.deffered) ~= nil then
+        local deffered = Heap.new()
+        for _,v in pairs(state.deffered) do
+          local at_tick = game.tick + v.delay
+          Heap.put(deffered, at_tick, v)
+        end
+        state.deffered = deffered
+      end
+    end)
+  end,
 }
