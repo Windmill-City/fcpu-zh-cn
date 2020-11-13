@@ -152,6 +152,9 @@ function Controller.set_program_counter(state, value)
 end
 
 local function run_deffer_command(op)
+  if op.at and op.at + op.delay ~= game.tick then
+    __DebugAdapter.breakpoint()
+  end
   if op.action == 'disable' then
     if op.ic and op.ic.valid then
       local control = op.ic.get_or_create_control_behavior()
@@ -185,6 +188,7 @@ function Controller.add_defferred(state, deffer)
     else
       local t = table.deep_copy(op)
       local at_tick = t.delay + game.tick
+      t.at = game.tick
       Heap.put(state.deffered, at_tick, t)
     end
   end

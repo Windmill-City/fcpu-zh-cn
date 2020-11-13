@@ -328,6 +328,7 @@ return {
         local deffered = Heap.new()
         for _,v in pairs(state.deffered) do
           local at_tick = game.tick + v.delay
+          v.at = game.tick
           Heap.put(deffered, at_tick, v)
         end
         state.deffered = deffered
