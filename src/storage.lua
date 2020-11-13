@@ -30,6 +30,8 @@ function destroy_fcpu(entity, state)
   Entity.set_data(entity, nil)
   if state then
     state.destroy_regnum = nil
+    global.fcpus[state.index] = nil
+    global.running[state.index] = nil
   end
 end
 

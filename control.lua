@@ -61,10 +61,8 @@ script.on_event(defines.events.on_tick, function(event)
   local enabled = 0
   local start = global.last_index
 
-
-  Controller.do_defferred()
-
-  local HandleCPU = function(state, k)
+  local HandleCPU = function(index, k)
+    local state = global.fcpus[index]
     handled = handled + 1
     if state.entity and state.entity.valid then
       if not state.disabled and state.entity.active then
@@ -85,11 +83,14 @@ script.on_event(defines.events.on_tick, function(event)
     return nil, not state.destroy_regnum, start == k
   end
 
+  -- TODO: add explicit HandleCPU call for deffered fCPUs!
+  Controller.do_defferred()
+
   local limit = fcpu_maximum_updates_per_tick
   local ended
-  global.last_index, _, ended = table.for_n_of(global.fcpus, global.last_index, limit, HandleCPU)
+  global.last_index, _, ended = table.for_n_of(global.running, global.last_index, limit, HandleCPU)
   if start and ended and handled < limit then
-    global.last_index = table.for_n_of(global.fcpus, nil, limit - handled, HandleCPU)
+    global.last_index = table.for_n_of(global.running, nil, limit - handled, HandleCPU)
   end
 end)
 

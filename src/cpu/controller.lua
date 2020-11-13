@@ -154,6 +154,10 @@ local function run_deffer_command(op)
   assert(not op.at or op.at + op.delay == game.tick, "Out of order deffered action executed")
 
   if op.action == 'wake' then
+    local state = global.fcpus[op.index]
+    if state and state.sleep_at == op.at then
+      global.running[op.index] = op.index
+    end
   elseif op.action == 'sync' then
     local state = global.fcpus[op.index]
     if state then
@@ -250,6 +254,11 @@ end
 function Controller.tick(state, sync_wait)
   if state.program_state == PSTATE_BREAKPOINT then
     return
+  end
+
+  if state.program_state == PSTATE_RUNNING or state.program_state == PSTATE_SLEEPING then
+  else
+    global.running[state.index] = nil
   end
 
   Controller.validate_cache(state)
@@ -430,6 +439,15 @@ function Controller.update_state(state, pstate)
 
   if state.program_state ~= pstate then
     if pstate ~= nil then
+      if pstate == PSTATE_RUNNING then
+        global.running[state.index] = state.index
+      elseif pstate == PSTATE_SLEEPING and state.sleep_time then
+        global.running[state.index] = nil
+        state.sleep_at = game.tick
+        Heap.put(global.deffered, game.tick + state.sleep_time, {action='wake', at=game.tick, delay=state.sleep_time, index=state.index})
+      else
+        global.running[state.index] = nil
+      end
       state.program_state = pstate
     end
 

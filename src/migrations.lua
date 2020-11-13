@@ -15,6 +15,7 @@ local function foreach_fcpu(proc)
       proc(state.entity, state)
     else
       global.fcpus[k] = nil
+      global.running[k] = nil
     end
   end
 end
@@ -218,6 +219,7 @@ return {
     end
     for _,v in ipairs(invalids) do
       global.fcpus[v] = nil
+      global.running[v] = nil
     end
   end,
 
@@ -323,6 +325,7 @@ return {
       end
     end
     -- }
+    global.running = {}
     global.deffered = Heap.new()
     foreach_fcpu(function(fcpu, state)
       if next(state.deffered) ~= nil then
@@ -340,6 +343,13 @@ return {
           Heap.put(global.deffered, sync_at + 1, {action='sync', index=state.index, at=game.tick, delay=sync_at + 1 - game.tick})
         end
         state.deffered = nil
+      end
+      if state.program_state == PSTATE_RUNNING then
+        global.running[state.index] = state.index
+      elseif state.program_state == PSTATE_SLEEPING then
+        global.running[state.index] = nil
+        state.sleep_at = game.tick
+        Heap.put(global.deffered, game.tick + state.sleep_time, {action='wake', at=game.tick, delay=state.sleep_time, index=state.index})
       end
     end)
   end,
