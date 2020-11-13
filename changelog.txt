@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.24
-Date: ????
+Date: 2020-11-13
   Features:
     - Added detection of broken mods, which mess with blueprint data and take care of their shit.
   Bugfixes:
