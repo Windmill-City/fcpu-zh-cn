@@ -158,7 +158,7 @@ local function on_player_setup_blueprint(event)
       local mapping = event.mapping.get()
       local entities = blueprint.get_blueprint_entities()
 
-      if #mapping == 0 and 0 < #entities then
+      if #mapping == 0 and entities and 0 < #entities then
         local pos2idx = {}
         for _,v in ipairs(entities) do
           if v.name == 'fcpu' then
