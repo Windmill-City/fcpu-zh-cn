@@ -1,14 +1,15 @@
-# Upcoming  (in v0.4.0)
+# Upcoming  (in v0.4.x)
 * Breakpoints.
 * Hotkeys, auto switch memory channel for debugging.
 * New conditional break until signal of a certain type has changed its value.
 * SIMD `x*` with 3 arguments.
 
-# Upcoming  (in v0.5.0)
+# Upcoming  (in v0.5.x)
 * Memory array with constant memory indices.
 * Add push, pop, call, ret semantics for subroutines and stacks.
 * Vector compare mnemonics.
 * `xflt` mnemonic for filtering signals.
+* Logistics network access (@Chiko)
 
 # TODO list, fCPU
 * Factorio v1.1.0 support.
