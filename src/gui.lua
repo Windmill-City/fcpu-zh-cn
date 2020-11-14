@@ -47,10 +47,14 @@ local function inplace_dictionary_combine(dst, ...)
   --return new
 end
 
+local function string_insert(str1, str2, pos)
+  return str1:sub(1,pos)..str2..str1:sub(pos+1)
+end
+
 local function InsertTextInProgram(player_data, signal_str)
   -- see: https://forums.factorio.com/viewtopic.php?f=28&t=88330
   local pos = player_data.gui_program_input.text:len()
-  player_data.gui_program_input.text = string.insert(player_data.gui_program_input.text, signal_str, pos)
+  player_data.gui_program_input.text = string_insert(player_data.gui_program_input.text, signal_str, pos)
   fcpu_update_program(player_data.current_fcpu, player_data.gui_program_input.text)
 end
 
@@ -612,6 +616,7 @@ function GuiWidgetClose(player_index, silent)
 
     player_data.gui_fcpu.destroy()
     player_data.gui_fcpu = nil
+    player_data.current_fcpu = nil
   end
 end
 
@@ -632,23 +637,70 @@ end
 
 -------------------------------------------------------------------------------------------------------
 
-function string.insert(str1, str2, pos)
-  return str1:sub(1,pos)..str2..str1:sub(pos+1)
-end
-
 local function mixPlayerData(proc)
   return function(event)
     local player_data, player = get_player_data(event.player_index)
-    proc(player_data, player, event)
+    local state = get_fcpu_state(player_data.current_fcpu)
+    if state then
+      proc(player_data, state, event)
+    end
   end
 end
+
+local ControlHandlers = {}
+
+ControlHandlers['fcpu-debug-stop'] = mixPlayerData(function(player_data, state)
+  Controller.compile(state)
+  Controller.set_program_counter(state, 1)
+  Controller.halt(state)
+end)
+
+ControlHandlers['fcpu-debug-start'] = mixPlayerData(function(player_data, state)
+  if player_data.gui_error_message and player_data.gui_error_message.valid then
+    player_data.gui_error_message.caption = ""
+  end
+  Controller.compile(state)
+  Controller.run(state)
+end)
+
+ControlHandlers['fcpu-debug-restart'] = mixPlayerData(function(player_data, state)
+  Controller.halt(state)
+  Controller.set_program_counter(state, 1)
+  Controller.run(state)
+end)
+
+ControlHandlers['fcpu-debug-pause'] = mixPlayerData(function(player_data, state)
+  if Controller.is_running(state) then
+    Controller.compile(state)
+    Controller.halt(state)
+  end
+end)
+
+ControlHandlers['fcpu-debug-step-over'] = mixPlayerData(function(player_data, state)
+  if player_data.gui_error_message and player_data.gui_error_message.valid then
+    player_data.gui_error_message.caption = ""
+  end
+  Controller.compile(state)
+  Controller.step(state)
+end)
+
+ControlHandlers['fcpu-debug-step-into'] = mixPlayerData(function(player_data, state)
+  if not Controller.is_sleeping(state) then
+    if player_data.gui_error_message and player_data.gui_error_message.valid then
+      player_data.gui_error_message.caption = ""
+    end
+    Controller.compile(state)
+    Controller.step(state)
+  end
+end)
+
+-------------------------------------------------------------------------------------------------------
 
 gui.add_handlers{
   memory={
     memory_channel = {
-      on_gui_selection_state_changed = mixPlayerData(function(player_data, player, event)
+      on_gui_selection_state_changed = mixPlayerData(function(player_data, state)
         if player_data.gui_memory_view then
-          local state = get_fcpu_state(player_data.current_fcpu)
           UpdateWidget_MemoryView(player_data, state, true)
         end
       end)
@@ -661,7 +713,7 @@ gui.add_handlers{
       end
     },
     program_input = {
-      on_gui_text_changed = mixPlayerData(function(player_data, player, event)
+      on_gui_text_changed = mixPlayerData(function(player_data, state, event)
         local element = event.element
         local lines = {};
         for m in (element.text..'\n'):gmatch("(.-)\n") do
@@ -683,12 +735,11 @@ gui.add_handlers{
           end
           element.text = table.concat(lines, '\n')
         end
-        fcpu_update_program(player_data.current_fcpu, element.text)
+        fcpu_update_program(state.entity, element.text)
       end)
     },
     enable_program = {
-      on_gui_switch_state_changed = mixPlayerData(function(player_data, player, event)
-        local state = get_fcpu_state(player_data.current_fcpu)
+      on_gui_switch_state_changed = mixPlayerData(function(player_data, state, event)
         if event.element then
           if event.element.switch_state == "right" then
             Controller.disable(state, false)
@@ -704,46 +755,37 @@ gui.add_handlers{
       end)
     },
     run_program = {
-      on_gui_click = mixPlayerData(function(player_data)
-        local state = get_fcpu_state(player_data.current_fcpu)
-        player_data.gui_error_message.caption = ""
-        Controller.compile(state)
-        Controller.run(state)
-      end)
+      on_gui_click = ControlHandlers['fcpu-debug-start']
     },
     halt_program = {
-      on_gui_click = mixPlayerData(function(player_data)
-        local state = get_fcpu_state(player_data.current_fcpu)
-        Controller.compile(state)
-        if not Controller.is_running(state) then
-          Controller.set_program_counter(state, 1)
+      on_gui_click = mixPlayerData(function(player_data, state, event)
+        if Controller.is_running(state) then
+          ControlHandlers['fcpu-debug-pause'](event)
+        else
+          ControlHandlers['fcpu-debug-stop'](event)
         end
-        Controller.halt(state)
       end)
     },
     step_program = {
-      on_gui_click = mixPlayerData(function(player_data)
-        local state = get_fcpu_state(player_data.current_fcpu)
-        player_data.gui_error_message.caption = ""
-        Controller.compile(state)
-        Controller.step(state)
-      end)
+      on_gui_click = ControlHandlers['fcpu-debug-step-into']
     },
     copy_program = {
       on_gui_click = mixPlayerData(function(player_data)
-        player_data.program_clipboard = player_data.gui_program_input.text
+        if player_data.gui_program_input then
+          player_data.program_clipboard = player_data.gui_program_input.text
+        end
       end)
     },
     paste_program = {
-      on_gui_click = mixPlayerData(function(player_data)
-        if player_data.program_clipboard then
+      on_gui_click = mixPlayerData(function(player_data, state)
+        if player_data.gui_program_input then
           player_data.gui_program_input.text = player_data.program_clipboard
-          fcpu_update_program(player_data.current_fcpu, player_data.gui_program_input.text)
+          fcpu_update_program(state.entity, player_data.gui_program_input.text)
         end
       end)
     },
     insert_signal_to_program = {
-      on_gui_elem_changed = mixPlayerData(function(player_data, player, event)
+      on_gui_elem_changed = mixPlayerData(function(player_data, state, event)
         local signal = event.element.elem_value
         if signal then
           if signal.type == 'virtual' then
@@ -756,7 +798,7 @@ gui.add_handlers{
       end)
     },
     insert_register_to_program = {
-      on_gui_click = mixPlayerData(function(player_data, player, event)
+      on_gui_click = mixPlayerData(function(player_data, state, event)
         local k, v = string.match(event.element.tooltip, '([^=]+)=(.+)')
         if event.button == defines.mouse_button_type.left then
           InsertTextInProgram(player_data, k)
@@ -766,23 +808,21 @@ gui.add_handlers{
       end)
     },
     view_memory = {
-      on_gui_click = mixPlayerData(function(player_data, player)
-        if not player_data.gui_fcpu or not player_data.gui_fcpu["fcpu-panels"] or player_data.gui_fcpu["fcpu-panels"]["fcpu-memory-view"] then
-          DestroyWidget_MemoryView(player_data)
-        else
+      on_gui_click = mixPlayerData(function(player_data, state)
+        if player_data.gui_fcpu and player_data.gui_fcpu["fcpu-panels"] then
           local rootGui = player_data.gui_fcpu["fcpu-panels"]
           local elems = CreateWidget_MemoryView(rootGui)
           inplace_dictionary_combine(player_data, elems)
-          local state = get_fcpu_state(player_data.current_fcpu)
           UpdateWidget_MemoryView(player_data, state, true)
+        else
+          DestroyWidget_MemoryView(player_data)
         end
       end)
     },
     breakpoint = {
-      on_gui_click = mixPlayerData(function(player_data, player, event)
+      on_gui_click = mixPlayerData(function(player_data, state, event)
         if player_data.gui_breakpoints and event.element then
           local num = tonumber(string.match(event.element.name, 'break%-(%d+)$'))
-          local state = get_fcpu_state(player_data.current_fcpu)
           state.breakpoints[num] = not state.breakpoints[num] or nil;
           event.element.caption = FormatBreakpointTitle(state, num)
         end
@@ -835,6 +875,14 @@ end)
 script.on_event("fcpu-escape", function(event)
   GuiWidgetClose(event.player_index)
 end)
+
+-- Handle debug hotkeys
+script.on_event("fcpu-debug-stop", ControlHandlers['fcpu-debug-stop'])
+script.on_event("fcpu-debug-start", ControlHandlers['fcpu-debug-start'])
+script.on_event("fcpu-debug-restart", ControlHandlers['fcpu-debug-restart'])
+script.on_event("fcpu-debug-pause", ControlHandlers['fcpu-debug-pause'])
+script.on_event("fcpu-debug-step-over", ControlHandlers['fcpu-debug-step-over'])
+script.on_event("fcpu-debug-step-into", ControlHandlers['fcpu-debug-step-into'])
 
 -- Handle player move event to close GUI when out of range.
 script.on_event(defines.events.on_player_changed_position, function(event)

@@ -64,9 +64,11 @@ end
 
 function fcpu_update_program(fcpu, program_text)
   local state = get_fcpu_state(fcpu)
-  local modified = Controller.update_program_text(state, program_text)
+  if state then
+    local modified = Controller.update_program_text(state, program_text)
 
-  if modified then
-    Controller.verify(state)
+    if modified then
+      Controller.verify(state)
+    end
   end
 end

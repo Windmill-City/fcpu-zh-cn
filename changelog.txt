@@ -2,6 +2,7 @@
 Version: 0.4.0
 Date: ????
   Features:
+    - Added hotkeys.
     - SIMD instructions have global queue for handling. Significant (~30%) performance increase for `x*` mnemonics.
     - Sleeping/Disabled fCPU now not eats UPS at all! Huge (~10-40%) performance increse for maps with a lot of fCPUs.
 ---------------------------------------------------------------------------------------------------
