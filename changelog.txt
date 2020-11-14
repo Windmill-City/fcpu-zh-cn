@@ -3,6 +3,7 @@ Version: 0.4.0
 Date: ????
   Features:
     - Added hotkeys for debugging.
+    - Added auto select last modified memory channel.
     - Added `bti` (break until input have type) mnemonic.
     - Added `btic` (break until input type changed) mnemonic.
     - Added basic string support.

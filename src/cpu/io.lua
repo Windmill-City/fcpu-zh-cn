@@ -380,6 +380,7 @@ function io.GuiCache_InvalidateMemory(channel, delay)
     if (state.gui_cache.memory_changed[channel] or 0) < game.tick then
       -- do not add cache until gui initialize it
       state.gui_cache.memory_changed[channel] = game.tick + (delay or 0)
+      state.gui_cache.memory_autochannel = channel
     end
   else
     -- update all channels

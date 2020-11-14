@@ -18,7 +18,11 @@ function MemoryView.CreateWidget(rootGui)
   local elems = gui.build(rootGui, {
     {type="frame", name="fcpu-memory-view", save_as="gui_memory_view", style="inside_shallow_frame_with_padding", direction="vertical", children={
       {template="heading_3", caption={"gui-fcpu-memviewer.memory-channel"}},
-      {type='drop-down', save_as='gui_memory_channel', items={ table.unpack(memchannels) }, selected_index=1, handlers="memory.memory_channel"},
+      {type="flow", name="fcpu-panels", direction="horizontal", style_mods={ vertical_align='center' }, children={
+        {type='drop-down', save_as='gui_memory_channel', items={ table.unpack(memchannels) }, selected_index=1, handlers="memory.memory_channel"},
+        {template="pushers.horizontal"},
+        {type='checkbox', save_as='gui_memory_autoselect', state=false, caption={'gui-fcpu-memviewer.autoselect-channel'}},
+      }},
 
       {template="heading_3", caption={"gui-fcpu-memviewer.memory-view"}},
       {type="scroll-pane", style="scroll_pane_in_shallow_frame", direction="vertical", children={
@@ -113,6 +117,13 @@ end
 function MemoryView.UpdateWidget(player_data, state, initial)
   if not player_data.gui_memory_channel then return end
   local index = player_data.gui_memory_channel.selected_index
+
+  if player_data.gui_cache and player_data.gui_memory_autoselect and player_data.gui_memory_autoselect.state then
+    if state.gui_cache.memory_autochannel then
+      index = tonumber(string.sub(state.gui_cache.memory_autochannel, 4)) or index
+      player_data.gui_memory_channel.selected_index = index
+    end
+  end
 
   if state then
     index = math.max(1, index)
