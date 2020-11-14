@@ -312,7 +312,7 @@ return {
     end)
   end,
 
-  ["0.3.24"] = function()
+  ["0.4.0"] = function()
     -- Validation {
     for _, surface in pairs(game.surfaces) do
       for _, fcpu in pairs(surface.find_entities_filtered{ name="fcpu" }) do
@@ -344,12 +344,12 @@ return {
         end
         state.deffered = nil
       end
-      if state.program_state == PSTATE_RUNNING then
-        global.running[state.index] = state.index
-      elseif state.program_state == PSTATE_SLEEPING then
+      if state.program_state == PSTATE_SLEEPING then
         global.running[state.index] = nil
         state.sleep_at = game.tick
         Heap.put(global.deffered, game.tick + state.sleep_time, {action='wake', at=game.tick, delay=state.sleep_time, index=state.index})
+      elseif state.program_state == PSTATE_RUNNING or not state.disabled then
+        global.running[state.index] = state.index
       end
     end)
   end,

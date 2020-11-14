@@ -445,7 +445,7 @@ function Controller.update_state(state, pstate)
         global.running[state.index] = nil
         state.sleep_at = game.tick
         Heap.put(global.deffered, game.tick + state.sleep_time, {action='wake', at=game.tick, delay=state.sleep_time, index=state.index})
-      else
+      elseif state.disabled then
         global.running[state.index] = nil
       end
       state.program_state = pstate
