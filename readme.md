@@ -190,11 +190,11 @@ Each instruction take one or more operands and modify them or state of fCPU.
   Set signal type.  
   *dst... = type*
 
-* `fid` dst[**R**/**O**] mem[**I**/**M**] type[**T**/**R**]  
-  Find type in memory or red/green input wire, assign signal type and number value.
+* `fid` dst[**R**/**O**] src[**I**/**M**] type[**T**/**R**]  
+  Find *type* in *src* (memory or red/green input wire), then assign *dst* to signal type and number value.
 
-* `idx` dst[**R**] mem[**I**/**M**] type[**T**/**R**]  
-  Find type in memory or red/green input wire, assing index of memory cell or input wire location.
+* `idx` dst[**R**] src[**I**/**M**] type[**T**/**R**]  
+  Find *type* in *src* (memory or red/green input wire), then assing *dst* to the index of memory cell or input wire location.
 
 
 * `fir` dst[**R**/**O**] type[**T**/**R**]  
@@ -339,6 +339,12 @@ Each instruction take one or more operands and modify them or state of fCPU.
   `bti` type[**T**/**R**]
   Block until signal type found on *r*ed/*g*reen/both_*i*nput wires.
 
+* `btrc` reg[**R**]
+  `btgc` reg[**R**]
+  `btic` reg[**R**]
+  Block until *register* have same value as in *r*ed/*g*reen/both_*i*nput wires.  
+  Then assign *register* to new value.
+
 
 ### Testing operands values
 
@@ -434,7 +440,7 @@ blt r1 10 :counter
 ### Utility mnemonics
 * `ugpf` dst[**R**] name[**T**/**R**] field[**S**]
   *Utility Get Prototype Field*  
-  Find prototype with *name* and assign *field* value (only numbers supported) to *dst*.  
+  Find prototype with *name* and assign *dst* to *field* value (only numbers supported).  
   For example: `ugpf r1 [item=inserter] 'inserter_rotation_speed'`.  
 
 * `uiss` dst[**R**] type[**T**/**R**]  

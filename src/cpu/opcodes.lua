@@ -560,6 +560,40 @@ local opcodes = {
     end
   end,
 
+  btrc = function(_)
+    assert.one(_)
+    local oldSig = io.register_get(_[1])
+    local newSig = io.wire_find_signal('red', oldSig.signal)
+    if newSig == NULL_SIGNAL or newSig.count == oldSig.count then
+      return {type = 'block'}
+    else
+      io.register_set(_[1], newSig)
+      return {type = 'next'}
+    end
+  end,
+  btgc = function(_)
+    assert.one(_)
+    local oldSig = io.register_get(_[1])
+    local newSig = io.wire_find_signal('green', oldSig.signal)
+    if newSig == NULL_SIGNAL or newSig.count == oldSig.count then
+      return {type = 'block'}
+    else
+      io.register_set(_[1], newSig)
+      return {type = 'next'}
+    end
+  end,
+  btic = function(_)
+    assert.one(_)
+    local oldSig = io.register_get(_[1])
+    local newSig = io.wire_find_signal('input', oldSig.signal)
+    if newSig == NULL_SIGNAL or newSig.count == oldSig.count then
+      return {type = 'block'}
+    else
+      io.register_set(_[1], newSig)
+      return {type = 'next'}
+    end
+  end,
+
   nmd = function(_) -- Nuclear Meltdown
     assert.one(_)
     assert.type(_[1], {'type'})
