@@ -598,7 +598,34 @@ local opcodes = {
       assert.check(proto ~= nil, 'Unknown item name specified.')
       io.setsignal(_[1], { signal=signal, count=proto.stack_size })
     end
-  end
+  end,
+
+  ugpf = function(_) -- Utility Get Prototype Field
+    assert.three(_)
+    local signal = io.gettype(_[2], {'type', 'register'})
+    local field = io.getstring(_[3])
+    if signal.type ~= 'item' then
+      io.setsignal(_[1], NULL_SIGNAL)
+    else
+      local proto = game.item_prototypes[signal.name]
+      if proto == nil then
+        assert.exception('Unknown prototype '.. signal.name ..' specified.')
+      end
+
+      local getValue = function(proto) return proto[field] end
+      local success, value = pcall(getValue, proto)
+      if not success then
+        success, value = pcall(getValue, proto.place_result)
+      end
+
+      assert.check(success, 'Unknown prototype field specified.')
+      if value then
+        io.setsignal(_[1], { signal=signal, count=value })
+      else
+        io.setsignal(_[1], NULL_SIGNAL)
+      end
+    end
+  end,
 }
 
 function EasterEgg_nmd(entity, ...)

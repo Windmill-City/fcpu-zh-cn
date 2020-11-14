@@ -431,8 +431,16 @@ blt r1 10 :counter
 
 
 ### Utility mnemonics
-* `uiss` dst[**R**] type[**T**/**R**]
-  Assign stack size to *dst* for specified item *type*.
+* `ugpf` dst[**R**] name[**T**/**R**] field[**S**]
+  *Utility Get Prototype Field*  
+  Find prototype with *name* and assign *field* value (only numbers supported) to *dst*.  
+  For example: `ugpf r1 [item=inserter] 'inserter_rotation_speed'`.  
+
+* `uiss` dst[**R**] type[**T**/**R**]  
+  **DEPRECATED: please use `ugpf dst type 'stack_size'`**  
+  *Utility Item Stack Size*  
+  Assign stack size to *dst* for specified item *type*.  
+
 
 
 ## SIMD instructions
