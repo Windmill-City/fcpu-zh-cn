@@ -122,17 +122,16 @@ This approach is also could be used with `red`, `green` input wires and memory c
 
 
 
-## Control signals (interrupts)
-You could control fCPU state by wires (not only manually through game GUI).  
+## Control signals, interruptions
+You could control fCPU state by wires, not only manually through game GUI.  
 There are some signals for it:
-
 * `[virtual-signal=signal-fcpu-halt]`: Halt program execution.
 * `[virtual-signal=signal-fcpu-run]`: Continue running program.
-* `[virtual-signal=signal-fcpu-step]`: Execute current instruction.
-* `[virtual-signal=signal-fcpu-sleep]`: Sleep specified game ticks.
+* `[virtual-signal=signal-fcpu-step]`: Execute current instruction and move to next.
+* `[virtual-signal=signal-fcpu-sleep]`: Sleep specified game ticks. In sleep mode fCPU do not handle interruptions.
 * `[virtual-signal=signal-fcpu-jump]`: Jump to specified line in program.
 
-If fCPU encounter error in program it will emit `[virtual-signal=signal-fcpu-error]` with line number as value.  
+If fCPU encounter error in program it will output `[virtual-signal=signal-fcpu-error]` with line number as value.  
 
 
 ## Mnemonics
@@ -328,15 +327,17 @@ Each instruction take one or more operands and modify them or state of fCPU.
   *Halt* program execution until it will be resumed by player or by *Run* signal from any **i**nput wire.
 
 * `slp` cnt[**C**/**R**]  
-  Sleep for specified ticks count.
+  Sleep for specified ticks count.  
+  fCPU do not handle interruptions while sleeping.  
 
 * `bkr` cnt[**C**/**R**]  
   `bkg` cnt[**C**/**R**]  
-  Block until there are at least *cnt* *r*ed/*g*reen signals.
+  Block until there are at least *cnt* signals on *r*ed/*g*reen wires.
 
 * `btr` type[**T**/**R**]
   `btg` type[**T**/**R**]
-  Block until signal type found in *r*ed/*g*reen input wires.
+  `bti` type[**T**/**R**]
+  Block until signal type found on *r*ed/*g*reen/both_*i*nput wires.
 
 
 ### Testing operands values

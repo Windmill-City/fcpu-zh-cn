@@ -531,16 +531,6 @@ local opcodes = {
       return {type = 'next'}
     end
   end,
-  bkm = function(_)
-    assert.one(_)
-    assert.type(_[1], {'value', 'register'})
-    local count = io.getcount(_[1])
-    if io.wire_count('green') < count then
-      return {type = 'block'}
-    else
-      return {type = 'next'}
-    end
-  end,
 
   btr = function(_)
     assert.one(_)
@@ -555,6 +545,15 @@ local opcodes = {
     assert.one(_)
     local type = io.gettype(_[1], {'type', 'register'})
     if io.wire_find_signal('green', type) == NULL_SIGNAL then
+      return {type = 'block'}
+    else
+      return {type = 'next'}
+    end
+  end,
+  bti = function(_)
+    assert.one(_)
+    local type = io.gettype(_[1], {'type', 'register'})
+    if io.wire_find_signal('input', type) == NULL_SIGNAL then
       return {type = 'block'}
     else
       return {type = 'next'}

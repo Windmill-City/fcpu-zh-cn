@@ -182,12 +182,16 @@ function io.wire_set(_, signal)
 end
 
 function io.wire_find_signal(color, signal_to_find)
-  if not state.cache.wires[color] then
-    assert.exception("Tried to access "..color.." wire when input not present.")
-  end
   local wire = state.cache.wires[color]
   if signal_to_find then
-    local count = wire.get_signal(signal_to_find)
+    local count
+    if wire then
+      count = wire.get_signal(signal_to_find)
+    elseif color == 'input' then
+      count = state.entity.get_merged_signal(signal_to_find, defines.circuit_connector_id.combinator_input)
+    else
+      assert.exception("Tried to access "..color.." wire when input not present.")
+    end
     if count ~= 0 then
       return {signal = signal_to_find, count = count}
     end

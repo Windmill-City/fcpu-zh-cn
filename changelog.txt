@@ -2,7 +2,8 @@
 Version: 0.4.0
 Date: ????
   Features:
-    - Added hotkeys.
+    - Added hotkeys for debugging.
+    - Added `bti` mnemonic.
     - Added basic string support.
     - Added *Utility Get Prototype Field* `ugpf`.
     - SIMD instructions have global queue for handling. Significant (~30%) performance increase for `x*` mnemonics.
