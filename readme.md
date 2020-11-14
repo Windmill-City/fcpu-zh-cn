@@ -142,7 +142,7 @@ Each instruction take one or more operands and modify them or state of fCPU.
 
 **Legend**
 
-- **S**, signal: consists of **V**alue and **T**ype (`123[item=copper-ore]`)
+- **VT**, signal: consists of **V**alue and **T**ype (`123[item=copper-ore]`)
   - **V**, value: signal value, same as **C**
   - **T**, type: signal type
 
@@ -154,6 +154,7 @@ Each instruction take one or more operands and modify them or state of fCPU.
 
 - **A**, address: instruction address (`5`)
 - **L**, label: instruction label (`:labelname`)
+- **S**, string: used in utility mnemonics (`'rotation_speed'`)
 
 `...` - one or more, could be specified multiple times with space separator.  
 `?` - optional, may be specified.  
@@ -178,15 +179,15 @@ Each instruction take one or more operands and modify them or state of fCPU.
 * `clr` dst...[**R**/**M**/**O**]  
   Clear specified registers, memory channels or output wires (`mem3`, `r2`, `out4`).
 
-* `mov` dst...[**R**/**O**] src[**V**/**T**/**S**/**R**]  
+* `mov` dst...[**R**/**O**] src[**V**/**T**/**VT**/**R**]  
   Copy signal from source to destination.  
   *dst... = src*
 
-* `ssv` dst...[**R**/**O**] val[**V**/**S**/**R**]  
+* `ssv` dst...[**R**/**O**] val[**V**/**R**]  
   Set signal value.  
   *dst... = val*
 
-* `sst` dst...[**R**/**O**] type[**T**/**S**/**R**]  
+* `sst` dst...[**R**/**O**] type[**T**/**R**]  
   Set signal type.  
   *dst... = type*
 

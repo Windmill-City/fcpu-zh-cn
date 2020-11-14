@@ -400,6 +400,8 @@ function io.getsignal(_, types)
     signal = io.memory_get(_)
   elseif _.type == 'signal' or _.type == 'type' or _.type == 'value' then
     signal = _
+  elseif _.type == 'string' then
+    assert.exception('not supported yet')
   else
     assert.exception('tryint to retrieve nil signal')
   end
@@ -444,6 +446,15 @@ function io.setcount(_, count, types)
   local signal = io.getsignal(_, types)
   signal.count = count
   io.setsignal(_, signal, types)
+end
+
+
+function io.getstring(_, types)
+  if _.type == 'string' then
+    return _.str
+  else
+    return tostring(io.getcount(_, types))
+  end
 end
 
 

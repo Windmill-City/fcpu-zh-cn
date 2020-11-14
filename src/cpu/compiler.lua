@@ -96,6 +96,26 @@ local function parse(tokens)
   local parseConstant = function(fp)
     return emitter.make_value(consume(), fp)
   end
+  local parseString = function()
+    local str = ''
+    local n = 0
+    while n == 0 or n % 2 ~= 0 do
+      local s = consume()
+      assert.check(s ~= nil, 'String is not terminated')
+      for i = 1, #s do
+        local c = string.sub(s, i, i)
+        if c == '\'' then
+          n = n + 1
+        else
+          str = str .. c
+        end
+      end
+      if n % 2 == 1 then
+        str = str .. ' '
+      end
+    end
+    return emitter.make_string(str)
+  end
   local parseAddress = function(name)
     local token = consume()
     local a, b = string.match(token, name..'(@?)(%d+)')
@@ -170,6 +190,8 @@ local function parse(tokens)
         return parseSignal()
       elseif string.find(peek(), '[%-]?%d') == 1 then
         return parseConstant()
+      elseif fc == '\'' then
+        return parseString()
       else
         rewriteLower()
 

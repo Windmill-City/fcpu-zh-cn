@@ -15,6 +15,10 @@ function emitter.make_value(numstr)
   return { type = 'value', count = number }
 end
 
+function emitter.make_string(str)
+  return { type = 'string', str = str }
+end
+
 function emitter.make_address(addr, is_ptr)
   assert.check(addr ~= nil)
   return { type = 'address', addr = tonumber(addr), pointer = is_ptr }
