@@ -6,6 +6,8 @@ Date: ????
     - Added `bti` mnemonic.
     - Added basic string support.
     - Added *Utility Get Prototype Field* `ugpf`.
+  Changes:
+    - In sleep mode, fCPU does not handle interruptions.
     - SIMD instructions have global queue for handling. Significant (~30%) performance increase for `x*` mnemonics.
     - Sleeping/Disabled fCPU now not eats UPS at all! Huge (~10-40%) performance increse for maps with a lot of fCPUs.
 ---------------------------------------------------------------------------------------------------

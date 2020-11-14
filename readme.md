@@ -16,7 +16,7 @@
 * two input wires (Red, Green)
 * two output wires (Red, Green) have same output signals and values
 * parallel output, allows output multiple signals simultaneously
-* could be controlled through special input signals (interrupts)
+* could be controlled through special input signals (interruptions)
 * one tick = one instruction (except for SIMD ones)
 * made for geeks
 
