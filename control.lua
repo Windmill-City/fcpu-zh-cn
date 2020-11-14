@@ -163,7 +163,7 @@ local function on_player_setup_blueprint(event)
         for _,v in ipairs(entities) do
           if v.name == 'fcpu' then
             local pos = v.position.x ..';'.. v.position.y
-            pos2idx[pos] = v.emtity_number
+            pos2idx[pos] = v.entity_number
           end
         end
 
