@@ -5,7 +5,7 @@ Date: ????
     - Added hotkeys for debugging.
     - Added auto select last modified memory channel.
     - Added `bti` (break until input have type) mnemonic.
-    - Added `btic` (break until input type changed) mnemonic.
+    - Added `btrc`,`btgc`,`btic` (break until input type changed) mnemonics.
     - Added basic string support.
     - Added *Utility Get Prototype Field* `ugpf`.
   Changes:
