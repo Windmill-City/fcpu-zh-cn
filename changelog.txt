@@ -12,6 +12,8 @@ Date: ????
     - In sleep mode, fCPU does not handle interruptions.
     - SIMD instructions have global queue for handling. Significant (~30%) performance increase for `x*` mnemonics.
     - Sleeping/Disabled fCPU now not eats UPS at all! Huge (~10-40%) performance increse for maps with a lot of fCPUs.
+  Bugfixes:
+    - Possible fix for (https://mods.factorio.com/mod/fcpu/discussion/5fb00a179d70848806c566dd).
 ---------------------------------------------------------------------------------------------------
 Version: 0.3.27
 Date: 2020-11-15

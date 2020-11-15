@@ -258,6 +258,7 @@ return {
   ["0.3.20"] = function()
     global.migrated = nil
     -- Validation {
+    global._entity_data = global._entity_data or {}
     for k, v in pairs(global._entity_data) do
       if type(v) == 'table' and (not v.fcpu or not v.fcpu.valid) then
         global._entity_data[k] = nil
