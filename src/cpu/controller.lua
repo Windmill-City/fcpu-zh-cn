@@ -203,9 +203,9 @@ function Controller.validate_cache(state)
   end
 
   -- should be always valid
-  --if not (control.indication and control.indication.valid) then
-  --  control.indication = state.entity.get_control_behavior()
-  --end
+  if not (control.indication and control.indication.valid) then
+    control.indication = state.entity.get_control_behavior()
+  end
 
   -- Cache.Wires
   local wires = cache.wires
