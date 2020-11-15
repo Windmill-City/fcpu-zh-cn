@@ -58,19 +58,19 @@ local function fcpu_load_docs(sections, force)
   end
 end
 
-function fcpu_menu(player_index)
+local function fcpu_menu(player_index)
   return wiki_menu
 end
 
-function fcpu_menu_caption_override(page_name, player_index)
+local function fcpu_menu_caption_override(page_name, player_index)
   return wiki_pages[page_name] and wiki_pages[page_name].title or nil
 end
 
-function fcpu_title_caption_override(page_name, player_index)
+local function fcpu_title_caption_override(page_name, player_index)
   return wiki_pages[page_name] and wiki_pages[page_name].title or nil
 end
 
-function fcpu_page_content(page_name, player_index, element)
+local function fcpu_page_content(page_name, player_index, element)
   if wiki_pages[page_name] then
     local content = wiki_pages[page_name].content
 

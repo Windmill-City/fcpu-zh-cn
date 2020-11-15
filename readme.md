@@ -558,14 +558,16 @@ Like any other vanilla combinator operation, this breaks the signal indices.
 That is why, if you change the state of memory, then the indexes will also change.  
 
 
-## GUI
+## User Interface
 
 ### Hotkeys
 
-* **F5** = Run/continue
-* **F9** = Toggle breakpoint
-* **F10** = Step over
-* **F11** = Step into
+* **F5** = Run/Continue
+* **Shift** + **F5** = Stop
+* **Ctrl** + **Shift** + **F5** = Restart
+* **F6** = Pause
+* **F7**, **F11** = Step into
+* **F8**, **F10** = Step over
 
 
 [comment]: <> (md2frt-skip-section-begin)
