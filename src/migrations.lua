@@ -350,6 +350,7 @@ return {
         state.sleep_at = game.tick
         Heap.put(global.deffered, game.tick + state.sleep_time, {action='wake', at=game.tick, delay=state.sleep_time, index=state.index})
       elseif state.program_state == PSTATE_RUNNING or not state.disabled then
+        state.sleep_time = 0
         global.running[state.index] = state.index
       end
     end)

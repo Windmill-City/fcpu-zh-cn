@@ -460,7 +460,7 @@ function MainView.RegisterHandlers(ControlHandlers)
         end)
       },
       step_program = {
-        on_gui_click = ControlHandlers['fcpu-debug-step-into']
+        on_gui_click = ControlHandlers['fcpu-debug-step-over']
       },
       copy_program = {
         on_gui_click = GUI_mixPlayerData(function(player_data)

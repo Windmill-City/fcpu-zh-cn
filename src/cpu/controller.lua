@@ -156,7 +156,10 @@ local function run_deffer_command(op)
   if op.action == 'wake' then
     local state = global.fcpus[op.index]
     if state and state.sleep_at == op.at then
-      global.running[op.index] = op.index
+      assert(state.sleep_at + state.sleep_time == game.tick)
+      state.sleep_time = 0
+      Controller.set_program_counter(state, state.instruction_pointer + 1)
+      Controller.update_state(state, PSTATE_RUNNING)
     end
   elseif op.action == 'sync' then
     local state = global.fcpus[op.index]
@@ -274,23 +277,15 @@ function Controller.tick(state, sync_wait)
       Controller.halt(state)
     else
       local value = get_signal(SLEEP_SIGNAL)
-      Controller.sleep(state, value)
+      if value ~= 0 then
+        Controller.sleep(state, value)
+      end
     end
   elseif state.program_state == PSTATE_HALTED then
     if 0 < get_signal(RUN_SIGNAL) then
       Controller.run(state)
     elseif 0 < get_signal(STEP_SIGNAL) then
       Controller.step(state)
-    end
-  elseif state.program_state == PSTATE_SLEEPING then
-    if 0 < get_signal(HALT_SIGNAL) then
-      Controller.halt(state)
-    elseif 0 < get_signal(STEP_SIGNAL) then
-      if 1 < state.sleep_time then
-        state.sleep_time = 0
-        Controller.set_program_counter(state, state.instruction_pointer + 1)
-        Controller.step(state)
-      end
     end
   end
   if true then
@@ -349,45 +344,52 @@ function Controller.tick(state, sync_wait)
         Controller.add_defferred(state, ast.deffer)
       end
     end
-  elseif state.program_state == PSTATE_SLEEPING then
-    state.sleep_time = state.sleep_time - 1
-    if state.sleep_time <= 1 then
-      Controller.update_state(state, PSTATE_RUNNING)
-      Controller.set_program_counter(state, state.instruction_pointer + 1)
-    end
   end
 
   if state.do_step and state.program_state == PSTATE_RUNNING then
-    state.do_step = false
     Controller.halt(state)
   end
 end
 
 function Controller.run(state)
-  Controller.update_state(state, PSTATE_RUNNING)
-  state.do_step = false
   Controller.set_error_message(state, nil)
+  state.sleep_time = 0
+  state.need_sync = nil
+  state.do_step = false
+  Controller.update_state(state, PSTATE_RUNNING)
 end
 
-function Controller.step(state)
+function Controller.step(state, over)
+  Controller.set_error_message(state, nil)
+  if state.program_state == PSTATE_SLEEPING then
+    state.sleep_at = nil
+    Controller.set_program_counter(state, state.instruction_pointer + 1)
+  else
+    state.sleep_time = 0
+    state.need_sync = nil
+    state.do_step = true
+    Controller.update_state(state, PSTATE_RUNNING)
+  end
   if #state.program_ast < state.instruction_pointer then
     Controller.set_program_counter(state, 1)
   end
-  Controller.update_state(state, PSTATE_RUNNING)
-  state.do_step = true
-  Controller.set_error_message(state, nil)
 end
 
 function Controller.sleep(state, value)
   if 0 < value then
-    Controller.update_state(state, PSTATE_SLEEPING)
+    assert(state.sleep_time == 0)
     state.sleep_time = value
+  else
+    state.sleep_time = 0
   end
+  Controller.update_state(state, PSTATE_SLEEPING)
 end
 
 function Controller.halt(state)
-  Controller.update_state(state, PSTATE_HALTED)
+  state.sleep_time = 0
+  state.need_sync = nil
   state.do_step = false
+  Controller.update_state(state, PSTATE_HALTED)
   script.raise_event(Controller.event_halt, {entity = state.entity})
 end
 
@@ -443,16 +445,17 @@ function Controller.update_state(state, pstate)
 
   if state.program_state ~= pstate then
     if pstate ~= nil then
+      state.program_state = pstate
       if pstate == PSTATE_RUNNING then
         global.running[state.index] = state.index
+        state.sleep_at = nil
       elseif pstate == PSTATE_SLEEPING and state.sleep_time then
         global.running[state.index] = nil
         state.sleep_at = game.tick
-        Heap.put(global.deffered, game.tick + state.sleep_time, {action='wake', at=game.tick, delay=state.sleep_time, index=state.index})
+        Controller.add_defferred(state, {{action='wake', at=game.tick, delay=state.sleep_time, index=state.index}})
       elseif state.disabled then
         global.running[state.index] = nil
       end
-      state.program_state = pstate
     end
 
     if control then

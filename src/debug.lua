@@ -36,6 +36,25 @@ function UpdateModSetting(event)
   end
 end
 
+function debug_notify(state, msg)
+  if state then
+    if state.entity then
+      rendering.draw_text{
+        text = state.entity.unit_number ..' > #'.. state.index ..' '.. (msg or ''),
+        surface = state.entity.surface,
+        target  = state.entity,
+        color = {r=1,g=1},
+        time_to_live = 60,
+        alignment = 'center',
+      }
+    else
+      game.print('#'.. state.index ..' '.. msg)
+    end
+  else
+    game.print(msg)
+  end
+end
+
 
 UpdateModSetting{setting = "fcpu-debug-enabled"}
 UpdateModSetting{setting = "fcpu-gui-updates-every-tick"}
