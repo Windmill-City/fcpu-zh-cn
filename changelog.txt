@@ -2,6 +2,7 @@
 Version: 0.4.0
 Date: ????
   Features:
+    - Added `xflt` (thanks to https://www.reddit.com/user/Halke1986/ for original filter blueprint).
     - Added hotkeys for debugging.
     - Added auto select last modified memory channel.
     - Added `bti` (break until input have type) mnemonic.

@@ -228,6 +228,156 @@ function builder.create_merger_cell(entity, input_a, input_b)
   return proxy
 end
 
+function builder.create_filter_cell(entity, input_src, input_msk)
+  --[[ blueprint!
+  0eNrtmE2PmzAQhv+Ljy1ZYb6D2kOlnnvtoVohByYbq2AjY7JFEf+9NrSEZUmC02ibw14imdiPh3nnHQMHtMlrKAVlEsUHRFPOKhT/OKCKPjGS62uyKQHFiEookIUYKfSICCp3BUiarlJebCgjkgvUWoiyDH6hGLfWRUYGKc1AzAOc9tFCwCSVFPqIukGTsLrYgFA7DBwdsyRMjkEWKnml1nKmt9cB2faDb6EGxatg/eCrjTIqIO1neJaGSMHzZAM7sqeKoJZtaS5BnMjHngpZqytDGP2MlYBM30bKa51SfCEjpyhPAoCNOCs8yowJSMs74jjYC73IDbxw4LlGvAbynD+PIxuQ0YD0jJDPO1UXczEGA9A3TV4zG+HxpgMjYNqQsRjYcQdQaAT6Pl8avqGkJP05D4rax+46Y31pVxqH9Y8uy5GLaNZXPRVpTWU3xGptqwOZGM0xNZr7brR3o92R0da2bV/rtZIyY6v1JTUxm7/MbO6FE3bGbniwW7jIbEdwov7O6BD8lopKJotTAyTd6dRUoDHJ3+YwKVRegiB9POijYvBalrXxLu0/dTULOSd1mUx3RprocbRMNs9cNvvuZMMv1frwFmrhSb5dM/XcqXrz8vjnnjnPnmDLtPlDvY0wR0VsPShKIro4Y/TpakU0qGySroslW8GLhDKFQfGW5BW0Jo1s6pDgpGIzcofL7BSY28m5NzuNz8Kxrb58+3pzYy09cU4Ls7DPhVcbyf+fRnpxIr2w1OfbW0qKGgw6oP+qhVnzekZmrTFa1hojQ0Wd+1D0DVqjoY7BUh3d808coZnM4Xna+oTs6yEZBWS0LlaQq3sUqs2WPIfzzyu4e6tb3IdmC1Elp/sYFI++P1lor14Cuz2dSBt2HQYhtgM/aNvfWERHHQ==
+  ]]
+  local wireS = input_src.wire or defines.wire_type.red
+  local wireM = input_msk.wire or defines.wire_type.red
+
+  local a1, control_a1 = builder.create_node(entity, 'arithmetic')
+  local a2, control_a2 = builder.create_node(entity, 'arithmetic')
+  local a3, control_a3 = builder.create_node(entity, 'arithmetic')
+  local d1, control_d1 = builder.create_node(entity, 'decider')
+  local d2, control_d2 = builder.create_node(entity, 'decider')
+  local d3, control_d3 = builder.create_node(entity, 'decider')
+
+  control_a1.parameters = {
+    parameters = {
+      first_signal = {type='virtual', name='signal-each'},
+      second_signal = nil,
+      first_constant  = nil,
+      second_constant = -1,
+      operation  = '*',
+      output_signal = {type='virtual', name='signal-each'}
+    }
+  }
+  control_a2.parameters = {
+    parameters = {
+      first_signal = {type='virtual', name='signal-each'},
+      second_signal = nil,
+      first_constant  = nil,
+      second_constant = -2147483648,
+      operation  = '+',
+      output_signal = {type='virtual', name='signal-each'}
+    }
+  }
+  control_a3.parameters = {
+    parameters = {
+      first_signal = {type='virtual', name='signal-each'},
+      second_signal = nil,
+      first_constant  = nil,
+      second_constant = 2147483647,
+      operation  = 'AND',
+      output_signal = {type='virtual', name='signal-each'}
+    }
+  }
+
+  control_d1.parameters = {
+    parameters = {
+      first_signal = {type='virtual', name='signal-each'},
+      second_signal = nil,
+      constant = 0,
+      comparator = "<",
+      output_signal = {type='virtual', name='signal-each'},
+      copy_count_from_input = false
+    }
+  }
+  control_d2.parameters = {
+    parameters = {
+      first_signal = {type='virtual', name='signal-each'},
+      second_signal = nil,
+      constant = 0,
+      comparator = "<",
+      output_signal = {type='virtual', name='signal-each'},
+      copy_count_from_input = true
+    }
+  }
+  control_d3.parameters = {
+    parameters = {
+      first_signal = {type='virtual', name='signal-each'},
+      second_signal = nil,
+      constant = -2147483648,
+      comparator = "=",
+      output_signal = {type='virtual', name='signal-each'},
+      copy_count_from_input = true
+    }
+  }
+
+  a1.connect_neighbour{
+    source_circuit_id = defines.circuit_connector_id.combinator_input,
+    target_circuit_id = input_src.port,
+    target_entity = input_src.entity,
+    wire = wireM,
+  }
+  a2.connect_neighbour{
+    source_circuit_id = defines.circuit_connector_id.combinator_input,
+    target_circuit_id = defines.circuit_connector_id.combinator_input,
+    target_entity = a1,
+    wire = wireM,
+  }
+  a2.connect_neighbour{
+    source_circuit_id = defines.circuit_connector_id.combinator_output,
+    target_circuit_id = defines.circuit_connector_id.combinator_output,
+    target_entity = a1,
+    wire = defines.wire_type.green,
+  }
+
+  a3.connect_neighbour{
+    source_circuit_id = defines.circuit_connector_id.combinator_input,
+    target_circuit_id = defines.circuit_connector_id.combinator_input,
+    target_entity = d1,
+    wire = wireS,
+  }
+  d1.connect_neighbour{
+    source_circuit_id = defines.circuit_connector_id.combinator_input,
+    target_circuit_id = input_msk.port,
+    target_entity = input_msk.entity,
+    wire = wireS,
+  }
+  d1.connect_neighbour{
+    source_circuit_id = defines.circuit_connector_id.combinator_output,
+    target_circuit_id = defines.circuit_connector_id.combinator_input,
+    target_entity = d3,
+    wire = defines.wire_type.red,
+  }
+
+  a2.connect_neighbour{
+    source_circuit_id = defines.circuit_connector_id.combinator_output,
+    target_circuit_id = defines.circuit_connector_id.combinator_input,
+    target_entity = d2,
+    wire = defines.wire_type.green,
+  }
+  a3.connect_neighbour{
+    source_circuit_id = defines.circuit_connector_id.combinator_output,
+    target_circuit_id = defines.circuit_connector_id.combinator_input,
+    target_entity = d2,
+    wire = defines.wire_type.red,
+  }
+
+  --[[ Tie outputs for each color ]]
+  d2.connect_neighbour{
+    source_circuit_id = defines.circuit_connector_id.combinator_input,
+    target_circuit_id = defines.circuit_connector_id.combinator_input,
+    target_entity = d3,
+    wire = defines.wire_type.green,
+  }
+  d2.connect_neighbour{
+    source_circuit_id = defines.circuit_connector_id.combinator_output,
+    target_circuit_id = defines.circuit_connector_id.combinator_output,
+    target_entity = d3,
+    wire = defines.wire_type.green,
+  }
+  d2.connect_neighbour{
+    source_circuit_id = defines.circuit_connector_id.combinator_output,
+    target_circuit_id = defines.circuit_connector_id.combinator_output,
+    target_entity = d3,
+    wire = defines.wire_type.red,
+  }
+
+  return d3
+end
+
 function builder.create_memory_cell(entity, input_a, input_b)
   local wire1 = input_a.wire or defines.wire_type.red
   local wire2 = inverse_wire_color(wire1)
@@ -566,6 +716,34 @@ local ops = {
       {action='tune', ic=ics.kin, value=1, delay = 2},
       {action='tune', ic=ics.kout, value=0, delay = 2},
       {action='noop', delay = 4},
+    }
+
+    return ics_name, ics, deffer
+  end,
+
+  xflt = function(state, _)
+    assert.three(_)
+
+    local input_a = connect_input_from(state, _[2])
+    local input_b = connect_input_from(state, _[3])
+
+    local merger = builder.create_filter_cell(state.entity, input_a, input_b)
+    local ics = builder.create_memory_cell(state.entity, {
+      entity = merger,
+      wire = input_a.wire,
+      port = defines.circuit_connector_id.combinator_output
+    })
+    ics[#ics + 1] = merger
+
+    local ics_name = connect_output_to(state, ics, _[1])
+
+    local deffer = {
+      {action='disable', ic=ics.clr, delay = 0},
+      {action='tune', ic=ics.kin, value=0, delay = 0},
+      {action='tune', ic=ics.kout, value=2, delay = 2},
+      {action='tune', ic=ics.kin, value=2, delay = 3},
+      {action='tune', ic=ics.kout, value=0, delay = 3},
+      {action='noop', delay = 5},
     }
 
     return ics_name, ics, deffer

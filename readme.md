@@ -473,6 +473,10 @@ When working with SIMD instructions, the following features should be considered
 * `xuni` dst[**M**/**O**] a[**I**/**M**] b[**I**/**M**]
   *dst(each) = a(each) + b(each)*
 
+* `xflt` dst[**M**/**O**] src[**I**/**M**] mask[**I**/**M**]
+  Copy all the signals from *src* to *dst* having *mask* as whitelist.
+  *Internal design by https://www.reddit.com/user/Halke1986/*
+
 * `xadd` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]
   *dst(each) = dst + val* 
   *dst(each) = src + val* (if src specified)

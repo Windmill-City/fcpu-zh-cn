@@ -32,11 +32,9 @@ local opcodes_vx = {
     return {type='xwait'}
   end,
 
-  xmov = function(_, ics)
-  end,
-
-  xuni = function(_, ics)
-  end,
+  xmov = function(_, ics)end,
+  xuni = function(_, ics)end,
+  xflt = function(_, ics)end,
 
   xadd = vector_scalar_op(),
   xsub = vector_scalar_op(),
