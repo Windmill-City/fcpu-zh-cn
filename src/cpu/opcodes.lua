@@ -645,7 +645,7 @@ local opcodes = {
         assert.exception('Unknown prototype '.. signal.name ..' specified.')
       end
 
-      local getValue = function(proto) return proto[field] end
+      local getValue = function(proto) return tonumber(proto[field]) end
       local success, value = pcall(getValue, proto)
       if not success then
         success, value = pcall(getValue, proto.place_result)
