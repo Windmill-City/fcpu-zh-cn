@@ -175,6 +175,7 @@ local migrations = require("src/migrations.lua")
 script.on_init(function()
   gui.init()
   gui.build_lookup_tables()
+  global.gui_update_on_tick = 0
   global.fcpus = {}
   global.running = {}
   global.deffered = Heap.new()

@@ -29,7 +29,7 @@ function UpdateModSetting(event)
     update_debug_enabled()
   end
   if event.setting == "fcpu-gui-updates-every-tick" then
-    fcpu_gui_updates_every_tick = settings.startup[event.setting].value
+    fcpu_gui_updates_every_tick = settings.global[event.setting].value
   end
   if event.setting == "fcpu-maximum-updates-per-tick" then
     fcpu_maximum_updates_per_tick = settings.global[event.setting].value
@@ -37,21 +37,23 @@ function UpdateModSetting(event)
 end
 
 function debug_notify(state, msg)
-  if state then
-    if state.entity then
-      rendering.draw_text{
-        text = state.entity.unit_number ..' > #'.. state.index ..' '.. (msg or ''),
-        surface = state.entity.surface,
-        target  = state.entity,
-        color = {r=1,g=1},
-        time_to_live = 60,
-        alignment = 'center',
-      }
+  if fcpu_debug_enabled and 0 < fcpu_debug_enabled then
+    if state then
+      if state.entity then
+        rendering.draw_text{
+          text = state.entity.unit_number ..' > #'.. state.index ..' '.. (msg or ''),
+          surface = state.entity.surface,
+          target  = state.entity,
+          color = {r=1,g=1},
+          time_to_live = 60,
+          alignment = 'center',
+        }
+      else
+        game.print('#'.. state.index ..' '.. msg)
+      end
     else
-      game.print('#'.. state.index ..' '.. msg)
+      game.print(msg)
     end
-  else
-    game.print(msg)
   end
 end
 

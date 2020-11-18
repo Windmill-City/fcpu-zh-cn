@@ -326,6 +326,7 @@ return {
       end
     end
     -- }
+    global.gui_update_on_tick = 0
     global.running = {}
     global.deffered = Heap.new()
     foreach_fcpu(function(fcpu, state)

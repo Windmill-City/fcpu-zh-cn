@@ -34,7 +34,7 @@ local function on_died_fcpu(event)
   handle_fcpu_died(entity)
 end
 
-script.on_nth_tick(fcpu_gui_updates_every_tick, function(event)
+local function update_gui()
   for _, player in pairs(game.players) do
     local player_data = get_player_data(player.index)
     if player_data and player_data.current_fcpu and player_data.gui_fcpu and player_data.gui_fcpu.valid then
@@ -48,7 +48,11 @@ script.on_nth_tick(fcpu_gui_updates_every_tick, function(event)
       end
     end
   end
-end)
+end
+
+--script.on_nth_tick(fcpu_gui_updates_every_tick, function(event)
+--  update_gui()
+--end)
 
 local function sufficient_power(cpu)
   if cpu.is_connected_to_electric_network() then
@@ -91,6 +95,11 @@ script.on_event(defines.events.on_tick, function(event)
   global.last_index, _, ended = table.for_n_of(global.running, global.last_index, limit, HandleCPU)
   if start and ended and handled < limit then
     global.last_index = table.for_n_of(global.running, nil, limit - handled, HandleCPU)
+  end
+
+  if (global.gui_update_on_tick or 0) <= game.tick then
+    global.gui_update_on_tick = game.tick + fcpu_gui_updates_every_tick
+    update_gui()
   end
 end)
 
