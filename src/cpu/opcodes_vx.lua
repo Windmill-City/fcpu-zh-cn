@@ -64,7 +64,7 @@ local opcodes_vx = {
       end
     end
 
-    io.setsignal(_[1], m)
+    io.setsignal(_[1], m or NULL_SIGNAL)
   end,
   xmax = function(_, ics)
     assert.two(_)
@@ -81,7 +81,7 @@ local opcodes_vx = {
       end
     end
 
-    io.setsignal(_[1], m)
+    io.setsignal(_[1], m or NULL_SIGNAL)
   end,
   xavg = function(_, ics)
     assert.two(_)

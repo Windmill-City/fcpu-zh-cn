@@ -161,7 +161,7 @@ function io.wire_get(_)
     assert.todo()
   end
   if not state.cache.wires[_.color] then
-    assert.exception("Tried to access ".._.color.." wire when input not present.")
+    assert.exception("Tried to access ".._.color.." wire when it is not connected")
   end
   if state.cache.wires[_.color].signals then
     local addr = addr_deref(_)
@@ -190,7 +190,7 @@ function io.wire_find_signal(color, signal_to_find)
     elseif color == 'input' then
       count = state.entity.get_merged_signal(signal_to_find, defines.circuit_connector_id.combinator_input)
     else
-      assert.exception("Tried to access "..color.." wire when input not present.")
+      assert.exception("Tried to access "..color.." wire when it is not connected")
     end
     if count ~= 0 then
       return {signal = signal_to_find, count = count}
@@ -251,7 +251,7 @@ function io.memory_getchannel_read(_)
       return output_control
     end
     if not state.cache.wires[_.color] then
-      assert.exception("Tried to access ".._.color.." wire when input not present.")
+      assert.exception("Tried to access ".._.color.." wire when it is not connected")
     end
     return state.cache.wires[_.color]
   else
@@ -279,7 +279,7 @@ function io.memory_getchannel_write(_, corrective)
     if _.color == 'out' then
       return output_control
     end
-    assert.exception("Could not write to ".._.color.." input wire.")
+    assert.exception("Could not write to ".._.color.." input wire")
   else
     assert.todo()
   end
@@ -292,10 +292,7 @@ function io.memory_getchannel_signals(_)
     if ics and ics.out and ics.out.valid then
       local control = ics.out.get_control_behavior()
       local output = control.get_circuit_network(ics.color_out or defines.wire_type.red, defines.circuit_connector_id.combinator_output)
-      if output then
-        return output.signals
-      end
-      return control.signals_last_tick
+      return output and output.signals or control.signals_last_tick
     else
       assert.exception("Memory channel does not exists")
     end
@@ -304,9 +301,9 @@ function io.memory_getchannel_signals(_)
       return output_control.parameters.parameters
     end
     if not state.cache.wires[_.color] then
-      assert.exception("Tried to access ".._.color.." wire when input not present.")
+      assert.exception("Tried to access ".._.color.." wire when it is not connected")
     end
-    return state.cache.wires[_.color].signals
+    return state.cache.wires[_.color].signals or {}
   else
     assert.todo()
   end

@@ -32,7 +32,7 @@ fCPU is a combinator that includes:
 
 
 ### Program
-Programs for fCPU are entered in plain text in simplified [assembly language][1] and consists of lines.
+Programs for fCPU are entered in plain text in simplified assembly language (this guide is enough for a quick study) and consists of lines.
 Each line represents one instruction.
 An instruction consists of mnemonics and operands.
 For example: `mov out1 123[item=copper-ore]`, here `mov` is a mnemonic,` out1` is the first operand, `123[item=copper-ore]` is the second operand.
@@ -54,8 +54,6 @@ The following can be used as operands:
 - **Label** in the code: written in text with a colon in front (`:label`, `:anyname`, ...)
 
 The processor executes instructions from a written program in turn, line by line.
-
-[1]: This guide is enough for a quick study
 
 
 ### Registers
