@@ -43,7 +43,7 @@ function GUI_mixPlayerData(proc)
     local player_data, player = get_player_data(event.player_index)
     local state = get_fcpu_state(player_data.current_fcpu)
     if state then
-      proc(player_data, state, event)
+      proc(player_data, state, event, player)
     end
   end
 end
@@ -134,16 +134,16 @@ script.on_event("fcpu-open", function(event)
       end
     end
   elseif entity then
-    GuiWidgetClose(event.player_index)
+    GuiWidgetClose(event.player_index, true)
   end
 end)
 
 -- Handle fCPU GUI Close event.
 script.on_event("fcpu-close", function(event)
-  GuiWidgetClose(event.player_index)
+  GuiWidgetClose(event.player_index, true)
 end)
 script.on_event("fcpu-escape", function(event)
-  GuiWidgetClose(event.player_index)
+  GuiWidgetClose(event.player_index, true)
 end)
 
 -- Handle debug hotkeys
@@ -159,7 +159,7 @@ script.on_event(defines.events.on_player_changed_position, function(event)
   local player_data, player = get_player_data(event.player_index)
   if player_data and player_data.current_fcpu and player_data.gui_fcpu then
     if not player.can_reach_entity(player_data.current_fcpu) then
-      GuiWidgetClose(event.player_index, true)
+      GuiWidgetClose(event.player_index, false, true)
     end
   end
 end)

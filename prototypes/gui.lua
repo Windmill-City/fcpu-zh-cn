@@ -17,6 +17,29 @@ data:extend{
 data:extend{
   {
     type = "sprite",
+    name = "fcpu-pin-black",
+    filename = "__fcpu__/graphics/icons/gui/pin.png",
+    priority = "extra-high-no-scale",
+    size = 32,
+    scale = 0.5,
+    flags = {"gui-icon"}
+  },
+  {
+    type = "sprite",
+    name = "fcpu-pin-white",
+    filename = "__fcpu__/graphics/icons/gui/pin.png",
+    priority = "extra-high-no-scale",
+    x = 32,
+    y = 0,
+    size = 32,
+    scale = 0.5,
+    flags = {"gui-icon"}
+  },
+}
+
+data:extend{
+  {
+    type = "sprite",
     name = "fcpu-play-sprite",
     filename = "__fcpu__/graphics/icons/gui/play.png",
     width = 32,

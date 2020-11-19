@@ -59,7 +59,9 @@ function MainView.RegisterTemplates()
   gui.add_templates{
     frame_title = {type="label", style="frame_title"},
     frame_action_button = {type="sprite-button", style="frame_action_button", mouse_button_filter={"left"}},
+    frame_action_checkbox = {type="checkbox", style="frame_action_button", mouse_button_filter={"left"}},
     drag_handle = {type="empty-widget", name="drag-handle", style="draggable_space_header", style_mods={minimal_width=30, height=24, right_margin=4, horizontally_stretchable=true}},
+    pin_button = {template="frame_action_button", sprite="fcpu-pin-white", hovered_sprite="fcpu-pin-black"},
     close_button = {template="frame_action_button", sprite="utility/close_white", hovered_sprite="utility/close_black"},
 
     pushers = {
@@ -115,6 +117,7 @@ local function CreateWidget_Main(rootGui)
       {type="flow", name="titlebar", children={
         {template="frame_title", name="label", caption="fCPU"},
         {template="drag_handle", name="drag-handle"},
+        {template="pin_button", save_as="gui_pin_button", handlers="widget.pin_button", state=false},
         {template="close_button", save_as="gui_exit_button", handlers="widget.close_button"},
       }},
       {type="flow", name="fcpu-panels", direction="horizontal", style_mods={maximal_height=710, horizontal_spacing=12}, children={
@@ -223,6 +226,19 @@ local function CreateWidget_Main(rootGui)
   return elems
 end
 
+local function GuiWidgetUpdatePinButton(player)
+  local player_data = get_player_data(player.index)
+  if player_data.gui_pin_button and player_data.gui_pin_button.valid then
+    if player_data.gui_pinned then
+      player_data.gui_pin_button.style = "flib_selected_frame_action_button"
+      player_data.gui_fcpu.auto_center = false
+    else
+      player_data.gui_pin_button.style = "frame_action_button"
+      player_data.gui_fcpu.force_auto_center()
+    end
+  end
+end
+
 function GuiWidgetOpen(player, entity)
   local player_data = get_player_data(player.index)
   local state = get_fcpu_state(entity)
@@ -247,6 +263,7 @@ function GuiWidgetOpen(player, entity)
 
   player_data.gui_program_input.text = state.program_text
   GuiWidgetUpdate(player_data, state, true)
+  GuiWidgetUpdatePinButton(player)
 
   if state.error_message then
     player_data.gui_error_message.caption = state.error_message
@@ -354,7 +371,7 @@ function GuiWidgetUpdate(player_data, state, initial)
   end
 end
 
-function GuiWidgetClose(player_index, silent)
+function GuiWidgetClose(player_index, skip_if_pinned, silent)
   local player_data, player = get_player_data(player_index)
   if player_data and player_data.current_fcpu then
     if not (player_data.gui_fcpu and player_data.gui_fcpu.valid) then
@@ -400,6 +417,12 @@ end
 function MainView.RegisterHandlers(ControlHandlers)
   gui.add_handlers{
     widget = {
+      pin_button = {
+        on_gui_click = GUI_mixPlayerData(function(player_data, state, event, player)
+          player_data.gui_pinned = not player_data.gui_pinned
+          GuiWidgetUpdatePinButton(player)
+        end)
+      },
       close_button = {
         on_gui_click = function(event)
           GuiWidgetClose(event.player_index)

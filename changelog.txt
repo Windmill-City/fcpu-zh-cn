@@ -9,6 +9,7 @@ Date: ????
     - Added `btrc`,`btgc`,`btic` (break until input type changed) mnemonics.
     - Added basic string support.
     - Added *Utility Get Prototype Field* `ugpf`.
+    - Added pin button.
   Changes:
     - GUI refresh rate made runtime changeable, please update this setting to needed value.
     - In sleep mode, fCPU does not handle interruptions.
