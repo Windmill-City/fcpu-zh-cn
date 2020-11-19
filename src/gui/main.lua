@@ -382,7 +382,6 @@ function GuiWidgetClose(player_index, skip_if_pinned, silent)
   local player_data, player = get_player_data(player_index)
   if player_data and player_data.current_fcpu then
     if skip_if_pinned and player_data.gui_pinned then
-      player_data.gui_pinned_location = player_data.gui_fcpu.location
       return
     end
     if not (player_data.gui_fcpu and player_data.gui_fcpu.valid) then
@@ -402,6 +401,7 @@ function GuiWidgetClose(player_index, skip_if_pinned, silent)
       end
     end
 
+    player_data.gui_pinned_location = player_data.gui_fcpu.location
     player_data.gui_fcpu.destroy()
     player_data.gui_fcpu = nil
     player_data.current_fcpu = nil
@@ -415,6 +415,7 @@ function GuiEntityCloseWidget(entity)
     or player_data.current_fcpu.unit_number == entity.unit_number
     or entity.valid and Entity._are_equal(entity, player_data.current_fcpu) then
       if player_data.gui_fcpu and player_data.gui_fcpu.valid then
+        player_data.gui_pinned_location = player_data.gui_fcpu.location
         player_data.gui_fcpu.destroy()
         player_data.gui_fcpu = nil
       end
