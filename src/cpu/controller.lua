@@ -254,23 +254,10 @@ function Controller.validate_cache(state)
   end
 end
 
-function Controller.tick(state, sync_wait)
-  if state.program_state == PSTATE_BREAKPOINT then
-    return
-  end
-
-  if state.program_state == PSTATE_RUNNING or state.program_state == PSTATE_SLEEPING then
-  else
-    global.running[state.index] = nil
-  end
-
-  Controller.validate_cache(state)
-
-  state.clock = state.clock + 1
-
-  -- Interrupts
+function Controller.handle_interrupts(state)
   local get_signal = function(signal)
-    return state.entity.get_merged_signal(signal.signal, defines.circuit_connector_id.combinator_input) or 0
+    local t = state.entity.get_merged_signal(signal.signal, defines.circuit_connector_id.combinator_input)
+    return t or 0
   end
   if state.program_state == PSTATE_RUNNING then
     if 0 < get_signal(HALT_SIGNAL) then
@@ -294,60 +281,75 @@ function Controller.tick(state, sync_wait)
       Controller.set_program_counter(state, value)
     end
   end
+end
+
+function Controller.tick(state, sync_wait)
+  if state.program_state == PSTATE_BREAKPOINT then
+    return
+  end
+
+  Controller.validate_cache(state)
+  Controller.handle_interrupts(state)
 
 ::repeat_eval::
 
   -- Run Controller code.
-  if state.program_state == PSTATE_RUNNING and not sync_wait then
-    local ast = state.program_ast[state.instruction_pointer]
-    local ics = state.program_ics[state.instruction_pointer]
-    local success, result = Compiler.eval(ast, ics, state)
-    if not success then
-      Controller.set_error_message(state, result)
-      Controller.halt(state)
-    elseif result then
-      if result.type == 'halt' then
+  if state.program_state == PSTATE_RUNNING then
+    state.clock = state.clock + 1
+
+    if not sync_wait then
+      local ast = state.program_ast[state.instruction_pointer]
+      local ics = state.program_ics[state.instruction_pointer]
+      local success, result = Compiler.eval(ast, ics, state)
+      if not success then
+        Controller.set_error_message(state, result)
         Controller.halt(state)
-        Controller.set_program_counter(state, state.instruction_pointer + 1)
-      elseif result.type == 'sleep' then
-        Controller.sleep(state, result.val)
-      elseif result.type == 'jump' then
-        if result.label then
-          for line_num, node in ipairs(state.program_ast) do
-            if node.type == 'label' and node.label == result.label then
-              Controller.set_program_counter(state, line_num + 1 + (result.val or 0))
-              break
-            end
-          end
-        else
-          Controller.set_program_counter(state, result.val)
-        end
-      elseif result.type == 'block' then
-        -- FIXME: should take into account the fcpu_maximum_updates_per_tick limit!
-        -- Do nothing, keeping the instruction_pointer the same.
-      elseif result.type == 'skip' then
-        Controller.set_program_counter(state, state.instruction_pointer + 2)
-      elseif result.type == 'next' then
-        Controller.set_program_counter(state, state.instruction_pointer + 1)
-        goto repeat_eval
-      elseif result.type == 'xwait' then
-        if not sync_wait then
+      elseif result then
+        if result.type == 'halt' then
+          Controller.halt(state)
           Controller.set_program_counter(state, state.instruction_pointer + 1)
+        elseif result.type == 'sleep' then
+          Controller.sleep(state, result.val)
+        elseif result.type == 'jump' then
+          if result.label then
+            for line_num, node in ipairs(state.program_ast) do
+              if node.type == 'label' and node.label == result.label then
+                Controller.set_program_counter(state, line_num + 1 + (result.val or 0))
+                break
+              end
+            end
+          else
+            Controller.set_program_counter(state, result.val)
+          end
+        elseif result.type == 'block' then
+          -- FIXME: should take into account the fcpu_maximum_updates_per_tick limit!
+          -- Do nothing, keeping the instruction_pointer the same.
+        elseif result.type == 'skip' then
+          Controller.set_program_counter(state, state.instruction_pointer + 2)
+        elseif result.type == 'next' then
+          Controller.set_program_counter(state, state.instruction_pointer + 1)
+          goto repeat_eval
+        elseif result.type == 'xwait' then
+          if not sync_wait then
+            Controller.set_program_counter(state, state.instruction_pointer + 1)
+          end
+        elseif result.type == 'deffer' then
+          Controller.set_program_counter(state, state.instruction_pointer + 1)
+          Controller.add_defferred(state, result.deffer)
         end
-      elseif result.type == 'deffer' then
+      else
         Controller.set_program_counter(state, state.instruction_pointer + 1)
-        Controller.add_defferred(state, result.deffer)
-      end
-    else
-      Controller.set_program_counter(state, state.instruction_pointer + 1)
-      if ast and ast.deffer then
-        Controller.add_defferred(state, ast.deffer)
+        if ast and ast.deffer then
+          Controller.add_defferred(state, ast.deffer)
+        end
       end
     end
-  end
 
-  if state.do_step and state.program_state == PSTATE_RUNNING then
-    Controller.halt(state)
+    if state.do_step and state.program_state == PSTATE_RUNNING then
+      Controller.halt(state)
+    end
+  elseif state.program_state == PSTATE_SLEEPING then
+    global.running[state.index] = nil
   end
 end
 
