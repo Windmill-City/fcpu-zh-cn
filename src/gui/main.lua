@@ -221,7 +221,6 @@ local function CreateWidget_Main(rootGui)
   elems.gui_editor_toolbar['insert-signal-to-program'].elem_value = defaultToolbarInsertSignal
   elems.gui_fcpu.titlebar.label.drag_target = elems.gui_fcpu
   elems.gui_fcpu.titlebar['drag-handle'].drag_target = elems.gui_fcpu
-  elems.gui_fcpu.force_auto_center()
 
   return elems
 end
@@ -232,9 +231,13 @@ local function GuiWidgetUpdatePinButton(player)
     if player_data.gui_pinned then
       player_data.gui_pin_button.style = "flib_selected_frame_action_button"
       player_data.gui_fcpu.auto_center = false
+      player_data.gui_fcpu.location = player_data.gui_pinned_location
+      player.opened = nil
     else
       player_data.gui_pin_button.style = "frame_action_button"
       player_data.gui_fcpu.force_auto_center()
+      player_data.gui_pinned_location = player_data.gui_fcpu.location
+      player.opened = player_data.gui_fcpu
     end
   end
 end
@@ -245,6 +248,10 @@ function GuiWidgetOpen(player, entity)
 
   local rootGui = player.gui.screen -- mod_gui.get_frame_flow({gui={left=player.gui.screen}})
   if rootGui["fcpu-widget"] then
+    if player_data.gui_fcpu and player_data.gui_fcpu.valid then
+      player_data.gui_pinned_location = player_data.gui_fcpu.location
+    end
+    player_data.gui_fcpu = nil
     rootGui["fcpu-widget"].destroy()
   end
   if not state then
@@ -261,9 +268,9 @@ function GuiWidgetOpen(player, entity)
     {}--MemoryView.CreateWidget(elems.gui_fcpu["fcpu-panels"])
   )
 
+  GuiWidgetUpdatePinButton(player)
   player_data.gui_program_input.text = state.program_text
   GuiWidgetUpdate(player_data, state, true)
-  GuiWidgetUpdatePinButton(player)
 
   if state.error_message then
     player_data.gui_error_message.caption = state.error_message
@@ -374,6 +381,10 @@ end
 function GuiWidgetClose(player_index, skip_if_pinned, silent)
   local player_data, player = get_player_data(player_index)
   if player_data and player_data.current_fcpu then
+    if skip_if_pinned and player_data.gui_pinned then
+      player_data.gui_pinned_location = player_data.gui_fcpu.location
+      return
+    end
     if not (player_data.gui_fcpu and player_data.gui_fcpu.valid) then
       local rootGui = player.gui.screen -- mod_gui.get_frame_flow({gui={left=player.gui.screen}})
       if rootGui["fcpu-widget"] then

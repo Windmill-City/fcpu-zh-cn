@@ -113,7 +113,11 @@ script.on_event(defines.events.on_gui_opened, function(event)
   if entity and entity.valid and entity.name == "fcpu" then
     local player_data, player = get_player_data(event.player_index)
     if player_data and player_data.gui_fcpu and player_data.gui_fcpu.valid then
-      player.opened = player_data.gui_fcpu
+      if player_data.gui_pinned then
+        player.opened = nil
+      else
+        player.opened = player_data.gui_fcpu
+      end
     end
   end
 end)
