@@ -156,7 +156,7 @@ local function run_deffer_command(op)
   if op.action == 'wake' then
     local state = global.fcpus[op.index]
     if state and state.sleep_at == op.at then
-      debug_assert(state.sleep_at + state.sleep_time == game.tick)
+      debug_assert(state.sleep_at + op.delay == game.tick)
       state.sleep_time = 0
       Controller.set_program_counter(state, state.instruction_pointer + 1)
       Controller.update_state(state, PSTATE_RUNNING)
