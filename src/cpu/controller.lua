@@ -151,12 +151,12 @@ function Controller.set_program_counter(state, value)
 end
 
 local function run_deffer_command(op)
-  assert(not op.at or op.at + op.delay == game.tick, "Out of order deffered action executed")
+  debug_assert(not op.at or op.at + op.delay == game.tick, "Out of order deffered action executed")
 
   if op.action == 'wake' then
     local state = global.fcpus[op.index]
     if state and state.sleep_at == op.at then
-      assert(state.sleep_at + state.sleep_time == game.tick)
+      debug_assert(state.sleep_at + state.sleep_time == game.tick)
       state.sleep_time = 0
       Controller.set_program_counter(state, state.instruction_pointer + 1)
       Controller.update_state(state, PSTATE_RUNNING)
@@ -377,7 +377,7 @@ end
 
 function Controller.sleep(state, value)
   if 0 < value then
-    assert(state.sleep_time == 0)
+    debug_assert(state.sleep_time == 0)
     state.sleep_time = value
   else
     state.sleep_time = 0
