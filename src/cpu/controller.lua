@@ -388,6 +388,7 @@ function Controller.sleep(state, value)
 end
 
 function Controller.halt(state)
+  state.sleep_at = nil
   state.sleep_time = 0
   state.need_sync = nil
   state.do_step = false
@@ -454,9 +455,14 @@ function Controller.update_state(state, pstate)
       elseif pstate == PSTATE_SLEEPING and state.sleep_time then
         global.running[state.index] = nil
         state.sleep_at = game.tick
-        Controller.add_defferred(state, {{action='wake', at=game.tick, delay=state.sleep_time, index=state.index}})
-      elseif state.disabled then
-        global.running[state.index] = nil
+        Controller.add_defferred(state, {{action='wake', at=state.sleep_at, delay=state.sleep_time, index=state.index}})
+      else
+        if pstate == PSTATE_HALTED then
+          state.sleep_at = nil
+        end
+        if state.disabled then
+          global.running[state.index] = nil
+        end
       end
     end
 

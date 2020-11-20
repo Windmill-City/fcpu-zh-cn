@@ -3,13 +3,13 @@ Version: 0.4.0
 Date: ????
   Features:
     - Added `xflt` (thanks to https://www.reddit.com/user/Halke1986/ for original filter blueprint).
-    - Added hotkeys for debugging.
-    - Added auto select last modified memory channel.
     - Added `bti` (break until input have type) mnemonic.
     - Added `btrc`,`btgc`,`btic` (break until input type changed) mnemonics.
+    - Added `ugpf` *Utility Get Prototype Field*.
     - Added basic string support.
-    - Added *Utility Get Prototype Field* `ugpf`.
     - Added pin button.
+    - Added hotkeys for debugging.
+    - Added auto select last modified memory channel.
   Changes:
     - GUI refresh rate made runtime changeable, please update this setting to needed value.
     - In sleep mode, fCPU does not handle interruptions.
