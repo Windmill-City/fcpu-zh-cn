@@ -706,8 +706,9 @@ local ops = {
   xuni = function(state, _)
     assert.three(_)
 
-    local input_a = connect_input_from(state, _[2])
-    local input_b = connect_input_from(state, _[3])
+    local mainWireIsFirst = (_[2].type == 'wire')
+    local input_a = connect_input_from(state, _[mainWireIsFirst and 2 or 3])
+    local input_b = connect_input_from(state, _[mainWireIsFirst and 3 or 2])
 
     local merger = builder.create_merger_cell(state.entity, input_a, input_b)
     local ics = builder.create_memory_cell(state.entity, {
