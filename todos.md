@@ -4,12 +4,12 @@
 * New conditional break until signal of a certain type has changed its value.
 * SIMD `x*` with 3 arguments.
 * `xflt` mnemonic for filtering signals.
+* Vector compare mnemonics `xc*`.
 * Factorio v1.1.0 support.
 
 # Upcoming  (in v0.5.x)
 * Being able to give a name/label to each processor (https://discordapp.com/channels/705695217512349768/749028842869489776/773806128919609355)
 * Test result flags to extend one condition line limitation.
-* Vector compare mnemonics.
 * Logistics network access (@Chiko)
 * Memory array with constant memory indices.
 * Add push, pop, call, ret semantics for subroutines and stacks.

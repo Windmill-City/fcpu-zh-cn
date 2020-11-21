@@ -542,15 +542,15 @@ function builder.create_arithmetic_cell(entity, input_a, input_b, operation)
 end
 
 
-function builder.create_decider_cell(entity, input_a, input_b, operation)
-  local ics = builder.create_memory_cell(entity, input_a)
+function builder.create_decider_cell(entity, input, signal, operation)
+  local ics = builder.create_memory_cell(entity, input)
   local dst, control_dst = builder.create_node(entity, 'decider')
 
   control_dst.parameters = {
     parameters = {
       first_signal = {type='virtual', name='signal-each'},
-      second_signal = input_b.signal,
-      constant = input_b.count,
+      second_signal = nil,
+      constant = 0,
       comparator = operation,
       output_signal = {type='virtual', name='signal-each'},
       copy_count_from_input = true
@@ -634,11 +634,12 @@ end
 
 local function vector_scalar_op(operation)
   return function(state, _)
-    local src = (assert.two_or_three(_) == 3 and _[2]) or _[1]
+    local three = assert.two_or_three(_) == 3
 
-    local input_a = connect_input_from(state, src)
+    local input = connect_input_from(state, (three and _[2]) or _[1])
+    local value = nil
 
-    local ics = builder.create_arithmetic_cell(state.entity, input_a, nil, operation)
+    local ics = builder.create_arithmetic_cell(state.entity, input, value, operation)
 
     local ics_name = connect_output_to(state, ics, _[1])
 
@@ -657,10 +658,12 @@ end
 
 local function vector_decide_op(operation)
   return function(state, _)
-    local input_a = connect_input_from(state, _[1])
-    local input_b = connect_input_from(state, _[3])
+    local three = assert.two_or_three(_) == 3
 
-    local ics = builder.create_decider_cell(state.entity, input_a, input_b, operation)
+    local input = connect_input_from(state, (three and _[2]) or _[1])
+    local value = nil
+
+    local ics = builder.create_decider_cell(state.entity, input, value, operation)
 
     local ics_name = connect_output_to(state, ics, _[1])
 
@@ -773,14 +776,12 @@ local ops = {
   xsl  = vector_scalar_op('<<'),
   xsr  = vector_scalar_op('>>'),
 
---[[
-  xlt = vector_decide_op('<'),
-  xle = vector_decide_op('≤'),
-  xne = vector_decide_op('≠'),
-  xeq = vector_decide_op('='),
-  xge = vector_decide_op('≥'),
-  xgt = vector_decide_op('>'),
-]]
+  xclt = vector_decide_op('<'),
+  xcle = vector_decide_op('≤'),
+  xcne = vector_decide_op('≠'),
+  xceq = vector_decide_op('='),
+  xcge = vector_decide_op('≥'),
+  xcgt = vector_decide_op('>'),
 }
 
 function builder.construct(ast, state_)

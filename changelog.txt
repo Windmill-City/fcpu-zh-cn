@@ -6,6 +6,7 @@ Date: ????
     - Added `bti` (break until input have type) mnemonic.
     - Added `btrc`,`btgc`,`btic` (break until input type changed) mnemonics.
     - Added `ugpf` *Utility Get Prototype Field*.
+    - Added `xc*` SIMD *Comparision*.
     - Added basic string support.
     - Added pin button.
     - Added hotkeys for debugging.

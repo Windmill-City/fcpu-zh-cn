@@ -469,6 +469,7 @@ When working with SIMD instructions, the following features should be considered
   *dst(each) = src(each)*
 
 * `xuni` dst[**M**/**O**] a[**I**/**M**] b[**I**/**M**]
+  Merge two memory channels into unite one.  
   *dst(each) = a(each) + b(each)*
 
 * `xflt` dst[**M**/**O**] src[**I**/**M**] mask[**I**/**M**]
@@ -498,6 +499,35 @@ When working with SIMD instructions, the following features should be considered
 * `xpow` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]
   *dst(each) = dst ^ val*
   *dst(each) = src ^ val* (if src specified)
+
+
+### SIMD Comparision
+
+Compares each signal value in memory with operand specified and pass it to destination if condition met.  
+
+* `xceq` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]  
+  Equal.  
+  *dst(each) = src(each), if src(each) == val*
+
+* `xcne` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]  
+  Not equal.  
+  *dst(each) = src(each), if src(each) != val*
+
+* `xcgt` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]  
+  Greater than.  
+  *dst(each) = src(each), if src(each) > val*
+
+* `xclt` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]  
+  Less than.  
+  *dst(each) = src(each), if src(each) < val*
+
+* `xcge` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]  
+  Greater or equal than.  
+  *dst(each) = src(each), if src(each) >= val*
+
+* `xcle` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]  
+  Less or equal than.  
+  *dst(each) = src(each), if src(each) <= val*
 
 
 ### SIMD Bitwise

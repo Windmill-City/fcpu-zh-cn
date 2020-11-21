@@ -17,6 +17,21 @@ local function vector_scalar_op()
   end
 end
 
+local function vector_compare_op()
+  return function(_, ics)
+    local src = (#_ == 3 and _[3]) or _[2]
+
+    if ics and ics.out then
+      local control = ics.out.get_or_create_control_behavior()
+      local signal = io.getsignal(src, {'value', 'signal', 'register', 'input'})
+      local params = control.parameters
+      params.parameters.second_signal = signal.signal
+      params.parameters.constant = signal.count
+      control.parameters = params
+    end
+  end
+end
+
 local opcodes_vx = {
 -- S: Signal
 -- T: signal type
@@ -48,6 +63,13 @@ local opcodes_vx = {
   xxor = vector_scalar_op(),
   xsl  = vector_scalar_op(),
   xsr  = vector_scalar_op(),
+
+  xclt = vector_compare_op(),
+  xcle = vector_compare_op(),
+  xcne = vector_compare_op(),
+  xceq = vector_compare_op(),
+  xcge = vector_compare_op(),
+  xcgt = vector_compare_op(),
 
   xmin = function(_, ics)
     assert.two(_)
