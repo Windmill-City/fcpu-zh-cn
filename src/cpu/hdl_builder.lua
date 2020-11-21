@@ -316,8 +316,8 @@ function builder.create_filter_cell(entity, input_src, input_msk)
 
   a1.connect_neighbour{
     source_circuit_id = defines.circuit_connector_id.combinator_input,
-    target_circuit_id = input_src.port,
-    target_entity = input_src.entity,
+    target_circuit_id = input_msk.port,
+    target_entity = input_msk.entity,
     wire = wireM,
   }
   a2.connect_neighbour{
@@ -341,8 +341,8 @@ function builder.create_filter_cell(entity, input_src, input_msk)
   }
   d1.connect_neighbour{
     source_circuit_id = defines.circuit_connector_id.combinator_input,
-    target_circuit_id = input_msk.port,
-    target_entity = input_msk.entity,
+    target_circuit_id = input_src.port,
+    target_entity = input_src.entity,
     wire = wireS,
   }
   d1.connect_neighbour{
