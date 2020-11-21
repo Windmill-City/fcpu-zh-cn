@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.0
-Date: ????
+Date: 2020-11-21
   Features:
     - Added `xflt` (thanks to https://www.reddit.com/user/Halke1986/ for original filter blueprint).
     - Added `bti` (break until input have type) mnemonic.
