@@ -14,6 +14,7 @@ local function handle_fcpu_create_v2(ent, tags)
     local state = get_fcpu_state(ent)
     state.entity = ent
     state.disabled = tags.d
+    state.custom_name = tags.n
 
     Controller.verify(state)
     Controller.update_program_text(state, tags.t)

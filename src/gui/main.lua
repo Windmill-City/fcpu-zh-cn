@@ -57,7 +57,7 @@ end
 
 function MainView.RegisterTemplates()
   gui.add_templates{
-    frame_title = {type="label", style="frame_title"},
+    frame_title = {type="label", style="frame_title", style_mods={maximal_width=240}},
     frame_action_button = {type="sprite-button", style="frame_action_button", mouse_button_filter={"left"}},
     frame_action_checkbox = {type="checkbox", style="frame_action_button", mouse_button_filter={"left"}},
     drag_handle = {type="empty-widget", name="drag-handle", style="draggable_space_header", style_mods={minimal_width=30, height=24, right_margin=4, horizontally_stretchable=true}},
@@ -115,7 +115,9 @@ local function CreateWidget_Main(rootGui)
   local elems = gui.build(rootGui, {
     {type="frame", save_as="gui_fcpu", name="fcpu-widget", style="inner_frame_in_outer_frame", direction="vertical", children={
       {type="flow", name="titlebar", children={
-        {template="frame_title", name="label", caption="fCPU"},
+        {template="frame_action_button", handlers="widget.rename_button", sprite="utility/rename_icon_small_white", hovered_sprite="utility/rename_icon_small_black"},
+        {type="textfield", name="custom-name", handlers="widget.rename_field", style="titlebar_search_textfield", visible=false, clear_and_focus_on_right_click=true, style_mods={ bottom_margin=2 }},
+        {template="frame_title", name="label"},
         {template="drag_handle", name="drag-handle"},
         {template="pin_button", save_as="gui_pin_button", handlers="widget.pin_button", state=false},
         {template="close_button", save_as="gui_exit_button", handlers="widget.close_button"},
@@ -219,10 +221,19 @@ local function CreateWidget_Main(rootGui)
   })
 
   elems.gui_editor_toolbar['insert-signal-to-program'].elem_value = defaultToolbarInsertSignal
-  elems.gui_fcpu.titlebar.label.drag_target = elems.gui_fcpu
+  elems.gui_fcpu.titlebar['label'].drag_target = elems.gui_fcpu
   elems.gui_fcpu.titlebar['drag-handle'].drag_target = elems.gui_fcpu
 
   return elems
+end
+
+local function GuiWidgetUpdateTitle(player_data, state)
+  local title = state.custom_name or "fCPU"
+  if 0 < fcpu_debug_enabled then
+    player_data.gui_fcpu.titlebar.label.caption = title .." #".. state.entity.unit_number ..' ⇨ '.. state.index
+  else
+    player_data.gui_fcpu.titlebar.label.caption = title
+  end
 end
 
 local function GuiWidgetUpdatePinButton(player, force)
@@ -262,15 +273,13 @@ function GuiWidgetOpen(player, entity)
   end
 
   local elems = CreateWidget_Main(rootGui)
-  if 0 < fcpu_debug_enabled then
-    elems.gui_fcpu.titlebar.label.caption = elems.gui_fcpu.titlebar.label.caption.." #"..entity.unit_number..' ⇨ '..state.index
-  end
   inplace_dictionary_combine(
     player_data,
     elems,
     {}--MemoryView.CreateWidget(elems.gui_fcpu["fcpu-panels"])
   )
 
+  GuiWidgetUpdateTitle(player_data, state)
   GuiWidgetUpdatePinButton(player, true)
   player_data.gui_program_input.text = state.program_text
   GuiWidgetUpdate(player_data, state, true)
@@ -436,6 +445,30 @@ end
 function MainView.RegisterHandlers(ControlHandlers)
   gui.add_handlers{
     widget = {
+      rename_button = {
+        on_gui_click = GUI_mixPlayerData(function(player_data, state, event, player)
+          if player_data.gui_fcpu.titlebar['custom-name'].visible then
+            player_data.gui_fcpu.titlebar['custom-name'].visible = false
+            player_data.gui_fcpu.titlebar['label'].visible = true
+          else
+            player_data.gui_fcpu.titlebar['custom-name'].text = state.custom_name or ''
+            player_data.gui_fcpu.titlebar['custom-name'].visible = true
+            player_data.gui_fcpu.titlebar['label'].visible = false
+          end
+        end)
+      },
+      rename_field = {
+        on_gui_confirmed = GUI_mixPlayerData(function(player_data, state, event)
+          player_data.gui_fcpu.titlebar['custom-name'].visible = false
+          player_data.gui_fcpu.titlebar['label'].visible = true
+
+          state.custom_name = string.gsub(event.element.text, [[^%s*(.-)%s*$]], '%1')
+          if #state.custom_name == 0 then
+            state.custom_name = nil
+          end
+          GuiWidgetUpdateTitle(player_data, state)
+        end)
+      },
       pin_button = {
         on_gui_click = GUI_mixPlayerData(function(player_data, state, event, player)
           player_data.gui_pinned = not player_data.gui_pinned

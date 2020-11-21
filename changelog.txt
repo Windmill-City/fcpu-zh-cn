@@ -9,10 +9,11 @@ Date: ????
     - Added `xc*` SIMD *Comparision*.
     - Added basic string support.
     - Added pin button.
-    - Added hotkeys for debugging.
+    - Added debugging hotkeys.
+    - Added ability to rename fCPU unit.
     - Added auto select last modified memory channel.
   Changes:
-    - GUI refresh rate made runtime changeable, please update this setting to needed value.
+    - GUI refresh rate could be changed in runtime, please update this setting to needed value.
     - In sleep mode, fCPU does not handle interruptions.
     - SIMD instructions have global queue for handling. Significant (~30%) performance increase for `x*` mnemonics.
     - Sleeping/Disabled fCPU now not eats UPS at all! Huge (~10-40%) performance increse for maps with a lot of fCPUs.

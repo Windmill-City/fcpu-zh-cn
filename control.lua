@@ -149,7 +149,8 @@ local function setup_blueprint_tag(blueprint, index, entity)
       t = state.program_text,
       i = state.instruction_pointer,
       r = Controller.is_running(state),
-      d = state.disabled
+      d = state.disabled,
+      n = state.custom_name,
     })
   end
 end
