@@ -232,6 +232,9 @@ function MemoryView.RegisterHandlers()
     memory={
       memory_channel = {
         on_gui_selection_state_changed = GUI_mixPlayerData(function(player_data, state)
+          if player_data.gui_memory_autoselect then
+            player_data.gui_memory_autoselect.state = false
+          end
           if player_data.gui_memory_view then
             MemoryView.UpdateWidget(player_data, state, true)
           end
