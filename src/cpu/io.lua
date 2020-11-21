@@ -292,7 +292,7 @@ function io.memory_getchannel_signals(_)
     if ics and ics.out and ics.out.valid then
       local control = ics.out.get_control_behavior()
       local output = control.get_circuit_network(ics.color_out or defines.wire_type.red, defines.circuit_connector_id.combinator_output)
-      return output and output.signals or control.signals_last_tick
+      return output and output.signals or control.signals_last_tick or {}
     else
       assert.exception("Memory channel does not exists")
     end
