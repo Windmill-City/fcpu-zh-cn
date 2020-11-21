@@ -115,7 +115,7 @@ local function CreateWidget_Main(rootGui)
   local elems = gui.build(rootGui, {
     {type="frame", save_as="gui_fcpu", name="fcpu-widget", style="inner_frame_in_outer_frame", direction="vertical", children={
       {type="flow", name="titlebar", children={
-        {template="frame_action_button", handlers="widget.rename_button", sprite="utility/rename_icon_small_white", hovered_sprite="utility/rename_icon_small_black"},
+        {template="frame_action_button", name="rename-button", handlers="widget.rename_button", sprite="utility/rename_icon_small_white", hovered_sprite="utility/rename_icon_small_black"},
         {type="textfield", name="custom-name", handlers="widget.rename_field", style="titlebar_search_textfield", visible=false, clear_and_focus_on_right_click=true, style_mods={ bottom_margin=2 }},
         {template="frame_title", name="label"},
         {template="drag_handle", name="drag-handle"},
@@ -447,20 +447,26 @@ function MainView.RegisterHandlers(ControlHandlers)
     widget = {
       rename_button = {
         on_gui_click = GUI_mixPlayerData(function(player_data, state, event, player)
-          if player_data.gui_fcpu.titlebar['custom-name'].visible then
-            player_data.gui_fcpu.titlebar['custom-name'].visible = false
-            player_data.gui_fcpu.titlebar['label'].visible = true
+          local titlebar = player_data.gui_fcpu.titlebar
+          if titlebar['custom-name'].visible then
+            titlebar['label'].visible = true
+            titlebar['custom-name'].visible = false
+            titlebar['rename-button'].style = "frame_action_button"
           else
-            player_data.gui_fcpu.titlebar['custom-name'].text = state.custom_name or ''
-            player_data.gui_fcpu.titlebar['custom-name'].visible = true
-            player_data.gui_fcpu.titlebar['label'].visible = false
+            titlebar['label'].visible = false
+            titlebar['custom-name'].text = state.custom_name or ''
+            titlebar['custom-name'].visible = true
+            titlebar['custom-name'].focus()
+            titlebar['rename-button'].style = "flib_selected_frame_action_button"
           end
         end)
       },
       rename_field = {
         on_gui_confirmed = GUI_mixPlayerData(function(player_data, state, event)
-          player_data.gui_fcpu.titlebar['custom-name'].visible = false
-          player_data.gui_fcpu.titlebar['label'].visible = true
+          local titlebar = player_data.gui_fcpu.titlebar
+          titlebar['label'].visible = true
+          titlebar['custom-name'].visible = false
+          titlebar['rename-button'].style = "frame_action_button"
 
           state.custom_name = string.gsub(event.element.text, [[^%s*(.-)%s*$]], '%1')
           if #state.custom_name == 0 then

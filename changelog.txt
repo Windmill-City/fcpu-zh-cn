@@ -2,6 +2,7 @@
 Version: 0.4.1
 Date: ????
   Changes:
+    - Pressing rename fCPU title button now selects edit field.
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.0
 Date: 2020-11-21

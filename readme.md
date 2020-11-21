@@ -12,7 +12,7 @@
 * 4 memory channels for vector processing
 * 50+ opcodes
 * rich math instructions, trigonometry, rounding
-* SIMD instructions, `min`, `max`
+* SIMD instructions, `min`, `max`, filter, comparison, etc...
 * two input wires (Red, Green)
 * two output wires (Red, Green) have same output signals and values
 * parallel output, allows output multiple signals simultaneously
@@ -439,7 +439,9 @@ blt r1 10 :counter
 * `ugpf` dst[**R**] name[**T**/**R**] field[**S**]
   *Utility Get Prototype Field*  
   Find prototype with *name* and assign *dst* to *field* value (only numbers supported).  
-  For example: `ugpf r1 [item=inserter] 'inserter_rotation_speed'`.  
+  For example:  
+  - `ugpf r1 [item=inserter] 'inserter_rotation_speed'`
+  - `ugpf r1 [item=copper-ore] 'stack_size'` (this is a same as `uiss r1 [item=copper-ore]`)
 
 * `uiss` dst[**R**] type[**T**/**R**]  
   **DEPRECATED: please use `ugpf dst type 'stack_size'`**  

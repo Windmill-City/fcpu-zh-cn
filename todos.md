@@ -1,11 +1,4 @@
 # Upcoming  (in v0.4.x)
-* Breakpoints.
-* Hotkeys, auto switch memory channel for debugging.
-* New conditional break until signal of a certain type has changed its value.
-* SIMD `x*` with 3 arguments.
-* `xflt` mnemonic for filtering signals.
-* Vector compare mnemonics `xc*`.
-* Being able to give a name/label to each processor (https://discordapp.com/channels/705695217512349768/749028842869489776/773806128919609355)
 * Factorio v1.1.0 support.
 
 # Upcoming  (in v0.5.x)
@@ -35,3 +28,10 @@
 * New `xmin`, `xmax`, `xavg`, `fim`, `rnd` SIMD opcodes (DONE in v0.3.1)
 * Increase lines count, implement modern blueprint tags (DONE in v0.3.1)
 * Extend x* semantics for copying registers and composing memory with separate signals (DONE in v0.3.9)
+* Breakpoints (DONE in v0.4.0)
+* Hotkeys, auto switch memory channel for debugging (DONE in v0.4.0)
+* New conditional break until signal of a certain type has changed its value (DONE in v0.4.0)
+* SIMD `x*` with 3 arguments (DONE in v0.4.0)
+* `xflt` mnemonic for filtering signals (DONE in v0.4.0)
+* Vector compare mnemonics `xc*` (DONE in v0.4.0)
+* Being able to give a name/label to each processor (DONE in v0.4.0)
