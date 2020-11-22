@@ -25,7 +25,6 @@ local function vector_compare_op()
       local control = ics.out.get_or_create_control_behavior()
       local signal = io.getsignal(src, {'value', 'signal', 'register', 'input'})
       local params = control.parameters
-      params.parameters.second_signal = signal.signal
       params.parameters.constant = signal.count
       control.parameters = params
     end

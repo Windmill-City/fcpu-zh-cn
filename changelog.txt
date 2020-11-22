@@ -2,6 +2,7 @@
 Version: 0.4.3
 Date: ????
   Changes:
+    - `xc*` now ignore signal types rather than rely on it's value from src.
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.2
 Date: 2020-11-22

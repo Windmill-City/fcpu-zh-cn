@@ -147,7 +147,7 @@ Each instruction take one or more operands and modify them or state of fCPU.
 * **R**, register: (`reg1`, `r3`, ..., `reg8` or `r@4` notation, or one memory cell `m1[23]` or one input wire signal `red34`, `green@3`)
 * **M**, memory: channel (`mem1`, `m2`, ..., `mem4`)
 * **I**, wire: input wire (`red`, `green`)
-* **O**, wire: output buffer (`out1`, `out2`, ..., `out256`)
+* **O**, wire: output buffer (`out1`, `out2`, ..., `out256`, `out`)
 
 - **A**, address: instruction address (`5`)
 - **L**, label: instruction label (`:labelname`)
