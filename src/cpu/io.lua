@@ -405,7 +405,7 @@ function io.getsignal(_, types)
   elseif _.type == 'string' then
     assert.exception('not supported yet')
   else
-    assert.exception('tryint to retrieve nil signal')
+    assert.exception('trying to retrieve nil signal')
   end
   return signal
 end
@@ -437,7 +437,7 @@ function io.getcount(_, types)
   else
     local signal = io.getsignal(_, types)
     if type(signal) ~= 'table' or signal.count == nil then
-      assert.exception('tryint to retrieve nil count')
+      assert.exception('trying to retrieve nil count')
     end
     return signal.count
   end
@@ -463,7 +463,7 @@ end
 function io.gettype(_, types)
   local signal = io.getsignal(_, types)
   if type(signal) ~= 'table' or signal.signal == nil then
-    assert.exception('tryint to retrieve nil type')
+    assert.exception('trying to retrieve nil type')
   end
   return signal.signal
 end
