@@ -4,6 +4,8 @@ Date: ????
   Changes:
     - Added `xflt` mnemonic with two operands (`xflt dst mask`).
     - Pressing rename fCPU title button now selects edit field.
+  Bugfixes:
+    - Added missed combinators to `xflt`.
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.0
 Date: 2020-11-21

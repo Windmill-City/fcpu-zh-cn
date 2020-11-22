@@ -385,7 +385,7 @@ function builder.create_filter_cell(entity, input_src, input_msk)
     wire = defines.wire_type.red,
   }
 
-  return d3
+  return {a1,a2,a3,d1,d2,gate=d3}
 end
 
 function builder.create_memory_cell(entity, input_a, input_b)
@@ -743,11 +743,13 @@ local ops = {
 
     local merger = builder.create_filter_cell(state.entity, input_a, input_b)
     local ics = builder.create_memory_cell(state.entity, {
-      entity = merger,
+      entity = merger.gate,
       wire = input_a.wire,
       port = defines.circuit_connector_id.combinator_output
     })
-    ics[#ics + 1] = merger
+    for _,ic in pairs(merger) do
+      ics[#ics + 1] = ic
+    end
 
     local ics_name = connect_output_to(state, ics, _[1])
 
