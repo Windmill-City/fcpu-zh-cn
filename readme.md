@@ -474,7 +474,7 @@ When working with SIMD instructions, the following features should be considered
   Merge two memory channels into unite one.  
   *dst(each) = a(each) + b(each)*
 
-* `xflt` dst[**M**/**O**] src[**I**/**M**] mask[**I**/**M**]
+* `xflt` dst[**M**/**O**] src?[**I**/**M**] mask[**I**/**M**]
   Copy all the signals from *src* to *dst* having *mask* as whitelist.
   *Internal design by https://www.reddit.com/user/Halke1986/*
 

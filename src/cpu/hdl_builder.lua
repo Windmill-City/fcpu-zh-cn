@@ -736,10 +736,10 @@ local ops = {
   end,
 
   xflt = function(state, _)
-    assert.three(_)
+    local three = assert.two_or_three(_) == 3
 
-    local input_a = connect_input_from(state, _[2])
-    local input_b = connect_input_from(state, _[3])
+    local input_a = connect_input_from(state, _[three and 2 or 1])
+    local input_b = connect_input_from(state, _[three and 3 or 2])
 
     local merger = builder.create_filter_cell(state.entity, input_a, input_b)
     local ics = builder.create_memory_cell(state.entity, {
