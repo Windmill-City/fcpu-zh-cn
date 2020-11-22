@@ -5,6 +5,8 @@ Date: ????
     - Added `emit` for appending signals to memory.
   Changes:
     - Cleaup fixed in v0.4.1 missed combinators.
+  Bugfixes:
+    - `bt*c` now correct handles zeroed signals.
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.1
 Date: 2020-11-22

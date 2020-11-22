@@ -571,7 +571,7 @@ local opcodes = {
     assert.one(_)
     local oldSig = io.register_get(_[1])
     local newSig = io.wire_find_signal('red', oldSig.signal)
-    if newSig == NULL_SIGNAL or newSig.count == oldSig.count then
+    if newSig.count == oldSig.count then
       return {type = 'block'}
     else
       io.register_set(_[1], newSig)
@@ -582,7 +582,7 @@ local opcodes = {
     assert.one(_)
     local oldSig = io.register_get(_[1])
     local newSig = io.wire_find_signal('green', oldSig.signal)
-    if newSig == NULL_SIGNAL or newSig.count == oldSig.count then
+    if newSig.count == oldSig.count then
       return {type = 'block'}
     else
       io.register_set(_[1], newSig)
@@ -593,7 +593,7 @@ local opcodes = {
     assert.one(_)
     local oldSig = io.register_get(_[1])
     local newSig = io.wire_find_signal('input', oldSig.signal)
-    if newSig == NULL_SIGNAL or newSig.count == oldSig.count then
+    if newSig.count == oldSig.count then
       return {type = 'block'}
     else
       io.register_set(_[1], newSig)
