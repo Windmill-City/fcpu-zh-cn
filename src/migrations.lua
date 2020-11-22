@@ -283,7 +283,6 @@ return {
     end
     -- }
     foreach_fcpu(function(fcpu, state)
-      local prev = state.program_text
       state.program_text = string.gsub(state.program_text, 'xinc(%s+[^%s]+)', 'xadd%1 1')
       state.program_text = string.gsub(state.program_text, 'xdec(%s+[^%s]+)', 'xsub%1 1')
 
@@ -355,5 +354,69 @@ return {
         global.running[state.index] = state.index
       end
     end)
+  end,
+
+  ["0.4.2"] = function()
+    -- Validation {
+    local valid_ics = {}
+    foreach_fcpu(function(fcpu, state)
+      for _,v in pairs(state.program_ics) do
+        if type(v) == 'table' and not v.unit_number then
+          for _,vv in pairs(v) do
+            if type(vv) == 'table' and vv.unit_number then
+              valid_ics[vv.unit_number] = vv
+            end
+          end
+        elseif v.valid then
+          valid_ics[v.unit_number] = v
+        end
+      end
+    end)
+    local incorrect_ics = {}
+    for _, surface in pairs(game.surfaces) do
+      for _, ic in pairs(surface.find_entities_filtered{ name="arithmetic-fcpu" }) do
+        if not valid_ics[ic.unit_number] then
+          incorrect_ics[#incorrect_ics + 1] = ic
+        end
+      end
+      for _, ic in pairs(surface.find_entities_filtered{ name="constant-fcpu" }) do
+        if not valid_ics[ic.unit_number] then
+          incorrect_ics[#incorrect_ics + 1] = ic
+        end
+      end
+      for _, ic in pairs(surface.find_entities_filtered{ name="decider-fcpu" }) do
+        if not valid_ics[ic.unit_number] then
+          incorrect_ics[#incorrect_ics + 1] = ic
+        end
+      end
+      for _, ic in pairs(surface.find_entities_filtered{ name="output-fcpu" }) do
+        if not valid_ics[ic.unit_number] then
+          incorrect_ics[#incorrect_ics + 1] = ic
+        end
+      end
+    end
+    -- }
+    for k, v in pairs(global._entity_data) do
+      if type(v) == 'table' and (not v.fcpu or not v.fcpu.valid) then
+        global._entity_data[k] = nil
+      end
+    end
+    local altered_fcpus = {}
+    for _, ic in ipairs(incorrect_ics) do
+      local data = Entity.get_data(ic)
+      if data and data.fcpu and data.fcpu.valid then
+        altered_fcpus[data.fcpu.unit_number] = data.fcpu
+      end
+      Entity.set_data(ic, nil)
+      ic.destroy()
+    end
+    for _,fcpu in pairs(altered_fcpus) do
+      local state = global.fcpus[Entity.get_data(fcpu)]
+      if state then
+        Controller.verify(state)
+        state.modified = true
+        Controller.compile(state)
+      end
+    end
   end,
 }
