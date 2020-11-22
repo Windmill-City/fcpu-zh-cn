@@ -314,6 +314,9 @@ Each instruction take one or more operands and modify them or state of fCPU.
 
 ### Flow control
 
+* `lea` dst[**R**/**O**] addr[**L**]  
+  Load label *addr*ess into *dst*.
+
 * `jmp` addr[**C**/**A**/**L**/**R**]  
   Jump to address or label.
 

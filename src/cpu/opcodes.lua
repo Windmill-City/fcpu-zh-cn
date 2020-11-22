@@ -505,6 +505,21 @@ local opcodes = {
     return jump_op(_[3])
   end,
 
+  lea = function(_)
+    assert.two(_)
+    assert.is_register(_[1])
+    local label = _[2]
+    assert.type(label, {'label'})
+    local addr
+    for line_num, node in ipairs(state.program_ast) do
+      if node.type == 'label' and node.label == label then
+        addr = line_num + 1
+        break
+      end
+    end
+    assert.check(addr ~= nil, 'Undefined label')
+    io.register_set_count(_[1], addr)
+  end,
   jmp = function(_)
     assert.one_or_two(_)
     return jump_op(_[1], _[2])
