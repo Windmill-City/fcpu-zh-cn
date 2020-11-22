@@ -191,7 +191,7 @@ script.on_load(function()
   register_picker_dolly_handler()
 end)
 script.on_configuration_changed(function(e)
-  if migration.on_config_changed(e, migrations) then
+  if migration.on_config_changed(e, migrations, nil, e) then
     gui.check_filter_validity()
   end
   fcpu_wiki_booktorio_init()

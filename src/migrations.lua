@@ -395,12 +395,6 @@ return {
         end
       end
     end
-    -- }
-    for k, v in pairs(global._entity_data) do
-      if type(v) == 'table' and (not v.fcpu or not v.fcpu.valid) then
-        global._entity_data[k] = nil
-      end
-    end
     local altered_fcpus = {}
     for _, ic in ipairs(incorrect_ics) do
       local data = Entity.get_data(ic)
@@ -416,6 +410,13 @@ return {
         Controller.verify(state)
         state.modified = true
         Controller.compile(state)
+      end
+    end
+    -- }
+
+    for k, v in pairs(global._entity_data) do
+      if type(v) == 'table' and (not v.fcpu or not v.fcpu.valid) then
+        global._entity_data[k] = nil
       end
     end
   end,

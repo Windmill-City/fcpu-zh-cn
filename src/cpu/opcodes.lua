@@ -170,11 +170,18 @@ local opcodes = {
       io.setsignal(_[i], sig, {'register', 'wire'})
     end
   end,
-  --[[emit = function(_) -- emit src[V/T/S/R/I]
-    assert.one(_)
-    local sig = io.getsignal(_[1], {'value', 'type', 'signal', 'register', 'input'})
-    io.wire_set({type='wire', color='out', addr=1, pointer=false}, sig)
-  end,]]
+  emit = function(_) -- emit dst[M] src...[V/T/S/R/I]
+    assert.two_or_more(_)
+    local dst = table.deep_copy(_[1])
+    assert.is_memory_writable(dst)
+    local signals = io.memory_getchannel_signals(dst)
+    dst.addr = signals and #signals or 0
+    for i = 2,#_ do
+      local sig = io.getsignal(_[i], {'value', 'type', 'signal', 'register', 'input'})
+      dst.addr = dst.addr + 1
+      io.memory_set(dst, sig)
+    end
+  end,
   ssv = function(_) -- ssv dst...[R] val[V/S/R/I]
     assert.two_or_more(_)
     local sigcount = io.getcount(_[#_], {'value', 'signal', 'register', 'input'})

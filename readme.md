@@ -470,6 +470,9 @@ When working with SIMD instructions, the following features should be considered
 * `xmov` dst[**M**/**O**] src[**I**/**M**]
   *dst(each) = src(each)*
 
+* `emit` dst[**M**] val...[**V**/**T**/**VT**/**R**]
+  Append *val*ues to *dst* memory (with random ordering until v0.5.0).  
+
 * `xuni` dst[**M**/**O**] a[**I**/**M**] b[**I**/**M**]
   Merge two memory channels into unite one.  
   *dst(each) = a(each) + b(each)*

@@ -18,6 +18,7 @@
 * Add drag and drop GUI for newbies.
 * Code highlighting.
 * Factorio modules support.
+* Multiplayer glitch (https://discord.com/channels/705695217512349768/749054693581520996/779943947203510272)
 
 # Done
 * Output multiple signals (DONE in v0.2.0)
