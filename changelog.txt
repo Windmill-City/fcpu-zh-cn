@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.4
-Date: ????
+Date: 2020-11-23
   Features:
     - Added `lea` for loading address of a labels.
     - Common mnemonics extended with optional src operand.
