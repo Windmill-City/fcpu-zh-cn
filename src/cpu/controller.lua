@@ -158,8 +158,8 @@ local function run_deffer_command(op)
     if state and state.sleep_at == op.at then
       debug_assert(state.sleep_at + op.delay == game.tick)
       state.sleep_time = 0
-      Controller.set_program_counter(state, state.instruction_pointer + 1)
       Controller.update_state(state, PSTATE_RUNNING)
+      Controller.set_program_counter(state, state.instruction_pointer + 1)
     end
   elseif op.action == 'sync' then
     local state = global.fcpus[op.index]

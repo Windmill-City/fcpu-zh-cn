@@ -1,5 +1,7 @@
 # Upcoming  (in v0.4.x)
 * Factorio v1.1.0 support.
+* Multiple input/output wires.
+* New graphics.
 
 # Upcoming  (in v0.5.x)
 * Test result flags to extend one condition line limitation.

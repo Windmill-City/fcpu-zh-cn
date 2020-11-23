@@ -6,6 +6,7 @@ Date: ????
     - Common mnemonics extended with optional src operand.
   Bugfixes:
     - `Step` button may ignore instructions when stepping out of sleep mode.
+    - Breakpoint miss right after `slp`.
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.3
 Date: 2020-11-22
