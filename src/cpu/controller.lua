@@ -364,9 +364,9 @@ end
 function Controller.step(state, over)
   Controller.set_error_message(state, nil)
   if state.program_state == PSTATE_SLEEPING then
-    state.sleep_at = nil
     Controller.set_program_counter(state, state.instruction_pointer + 1)
-  else
+    Controller.halt(state)
+else
     state.sleep_time = 0
     state.need_sync = nil
     state.do_step = true

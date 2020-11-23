@@ -4,6 +4,8 @@ Date: ????
   Features:
     - Added `lea` for loading address of a labels.
     - Common mnemonics extended with optional src operand.
+  Bugfixes:
+    - `Step` button may ignore instructions when stepping out of sleep mode.
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.3
 Date: 2020-11-22
