@@ -11,7 +11,7 @@ local function vector_scalar_op()
     if ics and ics.out then
       local control = ics.out.get_or_create_control_behavior()
       local params = control.parameters
-      params.parameters.second_constant = io.getcount(src)
+      params.second_constant = io.getcount(src)
       control.parameters = params
     end
   end
@@ -25,7 +25,7 @@ local function vector_compare_op()
       local control = ics.out.get_or_create_control_behavior()
       local signal = io.getsignal(src, {'value', 'signal', 'register', 'input'})
       local params = control.parameters
-      params.parameters.constant = signal.count
+      params.constant = signal.count
       control.parameters = params
     end
   end

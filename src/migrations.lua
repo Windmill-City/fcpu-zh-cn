@@ -55,18 +55,16 @@ return {
       local control = fcpu.get_or_create_control_behavior()
       if control then
         signal = {
-          count = control.parameters.parameters.first_constant,
-          signal_id = control.parameters.parameters.output_signal
+          count = control.parameters.first_constant,
+          signal_id = control.parameters.output_signal
         }
         control.parameters = {
-          parameters = {
-            first_signal = nil,
-            second_signal = nil,
-            first_constant = nil,
-            second_constant = nil,
-            operation = "+",
-            output_signal = nil
-          }
+          first_signal = nil,
+          second_signal = nil,
+          first_constant = nil,
+          second_constant = nil,
+          operation = "+",
+          output_signal = nil
         }
       end
       state.program_ics = {}
@@ -81,9 +79,9 @@ return {
       if signal then
         control = state.program_ics.output.get_control_behavior()
         local params = control.parameters
-        params.parameters[1].signal = signal.signal_id
-        params.parameters[1].count = signal.count or 0
-        params.parameters[1].index = 1
+        params[1].signal = signal.signal_id
+        params[1].count = signal.count or 0
+        params[1].index = 1
         control.parameters = params
       end
     end)

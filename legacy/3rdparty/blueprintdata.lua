@@ -81,12 +81,12 @@ function write_to_combinator(combinator, data)
 		return false
 	end
 
-	combinator.get_or_create_control_behavior().parameters = {parameters = params};
+	combinator.get_or_create_control_behavior().parameters = params;
 	return true
 end
 --------------------------------------------------------------------------------------------------------------------------------
 function read_from_combinator(combinator)
-	local params = combinator.get_or_create_control_behavior().parameters.parameters
+	local params = combinator.get_or_create_control_behavior().parameters
 	local numbers = {}
 
 	for _, p in pairs(params) do

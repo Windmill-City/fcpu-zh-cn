@@ -9,7 +9,7 @@ data:extend{
     type = "custom-input",
     name = "fcpu-close",
     key_sequence = "",
-    linked_game_control = "close-gui",
+    linked_game_control = "confirm-gui",
   },
   {
     type = "custom-input",

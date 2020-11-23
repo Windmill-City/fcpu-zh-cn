@@ -140,14 +140,12 @@ function builder.verify(state)
       state.program_ics[ics_name].out = ent_mem
 
       ctrl_mem.parameters = {
-        parameters = {
-          first_signal = {type='virtual', name='signal-fcpu-error'},
-          second_signal = nil,
-          constant = 0,
-          comparator = "=",
-          output_signal = {type='virtual', name='signal-everything'},
-          copy_count_from_input = true
-        }
+        first_signal = {type='virtual', name='signal-fcpu-error'},
+        second_signal = nil,
+        constant = 0,
+        comparator = "=",
+        output_signal = {type='virtual', name='signal-everything'},
+        copy_count_from_input = true
       }
     end
 
@@ -202,14 +200,12 @@ function builder.create_merger_cell(entity, input_a, input_b)
   local proxy, control_proxy = builder.create_node(entity, 'decider')
 
   control_proxy.parameters = {
-    parameters = {
-      first_signal = {type='virtual', name='signal-fcpu-error'},
-      second_signal = nil,
-      constant = 0,
-      comparator = "=",
-      output_signal = {type='virtual', name='signal-everything'},
-      copy_count_from_input = true
-    }
+    first_signal = {type='virtual', name='signal-fcpu-error'},
+    second_signal = nil,
+    constant = 0,
+    comparator = "=",
+    output_signal = {type='virtual', name='signal-everything'},
+    copy_count_from_input = true
   }
 
   proxy.connect_neighbour{
@@ -253,65 +249,53 @@ function builder.create_filter_cell(entity, input_src, input_msk)
   local d3, control_d3 = builder.create_node(entity, 'decider')
 
   control_a1.parameters = {
-    parameters = {
-      first_signal = {type='virtual', name='signal-each'},
-      second_signal = nil,
-      first_constant  = nil,
-      second_constant = -1,
-      operation  = '*',
-      output_signal = {type='virtual', name='signal-each'}
-    }
+    first_signal = {type='virtual', name='signal-each'},
+    second_signal = nil,
+    first_constant  = nil,
+    second_constant = -1,
+    operation  = '*',
+    output_signal = {type='virtual', name='signal-each'}
   }
   control_a2.parameters = {
-    parameters = {
-      first_signal = {type='virtual', name='signal-each'},
-      second_signal = nil,
-      first_constant  = nil,
-      second_constant = -2147483648,
-      operation  = '+',
-      output_signal = {type='virtual', name='signal-each'}
-    }
+    first_signal = {type='virtual', name='signal-each'},
+    second_signal = nil,
+    first_constant  = nil,
+    second_constant = -2147483648,
+    operation  = '+',
+    output_signal = {type='virtual', name='signal-each'}
   }
   control_a3.parameters = {
-    parameters = {
-      first_signal = {type='virtual', name='signal-each'},
-      second_signal = nil,
-      first_constant  = nil,
-      second_constant = 2147483647,
-      operation  = 'AND',
-      output_signal = {type='virtual', name='signal-each'}
-    }
+    first_signal = {type='virtual', name='signal-each'},
+    second_signal = nil,
+    first_constant  = nil,
+    second_constant = 2147483647,
+    operation  = 'AND',
+    output_signal = {type='virtual', name='signal-each'}
   }
 
   control_d1.parameters = {
-    parameters = {
-      first_signal = {type='virtual', name='signal-each'},
-      second_signal = nil,
-      constant = 0,
-      comparator = "<",
-      output_signal = {type='virtual', name='signal-each'},
-      copy_count_from_input = false
-    }
+    first_signal = {type='virtual', name='signal-each'},
+    second_signal = nil,
+    constant = 0,
+    comparator = "<",
+    output_signal = {type='virtual', name='signal-each'},
+    copy_count_from_input = false
   }
   control_d2.parameters = {
-    parameters = {
-      first_signal = {type='virtual', name='signal-each'},
-      second_signal = nil,
-      constant = 0,
-      comparator = "<",
-      output_signal = {type='virtual', name='signal-each'},
-      copy_count_from_input = true
-    }
+    first_signal = {type='virtual', name='signal-each'},
+    second_signal = nil,
+    constant = 0,
+    comparator = "<",
+    output_signal = {type='virtual', name='signal-each'},
+    copy_count_from_input = true
   }
   control_d3.parameters = {
-    parameters = {
-      first_signal = {type='virtual', name='signal-each'},
-      second_signal = nil,
-      constant = -2147483648,
-      comparator = "=",
-      output_signal = {type='virtual', name='signal-each'},
-      copy_count_from_input = true
-    }
+    first_signal = {type='virtual', name='signal-each'},
+    second_signal = nil,
+    constant = -2147483648,
+    comparator = "=",
+    output_signal = {type='virtual', name='signal-each'},
+    copy_count_from_input = true
   }
 
   a1.connect_neighbour{
@@ -403,25 +387,21 @@ function builder.create_memory_cell(entity, input_a, input_b)
   })
 
   control_key.parameters = {
-    parameters = {
-      first_signal = {type='virtual', name='signal-fcpu-error'},
-      second_signal = nil,
-      constant = 1,
-      comparator = "=", -- < ≤ ≠ = ≥ >
-      output_signal = {type='virtual', name='signal-everything'},
-      copy_count_from_input = true
-    }
+    first_signal = {type='virtual', name='signal-fcpu-error'},
+    second_signal = nil,
+    constant = 1,
+    comparator = "=", -- < ≤ ≠ = ≥ >
+    output_signal = {type='virtual', name='signal-everything'},
+    copy_count_from_input = true
   }
 
   control_out.parameters = {
-    parameters = {
-      first_signal = {type='virtual', name='signal-fcpu-error'},
-      second_signal = nil,
-      constant = 0,
-      comparator = "=", -- < ≤ ≠ = ≥ >
-      output_signal = {type='virtual', name='signal-everything'},
-      copy_count_from_input = true
-    }
+    first_signal = {type='virtual', name='signal-fcpu-error'},
+    second_signal = nil,
+    constant = 0,
+    comparator = "=", -- < ≤ ≠ = ≥ >
+    output_signal = {type='virtual', name='signal-everything'},
+    copy_count_from_input = true
   }
 
 
@@ -463,14 +443,12 @@ function builder.create_memory_cell(entity, input_a, input_b)
     local proxy, control_proxy = builder.create_node(entity, 'decider')
 
     control_proxy.parameters = {
-      parameters = {
-        first_signal = {type='virtual', name='signal-fcpu-error'},
-        second_signal = nil,
-        constant = 0,
-        comparator = "=",
-        output_signal = {type='virtual', name='signal-everything'},
-        copy_count_from_input = true
-      }
+      first_signal = {type='virtual', name='signal-fcpu-error'},
+      second_signal = nil,
+      constant = 0,
+      comparator = "=",
+      output_signal = {type='virtual', name='signal-everything'},
+      copy_count_from_input = true
     }
 
     proxy.connect_neighbour{
@@ -511,14 +489,12 @@ function builder.create_arithmetic_cell(entity, input_a, input_b, operation)
   local dst, control_dst = builder.create_node(entity, 'arithmetic')
 
   control_dst.parameters = {
-    parameters = {
-      first_signal = {type='virtual', name='signal-each'},
-      second_signal = nil,
-      first_constant  = nil,
-      second_constant = constant,
-      operation  = operation,
-      output_signal = {type='virtual', name='signal-each'}
-    }
+    first_signal = {type='virtual', name='signal-each'},
+    second_signal = nil,
+    first_constant  = nil,
+    second_constant = constant,
+    operation  = operation,
+    output_signal = {type='virtual', name='signal-each'}
   }
 
   dst.connect_neighbour{
@@ -547,14 +523,12 @@ function builder.create_decider_cell(entity, input, signal, operation)
   local dst, control_dst = builder.create_node(entity, 'decider')
 
   control_dst.parameters = {
-    parameters = {
-      first_signal = {type='virtual', name='signal-each'},
-      second_signal = nil,
-      constant = 0,
-      comparator = operation,
-      output_signal = {type='virtual', name='signal-each'},
-      copy_count_from_input = true
-    }
+    first_signal = {type='virtual', name='signal-each'},
+    second_signal = nil,
+    constant = 0,
+    comparator = operation,
+    output_signal = {type='virtual', name='signal-each'},
+    copy_count_from_input = true
   }
 
   dst.connect_neighbour{

@@ -229,7 +229,7 @@ local function update_ics_stack(push_ics)
     --  if node.kout.valid then
     --    local control = node.kout.get_or_create_control_behavior()
     --    local params = control.parameters
-    --    params.parameters.constant = 1
+    --    params.constant = 1
     --    control.parameters = params
     --  end
     --end

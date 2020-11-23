@@ -109,15 +109,15 @@ end
 -- Control output
 function io.control_get()
   local params = indication_control.parameters
-  local signal_id = params.parameters.output_signal
-  local count = params.parameters.first_constant
+  local signal_id = params.output_signal
+  local count = params.first_constant
   return emitter.make_signal(signal_id, count)
 end
 
 function io.control_set(signal)
   local params = indication_control.parameters
-  params.parameters.first_constant = signal.count
-  params.parameters.output_signal = signal.signal
+  params.first_constant = signal.count
+  params.output_signal = signal.signal
   indication_control.parameters = params
 end
 
@@ -295,7 +295,7 @@ function io.memory_getchannel_signals(_)
     end
   elseif _.type == 'wire' then
     if _.color == 'out' then
-      return output_control.parameters.parameters
+      return output_control.parameters
     end
     if not state.cache.wires[_.color] then
       assert.exception("Tried to access ".._.color.." wire when it is not connected")

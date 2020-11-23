@@ -166,7 +166,7 @@ function MemoryView.UpdateWidget(player_data, state, initial)
           if ics.value then
             local vc = ics.value.get_control_behavior()
             if vc.enabled and vc.parameters then
-              MemoryView.UpdateFromTable(player_data, vc.parameters.parameters, 1)
+              MemoryView.UpdateFromTable(player_data, vc.parameters, 1)
               return
             end
           end
@@ -199,7 +199,7 @@ function MemoryView.UpdateWidget(player_data, state, initial)
       -- Output buffer
       if state.program_ics.output then
         local control = state.program_ics.output.get_control_behavior()
-        MemoryView.UpdateFromTable(player_data, control and control.parameters and control.parameters.parameters, 1, true)
+        MemoryView.UpdateFromTable(player_data, control and control.parameters, 1, true)
         return
       end
     elseif index == MC_MEMORY_CHANNELS + 5 then

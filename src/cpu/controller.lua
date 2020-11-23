@@ -26,14 +26,12 @@ Controller.event_halt = script.generate_event_name()
 function Controller.init(mc)
   local control = mc.get_or_create_control_behavior()
   control.parameters = {
-    parameters = {
-      first_signal = nil,
-      second_signal = nil,
-      first_constant = nil,
-      second_constant = nil,
-      operation = "+",
-      output_signal = nil
-    }
+    first_signal = nil,
+    second_signal = nil,
+    first_constant = nil,
+    second_constant = nil,
+    operation = "+",
+    output_signal = nil
   }
   local state = {
     entity = mc,
@@ -180,7 +178,7 @@ local function run_deffer_command(op)
     if op.ic and op.ic.valid then
       local control = op.ic.get_or_create_control_behavior()
       local params = control.parameters
-      params.parameters.constant = op.value
+      params.constant = op.value
       control.parameters = params
     end
   elseif op.action == 'noop' then
@@ -470,19 +468,19 @@ function Controller.update_state(state, pstate)
       local indication_ctrl = control.indication -- should be always valid
       --if indication_ctrl and indication_ctrl.valid then
         local str = pstateStr[state.program_state]
-        local param = indication_ctrl.parameters
+        local params = indication_ctrl.parameters
         if state.disabled then
-          param.parameters.first_constant = nil
-          param.parameters.first_signal = nil
-          param.parameters.output_signal = nil
+          params.first_constant = nil
+          params.first_signal = nil
+          params.output_signal = nil
         elseif state.error_message and state.program_state == PSTATE_HALTED then
-          param.parameters.first_constant = state.instruction_pointer
-          param.parameters.first_signal = nil
-          param.parameters.output_signal = { type="virtual", name='signal-fcpu-error' }
+          params.first_constant = state.instruction_pointer
+          params.first_signal = nil
+          params.output_signal = { type="virtual", name='signal-fcpu-error' }
         elseif str then
-          param.parameters.first_constant = nil
-          param.parameters.first_signal = { type="virtual", name=str }
-          param.parameters.output_signal = nil
+          params.first_constant = nil
+          params.first_signal = { type="virtual", name=str }
+          params.output_signal = nil
         end
         indication_ctrl.parameters = param
       --end

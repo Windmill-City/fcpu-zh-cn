@@ -63,14 +63,13 @@ function createFCPU(input)
   fcpu.get_or_create_control_behavior = function()
     if fcpu._control_behavior == nil then
       fcpu._control_behavior = {
-        parameters = {
-          first_signal = nil,
-          second_signal = nil,
-          first_constant = nil,
-          second_constant = nil,
-          operation = "*",
-          output_signal = nil
-        },
+        first_signal = nil,
+        second_signal = nil,
+        first_constant = nil,
+        second_constant = nil,
+        operation = "*",
+        output_signal = nil,
+
         get_circuit_network = function(wire_type, circuit_connector_id)
           return buses[wire_type]
         end,
@@ -97,12 +96,10 @@ function createFCPU_Output(input)
   ent.get_or_create_control_behavior = function()
     if ent._control_behavior == nil then
       ent._control_behavior = {
-        parameters = {
-          parameters = {}
-        },
+        parameters = {},
       }
       for i = 1, 100 do
-        ent._control_behavior.parameters.parameters[i] = {
+        ent._control_behavior.parameters[i] = {
           signal = {type='virtual', name=''},
           count = 0,
           index = i,
@@ -141,8 +138,8 @@ function ExecuteTest(test_title, program_text, input_signals, probe_result, max_
     error(state.error_message[3])
   end
   if probe_result then
-    --local output = fcpu.get_control_behavior().parameters.parameters
-    local output = state.program_ics.output.get_control_behavior().parameters.parameters
+    --local output = fcpu.get_control_behavior().parameters
+    local output = state.program_ics.output.get_control_behavior().parameters
     local ret = probe_result(state, output, fcpu)
     if ret ~= true and ret ~= nil then
       print(serpent.block(state.regs, {comment=true}))
