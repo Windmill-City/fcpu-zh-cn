@@ -37,7 +37,7 @@ local jump_op = function(addr, offset)
   end
 end
 
-local test_mnemonic = function(condition)
+local test_mnemonics = function(condition)
   return function(_)
     assert.two(_)
     assert.type(_[1], {'value', 'input', 'register'})
@@ -47,7 +47,8 @@ local test_mnemonic = function(condition)
     end
   end
 end
-local branch_mnemonic = function(condition)
+
+local branch_mnemonics = function(condition)
   return function(_)
     assert.three_or_four(_)
     assert.type(_[1], {'value', 'input', 'register'})
@@ -58,13 +59,57 @@ local branch_mnemonic = function(condition)
   end
 end
 
-local find_in_wire = function(_, color)
-  assert.two(_)
-  local _dst = _[1]
-  assert.type(_dst, {'register', 'output'})
-  local _type = io.gettype(_[2], {'type', 'register', 'input'})
-  local sig = io.wire_find_signal(color, _type)
-  io.setsignal(_dst, sig)
+local bk_mnemonics = function(color)
+  return function(_)
+    assert.one(_)
+    assert.type(_[1], {'value', 'register'})
+    local count = io.getcount(_[1])
+    if io.wire_count(color) < count then
+      return {type = 'block'}
+    else
+      return {type = 'next'}
+    end
+  end
+end
+
+local bt_mnemonics = function(color)
+  return function(_)
+    assert.one(_)
+    local type = io.gettype(_[1], {'type', 'register'})
+    if (io.wire_find_signal(color, type) or 0) ~= 0 then
+      return {type = 'next'}
+    else
+      return {type = 'block'}
+    end
+  end
+end
+
+local btc_mnemonics = function(color)
+  return function(_)
+    assert.one(_)
+    local oldSig = io.register_get(_[1])
+    local type = oldSig.signal
+    assert.check(type, 'Type should be specified for reference signal')
+    local newCnt = io.wire_find_signal(color, type)
+    if newCnt == oldSig.count then
+      return {type = 'block'}
+    else
+      io.register_set(_[1], {signal=oldSig.signal, count=newCnt})
+      return {type = 'next'}
+    end
+  end
+end
+
+local find_in_wire = function(color)
+  return function(_)
+    assert.two(_)
+    local _dst = _[1]
+    assert.type(_dst, {'register', 'output'})
+    local _type = io.gettype(_[2], {'type', 'register', 'input'})
+    local count = io.wire_find_signal(color, _type)
+    local signal = (count and count ~= 0) and { signal = _type, count = count }
+    io.setsignal(_dst, signal or NULL_SIGNAL)
+  end
 end
 
 local find_in_channel = function(_)
@@ -209,12 +254,8 @@ local opcodes = {
     end
   end,
 
-  fir = function(_) -- fir dst[R/O] type[T/R/I]
-    find_in_wire(_, 'red')
-  end,
-  fig = function(_) -- fig dst[R/O] type[T/R/I]
-    find_in_wire(_, 'green')
-  end,
+  fir = find_in_wire('red'), -- fir dst[R/O] type[T/R/I]
+  fig = find_in_wire('green'), -- fig dst[R/O] type[T/R/I]
 
   fid = function(_) -- fid dst[R/O] mem[W/M] type[T/R/I]
     find_in_channel(_)
@@ -447,12 +488,12 @@ local opcodes = {
     io.register_set_count(_dst, r)
   end,
 
-  teq = test_mnemonic(function(a, b) return io.getcount(a) == io.getcount(b) end), -- teq a[C/R/I] b[C/R/I]
-  tne = test_mnemonic(function(a, b) return io.getcount(a) ~= io.getcount(b) end), -- tne a[C/R/I] b[C/R/I]
-  tgt = test_mnemonic(function(a, b) return io.getcount(a) > io.getcount(b) end), -- tgt a[C/R/I] b[C/R/I]
-  tlt = test_mnemonic(function(a, b) return io.getcount(a) < io.getcount(b) end), -- tlt a[C/R/I] b[C/R/I]
-  tge = test_mnemonic(function(a, b) return io.getcount(a) >= io.getcount(b) end), -- tge a[C/R/I] b[C/R/I]
-  tle = test_mnemonic(function(a, b) return io.getcount(a) <= io.getcount(b) end), -- tle a[C/R/I] b[C/R/I]
+  teq = test_mnemonics(function(a, b) return io.getcount(a) == io.getcount(b) end), -- teq a[C/R/I] b[C/R/I]
+  tne = test_mnemonics(function(a, b) return io.getcount(a) ~= io.getcount(b) end), -- tne a[C/R/I] b[C/R/I]
+  tgt = test_mnemonics(function(a, b) return io.getcount(a) > io.getcount(b) end), -- tgt a[C/R/I] b[C/R/I]
+  tlt = test_mnemonics(function(a, b) return io.getcount(a) < io.getcount(b) end), -- tlt a[C/R/I] b[C/R/I]
+  tge = test_mnemonics(function(a, b) return io.getcount(a) >= io.getcount(b) end), -- tge a[C/R/I] b[C/R/I]
+  tle = test_mnemonics(function(a, b) return io.getcount(a) <= io.getcount(b) end), -- tle a[C/R/I] b[C/R/I]
   tas = function(_) -- tas a[T/R/I] b[T/R/I]
     assert.two(_)
     local as = io.gettype(_[1], {'type', 'input', 'register'})
@@ -482,12 +523,12 @@ local opcodes = {
     end
   end,
 
-  beq = branch_mnemonic(function(a, b) return io.getcount(a) == io.getcount(b) end), -- beq a[C/R/I] b[C/R/I] addr[L/A/R]
-  bne = branch_mnemonic(function(a, b) return io.getcount(a) ~= io.getcount(b) end), -- bne a[C/R/I] b[C/R/I] addr[L/A/R]
-  bgt = branch_mnemonic(function(a, b) return io.getcount(a) > io.getcount(b) end), -- bgt a[C/R/I] b[C/R/I]  addr[L/A/R]
-  blt = branch_mnemonic(function(a, b) return io.getcount(a) < io.getcount(b) end), -- blt a[C/R/I] b[C/R/I]  addr[L/A/R]
-  bge = branch_mnemonic(function(a, b) return io.getcount(a) >= io.getcount(b) end), -- bge a[C/R/I] b[C/R/I] addr[L/A/R]
-  ble = branch_mnemonic(function(a, b) return io.getcount(a) <= io.getcount(b) end), -- ble a[C/R/I] b[C/R/I] addr[L/A/R]
+  beq = branch_mnemonics(function(a, b) return io.getcount(a) == io.getcount(b) end), -- beq a[C/R/I] b[C/R/I] addr[L/A/R]
+  bne = branch_mnemonics(function(a, b) return io.getcount(a) ~= io.getcount(b) end), -- bne a[C/R/I] b[C/R/I] addr[L/A/R]
+  bgt = branch_mnemonics(function(a, b) return io.getcount(a) > io.getcount(b) end), -- bgt a[C/R/I] b[C/R/I]  addr[L/A/R]
+  blt = branch_mnemonics(function(a, b) return io.getcount(a) < io.getcount(b) end), -- blt a[C/R/I] b[C/R/I]  addr[L/A/R]
+  bge = branch_mnemonics(function(a, b) return io.getcount(a) >= io.getcount(b) end), -- bge a[C/R/I] b[C/R/I] addr[L/A/R]
+  ble = branch_mnemonics(function(a, b) return io.getcount(a) <= io.getcount(b) end), -- ble a[C/R/I] b[C/R/I] addr[L/A/R]
   bas = function(_) -- bas a[T/R/I] b[T/R/I] addr[L/A/R]
     assert.three(_)
     local as = io.gettype(_[1], {'type', 'input', 'register'})
@@ -547,88 +588,16 @@ local opcodes = {
     return { type = 'sleep', val = io.getcount(_[1]) }
   end,
 
-  bkr = function(_)
-    assert.one(_)
-    assert.type(_[1], {'value', 'register'})
-    local count = io.getcount(_[1])
-    if io.wire_count('red') < count then
-      return {type = 'block'}
-    else
-      return {type = 'next'}
-    end
-  end,
-  bkg = function(_)
-    assert.one(_)
-    assert.type(_[1], {'value', 'register'})
-    local count = io.getcount(_[1])
-    if io.wire_count('green') < count then
-      return {type = 'block'}
-    else
-      return {type = 'next'}
-    end
-  end,
+  bkr = bk_mnemonics('red'),
+  bkg = bk_mnemonics('green'),
 
-  btr = function(_)
-    assert.one(_)
-    local type = io.gettype(_[1], {'type', 'register'})
-    if io.wire_find_signal('red', type) == NULL_SIGNAL then
-      return {type = 'block'}
-    else
-      return {type = 'next'}
-    end
-  end,
-  btg = function(_)
-    assert.one(_)
-    local type = io.gettype(_[1], {'type', 'register'})
-    if io.wire_find_signal('green', type) == NULL_SIGNAL then
-      return {type = 'block'}
-    else
-      return {type = 'next'}
-    end
-  end,
-  bti = function(_)
-    assert.one(_)
-    local type = io.gettype(_[1], {'type', 'register'})
-    if io.wire_find_signal('input', type) == NULL_SIGNAL then
-      return {type = 'block'}
-    else
-      return {type = 'next'}
-    end
-  end,
+  btr = bt_mnemonics('red'),
+  btg = bt_mnemonics('green'),
+  bti = bt_mnemonics('input'),
 
-  btrc = function(_)
-    assert.one(_)
-    local oldSig = io.register_get(_[1])
-    local newSig = io.wire_find_signal('red', oldSig.signal)
-    if newSig.count == oldSig.count then
-      return {type = 'block'}
-    else
-      io.register_set(_[1], newSig)
-      return {type = 'next'}
-    end
-  end,
-  btgc = function(_)
-    assert.one(_)
-    local oldSig = io.register_get(_[1])
-    local newSig = io.wire_find_signal('green', oldSig.signal)
-    if newSig.count == oldSig.count then
-      return {type = 'block'}
-    else
-      io.register_set(_[1], newSig)
-      return {type = 'next'}
-    end
-  end,
-  btic = function(_)
-    assert.one(_)
-    local oldSig = io.register_get(_[1])
-    local newSig = io.wire_find_signal('input', oldSig.signal)
-    if newSig.count == oldSig.count then
-      return {type = 'block'}
-    else
-      io.register_set(_[1], newSig)
-      return {type = 'next'}
-    end
-  end,
+  btrc = btc_mnemonics('red'),
+  btgc = btc_mnemonics('green'),
+  btic = btc_mnemonics('input'),
 
   nmd = function(_) -- Nuclear Meltdown
     assert.one(_)

@@ -357,8 +357,8 @@ Each instruction take one or more operands and modify them or state of fCPU.
 * `btrc` reg[**R**]
   `btgc` reg[**R**]
   `btic` reg[**R**]
-  Block until *register* have same value as in *r*ed/*g*reen/both_*i*nput wires.  
-  Then assign *register* to new value.
+  Block while reference *reg*ister have same value as in *r*ed/*g*reen/both_*i*nput wires.  
+  After red/green/input value were changed, assign new value to *register* and continue execution.
 
 
 ### Testing operands values

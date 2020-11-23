@@ -5,8 +5,9 @@ Date: ????
     - Added `lea` for loading address of a labels.
     - Common mnemonics extended with optional src operand.
   Bugfixes:
-    - `Step` button may ignore instructions when stepping out of sleep mode.
     - Breakpoint miss right after `slp`.
+    - `Step` may ignore instructions when stepping out of sleep mode.
+    - `btrc`/`btgc`/`btic` retains type when a signal became 0.
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.3
 Date: 2020-11-22

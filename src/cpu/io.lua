@@ -192,11 +192,8 @@ function io.wire_find_signal(color, signal_to_find)
     else
       assert.exception("Tried to access "..color.." wire when it is not connected")
     end
-    if count ~= 0 then
-      return {signal = signal_to_find, count = count}
-    end
+    return count
   end
-  return NULL_SIGNAL
 end
 
 function io.wire_count(color)
