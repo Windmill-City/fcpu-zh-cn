@@ -212,32 +212,38 @@ Each instruction take one or more operands and modify them or state of fCPU.
 
 ### Arithmetic
 
-* `add` dst[**R**] src[**C**/**R**]  
-  *dst = dst + src*
-* `sub` dst[**R**] src[**C**/**R**]  
-  *dst = dst - src*
-* `mul` dst[**R**] src[**C**/**R**]  
-  *dst = dst \* src*
-* `div` dst[**R**] src[**C**/**R**]  
-  *dst = dst / src*
-* `mod` dst[**R**] src[**C**/**R**]  
-  *dst = dst % src*
-* `pow` dst[**R**] src[**C**/**R**]  
-  *dst = dst ^ src*
+* `add` dst[**R**] src?[**C**/**R**] val[**C**/**R**]  
+  *dst = src + val* (if src is specified)  
+  *dst = dst + val*  
+* `sub` dst[**R**] src?[**C**/**R**] val[**C**/**R**]  
+  *dst = src - val* (if src is specified)  
+  *dst = dst - val*  
+* `mul` dst[**R**] src?[**C**/**R**] val[**C**/**R**]  
+  *dst = src \* val* (if src is specified)  
+  *dst = dst \* val*  
+* `div` dst[**R**] src?[**C**/**R**] val[**C**/**R**]  
+  *dst = src / val* (if src is specified)  
+  *dst = dst / val*  
+* `mod` dst[**R**] src?[**C**/**R**] val[**C**/**R**]  
+  *dst = src % val* (if src is specified)  
+  *dst = dst % val*  
+* `pow` dst[**R**] src?[**C**/**R**] val[**C**/**R**]  
+  *dst = src ^ val* (if src is specified)  
+  *dst = dst ^ val*  
 
 * `inc` dst[**R**]  
   *dst = dst + 1*
 * `dec` dst[**R**]  
   *dst = dst - 1*
 
-* `subi` dst[**R**] src[**C**/**R**]  
-  *dst = src - dst*
-* `divi` dst[**R**] src[**C**/**R**]  
-  *dst = src / dst*
-* `modi` dst[**R**] src[**C**/**R**]  
-  *dst = src % dst*
-* `powi` dst[**R**] src[**C**/**R**]  
-  *dst = src ^ dst*
+* `subi` dst[**R**] val[**C**/**R**]  
+  *dst = val - dst*
+* `divi` dst[**R**] val[**C**/**R**]  
+  *dst = val / dst*
+* `modi` dst[**R**] val[**C**/**R**]  
+  *dst = val % dst*
+* `powi` dst[**R**] val[**C**/**R**]  
+  *dst = val ^ dst*
 
 * `rnd` dst[**R**] min[**C**/**R**] max[**C**/**R**]  
   Assigns into *dst* a pseudo-random value in range [*min* to *max*] (inclusive).  
@@ -279,37 +285,45 @@ Each instruction take one or more operands and modify them or state of fCPU.
 
 ### Bitwise
 
-* `band` dst[**R**] src[**C**/**R**]  
+* `band` dst[**R**] src?[**C**/**R**] val[**C**/**R**]  
   AND.  
-  *dst = dst & src*
+  *dst = src & val* (if src is specified)
+  *dst = dst & val*
 
-* `bor` dst[**R**] src[**C**/**R**]  
+* `bor` dst[**R**] src?[**C**/**R**] val[**C**/**R**]  
   OR.  
-  *dst = dst | src*
+  *dst = src | val* (if src is specified)
+  *dst = dst | val*
 
-* `bxor` dst[**R**] src[**C**/**R**]  
+* `bxor` dst[**R**] src?[**C**/**R**] val[**C**/**R**]  
   XOR.  
-  *dst = dst ^ src*
+  *dst = src ^ val* (if src is specified)
+  *dst = dst ^ val*
 
-* `bnot` dst[**R**]  
+* `bnot` dst[**R**] src?[**R**]  
   NOT.  
+  *dst = ~src* (if src is specified)
   *dst = ~dst*
 
-* `bsl` dst[**R**] src[**C**/**R**]  
+* `bsl` dst[**R**] src?[**C**/**R**] val[**C**/**R**]  
   Shift left.  
-  *dst = dst << src*
+  *dst = src << val* (if src is specified)
+  *dst = dst << val*
 
-* `bsr` dst[**R**] src[**C**/**R**]  
+* `bsr` dst[**R**] src?[**C**/**R**] val[**C**/**R**]  
   Shift right.  
-  *dst = dst >> src*
+  *dst = src >> val* (if src is specified)
+  *dst = dst >> val*
 
-* `brl` dst[**R**] src[**C**/**R**]  
+* `brl` dst[**R**] src?[**C**/**R**] val[**C**/**R**]  
   Rotate left.  
-  *dst = dst rot<< src*
+  *dst = src rot<< val* (if src is specified)
+  *dst = dst rot<< val*
 
-* `brr` dst[**R**] src[**C**/**R**]  
+* `brr` dst[**R**] src?[**C**/**R**] val[**C**/**R**]  
   Rotate right.  
-  *dst = dst rot>> src*
+  *dst = src rot>> val* (if src is specified)
+  *dst = dst rot>> val*
 
 
 ### Flow control
@@ -442,6 +456,9 @@ blt r1 10 :counter
 * `ugpf` dst[**R**] name[**T**/**R**] field[**S**]
   *Utility Get Prototype Field*  
   Find prototype with *name* and assign *dst* to *field* value (only numbers supported).  
+  This instruction sequentially checks fields in:
+    1. https://wiki.factorio.com/Prototype/Item
+    2. https://wiki.factorio.com/Prototype/Entity
   For example:  
   - `ugpf r1 [item=inserter] 'inserter_rotation_speed'`
   - `ugpf r1 [item=copper-ore] 'stack_size'` (this is a same as `uiss r1 [item=copper-ore]`)
@@ -512,6 +529,7 @@ When working with SIMD instructions, the following features should be considered
 ### SIMD Comparision
 
 Compares each signal value in memory with operand specified and pass it to destination if condition met.  
+In two operand version *src* is the same as a *dst*.  
 
 * `xceq` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]  
   Equal.  

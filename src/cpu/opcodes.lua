@@ -10,6 +10,18 @@ local standard_op = function(_)
   assert.type(_src, {'register', 'value', 'input'})
   return _dst, _src
 end
+local standard_op3 = function(_)
+  local three = (assert.two_or_three(_) == 3)
+  local _dst = _[1]
+  assert.is_register(_dst)
+  local _a = _[three and 2 or 1]
+  local _b = _[three and 3 or 2]
+  if three then
+    assert.type(_a, {'register', 'value', 'input'})
+  end
+  assert.type(_b, {'register', 'value', 'input'})
+  return _dst, _a, _b
+end
 local jump_op = function(addr, offset)
   assert.type(addr, {'label', 'value', 'register'})
   if offset then
@@ -237,28 +249,28 @@ local opcodes = {
   end,
 
   add = function(_)
-    local _dst, _src = standard_op(_)
-    io.register_set_count(_dst, io.getcount(_dst) + io.getcount(_src))
+    local _dst, _a, _b = standard_op3(_)
+    io.register_set_count(_dst, io.getcount(_a) + io.getcount(_b))
   end,
   sub = function(_)
-    local _dst, _src = standard_op(_)
-    io.register_set_count(_dst, io.getcount(_dst) - io.getcount(_src))
+    local _dst, _a, _b = standard_op3(_)
+    io.register_set_count(_dst, io.getcount(_a) - io.getcount(_b))
   end,
   mul = function(_)
-    local _dst, _src = standard_op(_)
-    io.register_set_count(_dst, io.getcount(_dst) * io.getcount(_src))
+    local _dst, _a, _b = standard_op3(_)
+    io.register_set_count(_dst, io.getcount(_a) * io.getcount(_b))
   end,
   div = function(_)
-    local _dst, _src = standard_op(_)
-    io.register_set_count(_dst, io.getcount(_dst) / io.getcount(_src))
+    local _dst, _a, _b = standard_op3(_)
+    io.register_set_count(_dst, io.getcount(_a) / io.getcount(_b))
   end,
   mod = function(_)
-    local _dst, _src = standard_op(_)
-    io.register_set_count(_dst, io.getcount(_dst) % io.getcount(_src))
+    local _dst, _a, _b = standard_op3(_)
+    io.register_set_count(_dst, io.getcount(_a) % io.getcount(_b))
   end,
   pow = function(_)
-    local _dst, _src = standard_op(_)
-    io.register_set_count(_dst, io.getcount(_dst) ^ io.getcount(_src))
+    local _dst, _a, _b = standard_op3(_)
+    io.register_set_count(_dst, io.getcount(_a) ^ io.getcount(_b))
   end,
 
   inc = function(_)
@@ -392,44 +404,46 @@ local opcodes = {
   end,
 
   band = function(_)
-    local _dst, _src = standard_op(_)
-    local r = bit32.band(io.getcount(_dst), io.getcount(_src))
+    local _dst, _a, _b = standard_op3(_)
+    local r = bit32.band(io.getcount(_a), io.getcount(_b))
     io.register_set_count(_dst, r)
   end,
   bor = function(_)
-    local _dst, _src = standard_op(_)
-    local r = bit32.bor(io.getcount(_dst), io.getcount(_src))
+    local _dst, _a, _b = standard_op3(_)
+    local r = bit32.bor(io.getcount(_a), io.getcount(_b))
     io.register_set_count(_dst, r)
   end,
   bxor = function(_)
-    local _dst, _src = standard_op(_)
-    local r = bit32.bxor(io.getcount(_dst), io.getcount(_src))
+    local _dst, _a, _b = standard_op3(_)
+    local r = bit32.bxor(io.getcount(_a), io.getcount(_b))
     io.register_set_count(_dst, r)
   end,
   bnot = function(_)
+    local two = assert.one_or_two(_)
     local _dst = _[1]
-    assert.is_register(_dst)
-    local result = bit32.bnot(io.getcount(_dst))
+    local _src = _[two and 2 or 1]
+    assert.is_register(_dst, _src)
+    local result = bit32.bnot(io.getcount(_src))
     io.register_set_count(io.getcount(_dst), result)
   end,
   bsl = function(_)
-    local _dst, _src = standard_op(_)
-    local r = bit32.lshift(io.getcount(_dst), io.getcount(_src))
+    local _dst, _a, _b = standard_op3(_)
+    local r = bit32.lshift(io.getcount(_a), io.getcount(_b))
     io.register_set_count(_dst, r)
   end,
   bsr = function(_)
-    local _dst, _src = standard_op(_)
-    local r = bit32.rshift(io.getcount(_dst), io.getcount(_src))
+    local _dst, _a, _b = standard_op3(_)
+    local r = bit32.rshift(io.getcount(_a), io.getcount(_b))
     io.register_set_count(_dst, r)
   end,
   brl = function(_)
-    local _dst, _src = standard_op(_)
-    local r = bit32.lrotate(io.getcount(_dst), io.getcount(_src))
+    local _dst, _a, _b = standard_op3(_)
+    local r = bit32.lrotate(io.getcount(_a), io.getcount(_b))
     io.register_set_count(_dst, r)
   end,
   brr = function(_)
-    local _dst, _src = standard_op(_)
-    local r = bit32.rrotate(io.getcount(_dst), io.getcount(_src))
+    local _dst, _a, _b = standard_op3(_)
+    local r = bit32.rrotate(io.getcount(_a), io.getcount(_b))
     io.register_set_count(_dst, r)
   end,
 
