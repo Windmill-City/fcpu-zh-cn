@@ -10,7 +10,7 @@
   "dependencies": [
     "base >= 0.18",
     "stdlib",
-    "flib >= 0.6.0",
+    "flib",
     "? informatron >= 0.1.13",
     "? booktorio >= 1.0.0"
   ],

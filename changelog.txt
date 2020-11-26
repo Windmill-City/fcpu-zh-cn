@@ -4,6 +4,7 @@ Date: ????
   Bugfixes:
     - Typo in `lea`.
     - Typo in `ln`.
+    - Removed version constrain from flib (it is still less than 6.0.0).
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.5
 Date: 2020-11-23
