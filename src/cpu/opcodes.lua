@@ -565,13 +565,13 @@ local opcodes = {
     assert.is_register(_[1])
     local label = _[2]
     assert.type(label, {'label'})
-    local addr
-    for line_num, node in ipairs(state.program_ast) do
-      if node.type == 'label' and node.label == label then
-        addr = line_num + 1
-        break
+    local addr = io.for_entity(function(entity, state)
+      for line_num, node in ipairs(state.program_ast) do
+        if node and node.type == 'label' and node.label == label.label then
+          return line_num + 1
+        end
       end
-    end
+    end)
     assert.check(addr ~= nil, 'Undefined label')
     io.register_set_count(_[1], addr)
   end,
