@@ -510,8 +510,8 @@ When working with SIMD instructions, the following features should be considered
   *dst(each) = src - val* (if src specified)
 
 * `xmul` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]
-  *dst(each) = dst * val*
-  *dst(each) = src * val* (if src specified)
+  *dst(each) = dst \* val*
+  *dst(each) = src \* val* (if src specified)
 
 * `xdiv` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]
   *dst(each) = dst / val*
