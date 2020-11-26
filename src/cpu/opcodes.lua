@@ -441,7 +441,7 @@ local opcodes = {
   end,
   ln = function(_) -- * **ln** dst[R] src[C/R/I]
     local _dst, _src = standard_op(_)
-    io.register_set_count(_dst, math.ln(io.getcount(_src)))
+    io.register_set_count(_dst, math.log(io.getcount(_src)))
   end,
 
   band = function(_)
