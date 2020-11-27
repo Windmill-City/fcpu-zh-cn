@@ -466,7 +466,7 @@ function Controller.update_state(state, pstate)
 
     if control then
       local indication_ctrl = control.indication -- should be always valid
-      --if indication_ctrl and indication_ctrl.valid then
+      if indication_ctrl and indication_ctrl.valid then
         local str = pstateStr[state.program_state]
         local params = indication_ctrl.parameters
         if state.disabled then
@@ -482,8 +482,8 @@ function Controller.update_state(state, pstate)
           params.first_signal = { type="virtual", name=str }
           params.output_signal = nil
         end
-        indication_ctrl.parameters = param
-      --end
+        indication_ctrl.parameters = params
+      end
     end
   end
 
