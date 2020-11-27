@@ -9,6 +9,12 @@ data:extend({
     allowed_values = { 1, 2, 5, 10, 20, 30, 60 }
   },
   {
+    type = "bool-setting",
+    name = "fcpu-gui-editor-inline-icons",
+    setting_type = "runtime-global",
+    default_value = true
+  },
+  {
     type = "string-setting",
     name = "fcpu-debug-enabled",
     setting_type = "runtime-global",

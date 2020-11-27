@@ -28,6 +28,9 @@ function UpdateModSetting(event)
     end
     update_debug_enabled()
   end
+  if event.setting == "fcpu-gui-editor-inline-icons" then
+    fcpu_gui_editor_inline_icons = settings.global[event.setting].value
+  end
   if event.setting == "fcpu-gui-updates-every-tick" then
     fcpu_gui_updates_every_tick = settings.global[event.setting].value
   end
@@ -65,5 +68,6 @@ end
 
 
 UpdateModSetting{setting = "fcpu-debug-enabled"}
+UpdateModSetting{setting = "fcpu-gui-editor-inline-icons"}
 UpdateModSetting{setting = "fcpu-gui-updates-every-tick"}
 UpdateModSetting{setting = "fcpu-maximum-updates-per-tick"}

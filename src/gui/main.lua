@@ -281,8 +281,14 @@ function GuiWidgetOpen(player, entity)
 
   GuiWidgetUpdateTitle(player_data, state)
   GuiWidgetUpdatePinButton(player, true)
-  player_data.gui_program_input.text = state.program_text
   GuiWidgetUpdate(player_data, state, true)
+
+  player_data.gui_program_input.text = state.program_text
+  if fcpu_gui_editor_inline_icons then
+    player_data.gui_program_input.style.rich_text_setting = defines.rich_text_setting.enabled
+  else
+    player_data.gui_program_input.style.rich_text_setting = defines.rich_text_setting.disabled
+  end
 
   if state.error_message then
     player_data.gui_error_message.caption = state.error_message
