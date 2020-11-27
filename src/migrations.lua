@@ -418,4 +418,20 @@ return {
       end
     end
   end,
+
+  ["0.4.7"] = function()
+    foreach_fcpu(function(fcpu, state)
+      for _,op in pairs(state.program_ast or {}) do
+        for _,arg in pairs(op.expr or {}) do
+          if arg.type == 'register' and arg.location == 'readonly' then
+            if 100 <= arg.addr then
+              arg.addr = arg.addr - 100 + MC_REGS_RO_MSLOT
+            elseif 9 <= arg.addr then
+              arg.addr = arg.addr - 9 + MC_REGS_RO_FIRST
+            end
+          end
+        end
+      end
+    end)
+  end,
 }
