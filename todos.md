@@ -4,10 +4,12 @@
 * New graphics.
 
 # Upcoming  (in v0.5.x)
+* Hex number support.
 * Test result flags to extend one condition line limitation.
 * Logistics network access (@Chiko)
 * Memory array with constant memory indices.
 * Add push, pop, call, ret semantics for subroutines and stacks.
+* Extensions (https://discord.com/channels/705695217512349768/749028842869489776/781944420189863948)
 
 # Upcoming (in v0.6.x)
 * Examples, demos and docs.
