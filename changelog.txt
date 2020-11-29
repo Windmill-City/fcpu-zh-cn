@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.7
-Date: ????
+Date: 2020-11-29
   Features:
     - Added setting for disabling program editor icons.
   Bugfixes:
