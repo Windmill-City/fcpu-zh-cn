@@ -23,6 +23,7 @@ function register_fcpu(entity, state)
     state.index = #global.fcpus + 1
   end
   global.fcpus[state.index] = state
+  global.running[state.index] = state.index
   Entity.set_data(entity, state.index)
 end
 

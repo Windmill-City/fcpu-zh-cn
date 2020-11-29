@@ -9,7 +9,6 @@
 * Logistics network access (@Chiko)
 * Memory array with constant memory indices.
 * Add push, pop, call, ret semantics for subroutines and stacks.
-* Extensions (https://discord.com/channels/705695217512349768/749028842869489776/781944420189863948)
 
 # Upcoming (in v0.6.x)
 * Examples, demos and docs.
@@ -23,6 +22,9 @@
 * Code highlighting.
 * Factorio modules support.
 * Multiplayer glitch (https://discord.com/channels/705695217512349768/749054693581520996/779943947203510272)
+* Extensions (https://discord.com/channels/705695217512349768/749028842869489776/781944420189863948, https://discord.com/channels/705695217512349768/749054693581520996/782674502601408524)
+* Inline arithmetics (ipt+2, etc...).
+
 
 # Done
 * Output multiple signals (DONE in v0.2.0)

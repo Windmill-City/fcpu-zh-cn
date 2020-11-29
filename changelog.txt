@@ -5,6 +5,7 @@ Date: ????
     - Added setting for disabling program editor icons.
   Bugfixes:
     - Destroying sleeping fCPU.
+    - Newly created processors can't be controlled via external run signals
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.6
 Date: 2020-11-26
