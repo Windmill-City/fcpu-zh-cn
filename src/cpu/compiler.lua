@@ -32,7 +32,7 @@ local function has_pattern(value, table)
 end
 
 -- Split a string in to tokens using whitespace as a seperator.
-local function split(str)
+local function tokenize(str)
   local result = {}
 
   local comment
@@ -290,8 +290,8 @@ local compiler = {}
 function compiler.compile(lines)
   local ast = {}
   for i, line in ipairs(lines) do
-    local status, result = pcall(parse, split(line))
-    --local status, result = true, parse(split(line))
+    local status, result = pcall(parse, tokenize(line))
+    --local status, result = true, parse(tokenize(line))
     if not status then
       local start_index = string.find(result, '@') or 1
       result = string.sub(result, start_index+1, -1)

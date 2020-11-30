@@ -51,8 +51,8 @@ end
 local branch_mnemonics = function(condition)
   return function(_)
     assert.three_or_four(_)
-    assert.type(_[1], {'value', 'input', 'register'})
-    assert.type(_[2], {'value', 'input', 'register'})
+    assert.type(_[1], {'value', 'string', 'input', 'register'})
+    assert.type(_[2], {'value', 'string', 'input', 'register'})
     if condition(_[1], _[2]) then
       return jump_op(_[3], _[4])
     end
@@ -641,7 +641,6 @@ local opcodes = {
   ugpf = function(_) -- Utility Get Prototype Field
     assert.three(_)
     local signal = io.gettype(_[2], {'type', 'register'})
-    local field = io.getstring(_[3])
     if signal.type ~= 'item' then
       io.setsignal(_[1], NULL_SIGNAL)
     else
@@ -650,15 +649,26 @@ local opcodes = {
         assert.exception('Unknown prototype '.. signal.name ..' specified.')
       end
 
-      local getValue = function(proto) return tonumber(proto[field]) end
-      local success, value = pcall(getValue, proto)
-      if not success then
-        success, value = pcall(getValue, proto.place_result)
+      local getFieldValue = function(var, field)
+        for v in string.gmatch(field, '[^%.]+') do
+          var = var[v]
+        end
+        return tonumber(var) or var
       end
 
+      local field = io.getstring(_[3])
+
+      local success, value = pcall(getFieldValue, proto, field)
+      if not success then
+        success, value = pcall(getFieldValue, proto.place_result, field)
+      end
       assert.check(success, 'Unknown prototype field specified.')
-      if value then
+
+      local t = type(value)
+      if t == 'number' then
         io.setsignal(_[1], { signal=signal, count=value })
+      elseif t == 'string' then
+        io.setsignal(_[1], { signal=signal, str=value })
       else
         io.setsignal(_[1], NULL_SIGNAL)
       end

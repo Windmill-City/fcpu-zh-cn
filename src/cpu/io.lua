@@ -431,12 +431,14 @@ end
 function io.getcount(_, types)
   if _.type == 'value' then
     return _.count
+  elseif _.type == 'string' then
+    return _.str
   else
     local signal = io.getsignal(_, types)
     if type(signal) ~= 'table' or signal.count == nil then
       assert.exception('trying to retrieve nil count')
     end
-    return signal.count
+    return signal.str or signal.count
   end
 end
 

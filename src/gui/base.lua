@@ -31,6 +31,9 @@ function GUI_signalToTooltip(signal, prefix)
       str = str .. '['.. signal.signal.type ..'='.. signal.signal.name ..']'
     end
   end
+  if signal.str then
+    str = '\''.. signal.str ..'\''
+  end
   if prefix then
     return prefix .. (str and ('='.. str) or '')
   else
