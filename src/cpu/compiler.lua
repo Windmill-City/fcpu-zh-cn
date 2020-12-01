@@ -249,9 +249,7 @@ end
 --- Evaluates an AST.
 local function eval(ast, ics)
   local node = function(_)
-    if _.type == 'value' then
-      return _.count
-    elseif _.type == 'op' then
+    if _.type == 'op' then
       if ops[_.name] then
         return ops[_.name](_.expr)
       else
@@ -271,6 +269,8 @@ local function eval(ast, ics)
       -- do nothing
     elseif _.type == 'error' and _.error ~= nil then
       assert.exception(_.error)
+    elseif _.type == 'value' or _.type == 'string' then
+      return _.str or _.count
     else
       assert.exception('Unable to parse code '.. serpent.block(_))
     end

@@ -26,22 +26,22 @@ local jump_op = function(addr, offset)
   assert.type(addr, {'label', 'value', 'register'})
   if offset then
     assert.type(offset, {'value', 'register'})
-    offset = io.getcount(offset) or 0
+    offset = io.getvalue(offset) or 0
   else
     offset = 0
   end
   if addr.type == 'label' then
     return { type = 'jump', val = offset, label = addr.label }
   else
-    return { type = 'jump', val = io.getcount(addr) + offset }
+    return { type = 'jump', val = io.getvalue(addr) + offset }
   end
 end
 
 local test_mnemonics = function(condition)
   return function(_)
     assert.two(_)
-    assert.type(_[1], {'value', 'input', 'register'})
-    assert.type(_[2], {'value', 'input', 'register'})
+    assert.type(_[1], {'value', 'string', 'input', 'register'})
+    assert.type(_[2], {'value', 'string', 'input', 'register'})
     if not condition(_[1], _[2]) then
       return { type = 'skip' }
     end
@@ -63,7 +63,7 @@ local bk_mnemonics = function(color)
   return function(_)
     assert.one(_)
     assert.type(_[1], {'value', 'register'})
-    local count = io.getcount(_[1])
+    local count = io.getvalue(_[1])
     if io.wire_count(color) < count then
       return {type = 'block'}
     else
@@ -241,7 +241,7 @@ local opcodes = {
   end,
   ssv = function(_) -- ssv dst...[R] val[V/S/R/I]
     assert.two_or_more(_)
-    local sigcount = io.getcount(_[#_], {'value', 'signal', 'register', 'input'})
+    local sigcount = io.getvalue(_[#_], {'value', 'signal', 'register', 'input'})
     for i = 1, #_ - 1 do
       io.setcount(_[i], sigcount, {'register', 'output'})
     end
@@ -283,85 +283,85 @@ local opcodes = {
   swpv = function(_) -- swpv reg1[R] reg2[R]
     assert.two(_)
     assert.is_register(_[1], _[2])
-    local a = io.getcount(_[1], {'register'})
-    local b = io.getcount(_[2], {'register'})
+    local a = io.getvalue(_[1], {'register'})
+    local b = io.getvalue(_[2], {'register'})
     io.setcount(_[1], b, {'register'})
     io.setcount(_[2], a, {'register'})
   end,
 
   add = function(_)
     local _dst, _a, _b = standard_op3(_)
-    io.register_set_count(_dst, io.getcount(_a) + io.getcount(_b))
+    io.register_set_count(_dst, io.getvalue(_a) + io.getvalue(_b))
   end,
   sub = function(_)
     local _dst, _a, _b = standard_op3(_)
-    io.register_set_count(_dst, io.getcount(_a) - io.getcount(_b))
+    io.register_set_count(_dst, io.getvalue(_a) - io.getvalue(_b))
   end,
   mul = function(_)
     local _dst, _a, _b = standard_op3(_)
-    io.register_set_count(_dst, io.getcount(_a) * io.getcount(_b))
+    io.register_set_count(_dst, io.getvalue(_a) * io.getvalue(_b))
   end,
   div = function(_)
     local _dst, _a, _b = standard_op3(_)
-    io.register_set_count(_dst, io.getcount(_a) / io.getcount(_b))
+    io.register_set_count(_dst, io.getvalue(_a) / io.getvalue(_b))
   end,
   mod = function(_)
     local _dst, _a, _b = standard_op3(_)
-    io.register_set_count(_dst, io.getcount(_a) % io.getcount(_b))
+    io.register_set_count(_dst, io.getvalue(_a) % io.getvalue(_b))
   end,
   pow = function(_)
     local _dst, _a, _b = standard_op3(_)
-    io.register_set_count(_dst, io.getcount(_a) ^ io.getcount(_b))
+    io.register_set_count(_dst, io.getvalue(_a) ^ io.getvalue(_b))
   end,
 
   inc = function(_)
     assert.one(_)
     local _dst = _[1]
     assert.is_register(_dst)
-    io.register_set_count(_dst, io.getcount(_dst) + 1)
+    io.register_set_count(_dst, io.getvalue(_dst) + 1)
   end,
   dec = function(_)
     assert.one(_)
     local _dst = _[1]
     assert.is_register(_dst)
-    io.register_set_count(_dst, io.getcount(_dst) - 1)
+    io.register_set_count(_dst, io.getvalue(_dst) - 1)
   end,
 
   subi = function(_)
     local _dst, _src = standard_op(_)
-    io.register_set_count(_dst, io.getcount(_src) - io.getcount(_dst))
+    io.register_set_count(_dst, io.getvalue(_src) - io.getvalue(_dst))
   end,
   divi = function(_)
     local _dst, _src = standard_op(_)
-    io.register_set_count(_dst, io.getcount(_src) / io.getcount(_dst))
+    io.register_set_count(_dst, io.getvalue(_src) / io.getvalue(_dst))
   end,
   modi = function(_)
     local _dst, _src = standard_op(_)
-    io.register_set_count(_dst, io.getcount(_src) % io.getcount(_dst))
+    io.register_set_count(_dst, io.getvalue(_src) % io.getvalue(_dst))
   end,
   powi = function(_)
     local _dst, _src = standard_op(_)
-    io.register_set_count(_dst, io.getcount(_src) ^ io.getcount(_dst))
+    io.register_set_count(_dst, io.getvalue(_src) ^ io.getvalue(_dst))
   end,
 
   fract = function(_)
     assert.one(_)
-    local r = io.getcount(_[1], {'register'})
+    local r = io.getvalue(_[1], {'register'})
     io.register_set_count(_[1], r - math.floor(r))
   end,
   floor = function(_)
     assert.one(_)
-    local r = io.getcount(_[1], {'register'})
+    local r = io.getvalue(_[1], {'register'})
     io.register_set_count(_[1], math.floor(r))
   end,
   round = function(_)
     assert.one(_)
-    local r = io.getcount(_[1], {'register'})
+    local r = io.getvalue(_[1], {'register'})
     io.register_set_count(_[1], math.floor(r + 0.5))
   end,
   ceil = function(_)
     assert.one(_)
-    local r = io.getcount(_[1], {'register'})
+    local r = io.getvalue(_[1], {'register'})
     io.register_set_count(_[1], math.ceil(r))
   end,
 
@@ -373,8 +373,8 @@ local opcodes = {
     local _max = _[3]
     assert.type(_min, {'register', 'value', 'input'})
     assert.type(_max, {'register', 'value', 'input'})
-    local min = io.getcount(_min)
-    local range  = io.getcount(_max) - min + 1
+    local min = io.getvalue(_min)
+    local range  = io.getvalue(_max) - min + 1
     assert.check(0 <= range, "Minimum limit should be less or queal than the maximum limit")
     local r = min + (math.random() * range)
     io.register_set_count(_dst, r)
@@ -384,8 +384,8 @@ local opcodes = {
     assert.two(_)
     assert.type(_[1], {'register'})
     assert.type(_[2], {'value', 'register', 'input'})
-    local d = io.getcount(_[1])
-    local n = io.getcount(_[2])
+    local d = io.getvalue(_[1])
+    local n = io.getvalue(_[2])
     n = math.max(0, n)-- + 1
     -- TODO: optimize
     local s = tostring(math.floor(math.abs(d))):reverse()
@@ -396,9 +396,9 @@ local opcodes = {
     assert.type(_[1], {'register'})
     assert.type(_[2], {'value', 'register', 'input'})
     assert.type(_[3], {'value', 'register', 'input'})
-    local d = io.getcount(_[1])
-    local n = io.getcount(_[2])
-    local v = io.getcount(_[3])
+    local d = io.getvalue(_[1])
+    local n = io.getvalue(_[2])
+    local v = io.getvalue(_[3])
     n = math.max(0, n)-- + 1
     -- TODO: optimize
     local s = tostring(math.floor(math.abs(d)) or 0):reverse()
@@ -412,51 +412,51 @@ local opcodes = {
 
   cos = function(_) -- * **cos** dst[R] src[C/R/I]
     local _dst, _src = standard_op(_)
-    io.register_set_count(_dst, math.cos(io.getcount(_src)))
+    io.register_set_count(_dst, math.cos(io.getvalue(_src)))
   end,
   sin = function(_) -- * **sin** dst[R] src[C/R/I]
     local _dst, _src = standard_op(_)
-    io.register_set_count(_dst, math.sin(io.getcount(_src)))
+    io.register_set_count(_dst, math.sin(io.getvalue(_src)))
   end,
   tan = function(_) -- * **tan** dst[R] src[C/R/I]
     local _dst, _src = standard_op(_)
-    io.register_set_count(_dst, math.tan(io.getcount(_src)))
+    io.register_set_count(_dst, math.tan(io.getvalue(_src)))
   end,
   atan2 = function(_) -- * **atan2** dst[R] x[C/R/I] y[C/R/I]
     assert.three(_)
     assert.type(_[1], {'register'})
     assert.type(_[2], {'value', 'register', 'input'})
     assert.type(_[3], {'value', 'register', 'input'})
-    local y = io.getcount(_[2])
-    local x = io.getcount(_[3])
+    local y = io.getvalue(_[2])
+    local x = io.getvalue(_[3])
     io.register_set_count(_[1], math.atan2(y, x))
   end,
   sqrt = function(_) -- * **sqrt** dst[R] src[C/R/I]
     local _dst, _src = standard_op(_)
-    io.register_set_count(_dst, math.sqrt(io.getcount(_src)))
+    io.register_set_count(_dst, math.sqrt(io.getvalue(_src)))
   end,
   exp = function(_) -- * **exp** dst[R] src[C/R/I]
     local _dst, _src = standard_op(_)
-    io.register_set_count(_dst, math.exp(io.getcount(_src)))
+    io.register_set_count(_dst, math.exp(io.getvalue(_src)))
   end,
   ln = function(_) -- * **ln** dst[R] src[C/R/I]
     local _dst, _src = standard_op(_)
-    io.register_set_count(_dst, math.log(io.getcount(_src)))
+    io.register_set_count(_dst, math.log(io.getvalue(_src)))
   end,
 
   band = function(_)
     local _dst, _a, _b = standard_op3(_)
-    local r = bit32.band(io.getcount(_a), io.getcount(_b))
+    local r = bit32.band(io.getvalue(_a), io.getvalue(_b))
     io.register_set_count(_dst, r)
   end,
   bor = function(_)
     local _dst, _a, _b = standard_op3(_)
-    local r = bit32.bor(io.getcount(_a), io.getcount(_b))
+    local r = bit32.bor(io.getvalue(_a), io.getvalue(_b))
     io.register_set_count(_dst, r)
   end,
   bxor = function(_)
     local _dst, _a, _b = standard_op3(_)
-    local r = bit32.bxor(io.getcount(_a), io.getcount(_b))
+    local r = bit32.bxor(io.getvalue(_a), io.getvalue(_b))
     io.register_set_count(_dst, r)
   end,
   bnot = function(_)
@@ -464,36 +464,36 @@ local opcodes = {
     local _dst = _[1]
     local _src = _[two and 2 or 1]
     assert.is_register(_dst, _src)
-    local result = bit32.bnot(io.getcount(_src))
-    io.register_set_count(io.getcount(_dst), result)
+    local result = bit32.bnot(io.getvalue(_src))
+    io.register_set_count(io.getvalue(_dst), result)
   end,
   bsl = function(_)
     local _dst, _a, _b = standard_op3(_)
-    local r = bit32.lshift(io.getcount(_a), io.getcount(_b))
+    local r = bit32.lshift(io.getvalue(_a), io.getvalue(_b))
     io.register_set_count(_dst, r)
   end,
   bsr = function(_)
     local _dst, _a, _b = standard_op3(_)
-    local r = bit32.rshift(io.getcount(_a), io.getcount(_b))
+    local r = bit32.rshift(io.getvalue(_a), io.getvalue(_b))
     io.register_set_count(_dst, r)
   end,
   brl = function(_)
     local _dst, _a, _b = standard_op3(_)
-    local r = bit32.lrotate(io.getcount(_a), io.getcount(_b))
+    local r = bit32.lrotate(io.getvalue(_a), io.getvalue(_b))
     io.register_set_count(_dst, r)
   end,
   brr = function(_)
     local _dst, _a, _b = standard_op3(_)
-    local r = bit32.rrotate(io.getcount(_a), io.getcount(_b))
+    local r = bit32.rrotate(io.getvalue(_a), io.getvalue(_b))
     io.register_set_count(_dst, r)
   end,
 
-  teq = test_mnemonics(function(a, b) return io.getcount(a) == io.getcount(b) end), -- teq a[C/R/I] b[C/R/I]
-  tne = test_mnemonics(function(a, b) return io.getcount(a) ~= io.getcount(b) end), -- tne a[C/R/I] b[C/R/I]
-  tgt = test_mnemonics(function(a, b) return io.getcount(a) > io.getcount(b) end), -- tgt a[C/R/I] b[C/R/I]
-  tlt = test_mnemonics(function(a, b) return io.getcount(a) < io.getcount(b) end), -- tlt a[C/R/I] b[C/R/I]
-  tge = test_mnemonics(function(a, b) return io.getcount(a) >= io.getcount(b) end), -- tge a[C/R/I] b[C/R/I]
-  tle = test_mnemonics(function(a, b) return io.getcount(a) <= io.getcount(b) end), -- tle a[C/R/I] b[C/R/I]
+  teq = test_mnemonics(function(a, b) return io.getvalue(a) == io.getvalue(b) end), -- teq a[C/S/R/I] b[C/S/R/I]
+  tne = test_mnemonics(function(a, b) return io.getvalue(a) ~= io.getvalue(b) end), -- tne a[C/S/R/I] b[C/S/R/I]
+  tgt = test_mnemonics(function(a, b) return io.getvalue(a) >  io.getvalue(b) end), -- tgt a[C/S/R/I] b[C/S/R/I]
+  tlt = test_mnemonics(function(a, b) return io.getvalue(a) <  io.getvalue(b) end), -- tlt a[C/S/R/I] b[C/S/R/I]
+  tge = test_mnemonics(function(a, b) return io.getvalue(a) >= io.getvalue(b) end), -- tge a[C/S/R/I] b[C/S/R/I]
+  tle = test_mnemonics(function(a, b) return io.getvalue(a) <= io.getvalue(b) end), -- tle a[C/S/R/I] b[C/S/R/I]
   tas = function(_) -- tas a[T/R/I] b[T/R/I]
     assert.two(_)
     local as = io.gettype(_[1], {'type', 'input', 'register'})
@@ -523,12 +523,12 @@ local opcodes = {
     end
   end,
 
-  beq = branch_mnemonics(function(a, b) return io.getcount(a) == io.getcount(b) end), -- beq a[C/R/I] b[C/R/I] addr[L/A/R]
-  bne = branch_mnemonics(function(a, b) return io.getcount(a) ~= io.getcount(b) end), -- bne a[C/R/I] b[C/R/I] addr[L/A/R]
-  bgt = branch_mnemonics(function(a, b) return io.getcount(a) > io.getcount(b) end), -- bgt a[C/R/I] b[C/R/I]  addr[L/A/R]
-  blt = branch_mnemonics(function(a, b) return io.getcount(a) < io.getcount(b) end), -- blt a[C/R/I] b[C/R/I]  addr[L/A/R]
-  bge = branch_mnemonics(function(a, b) return io.getcount(a) >= io.getcount(b) end), -- bge a[C/R/I] b[C/R/I] addr[L/A/R]
-  ble = branch_mnemonics(function(a, b) return io.getcount(a) <= io.getcount(b) end), -- ble a[C/R/I] b[C/R/I] addr[L/A/R]
+  beq = branch_mnemonics(function(a, b) return io.getvalue(a) == io.getvalue(b) end), -- beq a[C/S/R/I] b[C/S/R/I] addr[L/A/R]
+  bne = branch_mnemonics(function(a, b) return io.getvalue(a) ~= io.getvalue(b) end), -- bne a[C/S/R/I] b[C/S/R/I] addr[L/A/R]
+  bgt = branch_mnemonics(function(a, b) return io.getvalue(a) >  io.getvalue(b) end), -- bgt a[C/S/R/I] b[C/S/R/I] addr[L/A/R]
+  blt = branch_mnemonics(function(a, b) return io.getvalue(a) <  io.getvalue(b) end), -- blt a[C/S/R/I] b[C/S/R/I] addr[L/A/R]
+  bge = branch_mnemonics(function(a, b) return io.getvalue(a) >= io.getvalue(b) end), -- bge a[C/S/R/I] b[C/S/R/I] addr[L/A/R]
+  ble = branch_mnemonics(function(a, b) return io.getvalue(a) <= io.getvalue(b) end), -- ble a[C/S/R/I] b[C/S/R/I] addr[L/A/R]
   bas = function(_) -- bas a[T/R/I] b[T/R/I] addr[L/A/R]
     assert.three(_)
     local as = io.gettype(_[1], {'type', 'input', 'register'})
@@ -585,7 +585,7 @@ local opcodes = {
   slp = function(_)
     assert.one(_)
     assert.type(_[1], {'value', 'register'})
-    return { type = 'sleep', val = io.getcount(_[1]) }
+    return { type = 'sleep', val = io.getvalue(_[1]) }
   end,
 
   bkr = bk_mnemonics('red'),
@@ -656,7 +656,7 @@ local opcodes = {
         return tonumber(var) or var
       end
 
-      local field = io.getstring(_[3])
+      local field = io.getvalue(_[3])
 
       local success, value = pcall(getFieldValue, proto, field)
       if not success then

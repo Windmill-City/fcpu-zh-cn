@@ -139,11 +139,9 @@ Each instruction take one or more operands and modify them or state of fCPU.
 
 **Legend**
 
-- **VT**, signal: consists of **V**alue and **T**ype (`123[item=copper-ore]`)
-  - **V**, value: signal value, same as **C**
-  - **T**, type: signal type
-
-* **C**, value: integer constant [-2^31..2^31), same as **V** (`-3500`)
+* **C**, value: integer constant in range [-2^31..2^31), (`-3500`)
+* **T**, type: signal type (`[item=iron-ore]`)
+* **CT**, signal: consists of **C**alue and **T**ype (`123[item=copper-ore]`)
 * **R**, register: (`reg1`, `r3`, ..., `reg8` or `r@4` notation, or one memory cell `m1[23]` or one input wire signal `red34`, `green@3`)
 * **M**, memory: channel (`mem1`, `m2`, ..., `mem4`)
 * **I**, wire: input wire (`red`, `green`)
@@ -176,11 +174,11 @@ Each instruction take one or more operands and modify them or state of fCPU.
 * `clr` dst...[**R**/**M**/**O**]  
   Clear specified registers, memory channels or output wires (`mem3`, `r2`, `out4`).
 
-* `mov` dst...[**R**/**O**] src[**V**/**T**/**VT**/**R**]  
+* `mov` dst...[**R**/**O**] src[**C**/**T**/**CT**/**R**]  
   Copy signal from source to destination.  
   *dst... = src*
 
-* `ssv` dst...[**R**/**O**] val[**V**/**R**]  
+* `ssv` dst...[**R**/**O**] val[**C**/**R**]  
   Set signal value.  
   *dst... = val*
 
@@ -374,27 +372,27 @@ jmp :counter
 ; r1 now equal to 10
 ```
 
-* `teq` a[**C**/**R**] b[**C**/**R**]  
+* `teq` a[**C**/**S**/**R**] b[**C**/**S**/**R**]  
   Equal.  
   *a == b*
 
-* `tne` a[**C**/**R**] b[**C**/**R**]  
+* `tne` a[**C**/**S**/**R**] b[**C**/**S**/**R**]  
   Not equal.  
   *a != b*
 
-* `tgt` a[**C**/**R**] b[**C**/**R**]  
+* `tgt` a[**C**/**S**/**R**] b[**C**/**S**/**R**]  
   Greater than.  
   *a > b*
 
-* `tlt` a[**C**/**R**] b[**C**/**R**]  
+* `tlt` a[**C**/**S**/**R**] b[**C**/**S**/**R**]  
   Less than.  
   *a < b*
 
-* `tge` a[**C**/**R**] b[**C**/**R**]  
+* `tge` a[**C**/**S**/**R**] b[**C**/**S**/**R**]  
   Greater or equal than.  
   *a >= b*
 
-* `tle` a[**C**/**R**] b[**C**/**R**]  
+* `tle` a[**C**/**S**/**R**] b[**C**/**S**/**R**]  
   Less or equal than.  
   *a <= b*
 
@@ -421,27 +419,27 @@ blt r1 10 :counter
 ; r1 now equal to 10
 ```
 
-* `beq` a[**C**/**R**] b[**C**/**R**] addr[**C**/**A**/**L**/**R**] offset?[**C**/**R**]  
+* `beq` a[**C**/**S**/**R**] b[**C**/**S**/**R**] addr[**C**/**A**/**L**/**R**] offset?[**C**/**R**]  
   Equal.  
   If *a == b* then `jmp addr offset`
 
-* `bne` a[**C**/**R**] b[**C**/**R**] addr[**C**/**A**/**L**/**R**] offset?[**C**/**R**]  
+* `bne` a[**C**/**S**/**R**] b[**C**/**S**/**R**] addr[**C**/**A**/**L**/**R**] offset?[**C**/**R**]  
   Not equal.  
   If *a != b* then `jmp addr offset`
 
-* `bgt` a[**C**/**R**] b[**C**/**R**] addr[**C**/**A**/**L**/**R**] offset?[**C**/**R**]  
+* `bgt` a[**C**/**S**/**R**] b[**C**/**S**/**R**] addr[**C**/**A**/**L**/**R**] offset?[**C**/**R**]  
   Greater than.  
   If *a > b* then `jmp addr offset`
 
-* `blt` a[**C**/**R**] b[**C**/**R**] addr[**C**/**A**/**L**/**R**] offset?[**C**/**R**]  
+* `blt` a[**C**/**S**/**R**] b[**C**/**S**/**R**] addr[**C**/**A**/**L**/**R**] offset?[**C**/**R**]  
   Less than.  
   If *a < b* then `jmp addr offset`
 
-* `bge` a[**C**/**R**] b[**C**/**R**] addr[**C**/**A**/**L**/**R**] offset?[**C**/**R**]  
+* `bge` a[**C**/**S**/**R**] b[**C**/**S**/**R**] addr[**C**/**A**/**L**/**R**] offset?[**C**/**R**]  
   Greater or equal than.  
   If *a >= b* then `jmp addr offset`
 
-* `ble` a[**C**/**R**] b[**C**/**R**] addr[**C**/**A**/**L**/**R**] offset?[**C**/**R**]  
+* `ble` a[**C**/**S**/**R**] b[**C**/**S**/**R**] addr[**C**/**A**/**L**/**R**] offset?[**C**/**R**]  
   Less or equal than.  
   If *a <= b* then `jmp addr offset`
 
@@ -462,6 +460,12 @@ blt r1 10 :counter
   For example:  
   - `ugpf r1 [item=inserter] 'inserter_rotation_speed'`
   - `ugpf r1 [item=copper-ore] 'stack_size'` (this is a same as `uiss r1 [item=copper-ore]`)
+
+  You may use dot `.` for diving inside this prototypes.  
+  To check if the item is a science pack use this example:  
+  - `ugpf r1 [item=automation-science-pack] 'subgroup.name'`
+    `beq r1 'science-pack' :yeah_science_btch`
+
 
 * `uiss` dst[**R**] type[**T**/**R**]  
   **DEPRECATED: please use `ugpf dst type 'stack_size'`**  
@@ -490,7 +494,7 @@ When working with SIMD instructions, the following features should be considered
 * `xmov` dst[**M**/**O**] src[**I**/**M**]
   *dst(each) = src(each)*
 
-* `emit` dst[**M**] val...[**V**/**T**/**VT**/**R**]
+* `emit` dst[**M**] val...[**C**/**T**/**CT**/**R**]
   Append *val*ues to *dst* memory (with random ordering until v0.5.0).  
 
 * `xuni` dst[**M**/**O**] a[**I**/**M**] b[**I**/**M**]

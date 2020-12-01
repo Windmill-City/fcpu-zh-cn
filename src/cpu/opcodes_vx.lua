@@ -6,12 +6,11 @@ local io
 local function vector_scalar_op()
   return function(_, ics)
     local src = (#_ == 3 and _[3]) or _[2]
-    assert.type(src, {'value', 'register', 'input'})
 
     if ics and ics.out then
       local control = ics.out.get_or_create_control_behavior()
       local params = control.parameters
-      params.second_constant = io.getcount(src)
+      params.second_constant = io.getvalue(src, {'value', 'register', 'input'})
       control.parameters = params
     end
   end
@@ -23,9 +22,8 @@ local function vector_compare_op()
 
     if ics and ics.out then
       local control = ics.out.get_or_create_control_behavior()
-      local signal = io.getsignal(src, {'value', 'signal', 'register', 'input'})
       local params = control.parameters
-      params.constant = signal.count
+      params.constant = io.getvalue(src, {'value', 'register', 'input'})
       control.parameters = params
     end
   end

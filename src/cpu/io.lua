@@ -428,34 +428,31 @@ function io.setsignal(_, signal, types)
 end
 
 
-function io.getcount(_, types)
+function io.getvalue(_, types)
   if _.type == 'value' then
+    local t = types and assert.type(_, types)
     return _.count
   elseif _.type == 'string' then
+    local t = types and assert.type(_, types)
     return _.str
   else
     local signal = io.getsignal(_, types)
-    if type(signal) ~= 'table' or signal.count == nil then
-      assert.exception('trying to retrieve nil count')
+    if type(signal) == 'table' then
+      local value = signal.str or signal.count
+      if value then
+        return value
+      end
     end
-    return signal.str or signal.count
+    assert.exception('trying to retrieve nil count')
   end
 end
 
 function io.setcount(_, count, types)
   -- TODO: optimize
   local signal = io.getsignal(_, types)
+  signal.str = nil
   signal.count = count
   io.setsignal(_, signal, types)
-end
-
-
-function io.getstring(_, types)
-  if _.type == 'string' then
-    return _.str
-  else
-    return tostring(io.getcount(_, types))
-  end
 end
 
 
