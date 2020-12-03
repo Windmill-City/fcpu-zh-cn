@@ -650,8 +650,19 @@ local opcodes = {
       end
 
       local getFieldValue = function(var, field)
-        for v in string.gmatch(field, '[^%.]+') do
-          var = var[v]
+        local bak
+        for v, b in string.gmatch(field, '([^%.()]+)([()]?)') do
+          if type(var[v]) == 'function' and b == '(' then
+            bak = var[v]
+            var = _G
+          else
+            var = var[v]
+            if b == ')' then
+              assert.check(bak, 'Unmatched brace found')
+              var = bak(var)
+              bak = nil
+            end
+          end
         end
         return tonumber(var) or var
       end
@@ -662,7 +673,7 @@ local opcodes = {
       if not success then
         success, value = pcall(getFieldValue, proto.place_result, field)
       end
-      assert.check(success, 'Unknown prototype field specified.')
+      assert.check(success, value)
 
       local t = type(value)
       if t == 'number' then

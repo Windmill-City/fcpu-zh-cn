@@ -2,6 +2,7 @@
 Version: 0.4.9
 Date: ????
   Changes:
+    - Added support for calling functions in `ugpf`.
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.8
 Date: 2020-12-01

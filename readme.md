@@ -455,11 +455,12 @@ blt r1 10 :counter
   *Utility Get Prototype Field*  
   Find prototype with *name* and assign *dst* to *field* value (only numbers supported).  
   This instruction sequentially checks fields in:
-    1. https://wiki.factorio.com/Prototype/Item
-    2. https://wiki.factorio.com/Prototype/Entity
+    1. https://lua-api.factorio.com/latest/LuaItemPrototype.html
+    2. https://lua-api.factorio.com/latest/LuaEntityPrototype.html
   For example:  
   - `ugpf r1 [item=inserter] 'inserter_rotation_speed'`
-  - `ugpf r1 [item=copper-ore] 'stack_size'` (this is a same as `uiss r1 [item=copper-ore]`)
+  - `ugpf r2 [item=copper-ore] 'stack_size'` (this is a same as `uiss r1 [item=copper-ore]`)
+  - `ugpf r3 [item=logistic-chest-buffer] 'get_inventory_size(defines.inventory.item_main)'`
 
   You may use dot `.` for diving inside this prototypes.  
   To check if the item is a science pack use this example:  
