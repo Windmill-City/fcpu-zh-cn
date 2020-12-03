@@ -245,7 +245,7 @@ function io.memory_getchannel_read(_)
     end
   elseif _.type == 'wire' then
     if _.color == 'out' then
-      return output_control
+      return output_control.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.constant_combinator)
     end
     if not state.cache.wires[_.color] then
       assert.exception("Tried to access ".._.color.." wire when it is not connected")
