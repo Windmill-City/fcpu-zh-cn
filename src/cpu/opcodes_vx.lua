@@ -1,5 +1,4 @@
-local hdlbuilder
-local assert
+local Assert = require('src/cpu/assert')
 local io
 
 
@@ -69,12 +68,12 @@ local opcodes_vx = {
   xcgt = vector_compare_op(),
 
   xmin = function(_, ics)
-    assert.two(_)
-    assert.type(_[1], {'register', 'output'})
-    assert.type(_[2], {'memory', 'input'})
+    Assert.two(_)
+    Assert.type(_[1], {'register', 'output'})
+    Assert.type(_[2], {'memory', 'input'})
 
     local signals = io.memory_getchannel_signals(_[2])
-    assert.check(signals ~= nil, "Input channel is unavailable")
+    Assert.check(signals ~= nil, "Input channel is unavailable")
 
     local m
     for _,v in ipairs(signals) do
@@ -86,12 +85,12 @@ local opcodes_vx = {
     io.setsignal(_[1], m or NULL_SIGNAL)
   end,
   xmax = function(_, ics)
-    assert.two(_)
-    assert.type(_[1], {'register', 'output'})
-    assert.type(_[2], {'memory', 'input'})
+    Assert.two(_)
+    Assert.type(_[1], {'register', 'output'})
+    Assert.type(_[2], {'memory', 'input'})
 
     local signals = io.memory_getchannel_signals(_[2])
-    assert.check(signals ~= nil, "Input channel is unavailable")
+    Assert.check(signals ~= nil, "Input channel is unavailable")
 
     local m
     for _,v in ipairs(signals) do
@@ -103,12 +102,12 @@ local opcodes_vx = {
     io.setsignal(_[1], m or NULL_SIGNAL)
   end,
   xavg = function(_, ics)
-    assert.two(_)
-    assert.type(_[1], {'register', 'output'})
-    assert.type(_[2], {'memory', 'input'})
+    Assert.two(_)
+    Assert.type(_[1], {'register', 'output'})
+    Assert.type(_[2], {'memory', 'input'})
 
     local signals = io.memory_getchannel_signals(_[2])
-    assert.check(signals ~= nil, "Input channel is unavailable")
+    Assert.check(signals ~= nil, "Input channel is unavailable")
 
     local s = 0
     local c = 0
@@ -125,12 +124,12 @@ local opcodes_vx = {
   end,
 
   xmini = function(_, ics)
-    assert.two(_)
-    assert.type(_[1], {'register', 'output'})
-    assert.type(_[2], {'memory', 'input'})
+    Assert.two(_)
+    Assert.type(_[1], {'register', 'output'})
+    Assert.type(_[2], {'memory', 'input'})
 
     local signals = io.memory_getchannel_signals(_[2])
-    assert.check(signals ~= nil, "Input channel is unavailable")
+    Assert.check(signals ~= nil, "Input channel is unavailable")
 
     local m, i
     for k,v in ipairs(signals) do
@@ -143,12 +142,12 @@ local opcodes_vx = {
     io.setcount(_[1], i)
   end,
   xmaxi = function(_, ics)
-    assert.two(_)
-    assert.type(_[1], {'register', 'output'})
-    assert.type(_[2], {'memory', 'input'})
+    Assert.two(_)
+    Assert.type(_[1], {'register', 'output'})
+    Assert.type(_[2], {'memory', 'input'})
 
     local signals = io.memory_getchannel_signals(_[2])
-    assert.check(signals ~= nil, "Input channel is unavailable")
+    Assert.check(signals ~= nil, "Input channel is unavailable")
 
     local m, i
     for k,v in ipairs(signals) do
@@ -163,9 +162,7 @@ local opcodes_vx = {
 }
 
 
-function opcodes_vx.setup(assert_, io_, hdlbuilder_)
-  hdlbuilder = hdlbuilder_
-  assert = assert_
+function opcodes_vx.setup(io_)
   io = io_
 end
 return opcodes_vx

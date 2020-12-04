@@ -7,7 +7,7 @@ table = require('__stdlib__/stdlib/utils/table')
 
 require('../src/constants')
 Controller = require('../src/cpu/controller')
-assert = require('../src/cpu/assert')
+Assert = require('../src/cpu/assert')
 
 ----------------------------------------------------------------------------------------------------------------
 
@@ -168,9 +168,9 @@ local fcpu, state = ExecuteTest(
     [defines.wire_type.red] = nil,
   },
   function(state, output)
-    return assert.result_signal(output[1], {count=1000, signal={type='item', name='iron-plate'}})
-       and assert.result_signal(output[2], {count=2000, signal={type='item', name='steel-plate'}})
-       and assert.result_signal(output[3], {count=3000, signal={type='item', name='copper-plate'}})
+    return Assert.result_signal(output[1], {count=1000, signal={type='item', name='iron-plate'}})
+       and Assert.result_signal(output[2], {count=2000, signal={type='item', name='steel-plate'}})
+       and Assert.result_signal(output[3], {count=3000, signal={type='item', name='copper-plate'}})
   end
 )
 
@@ -184,9 +184,9 @@ local fcpu, state = ExecuteTest(
   ]],
   {},
   function(state, output)
-    return assert.result_signal(output[1], NULL_SIGNAL)
-       and assert.result_signal(output[2], NULL_SIGNAL)
-       and assert.result_signal(output[3], NULL_SIGNAL)
+    return Assert.result_signal(output[1], NULL_SIGNAL)
+       and Assert.result_signal(output[2], NULL_SIGNAL)
+       and Assert.result_signal(output[3], NULL_SIGNAL)
   end
 )
 
@@ -206,7 +206,7 @@ local fcpu, state = ExecuteTest(
     [defines.wire_type.red] = nil,
   },
   function(state, output)
-    return assert.result_signal(state.regs[1], {count=10, signal={type='item', name='iron-plate'}})
+    return Assert.result_signal(state.regs[1], {count=10, signal={type='item', name='iron-plate'}})
     and ((state.regs[2].count == 1000 and state.regs[3].count == 200)
       or (state.regs[2].count == 200 and state.regs[3].count == 1000))
   end
@@ -222,8 +222,8 @@ local fcpu, state = ExecuteTest(
   ]],
   {},
   function(state, output)
-    return assert.result_signal(state.regs[1], {count=10, signal={type='item', name='iron-plate'}})
-    and assert.result_signal(state.regs[2], {count=10, signal={type='item', name='copper-plate'}})
+    return Assert.result_signal(state.regs[1], {count=10, signal={type='item', name='iron-plate'}})
+    and Assert.result_signal(state.regs[2], {count=10, signal={type='item', name='copper-plate'}})
   end
 )
 
@@ -234,7 +234,7 @@ local fcpu, state = ExecuteTest(
   ]],
   {},
   function(state, output)
-    return assert.result_signal(state.regs[1], {count=-20.2, signal={type='item', name='iron-plate'}})
+    return Assert.result_signal(state.regs[1], {count=-20.2, signal={type='item', name='iron-plate'}})
   end
 )
 
@@ -251,17 +251,17 @@ local fcpu, state = ExecuteTest(
   {},
   function(state, output)
     return
-    assert.result_signal(state.regs[1], {count=13, signal={type='item', name='iron-plate'}}) and
-    assert.result_signal(state.regs[5], {count=61, signal={type='item', name='copper-plate'}}) and
+    Assert.result_signal(state.regs[1], {count=13, signal={type='item', name='iron-plate'}}) and
+    Assert.result_signal(state.regs[5], {count=61, signal={type='item', name='copper-plate'}}) and
 
-    assert.result_signal(state.regs[2], {count=61, signal={type='item', name='copper-plate'}}) and
-    assert.result_signal(state.regs[6], {count=13, signal={type='item', name='iron-plate'}}) and
+    Assert.result_signal(state.regs[2], {count=61, signal={type='item', name='copper-plate'}}) and
+    Assert.result_signal(state.regs[6], {count=13, signal={type='item', name='iron-plate'}}) and
 
-    assert.result_signal(state.regs[3], {count=13, signal={type='item', name='copper-plate'}}) and
-    assert.result_signal(state.regs[7], {count=61, signal={type='item', name='iron-plate'}}) and
+    Assert.result_signal(state.regs[3], {count=13, signal={type='item', name='copper-plate'}}) and
+    Assert.result_signal(state.regs[7], {count=61, signal={type='item', name='iron-plate'}}) and
 
-    assert.result_signal(state.regs[4], {count=61, signal={type='item', name='iron-plate'}}) and
-    assert.result_signal(state.regs[8], {count=13, signal={type='item', name='copper-plate'}})
+    Assert.result_signal(state.regs[4], {count=61, signal={type='item', name='iron-plate'}}) and
+    Assert.result_signal(state.regs[8], {count=13, signal={type='item', name='copper-plate'}})
   end
 )
 
@@ -285,10 +285,10 @@ local fcpu, state = ExecuteTest(
     },
   },
   function(state, output)
-    return assert.result_signal(state.regs[1], {count=1000, signal={type='item', name='copper-plate'}})
-    and assert.result_signal(state.regs[2], {count=0})
-    and assert.result_signal(state.regs[3], {count=0})
-    and assert.result_signal(state.regs[4], {count=300, signal={type='item', name='iron-plate'}})
+    return Assert.result_signal(state.regs[1], {count=1000, signal={type='item', name='copper-plate'}})
+    and Assert.result_signal(state.regs[2], {count=0})
+    and Assert.result_signal(state.regs[3], {count=0})
+    and Assert.result_signal(state.regs[4], {count=300, signal={type='item', name='iron-plate'}})
   end
 )
 
@@ -384,10 +384,10 @@ local fcpu, state = ExecuteTest(
   {},
   function(state, output)
     return 
-    assert.result_signal(state.regs[1], {count=1, signal={type='virtual', name='signal-X'}}) and
-    assert.result_signal(state.regs[2], {count=2, signal={type='virtual', name='signal-Y'}}) and
-    assert.result_signal(state.regs[3], {count=3}) and
-    assert.result_signal(state.regs[4], {count=4}) and
+    Assert.result_signal(state.regs[1], {count=1, signal={type='virtual', name='signal-X'}}) and
+    Assert.result_signal(state.regs[2], {count=2, signal={type='virtual', name='signal-Y'}}) and
+    Assert.result_signal(state.regs[3], {count=3}) and
+    Assert.result_signal(state.regs[4], {count=4}) and
     (state.clock == 4)
   end,
   5000

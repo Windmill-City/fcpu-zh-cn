@@ -1,7 +1,6 @@
-local assert = require('src/cpu/assert')
+local Assert = require('src/cpu/assert')
 local emitter = require('src/cpu/emitter')
 local hdlBuilder = require('src/cpu/hdl_builder')
-local evaluator
 
 
 -- require('constants')
@@ -99,7 +98,7 @@ local function parse(tokens)
     local n = 0
     while n == 0 or n % 2 ~= 0 do
       local s = consume()
-      assert.check(s ~= nil, 'String is not terminated')
+      Assert.check(s ~= nil, 'String is not terminated')
       for i = 1, #s do
         local c = string.sub(s, i, i)
         if c == '\'' then
@@ -123,7 +122,7 @@ local function parse(tokens)
     local token = consume()
     local m = array_build{ string.match(token, '(-?[%d%.]*)%[([%a%-]+)[=%-]([%a%d%-_:,]+)%]') }
     if m[2] and not (m[2] == 'item' or m[2] == 'fluid' or m[2] == 'virtual-signal') then
-      assert.exception("Signal with type '".. (m[2] or 'nil') .."' is not supported")
+      Assert.exception("Signal with type '".. (m[2] or 'nil') .."' is not supported")
     end
     if m[2] == 'virtual-signal' then
       m[2] = 'virtual'
@@ -146,7 +145,7 @@ local function parse(tokens)
       elseif w ~= 'm' then
         return emitter.make_register_ro(w == 'r' and REG_CNR or w == 'g' and REG_CNG)
       else
-        assert.exception('Unknown register `'..name..'`')
+        Assert.exception('Unknown register `'..name..'`')
       end
     end
   end
@@ -169,7 +168,7 @@ local function parse(tokens)
     local address
     if peek() == 'out' then
       consume()
-      assert.deprecated('0.2.0', 'You should replace `out` with `out1`')
+      Assert.deprecated('0.2.0', 'You should replace `out` with `out1`')
       address = { addr = nil, pointer = false }
     else
       address = parseAddress(name)
@@ -281,9 +280,6 @@ end
 
 
 function Compiler.setup(evaluator_)
-  assert.setup()
-  emitter.setup(assert)
-  evaluator = evaluator_
-  evaluator.setup(hdlBuilder, emitter)
+  evaluator_.setup(hdlBuilder, emitter)
 end
 return Compiler

@@ -1,4 +1,4 @@
-local assert
+local Assert = require('src/cpu/assert')
 local hdlbuilder
 local emitter
 local indication_control
@@ -50,12 +50,12 @@ local function register_getreadonly(index)
     local signals = io.memory_getchannel_signals({ type = 'memory', location = 'mem', index = index - REG_CNM + 1 })
     return signals and #signals or 0
   else
-    assert.exception('Unknown register with internal index '.. index)
+    Assert.exception('Unknown register with internal index '.. index)
   end
 end
 
 local function register_getraw(index)
-  assert.regs_index_range(index, MC_REGS)
+  Assert.regs_index_range(index, MC_REGS)
   if state.regs[index] and not state.regs[index].count then
     state.regs[index].count = 0
   end
@@ -63,15 +63,15 @@ local function register_getraw(index)
 end
 
 local function register_setraw(index, signal)
-  assert.regs_index_range(index, MC_REGS)
-  assert.check(math.abs(signal.count or 0) ~= 1/0, "Division by zero")
+  Assert.regs_index_range(index, MC_REGS)
+  Assert.check(math.abs(signal.count or 0) ~= 1/0, "Division by zero")
   state.regs[index] = signal
 end
 
 local function addr_deref(_)
-  assert.check(_.addr ~= nil and _.pointer ~= nil, "Invalid address")
+  Assert.check(_.addr ~= nil and _.pointer ~= nil, "Invalid address")
   if _.pointer then
-    assert.check(_.addr <= MC_REGS)
+    Assert.check(_.addr <= MC_REGS)
     return register_getraw(_.addr).count
   else
     return _.addr
@@ -80,7 +80,7 @@ end
 
 
 function io.register_get(index_expr)
-  assert.check(index_expr.type == 'register', "Register expected")
+  Assert.check(index_expr.type == 'register', "Register expected")
   local addr = addr_deref(index_expr)
   if MC_REGS < addr then
     local result = table.deep_copy(NULL_SIGNAL)
@@ -92,7 +92,7 @@ function io.register_get(index_expr)
 end
 
 function io.register_set(index_expr, value)
-  assert.check(index_expr.type == 'register', "Register expected")
+  Assert.check(index_expr.type == 'register', "Register expected")
   local addr = addr_deref(index_expr)
   local signal = table.deep_copy(value)
   register_setraw(addr, signal)
@@ -100,7 +100,7 @@ end
 
 function io.register_set_count(index_expr, count)
   local value = io.register_get(index_expr)
-  assert.check(count == count, "Division by zero")
+  Assert.check(count == count, "Division by zero")
   value.count = count
   io.register_set(index_expr, value)
 end
@@ -129,9 +129,9 @@ local function output_get(index)
 end
 
 local function output_set(index, signal)
-  assert.check(1 <= index and index <= MC_OUTPUT, "Output cell index is out of range")
+  Assert.check(1 <= index and index <= MC_OUTPUT, "Output cell index is out of range")
   if signal and signal.count and signal.count ~= 0 and signal.signal then
-    assert.check(math.abs(signal.count) ~= 1/0, "Division by zero")
+    Assert.check(math.abs(signal.count) ~= 1/0, "Division by zero")
     output_control.set_signal(index, signal)
   else
     output_control.set_signal(index, nil)
@@ -158,10 +158,10 @@ function io.wire_get(_)
     local addr = addr_deref(_)
     return output_get(addr)
   elseif _.type == 'output' then
-    assert.todo()
+    Assert.todo()
   end
   if not state.cache.wires[_.color] then
-    assert.exception("Tried to access ".._.color.." wire when it is not connected")
+    Assert.exception("Tried to access ".._.color.." wire when it is not connected")
   end
   if state.cache.wires[_.color].signals then
     local addr = addr_deref(_)
@@ -175,9 +175,9 @@ function io.wire_set(_, signal)
     local addr = addr_deref(_)
     output_set(addr, signal)
   elseif _.type == 'output' then
-    assert.todo()
+    Assert.todo()
   else
-    assert.todo()
+    Assert.todo()
   end
 end
 
@@ -190,7 +190,7 @@ function io.wire_find_signal(color, signal_to_find)
     elseif color == 'input' then
       count = state.entity.get_merged_signal(signal_to_find, defines.circuit_connector_id.combinator_input)
     else
-      assert.exception("Tried to access "..color.." wire when it is not connected")
+      Assert.exception("Tried to access "..color.." wire when it is not connected")
     end
     return count
   end
@@ -241,18 +241,18 @@ function io.memory_getchannel_read(_)
       local network = control.get_circuit_network(ics.color_out or defines.wire_type.red, defines.circuit_connector_id.combinator_output)
       return network or control
     else
-      assert.exception("Memory channel does not exists")
+      Assert.exception("Memory channel does not exists")
     end
   elseif _.type == 'wire' then
     if _.color == 'out' then
       return output_control.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.constant_combinator)
     end
     if not state.cache.wires[_.color] then
-      assert.exception("Tried to access ".._.color.." wire when it is not connected")
+      Assert.exception("Tried to access ".._.color.." wire when it is not connected")
     end
     return state.cache.wires[_.color]
   else
-    assert.todo()
+    Assert.todo()
   end
 end
 
@@ -271,14 +271,14 @@ function io.memory_getchannel_write(_, corrective)
         end
       end
     end
-    assert.exception("Memory channel does not support writing")
+    Assert.exception("Memory channel does not support writing")
   elseif _.type == 'wire' then
     if _.color == 'out' then
       return output_control
     end
-    assert.exception("Could not write to ".._.color.." input wire")
+    Assert.exception("Could not write to ".._.color.." input wire")
   else
-    assert.todo()
+    Assert.todo()
   end
 end
 
@@ -291,40 +291,40 @@ function io.memory_getchannel_signals(_)
       local output = control.get_circuit_network(ics.color_out or defines.wire_type.red, defines.circuit_connector_id.combinator_output)
       return output and output.signals or control.signals_last_tick or {}
     else
-      assert.exception("Memory channel does not exists")
+      Assert.exception("Memory channel does not exists")
     end
   elseif _.type == 'wire' then
     if _.color == 'out' then
       return output_control.parameters
     end
     if not state.cache.wires[_.color] then
-      assert.exception("Tried to access ".._.color.." wire when it is not connected")
+      Assert.exception("Tried to access ".._.color.." wire when it is not connected")
     end
     return state.cache.wires[_.color].signals or {}
   else
-    assert.todo()
+    Assert.todo()
   end
 end
 
 local function memory_getraw(channel, addr)
   local signals = io.memory_getchannel_signals(channel)
-  --assert.check(signals ~= nil, "Trying to retrieve nil memory channel")
+  --Assert.check(signals ~= nil, "Trying to retrieve nil memory channel")
   return signals and signals[addr] or NULL_SIGNAL
 end
 
 local function memory_setraw(channel, addr, signal, corrective)
   local control = io.memory_getchannel_write(channel, corrective)
-  assert.check(control ~= nil, "Trying to access nil memory channel")
+  Assert.check(control ~= nil, "Trying to access nil memory channel")
   if addr == nil and signal == nil then
     -- Clear entire memory
     control.enabled = false
     control.parameters = nil
   else
     control.enabled = true
-    assert.check(1 <= addr and addr <= MC_OUTPUT, "Memory cell index is out of range")
+    Assert.check(1 <= addr and addr <= MC_OUTPUT, "Memory cell index is out of range")
     if signal and signal.count then
-      assert.check(signal.signal ~= nil, "Signal type should be specified when assigning to a memory cell")
-      assert.check(math.abs(signal.count) ~= 1/0, "Division by zero")
+      Assert.check(signal.signal ~= nil, "Signal type should be specified when assigning to a memory cell")
+      Assert.check(math.abs(signal.count) ~= 1/0, "Division by zero")
       control.set_signal(addr, signal)
     else
       control.set_signal(addr, nil)
@@ -333,13 +333,13 @@ local function memory_setraw(channel, addr, signal, corrective)
 end
 
 function io.memory_get(address)
-  assert.check(address.index ~= nil, "Should be addressable memory cell")
+  Assert.check(address.index ~= nil, "Should be addressable memory cell")
   local addr = addr_deref(address)
   return table.deep_copy(memory_getraw(address, addr))
 end
 
 function io.memory_set(address, signal)
-  assert.check(address.index ~= nil, "Should be addressable memory cell")
+  Assert.check(address.index ~= nil, "Should be addressable memory cell")
   local addr = addr_deref(address)
   local was = memory_getraw(address, addr)
   if was and was.signal then
@@ -359,7 +359,7 @@ function io.memory_clear(address)
       io.memory_clear{type='memory', location='mem', index=i}
     end
   else
-    assert.check(address.addr == nil, "Should be a memory channel")
+    Assert.check(address.addr == nil, "Should be a memory channel")
     memory_setraw(address, nil, nil, true)
     memory_setraw(address, nil, nil, false)
     io.GuiCache_InvalidateMemory(address.location .. address.index, 5)
@@ -388,21 +388,21 @@ function io.getsignal(_, types)
   if not types then
     types = {'signal', 'register', 'wire'}
   end
-  assert.type(_, types)
+  Assert.type(_, types)
   local signal = nil
   if _.type == 'wire' or _.type == 'input' then
     signal = io.wire_get(_)
   elseif _.type == 'register' then
     signal = io.register_get(_)
   elseif _.type == 'memory' then
-    assert.check(_.location == 'mem', 'expecting location `mem`')
+    Assert.check(_.location == 'mem', 'expecting location `mem`')
     signal = io.memory_get(_)
   elseif _.type == 'signal' or _.type == 'type' or _.type == 'value' then
     signal = _
   elseif _.type == 'string' then
-    assert.exception('not supported yet')
+    Assert.exception('not supported yet')
   else
-    assert.exception('trying to retrieve nil signal')
+    Assert.exception('trying to retrieve nil signal')
   end
   return signal
 end
@@ -411,29 +411,29 @@ function io.setsignal(_, signal, types)
   if not types then
     types = {'register', 'wire'}
   end
-  assert.type(_, types)
+  Assert.type(_, types)
   if _.type == 'wire' then
     io.wire_set(_, signal)
   elseif _.type == 'register' then
-    assert.check(_.location == 'reg', 'expecting location `reg`')
+    Assert.check(_.location == 'reg', 'expecting location `reg`')
     io.register_set(_, signal)
   elseif _.type == 'memory' then
     io.memory_set(_, signal)
-    --assert.exception('Memory cell could not be changed. Not supported yet.')
+    --Assert.exception('Memory cell could not be changed. Not supported yet.')
   elseif _.type == 'output' then
-    assert.todo()
+    Assert.todo()
   else
-    assert.exception('unhandled')
+    Assert.exception('unhandled')
   end
 end
 
 
 function io.getvalue(_, types)
   if _.type == 'value' then
-    local t = types and assert.type(_, types)
+    local t = types and Assert.type(_, types)
     return _.count
   elseif _.type == 'string' then
-    local t = types and assert.type(_, types)
+    local t = types and Assert.type(_, types)
     return _.str
   else
     local signal = io.getsignal(_, types)
@@ -443,7 +443,7 @@ function io.getvalue(_, types)
         return value
       end
     end
-    assert.exception('trying to retrieve nil count')
+    Assert.exception('trying to retrieve nil count')
   end
 end
 
@@ -459,7 +459,7 @@ end
 function io.gettype(_, types)
   local signal = io.getsignal(_, types)
   if type(signal) ~= 'table' or signal.signal == nil then
-    assert.exception('trying to retrieve nil type')
+    Assert.exception('trying to retrieve nil type')
   end
   return signal.signal
 end
@@ -479,8 +479,7 @@ function io.bind(state_)
 end
 
 
-function io.setup(assert_, hdlbuilder_, emitter_)
-  assert = assert_
+function io.setup(hdlbuilder_, emitter_)
   hdlbuilder = hdlbuilder_
   emitter = emitter_
 end

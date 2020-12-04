@@ -1,7 +1,6 @@
-local assert = require('src/cpu/assert')
+local Assert = require('src/cpu/assert')
 local state
 
-assert.setup()
 
 local _destroy_on_error = {}
 local builder = {}
@@ -481,7 +480,7 @@ function builder.create_arithmetic_cell(entity, input_a, input_b, operation)
     if type(input_b) == 'number' then
       constant = input_b
     else
-      assert.todo()
+      Assert.todo()
     end
   end
 
@@ -553,7 +552,7 @@ end
 -------------------------------------------------------------------------------------------------------
 
 local function connect_input_from(state, arg)
-  assert.is_memory_readable(arg)
+  Assert.is_memory_readable(arg)
   if arg.type == 'memory' then
     local ics_name = arg.location .. arg.index
     local mem_ics = state.program_ics[ics_name]
@@ -569,12 +568,12 @@ local function connect_input_from(state, arg)
       port = defines.circuit_connector_id.combinator_input
     }
   else
-    assert.todo()
+    Assert.todo()
   end
 end
 
 local function connect_output_to(state, ics, arg)
-  assert.is_memory_writable(arg)
+  Assert.is_memory_writable(arg)
   if arg.type == 'memory' then
     local ics_name = arg.location .. arg.index
     local mem_ics = state.program_ics[ics_name]
@@ -600,7 +599,7 @@ local function connect_output_to(state, ics, arg)
     }
     return 'output'
   else
-    assert.todo()
+    Assert.todo()
   end
 end
 
@@ -608,7 +607,7 @@ end
 
 local function vector_scalar_op(operation)
   return function(state, _)
-    local three = assert.two_or_three(_) == 3
+    local three = Assert.two_or_three(_) == 3
 
     local input = connect_input_from(state, (three and _[2]) or _[1])
     local value = nil
@@ -632,7 +631,7 @@ end
 
 local function vector_decide_op(operation)
   return function(state, _)
-    local three = assert.two_or_three(_) == 3
+    local three = Assert.two_or_three(_) == 3
 
     local input = connect_input_from(state, (three and _[2]) or _[1])
     local value = nil
@@ -658,7 +657,7 @@ end
 
 local ops = {
   xmov = function(state, _)
-    assert.two(_)
+    Assert.two(_)
 
     local wire_to = (_[1].type == 'wire')
 
@@ -681,7 +680,7 @@ local ops = {
   end,
 
   xuni = function(state, _)
-    assert.three(_)
+    Assert.three(_)
 
     local mainWireIsFirst = (_[2].type == 'wire')
     local input_a = connect_input_from(state, _[mainWireIsFirst and 2 or 3])
@@ -710,7 +709,7 @@ local ops = {
   end,
 
   xflt = function(state, _)
-    local three = assert.two_or_three(_) == 3
+    local three = Assert.two_or_three(_) == 3
 
     local input_a = connect_input_from(state, _[three and 2 or 1])
     local input_b = connect_input_from(state, _[three and 3 or 2])

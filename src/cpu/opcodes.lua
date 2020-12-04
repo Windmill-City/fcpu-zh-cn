@@ -1,31 +1,31 @@
-local assert
+local Assert = require('src/cpu/assert')
 local io
 
 
 local standard_op = function(_)
-  assert.two(_)
+  Assert.two(_)
   local _dst = _[1]
-  assert.is_register(_dst)
+  Assert.is_register(_dst)
   local _src = _[2]
-  assert.type(_src, {'register', 'value', 'input'})
+  Assert.type(_src, {'register', 'value', 'input'})
   return _dst, _src
 end
 local standard_op3 = function(_)
-  local three = (assert.two_or_three(_) == 3)
+  local three = (Assert.two_or_three(_) == 3)
   local _dst = _[1]
-  assert.is_register(_dst)
+  Assert.is_register(_dst)
   local _a = _[three and 2 or 1]
   local _b = _[three and 3 or 2]
   if three then
-    assert.type(_a, {'register', 'value', 'input'})
+    Assert.type(_a, {'register', 'value', 'input'})
   end
-  assert.type(_b, {'register', 'value', 'input'})
+  Assert.type(_b, {'register', 'value', 'input'})
   return _dst, _a, _b
 end
 local jump_op = function(addr, offset)
-  assert.type(addr, {'label', 'value', 'register'})
+  Assert.type(addr, {'label', 'value', 'register'})
   if offset then
-    assert.type(offset, {'value', 'register'})
+    Assert.type(offset, {'value', 'register'})
     offset = io.getvalue(offset) or 0
   else
     offset = 0
@@ -39,9 +39,9 @@ end
 
 local test_mnemonics = function(condition)
   return function(_)
-    assert.two(_)
-    assert.type(_[1], {'value', 'string', 'input', 'register'})
-    assert.type(_[2], {'value', 'string', 'input', 'register'})
+    Assert.two(_)
+    Assert.type(_[1], {'value', 'string', 'input', 'register'})
+    Assert.type(_[2], {'value', 'string', 'input', 'register'})
     if not condition(_[1], _[2]) then
       return { type = 'skip' }
     end
@@ -50,9 +50,9 @@ end
 
 local branch_mnemonics = function(condition)
   return function(_)
-    assert.three_or_four(_)
-    assert.type(_[1], {'value', 'string', 'input', 'register'})
-    assert.type(_[2], {'value', 'string', 'input', 'register'})
+    Assert.three_or_four(_)
+    Assert.type(_[1], {'value', 'string', 'input', 'register'})
+    Assert.type(_[2], {'value', 'string', 'input', 'register'})
     if condition(_[1], _[2]) then
       return jump_op(_[3], _[4])
     end
@@ -61,8 +61,8 @@ end
 
 local bk_mnemonics = function(color)
   return function(_)
-    assert.one(_)
-    assert.type(_[1], {'value', 'register'})
+    Assert.one(_)
+    Assert.type(_[1], {'value', 'register'})
     local count = io.getvalue(_[1])
     if io.wire_count(color) < count then
       return {type = 'block'}
@@ -74,7 +74,7 @@ end
 
 local bt_mnemonics = function(color)
   return function(_)
-    assert.one(_)
+    Assert.one(_)
     local type = io.gettype(_[1], {'type', 'register'})
     if (io.wire_find_signal(color, type) or 0) ~= 0 then
       return {type = 'next'}
@@ -86,10 +86,10 @@ end
 
 local btc_mnemonics = function(color)
   return function(_)
-    assert.one(_)
+    Assert.one(_)
     local oldSig = io.register_get(_[1])
     local type = oldSig.signal
-    assert.check(type, 'Type should be specified for reference signal')
+    Assert.check(type, 'Type should be specified for reference signal')
     local newCnt = io.wire_find_signal(color, type)
     if newCnt == oldSig.count then
       return {type = 'block'}
@@ -102,9 +102,9 @@ end
 
 local find_in_wire = function(color)
   return function(_)
-    assert.two(_)
+    Assert.two(_)
     local _dst = _[1]
-    assert.type(_dst, {'register', 'output'})
+    Assert.type(_dst, {'register', 'output'})
     local _type = io.gettype(_[2], {'type', 'register', 'input'})
     local count = io.wire_find_signal(color, _type)
     local signal = (count and count ~= 0) and { signal = _type, count = count }
@@ -113,11 +113,11 @@ local find_in_wire = function(color)
 end
 
 local find_in_channel = function(_)
-  assert.three(_)
+  Assert.three(_)
   local _dst = _[1]
-  assert.type(_dst, {'register', 'output'})
+  Assert.type(_dst, {'register', 'output'})
   local _chan = _[2]
-  assert.type(_chan, {'input', 'memory'})
+  Assert.type(_chan, {'input', 'memory'})
   local _type = io.gettype(_[3], {'type', 'register', 'input'})
   local control = io.memory_getchannel_read(_chan)
   local count = control.get_signal(_type)
@@ -129,11 +129,11 @@ local find_in_channel = function(_)
 end
 
 local index_in_channel = function(_)
-  assert.three(_)
+  Assert.three(_)
   local _dst = _[1]
-  assert.type(_dst, {'register', 'output'})
+  Assert.type(_dst, {'register', 'output'})
   local _chan = _[2]
-  assert.type(_chan, {'input', 'memory'})
+  Assert.type(_chan, {'input', 'memory'})
   local _type = io.gettype(_[3], {'type', 'register', 'input'})
   local signals = io.memory_getchannel_signals(_chan)
   if signals then
@@ -176,7 +176,7 @@ local opcodes = {
     if 0 < #_ then
       for i, expr in ipairs(_) do
         if expr then
-          assert.type(expr, {'register', 'memory', 'output'})
+          Assert.type(expr, {'register', 'memory', 'output'})
           if expr.type == 'register' then
             if expr.addr then
               io.register_set(expr, NULL_SIGNAL)
@@ -221,16 +221,16 @@ local opcodes = {
   end,
 
   mov = function(_) -- mov dst...[R/O] src[V/T/S/R/I]
-    assert.two_or_more(_)
+    Assert.two_or_more(_)
     local sig = io.getsignal(_[#_], {'value', 'type', 'signal', 'register', 'input'})
     for i = 1, #_ - 1 do
       io.setsignal(_[i], sig, {'register', 'wire'})
     end
   end,
   emit = function(_) -- emit dst[M] src...[V/T/S/R/I]
-    assert.two_or_more(_)
+    Assert.two_or_more(_)
     local dst = table.deep_copy(_[1])
-    assert.is_memory_writable(dst)
+    Assert.is_memory_writable(dst)
     local signals = io.memory_getchannel_signals(dst)
     dst.addr = signals and #signals or 0
     for i = 2,#_ do
@@ -240,14 +240,14 @@ local opcodes = {
     end
   end,
   ssv = function(_) -- ssv dst...[R] val[V/S/R/I]
-    assert.two_or_more(_)
+    Assert.two_or_more(_)
     local sigcount = io.getvalue(_[#_], {'value', 'signal', 'register', 'input'})
     for i = 1, #_ - 1 do
       io.setcount(_[i], sigcount, {'register', 'output'})
     end
   end,
   sst = function(_) -- sst dst...[R] type[T/S/R/I]
-    assert.two_or_more(_)
+    Assert.two_or_more(_)
     local sigtype = io.gettype(_[#_], {'type', 'signal', 'register', 'input'})
     for i = 1, #_ - 1 do
       io.settype(_[i], sigtype, {'register', 'output'})
@@ -265,24 +265,24 @@ local opcodes = {
   end,
 
   swp = function(_) -- swp reg1[R] reg2[R]
-    assert.two(_)
-    assert.is_register(_[1], _[2])
+    Assert.two(_)
+    Assert.is_register(_[1], _[2])
     local a = io.getsignal(_[1], {'register'})
     local b = io.getsignal(_[2], {'register'})
     io.setsignal(_[1], b, {'register'})
     io.setsignal(_[2], a, {'register'})
   end,
   swpt = function(_) -- swpt reg1[R] reg2[R]
-    assert.two(_)
-    assert.is_register(_[1], _[2])
+    Assert.two(_)
+    Assert.is_register(_[1], _[2])
     local a = io.gettype(_[1], {'register'})
     local b = io.gettype(_[2], {'register'})
     io.settype(_[1], b, {'register'})
     io.settype(_[2], a, {'register'})
   end,
   swpv = function(_) -- swpv reg1[R] reg2[R]
-    assert.two(_)
-    assert.is_register(_[1], _[2])
+    Assert.two(_)
+    Assert.is_register(_[1], _[2])
     local a = io.getvalue(_[1], {'register'})
     local b = io.getvalue(_[2], {'register'})
     io.setcount(_[1], b, {'register'})
@@ -315,15 +315,15 @@ local opcodes = {
   end,
 
   inc = function(_)
-    assert.one(_)
+    Assert.one(_)
     local _dst = _[1]
-    assert.is_register(_dst)
+    Assert.is_register(_dst)
     io.register_set_count(_dst, io.getvalue(_dst) + 1)
   end,
   dec = function(_)
-    assert.one(_)
+    Assert.one(_)
     local _dst = _[1]
-    assert.is_register(_dst)
+    Assert.is_register(_dst)
     io.register_set_count(_dst, io.getvalue(_dst) - 1)
   end,
 
@@ -345,45 +345,45 @@ local opcodes = {
   end,
 
   fract = function(_)
-    assert.one(_)
+    Assert.one(_)
     local r = io.getvalue(_[1], {'register'})
     io.register_set_count(_[1], r - math.floor(r))
   end,
   floor = function(_)
-    assert.one(_)
+    Assert.one(_)
     local r = io.getvalue(_[1], {'register'})
     io.register_set_count(_[1], math.floor(r))
   end,
   round = function(_)
-    assert.one(_)
+    Assert.one(_)
     local r = io.getvalue(_[1], {'register'})
     io.register_set_count(_[1], math.floor(r + 0.5))
   end,
   ceil = function(_)
-    assert.one(_)
+    Assert.one(_)
     local r = io.getvalue(_[1], {'register'})
     io.register_set_count(_[1], math.ceil(r))
   end,
 
   rnd = function(_) -- rnd dst[R/O] min[C/R/I] max[C/R/I]
-    assert.three(_)
+    Assert.three(_)
     local _dst = _[1]
-    assert.is_register(_dst)
+    Assert.is_register(_dst)
     local _min = _[2]
     local _max = _[3]
-    assert.type(_min, {'register', 'value', 'input'})
-    assert.type(_max, {'register', 'value', 'input'})
+    Assert.type(_min, {'register', 'value', 'input'})
+    Assert.type(_max, {'register', 'value', 'input'})
     local min = io.getvalue(_min)
     local range  = io.getvalue(_max) - min + 1
-    assert.check(0 <= range, "Minimum limit should be less or queal than the maximum limit")
+    Assert.check(0 <= range, "Minimum limit should be less or queal than the maximum limit")
     local r = min + (math.random() * range)
     io.register_set_count(_dst, r)
   end,
 
   dig = function(_) -- dig dst[R] num[C/R/I]
-    assert.two(_)
-    assert.type(_[1], {'register'})
-    assert.type(_[2], {'value', 'register', 'input'})
+    Assert.two(_)
+    Assert.type(_[1], {'register'})
+    Assert.type(_[2], {'value', 'register', 'input'})
     local d = io.getvalue(_[1])
     local n = io.getvalue(_[2])
     n = math.max(0, n)-- + 1
@@ -392,10 +392,10 @@ local opcodes = {
     io.register_set_count(_[1], tonumber(s:sub(n, n)) or 0)
   end,
   dis = function(_) -- dis dst[R] num[C/R/I] val[C/R/I]
-    assert.three(_)
-    assert.type(_[1], {'register'})
-    assert.type(_[2], {'value', 'register', 'input'})
-    assert.type(_[3], {'value', 'register', 'input'})
+    Assert.three(_)
+    Assert.type(_[1], {'register'})
+    Assert.type(_[2], {'value', 'register', 'input'})
+    Assert.type(_[3], {'value', 'register', 'input'})
     local d = io.getvalue(_[1])
     local n = io.getvalue(_[2])
     local v = io.getvalue(_[3])
@@ -423,10 +423,10 @@ local opcodes = {
     io.register_set_count(_dst, math.tan(io.getvalue(_src)))
   end,
   atan2 = function(_) -- * **atan2** dst[R] x[C/R/I] y[C/R/I]
-    assert.three(_)
-    assert.type(_[1], {'register'})
-    assert.type(_[2], {'value', 'register', 'input'})
-    assert.type(_[3], {'value', 'register', 'input'})
+    Assert.three(_)
+    Assert.type(_[1], {'register'})
+    Assert.type(_[2], {'value', 'register', 'input'})
+    Assert.type(_[3], {'value', 'register', 'input'})
     local y = io.getvalue(_[2])
     local x = io.getvalue(_[3])
     io.register_set_count(_[1], math.atan2(y, x))
@@ -460,10 +460,10 @@ local opcodes = {
     io.register_set_count(_dst, r)
   end,
   bnot = function(_)
-    local two = assert.one_or_two(_)
+    local two = Assert.one_or_two(_)
     local _dst = _[1]
     local _src = _[two and 2 or 1]
-    assert.is_register(_dst, _src)
+    Assert.is_register(_dst, _src)
     local result = bit32.bnot(io.getvalue(_src))
     io.register_set_count(io.getvalue(_dst), result)
   end,
@@ -495,7 +495,7 @@ local opcodes = {
   tge = test_mnemonics(function(a, b) return io.getvalue(a) >= io.getvalue(b) end), -- tge a[C/S/R/I] b[C/S/R/I]
   tle = test_mnemonics(function(a, b) return io.getvalue(a) <= io.getvalue(b) end), -- tle a[C/S/R/I] b[C/S/R/I]
   tas = function(_) -- tas a[T/R/I] b[T/R/I]
-    assert.two(_)
+    Assert.two(_)
     local as = io.gettype(_[1], {'type', 'input', 'register'})
     local bs = io.gettype(_[2], {'type', 'input', 'register'})
     local av = (as ~= nil)
@@ -509,7 +509,7 @@ local opcodes = {
     end
   end,
   tad = function(_) -- tad a[T/R/I] b[T/R/I]
-    assert.two(_)
+    Assert.two(_)
     local as = io.gettype(_[1], {'type', 'input', 'register'})
     local bs = io.gettype(_[2], {'type', 'input', 'register'})
     local av = (as ~= nil)
@@ -530,7 +530,7 @@ local opcodes = {
   bge = branch_mnemonics(function(a, b) return io.getvalue(a) >= io.getvalue(b) end), -- bge a[C/S/R/I] b[C/S/R/I] addr[L/A/R]
   ble = branch_mnemonics(function(a, b) return io.getvalue(a) <= io.getvalue(b) end), -- ble a[C/S/R/I] b[C/S/R/I] addr[L/A/R]
   bas = function(_) -- bas a[T/R/I] b[T/R/I] addr[L/A/R]
-    assert.three(_)
+    Assert.three(_)
     local as = io.gettype(_[1], {'type', 'input', 'register'})
     local bs = io.gettype(_[2], {'type', 'input', 'register'})
     local av = (as ~= nil)
@@ -545,7 +545,7 @@ local opcodes = {
     return jump_op(_[3])
   end,
   bad = function(_) -- bad a[T/R/I] b[T/R/I] addr[L/A/R]
-    assert.three(_)
+    Assert.three(_)
     local as = io.gettype(_[1], {'type', 'input', 'register'})
     local bs = io.gettype(_[2], {'type', 'input', 'register'})
     local av = (as ~= nil)
@@ -561,10 +561,10 @@ local opcodes = {
   end,
 
   lea = function(_)
-    assert.two(_)
-    assert.is_register(_[1])
+    Assert.two(_)
+    Assert.is_register(_[1])
     local label = _[2]
-    assert.type(label, {'label'})
+    Assert.type(label, {'label'})
     local addr = io.for_entity(function(entity, state)
       for line_num, node in ipairs(state.program_ast) do
         if node and node.type == 'label' and node.label == label.label then
@@ -572,19 +572,19 @@ local opcodes = {
         end
       end
     end)
-    assert.check(addr ~= nil, 'Undefined label')
+    Assert.check(addr ~= nil, 'Undefined label')
     io.register_set_count(_[1], addr)
   end,
   jmp = function(_)
-    assert.one_or_two(_)
+    Assert.one_or_two(_)
     return jump_op(_[1], _[2])
   end,
   hlt = function(_)
     return { type = 'halt' }
   end,
   slp = function(_)
-    assert.one(_)
-    assert.type(_[1], {'value', 'register'})
+    Assert.one(_)
+    Assert.type(_[1], {'value', 'register'})
     return { type = 'sleep', val = io.getvalue(_[1]) }
   end,
 
@@ -600,9 +600,9 @@ local opcodes = {
   btic = btc_mnemonics('input'),
 
   nmd = function(_) -- Nuclear Meltdown
-    assert.one(_)
-    assert.type(_[1], {'type'})
-    assert.check(_[1].signal.type == 'item' and (_[1].signal.name == 'uranium-fuel-cell' or _[1].signal.name == 'atomic-bomb'), 'Argument is pretty impoverished. Please, use enriched one!')
+    Assert.one(_)
+    Assert.type(_[1], {'type'})
+    Assert.check(_[1].signal.type == 'item' and (_[1].signal.name == 'uranium-fuel-cell' or _[1].signal.name == 'atomic-bomb'), 'Argument is pretty impoverished. Please, use enriched one!')
     return io.for_entity(function(entity)
       return {type='deffer', deffer={
         {action='exec', delay=0,  proc='game.print', args={'[color=red]fCPU core melting down... Better RUN![/color]'}},
@@ -620,7 +620,7 @@ local opcodes = {
   end,
 
   uiss = function(_) -- Utility Item Stack Size
-    assert.two(_)
+    Assert.two(_)
     local signal = io.gettype(_[2], {'type', 'register'})
     if signal.type ~= 'item' then
       io.setsignal(_[1], NULL_SIGNAL)
@@ -630,23 +630,23 @@ local opcodes = {
       --else
       --  str = '['.. signal.type ..'='.. signal.name ..']'
       --end
-      --assert.exception('Expecting `[item=...]` signal type, got \''.. str ..'\'.')
+      --Assert.exception('Expecting `[item=...]` signal type, got \''.. str ..'\'.')
     else
       local proto = game.item_prototypes[signal.name]
-      assert.check(proto ~= nil, 'Unknown item name specified.')
+      Assert.check(proto ~= nil, 'Unknown item name specified.')
       io.setsignal(_[1], { signal=signal, count=proto.stack_size })
     end
   end,
 
   ugpf = function(_) -- Utility Get Prototype Field
-    assert.three(_)
+    Assert.three(_)
     local signal = io.gettype(_[2], {'type', 'register'})
     if signal.type ~= 'item' then
       io.setsignal(_[1], NULL_SIGNAL)
     else
       local proto = game.item_prototypes[signal.name]
       if proto == nil then
-        assert.exception('Unknown prototype '.. signal.name ..' specified.')
+        Assert.exception('Unknown prototype '.. signal.name ..' specified.')
       end
 
       local getFieldValue = function(var, field)
@@ -658,7 +658,7 @@ local opcodes = {
           else
             var = var[v]
             if b == ')' then
-              assert.check(bak, 'Unmatched brace found')
+              Assert.check(bak, 'Unmatched brace found')
               var = bak(var)
               bak = nil
             end
@@ -673,7 +673,7 @@ local opcodes = {
       if not success then
         success, value = pcall(getFieldValue, proto.place_result, field)
       end
-      assert.check(success, value)
+      Assert.check(success, value)
 
       local t = type(value)
       if t == 'number' then
@@ -691,8 +691,7 @@ function EasterEgg_nmd(entity, ...)
   entity.surface.create_entity(...)
 end
 
-function opcodes.setup(assert_, io_)
-  assert = assert_
+function opcodes.setup(io_)
   io = io_
 end
 return opcodes

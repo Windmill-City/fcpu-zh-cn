@@ -1,4 +1,4 @@
-local assert = require('src/cpu/assert')
+local Assert = require('src/cpu/assert')
 local io = require('src/cpu/io')
 local ops = require('src/cpu/opcodes')
 local ops_vx = require('src/cpu/opcodes_vx')
@@ -36,7 +36,7 @@ local function eval(ast, ics)
       if ops[_.name] then
         return ops[_.name](_.expr)
       else
-        assert.exception('Unknown opcode: '.._.name)
+        Assert.exception('Unknown opcode: '.._.name)
       end
     elseif _.type == 'ic' then
       if ops_vx[_.name] then
@@ -46,23 +46,23 @@ local function eval(ast, ics)
         end
         return result
       else
-        assert.exception('Unknown opcode: '.._.name)
+        Assert.exception('Unknown opcode: '.._.name)
       end
     elseif _.type == 'nop' or _.type == 'label' then
       -- do nothing
     elseif _.type == 'error' and _.error ~= nil then
-      assert.exception(_.error)
+      Assert.exception(_.error)
     elseif _.type == 'value' or _.type == 'string' then
       return _.str or _.count
     else
-      assert.exception('Unable to parse code '.. serpent.block(_))
+      Assert.exception('Unable to parse code '.. serpent.block(_))
     end
   end
 
   if ast then
     local result = node(ast)
     if type(result) == 'number' then
-      assert.exception('Expected an opcode but instead read an integer.')
+      Assert.exception('Expected an opcode but instead read an integer.')
     end
     return result
   end
@@ -83,9 +83,8 @@ end
 
 
 function Evaluator.setup(hdlBuilder, emitter)
-  assert.setup()
-  io.setup(assert, hdlBuilder, emitter)
-  ops.setup(assert, io)
-  ops_vx.setup(assert, io, hdlBuilder)
+  io.setup(hdlBuilder, emitter)
+  ops.setup(io)
+  ops_vx.setup(io)
 end
 return Evaluator

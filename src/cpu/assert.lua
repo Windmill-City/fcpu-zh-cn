@@ -1,4 +1,4 @@
-local assert = {}
+local Assert = {}
 
 
 --- Throws an exception, the exception has a control character prepended to that
@@ -9,19 +9,19 @@ local function exception(e)
 end
 
 -- Assertion Helper Functions
-function assert.exception(...)
+function Assert.exception(...)
   exception(...)
 end
 
-function assert.deprecated(since_ver, ...)
+function Assert.deprecated(since_ver, ...)
   -- TODO: implement non fatal warning show to user
 end
 
-function assert.todo(msg)
+function Assert.todo(msg)
   exception("NOT IMPLEMENTED".. (msg and (': '..msg) or ''))
 end
 
-function assert.check(b, ...)
+function Assert.check(b, ...)
   if not b then
     if ... and 0 < #... then
       exception(...)
@@ -31,19 +31,19 @@ function assert.check(b, ...)
   end
 end
 
-function assert.one(_)
+function Assert.one(_)
   if #_ ~= 1 then
     exception("Expecting one parameter after opcode")
   end
 end
 
-function assert.two(_)
+function Assert.two(_)
   if #_ ~= 2 then
     exception("Expecting two parameters after opcode")
   end
 end
 
-function assert.one_or_two(_)
+function Assert.one_or_two(_)
   if #_ < 1 then
     exception("Expecting at least one parameters after opcode")
   end
@@ -53,34 +53,34 @@ function assert.one_or_two(_)
   return #_
 end
 
-function assert.two_or_three(_)
+function Assert.two_or_three(_)
   if #_ ~= 2 and #_ ~= 3 then
     exception("Expecting two or three parameters after opcode")
   end
   return #_
 end
 
-function assert.two_or_more(_)
+function Assert.two_or_more(_)
   if #_ < 2 then
     exception("Expecting at least two parameters after opcode")
   end
   return #_
 end
 
-function assert.three(_)
+function Assert.three(_)
   if #_ ~= 3 then
     exception("Expecting three parameters after opcode")
   end
 end
 
-function assert.three_or_four(_)
+function Assert.three_or_four(_)
   if #_ ~= 3 and #_ ~= 4 then
     exception("Expecting three or four parameters after opcode")
   end
   return #_
 end
 
-function assert.type(_, valid)
+function Assert.type(_, valid)
   -- wire, register, memory
   for i,v in ipairs(valid) do
     if _.type == v then
@@ -97,7 +97,7 @@ function assert.type(_, valid)
       if _.type == 'wire' and _.color == 'out' then
         return
       elseif _.type == 'output' then
-        assert.todo()
+        Assert.todo()
         return
       end
     elseif v == 'register' and _.type == 'memory' and _.addr ~= nil then
@@ -107,7 +107,7 @@ function assert.type(_, valid)
   exception("Expecting parameter to be a "..(table.concat(valid, ' or ')))
 end
 
-function assert.is_register(...)
+function Assert.is_register(...)
   for _,v in ipairs(table.pack(...)) do
     if v.type ~= "register" then
       if not (v.type == 'memory' and v.addr ~= nil) then
@@ -117,7 +117,7 @@ function assert.is_register(...)
   end
 end
 
-function assert.is_memory(...)
+function Assert.is_memory(...)
   for _,v in ipairs(table.pack(...)) do
     if v.type ~= "memory" or v.index == nil or v.addr ~= nil then
       exception("Expecting parameter to be a memory")
@@ -125,7 +125,7 @@ function assert.is_memory(...)
   end
 end
 
-function assert.is_memory_readable(...)
+function Assert.is_memory_readable(...)
   for _,v in ipairs(table.pack(...)) do
     if v.type ~= "memory" or v.index == nil or v.addr ~= nil then
       if v.type ~= 'wire' or (v.color ~= 'red' and v.color ~= 'green') then
@@ -135,7 +135,7 @@ function assert.is_memory_readable(...)
   end
 end
 
-function assert.is_memory_writable(...)
+function Assert.is_memory_writable(...)
   for _,v in ipairs(table.pack(...)) do
     if v.type ~= "memory" or v.index == nil or v.addr ~= nil then
       if v.type ~= 'wire' or v.color ~= 'out' then
@@ -145,7 +145,7 @@ function assert.is_memory_writable(...)
   end
 end
 
-function assert.regs_index_range(index, max)
+function Assert.regs_index_range(index, max)
   if index == nil then
     exception("No register address specified.")
   end
@@ -154,7 +154,7 @@ function assert.regs_index_range(index, max)
   end
 end
 
-function assert.memory_index_range(index, max)
+function Assert.memory_index_range(index, max)
   if index == nil then
     exception("No memory address specified.")
   end
@@ -164,7 +164,7 @@ function assert.memory_index_range(index, max)
 end
 
 
-function assert.result_signal(reg, signal)
+function Assert.result_signal(reg, signal)
   return
     (signal.count == nil or reg.count == signal.count) and
     (signal.signal == nil or
@@ -173,6 +173,4 @@ function assert.result_signal(reg, signal)
     )
 end
 
-function assert.setup()
-end
-return assert
+return Assert
