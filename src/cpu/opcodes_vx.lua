@@ -163,7 +163,7 @@ local opcodes_vx = {
 }
 
 
-function opcodes_vx.bind(assert_, io_, hdlbuilder_)
+function opcodes_vx.setup(assert_, io_, hdlbuilder_)
   hdlbuilder = hdlbuilder_
   assert = assert_
   io = io_

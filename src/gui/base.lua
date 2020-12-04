@@ -101,8 +101,8 @@ end)
 
 -------------------------------------------------------------------------------------------------------
 
-MainView.bind(gui, MemoryView, ControlHandlers)
-MemoryView.bind(gui)
+MainView.setup(gui, MemoryView, ControlHandlers)
+MemoryView.setup(gui)
 gui.register_handlers()
 
 -------------------------------------------------------------------------------------------------------

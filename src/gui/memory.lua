@@ -246,7 +246,7 @@ end
 
 -------------------------------------------------------------------------------------------------------
 
-function MemoryView.bind(gui_)
+function MemoryView.setup(gui_)
   gui = gui_
   MemoryView.RegisterHandlers()
 end

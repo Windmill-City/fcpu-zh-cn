@@ -53,7 +53,7 @@ function emitter.make_wire(name, address)
 end
 
 
-function emitter.bind(assert_)
+function emitter.setup(assert_)
     assert = assert_
 end
 return emitter

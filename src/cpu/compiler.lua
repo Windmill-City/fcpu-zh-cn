@@ -280,10 +280,10 @@ function Compiler.verify(state)
 end
 
 
-function Compiler.bind(evaluator_)
-  assert.bind()
-  emitter.bind(assert)
+function Compiler.setup(evaluator_)
+  assert.setup()
+  emitter.setup(assert)
   evaluator = evaluator_
-  evaluator.bind(hdlBuilder, emitter)
+  evaluator.setup(hdlBuilder, emitter)
 end
 return Compiler

@@ -616,7 +616,7 @@ end
 
 -------------------------------------------------------------------------------------------------------
 
-function MainView.bind(gui_, memoryview_, handlers)
+function MainView.setup(gui_, memoryview_, handlers)
   gui = gui_
   MemoryView = memoryview_
   MainView.RegisterTemplates()

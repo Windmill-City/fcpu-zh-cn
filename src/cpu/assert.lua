@@ -173,6 +173,6 @@ function assert.result_signal(reg, signal)
     )
 end
 
-function assert.bind()
+function assert.setup()
 end
 return assert

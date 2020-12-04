@@ -691,7 +691,7 @@ function EasterEgg_nmd(entity, ...)
   entity.surface.create_entity(...)
 end
 
-function opcodes.bind(assert_, io_)
+function opcodes.setup(assert_, io_)
   assert = assert_
   io = io_
 end

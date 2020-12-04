@@ -1,7 +1,7 @@
 local Compiler = require('src/cpu/compiler')
 local Evaluator = require('src/cpu/evaluator')
 
-Compiler.bind(Evaluator)
+Compiler.setup(Evaluator)
 
 PSTATE_HALTED = 0
 PSTATE_RUNNING = 1

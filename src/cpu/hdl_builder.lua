@@ -1,7 +1,7 @@
 local assert = require('src/cpu/assert')
 local state
 
-assert.bind()
+assert.setup()
 
 local _destroy_on_error = {}
 local builder = {}
@@ -777,6 +777,6 @@ function builder.construct(ast, state_)
 end
 
 
-function builder.bind()
+function builder.setup()
 end
 return builder

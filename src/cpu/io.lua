@@ -472,14 +472,14 @@ function io.settype(_, sigtype, types)
 end
 
 
-function io.setup(state_)
+function io.bind(state_)
   state = state_
   output_control = state_.cache.control.output
   indication_control = state_.cache.control.indication
 end
 
 
-function io.bind(assert_, hdlbuilder_, emitter_)
+function io.setup(assert_, hdlbuilder_, emitter_)
   assert = assert_
   hdlbuilder = hdlbuilder_
   emitter = emitter_

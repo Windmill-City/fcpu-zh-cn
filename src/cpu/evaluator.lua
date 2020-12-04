@@ -69,7 +69,7 @@ local function eval(ast, ics)
 end
 
 function Evaluator.eval(ast, ics, state)
-  io.setup(state)
+  io.bind(state)
 
   local status, results = pcall(eval, ast, ics)
   --local status, results = true, eval(ast)
@@ -82,10 +82,10 @@ end
 
 
 
-function Evaluator.bind(hdlBuilder, emitter)
-  assert.bind()
-  io.bind(assert, hdlBuilder, emitter)
-  ops.bind(assert, io)
-  ops_vx.bind(assert, io, hdlBuilder)
+function Evaluator.setup(hdlBuilder, emitter)
+  assert.setup()
+  io.setup(assert, hdlBuilder, emitter)
+  ops.setup(assert, io)
+  ops_vx.setup(assert, io, hdlBuilder)
 end
 return Evaluator
