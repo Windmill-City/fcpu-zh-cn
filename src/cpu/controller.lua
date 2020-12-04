@@ -147,6 +147,10 @@ function Controller.set_program_counter(state, value)
   Controller.GuiCache_InvalidateLine(state, state.instruction_pointer)
 end
 
+local function advance(state, inc)
+  Controller.set_program_counter(state, state.instruction_pointer + (inc or 1))
+end
+
 local function run_deffer_command(op)
   debug_assert(not op.at or op.at + op.delay == game.tick, "Out of order deffered action executed")
 
@@ -156,12 +160,13 @@ local function run_deffer_command(op)
       debug_assert(state.sleep_at + op.delay == game.tick)
       state.sleep_time = 0
       Controller.update_state(state, PSTATE_RUNNING)
-      Controller.set_program_counter(state, state.instruction_pointer + 1)
+      advance(state)
     end
   elseif op.action == 'sync' then
     local state = global.fcpus[op.index]
     if state then
       state.need_sync = nil
+      advance(state)
     end
   elseif op.action == 'disable' then
     if op.ic and op.ic.valid then
@@ -189,6 +194,7 @@ local function run_deffer_command(op)
 end
 
 function Controller.add_deferred(state, deffer)
+  local need_sync = false
   -- only numeric indices, skip named one!
   for _, op in ipairs(deffer) do
     if op.delay == 0 then
@@ -198,11 +204,11 @@ function Controller.add_deferred(state, deffer)
       local at_tick = game.tick + t.delay
       t.at = game.tick
       Heap.put(global.deffered, at_tick, t)
-      if t.action == 'sync' then
-        state.need_sync = true
-      end
+      need_sync = need_sync or (t.action == 'sync')
     end
   end
+  state.need_sync = need_sync
+  return need_sync
 end
 
 function Controller.do_defferred(state)
@@ -299,7 +305,7 @@ function Controller.tick(state, sync_wait)
       elseif result then
         if result.type == 'halt' then
           Controller.halt(state)
-          Controller.set_program_counter(state, state.instruction_pointer + 1)
+          advance(state)
         elseif result.type == 'sleep' then
           Controller.sleep(state, result.val)
         elseif result.type == 'jump' then
@@ -317,22 +323,26 @@ function Controller.tick(state, sync_wait)
           -- FIXME: should take into account the fcpu_maximum_updates_per_tick limit!
           -- Do nothing, keeping the instruction_pointer the same.
         elseif result.type == 'skip' then
-          Controller.set_program_counter(state, state.instruction_pointer + 2)
+          advance(state, 2)
         elseif result.type == 'next' then
-          Controller.set_program_counter(state, state.instruction_pointer + 1)
+          advance(state)
           goto repeat_eval
         elseif result.type == 'xwait' then
           if not sync_wait then
-            Controller.set_program_counter(state, state.instruction_pointer + 1)
+            advance(state)
           end
         elseif result.type == 'deffer' then
-          Controller.set_program_counter(state, state.instruction_pointer + 1)
-          Controller.add_deferred(state, result.deffer)
+          if not Controller.add_deferred(state, result.deffer) then
+            advance(state)
+          end
         end
       else
-        Controller.set_program_counter(state, state.instruction_pointer + 1)
         if ast and ast.deffer then
-          Controller.add_deferred(state, ast.deffer.run)
+          if not Controller.add_deferred(state, ast.deffer.run) then
+            advance(state)
+          end
+        else
+          advance(state)
         end
       end
     end
@@ -356,7 +366,7 @@ end
 function Controller.step(state, over)
   Controller.set_error_message(state, nil)
   if state.program_state == PSTATE_SLEEPING then
-    Controller.set_program_counter(state, state.instruction_pointer + 1)
+    advance(state)
     Controller.halt(state)
   else
     state.sleep_time = 0

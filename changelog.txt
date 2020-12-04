@@ -2,7 +2,8 @@
 Version: 0.4.10
 Date: ????
   Changes:
-    - Refactored clear sequence, sync.
+    - Instruction pointer move to next instruction after completing current.
+    - Refactored 'clear' and 'sync' sequence.
   Bugfixes:
     - Read memory from output buffer.
 ---------------------------------------------------------------------------------------------------
