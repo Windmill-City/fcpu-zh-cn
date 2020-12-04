@@ -438,17 +438,23 @@ return {
   ["0.4.10"] = function()
     foreach_fcpu(function(fcpu, state)
       for _1, line in pairs(state.program_ast or {}) do
-        local sync_delay
-        for _2, op in pairs(line.deffer or {}) do
-          if op.action == 'noop' then
-            if not sync_delay or (sync_delay < op.delay) then
-              sync_delay = op.delay
+        if line.deffer then
+          local sync_delay
+          for _2, op in pairs(line.deffer) do
+            if op.action == 'noop' then
+              if not sync_delay or (sync_delay < op.delay) then
+                sync_delay = op.delay
+              end
+              line.deffer[_2] = nil
             end
-            line.deffer[_2] = nil
           end
-        end
-        if sync_delay then
-          table.insert(line.deffer, {action='sync', index=state.index, delay = sync_delay + 1})
+          if sync_delay then
+            table.insert(line.deffer, {action='sync', index=state.index, delay = sync_delay + 1})
+          end
+          assert(state.program_ics[_1] ~= nil)
+          line.deffer = {
+            run = line.deffer,
+          }
         end
       end
     end)

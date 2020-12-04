@@ -208,7 +208,6 @@ function io.get_node(name)
 end
 
 function io.ics_set(name, index)
-  -- same as HdlBuilder.ics_set
   state.ics_stack[name] = index
 end
 

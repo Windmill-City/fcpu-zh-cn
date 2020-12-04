@@ -191,6 +191,7 @@ local function run_deffer_command(op)
 end
 
 function Controller.add_defferred(state, deffer)
+  -- only numeric indices, skip named one!
   for _, op in ipairs(deffer) do
     if op.delay == 0 then
       run_deffer_command(op)
@@ -333,7 +334,7 @@ function Controller.tick(state, sync_wait)
       else
         Controller.set_program_counter(state, state.instruction_pointer + 1)
         if ast and ast.deffer then
-          Controller.add_defferred(state, ast.deffer)
+          Controller.add_defferred(state, ast.deffer.run)
         end
       end
     end

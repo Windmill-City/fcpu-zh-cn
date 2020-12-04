@@ -617,12 +617,14 @@ local function vector_scalar_op(operation)
     local ics_name = connect_output_to(state, ics, _[1])
 
     local deffer = {
-      {action='disable', ic=ics.clr, delay = 0},
-      {action='tune', ic=ics.kin, value=0, delay = 0},
-      {action='tune', ic=ics.kout, value=1, delay = 0},
-      {action='tune', ic=ics.kin, value=1, delay = 1},
-      {action='tune', ic=ics.kout, value=0, delay = 1},
-      {action='sync', index=state.index, delay = 4},
+      run = {
+        {action='disable', ic=ics.clr, delay = 0},
+        {action='tune', ic=ics.kin, value=0, delay = 0},
+        {action='tune', ic=ics.kout, value=1, delay = 0},
+        {action='tune', ic=ics.kin, value=1, delay = 1},
+        {action='tune', ic=ics.kout, value=0, delay = 1},
+        {action='sync', index=state.index, delay = 4},
+      },
     }
 
     return ics_name, ics, deffer
@@ -641,12 +643,14 @@ local function vector_decide_op(operation)
     local ics_name = connect_output_to(state, ics, _[1])
 
     local deffer = {
-      {action='disable', ic=ics.clr, delay = 0},
-      {action='tune', ic=ics.kin, value=0, delay = 0},
-      {action='tune', ic=ics.kout, value=1, delay = 0},
-      {action='tune', ic=ics.kin, value=1, delay = 1},
-      {action='tune', ic=ics.kout, value=0, delay = 1},
-      {action='sync', index=state.index, delay = 4},
+      run = {
+        {action='disable', ic=ics.clr, delay = 0},
+        {action='tune', ic=ics.kin, value=0, delay = 0},
+        {action='tune', ic=ics.kout, value=1, delay = 0},
+        {action='tune', ic=ics.kin, value=1, delay = 1},
+        {action='tune', ic=ics.kout, value=0, delay = 1},
+        {action='sync', index=state.index, delay = 4},
+      },
     }
 
     return ics_name, ics, deffer
@@ -668,12 +672,14 @@ local ops = {
     local ics_name = connect_output_to(state, ics, _[1])
 
     local deffer = {
-      {action='disable', ic=ics.clr, delay = 0},
-      {action='tune', ic=ics.kin, value=0, delay = 0},
-      {action='tune', ic=ics.kout, value=1, delay = 0},
-      {action='tune', ic=ics.kin, value=1, delay = 1},
-      {action='tune', ic=ics.kout, value=0, delay = 1},
-      {action='sync', index=state.index, delay = wire_to and 5 or 4},
+      run = {
+        {action='disable', ic=ics.clr, delay = 0},
+        {action='tune', ic=ics.kin, value=0, delay = 0},
+        {action='tune', ic=ics.kout, value=1, delay = 0},
+        {action='tune', ic=ics.kin, value=1, delay = 1},
+        {action='tune', ic=ics.kout, value=0, delay = 1},
+        {action='sync', index=state.index, delay = wire_to and 5 or 4},
+      },
     }
 
     return ics_name, ics, deffer
@@ -697,12 +703,14 @@ local ops = {
     local ics_name = connect_output_to(state, ics, _[1])
 
     local deffer = {
-      {action='disable', ic=ics.clr, delay = 0},
-      {action='tune', ic=ics.kin, value=0, delay = 0},
-      {action='tune', ic=ics.kout, value=1, delay = 1},
-      {action='tune', ic=ics.kin, value=1, delay = 2},
-      {action='tune', ic=ics.kout, value=0, delay = 2},
-      {action='sync', index=state.index, delay = 5},
+      run = {
+        {action='disable', ic=ics.clr, delay = 0},
+        {action='tune', ic=ics.kin, value=0, delay = 0},
+        {action='tune', ic=ics.kout, value=1, delay = 1},
+        {action='tune', ic=ics.kin, value=1, delay = 2},
+        {action='tune', ic=ics.kout, value=0, delay = 2},
+        {action='sync', index=state.index, delay = 5},
+      },
     }
 
     return ics_name, ics, deffer
@@ -727,12 +735,14 @@ local ops = {
     local ics_name = connect_output_to(state, ics, _[1])
 
     local deffer = {
-      {action='disable', ic=ics.clr, delay = 0},
-      {action='tune', ic=ics.kin, value=0, delay = 0},
-      {action='tune', ic=ics.kout, value=2, delay = 2},
-      {action='tune', ic=ics.kin, value=2, delay = 3},
-      {action='tune', ic=ics.kout, value=0, delay = 3},
-      {action='sync', index=state.index, delay = 6},
+      run = {
+        {action='disable', ic=ics.clr, delay = 0},
+        {action='tune', ic=ics.kin, value=0, delay = 0},
+        {action='tune', ic=ics.kout, value=2, delay = 2},
+        {action='tune', ic=ics.kin, value=2, delay = 3},
+        {action='tune', ic=ics.kout, value=0, delay = 3},
+        {action='sync', index=state.index, delay = 6},
+      },
     }
 
     return ics_name, ics, deffer
