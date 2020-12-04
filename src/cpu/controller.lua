@@ -182,7 +182,6 @@ local function run_deffer_command(op)
       params.constant = op.value
       control.parameters = params
     end
-  elseif op.action == 'noop' then
   elseif op.action == 'exec' then
     local proc = load('return '..op.proc)
     if proc then
@@ -192,7 +191,6 @@ local function run_deffer_command(op)
 end
 
 function Controller.add_defferred(state, deffer)
-  local sync_at
   for _, op in ipairs(deffer) do
     if op.delay == 0 then
       run_deffer_command(op)
@@ -201,14 +199,10 @@ function Controller.add_defferred(state, deffer)
       local at_tick = game.tick + t.delay
       t.at = game.tick
       Heap.put(global.deffered, at_tick, t)
-      if not sync_at or sync_at < at_tick then
-        sync_at = at_tick
+      if t.action == 'sync' then
+        state.need_sync = true
       end
     end
-  end
-  if sync_at then
-    state.need_sync = true
-    Heap.put(global.deffered, sync_at + 1, {action='sync', index=state.index, at=game.tick, delay=sync_at + 1 - game.tick})
   end
 end
 

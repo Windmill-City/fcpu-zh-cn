@@ -421,8 +421,8 @@ return {
 
   ["0.4.7"] = function()
     foreach_fcpu(function(fcpu, state)
-      for _,op in pairs(state.program_ast or {}) do
-        for _,arg in pairs(op.expr or {}) do
+      for _,line in pairs(state.program_ast or {}) do
+        for _,arg in pairs(line.expr or {}) do
           if arg.type == 'register' and arg.location == 'readonly' then
             if 100 <= arg.addr then
               arg.addr = arg.addr - 100 + MC_REGS_RO_MSLOT
@@ -430,6 +430,25 @@ return {
               arg.addr = arg.addr - 9 + MC_REGS_RO_FIRST
             end
           end
+        end
+      end
+    end)
+  end,
+
+  ["0.4.10"] = function()
+    foreach_fcpu(function(fcpu, state)
+      for _1, line in pairs(state.program_ast or {}) do
+        local sync_delay
+        for _2, op in pairs(line.deffer or {}) do
+          if op.action == 'noop' then
+            if not sync_delay or (sync_delay < op.delay) then
+              sync_delay = op.delay
+            end
+            line.deffer[_2] = nil
+          end
+        end
+        if sync_delay then
+          table.insert(line.deffer, {action='sync', index=state.index, delay = sync_delay + 1})
         end
       end
     end)

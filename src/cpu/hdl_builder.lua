@@ -622,7 +622,7 @@ local function vector_scalar_op(operation)
       {action='tune', ic=ics.kout, value=1, delay = 0},
       {action='tune', ic=ics.kin, value=1, delay = 1},
       {action='tune', ic=ics.kout, value=0, delay = 1},
-      {action='noop', delay = 3},
+      {action='sync', index=state.index, delay = 4},
     }
 
     return ics_name, ics, deffer
@@ -646,7 +646,7 @@ local function vector_decide_op(operation)
       {action='tune', ic=ics.kout, value=1, delay = 0},
       {action='tune', ic=ics.kin, value=1, delay = 1},
       {action='tune', ic=ics.kout, value=0, delay = 1},
-      {action='noop', delay = 3},
+      {action='sync', index=state.index, delay = 4},
     }
 
     return ics_name, ics, deffer
@@ -673,7 +673,7 @@ local ops = {
       {action='tune', ic=ics.kout, value=1, delay = 0},
       {action='tune', ic=ics.kin, value=1, delay = 1},
       {action='tune', ic=ics.kout, value=0, delay = 1},
-      {action='noop', delay = wire_to and 4 or 3},
+      {action='sync', index=state.index, delay = wire_to and 5 or 4},
     }
 
     return ics_name, ics, deffer
@@ -702,7 +702,7 @@ local ops = {
       {action='tune', ic=ics.kout, value=1, delay = 1},
       {action='tune', ic=ics.kin, value=1, delay = 2},
       {action='tune', ic=ics.kout, value=0, delay = 2},
-      {action='noop', delay = 4},
+      {action='sync', index=state.index, delay = 5},
     }
 
     return ics_name, ics, deffer
@@ -732,7 +732,7 @@ local ops = {
       {action='tune', ic=ics.kout, value=2, delay = 2},
       {action='tune', ic=ics.kin, value=2, delay = 3},
       {action='tune', ic=ics.kout, value=0, delay = 3},
-      {action='noop', delay = 5},
+      {action='sync', index=state.index, delay = 6},
     }
 
     return ics_name, ics, deffer
