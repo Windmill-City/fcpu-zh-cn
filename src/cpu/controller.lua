@@ -1,6 +1,7 @@
 local Compiler = require('src/cpu/compiler')
+local Evaluator = require('src/cpu/evaluator')
 
-Compiler.bind()
+Compiler.bind(Evaluator)
 
 PSTATE_HALTED = 0
 PSTATE_RUNNING = 1
@@ -298,7 +299,7 @@ function Controller.tick(state, sync_wait)
     if not sync_wait then
       local ast = state.program_ast[state.instruction_pointer]
       local ics = state.program_ics[state.instruction_pointer]
-      local success, result = Compiler.eval(ast, ics, state)
+      local success, result = Evaluator.eval(ast, ics, state)
       if not success then
         Controller.set_error_message(state, result)
         Controller.halt(state)
