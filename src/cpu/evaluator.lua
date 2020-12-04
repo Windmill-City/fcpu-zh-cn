@@ -7,18 +7,9 @@ local Evaluator = {}
 
 local function update_ics_stack(push_ics)
   for _,v in ipairs(push_ics) do
-    local node = io.get_node(v.name)
-    --if node then
-    --  if node.kout.valid then
-    --    local control = node.kout.get_or_create_control_behavior()
-    --    local params = control.parameters
-    --    params.constant = 1
-    --    control.parameters = params
-    --  end
-    --end
-    if node and node.clr then
-      local control = node.clr.get_control_behavior()
-      control.enabled = true
+    local ast = io.get_node_ast(v.name)
+    if ast and ast.deffer and ast.deffer.clr then
+      io.add_deferred(ast.deffer.clr)
     end
     if string.sub(v.name, 1, 3) == 'mem' then
       io.memory_clear({type='memory', location='mem', index=string.sub(v.name, 4, 4)})
@@ -82,8 +73,8 @@ end
 
 
 
-function Evaluator.setup(hdlBuilder, emitter)
-  io.setup(hdlBuilder, emitter)
+function Evaluator.setup(hdlBuilder_, emitter_, controller_)
+  io.setup(hdlBuilder_, emitter_, controller_)
   ops.setup(io)
   ops_vx.setup(io)
 end

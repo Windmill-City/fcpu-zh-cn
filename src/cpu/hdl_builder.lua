@@ -376,14 +376,7 @@ function builder.create_memory_cell(entity, input_a, input_b)
   local wire2 = inverse_wire_color(wire1)
 
   local d_key, control_key = builder.create_node(entity, 'decider')
-  local c_clr, control_clr = builder.create_node(entity, 'constant')
   local d_out, control_out = builder.create_node(entity, 'decider')
-
-  control_clr.enabled = false
-  control_clr.set_signal(1, {
-    signal = {type='virtual', name='signal-fcpu-error'},
-    count = -1
-  })
 
   control_key.parameters = {
     first_signal = {type='virtual', name='signal-fcpu-error'},
@@ -416,12 +409,6 @@ function builder.create_memory_cell(entity, input_a, input_b)
     target_entity = d_out,
     wire = wire1,
   }
-  c_clr.connect_neighbour{
-    source_circuit_id = defines.circuit_connector_id.constant_combinator,
-    target_circuit_id = defines.circuit_connector_id.combinator_output,
-    target_entity = d_key,
-    wire = wire1,
-  }
   d_out.connect_neighbour{
     source_circuit_id = defines.circuit_connector_id.combinator_output,
     target_circuit_id = defines.circuit_connector_id.combinator_input,
@@ -432,7 +419,6 @@ function builder.create_memory_cell(entity, input_a, input_b)
   local ics = {
     color_out = wire1,
     kin = d_key,
-    clr = c_clr,
     kout = d_out,
     out = d_out,
   }
@@ -545,7 +531,6 @@ end
 -------------------------------------------------------------------------------------------------------
 
 function builder.get_node(state_, name)
-  -- same as io.get_node
   return state_.program_ics[name] or state_.program_ics[state_.ics_stack[name]]
 end
 
@@ -618,12 +603,15 @@ local function vector_scalar_op(operation)
 
     local deffer = {
       run = {
-        {action='disable', ic=ics.clr, delay = 0},
         {action='tune', ic=ics.kin, value=0, delay = 0},
         {action='tune', ic=ics.kout, value=1, delay = 0},
         {action='tune', ic=ics.kin, value=1, delay = 1},
         {action='tune', ic=ics.kout, value=0, delay = 1},
         {action='sync', index=state.index, delay = 4},
+      },
+      clr = {
+        {action='tune', ic=ics.kout, value=1, delay = 0},
+        {action='tune', ic=ics.kout, value=0, delay = 1},
       },
     }
 
@@ -644,12 +632,15 @@ local function vector_decide_op(operation)
 
     local deffer = {
       run = {
-        {action='disable', ic=ics.clr, delay = 0},
         {action='tune', ic=ics.kin, value=0, delay = 0},
         {action='tune', ic=ics.kout, value=1, delay = 0},
         {action='tune', ic=ics.kin, value=1, delay = 1},
         {action='tune', ic=ics.kout, value=0, delay = 1},
         {action='sync', index=state.index, delay = 4},
+      },
+      clr = {
+        {action='tune', ic=ics.kout, value=1, delay = 0},
+        {action='tune', ic=ics.kout, value=0, delay = 1},
       },
     }
 
@@ -673,12 +664,15 @@ local ops = {
 
     local deffer = {
       run = {
-        {action='disable', ic=ics.clr, delay = 0},
         {action='tune', ic=ics.kin, value=0, delay = 0},
         {action='tune', ic=ics.kout, value=1, delay = 0},
         {action='tune', ic=ics.kin, value=1, delay = 1},
         {action='tune', ic=ics.kout, value=0, delay = 1},
         {action='sync', index=state.index, delay = wire_to and 5 or 4},
+      },
+      clr = {
+        {action='tune', ic=ics.kout, value=1, delay = 0},
+        {action='tune', ic=ics.kout, value=0, delay = 1},
       },
     }
 
@@ -704,12 +698,15 @@ local ops = {
 
     local deffer = {
       run = {
-        {action='disable', ic=ics.clr, delay = 0},
         {action='tune', ic=ics.kin, value=0, delay = 0},
         {action='tune', ic=ics.kout, value=1, delay = 1},
         {action='tune', ic=ics.kin, value=1, delay = 2},
         {action='tune', ic=ics.kout, value=0, delay = 2},
         {action='sync', index=state.index, delay = 5},
+      },
+      clr = {
+        {action='tune', ic=ics.kout, value=1, delay = 0},
+        {action='tune', ic=ics.kout, value=0, delay = 1},
       },
     }
 
@@ -736,12 +733,15 @@ local ops = {
 
     local deffer = {
       run = {
-        {action='disable', ic=ics.clr, delay = 0},
         {action='tune', ic=ics.kin, value=0, delay = 0},
         {action='tune', ic=ics.kout, value=2, delay = 2},
         {action='tune', ic=ics.kin, value=2, delay = 3},
         {action='tune', ic=ics.kout, value=0, delay = 3},
         {action='sync', index=state.index, delay = 6},
+      },
+      clr = {
+        {action='tune', ic=ics.kout, value=1, delay = 0},
+        {action='tune', ic=ics.kout, value=0, delay = 1},
       },
     }
 

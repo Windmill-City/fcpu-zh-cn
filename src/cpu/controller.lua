@@ -1,8 +1,6 @@
 local Compiler = require('src/cpu/compiler')
 local Evaluator = require('src/cpu/evaluator')
 
-Compiler.setup(Evaluator)
-
 PSTATE_HALTED = 0
 PSTATE_RUNNING = 1
 PSTATE_SLEEPING = 2
@@ -190,7 +188,7 @@ local function run_deffer_command(op)
   end
 end
 
-function Controller.add_defferred(state, deffer)
+function Controller.add_deferred(state, deffer)
   -- only numeric indices, skip named one!
   for _, op in ipairs(deffer) do
     if op.delay == 0 then
@@ -329,12 +327,12 @@ function Controller.tick(state, sync_wait)
           end
         elseif result.type == 'deffer' then
           Controller.set_program_counter(state, state.instruction_pointer + 1)
-          Controller.add_defferred(state, result.deffer)
+          Controller.add_deferred(state, result.deffer)
         end
       else
         Controller.set_program_counter(state, state.instruction_pointer + 1)
         if ast and ast.deffer then
-          Controller.add_defferred(state, ast.deffer.run)
+          Controller.add_deferred(state, ast.deffer.run)
         end
       end
     end
@@ -360,7 +358,7 @@ function Controller.step(state, over)
   if state.program_state == PSTATE_SLEEPING then
     Controller.set_program_counter(state, state.instruction_pointer + 1)
     Controller.halt(state)
-else
+  else
     state.sleep_time = 0
     state.need_sync = nil
     state.do_step = true
@@ -427,7 +425,7 @@ end
 function Controller.update_ip(state)
   --local control = state.cache.control.indication
   --local param = control.parameters
-  --param.parameters.second_constant = state.instruction_pointer
+  --param.second_constant = state.instruction_pointer
   --control.parameters = param
 
   -- Stop on next instruction if breakpoint found
@@ -449,7 +447,7 @@ function Controller.update_state(state, pstate)
       elseif pstate == PSTATE_SLEEPING and state.sleep_time then
         global.running[state.index] = nil
         state.sleep_at = game.tick
-        Controller.add_defferred(state, {{action='wake', at=state.sleep_at, delay=state.sleep_time, index=state.index}})
+        Controller.add_deferred(state, {{action='wake', at=state.sleep_at, delay=state.sleep_time, index=state.index}})
       else
         if pstate == PSTATE_HALTED then
           state.sleep_at = nil
@@ -490,5 +488,8 @@ function Controller.update_state(state, pstate)
     end
   end
 end
+
+
+Compiler.setup(Evaluator, Controller)
 
 return Controller

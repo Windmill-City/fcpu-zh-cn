@@ -454,6 +454,10 @@ return {
           assert(state.program_ics[_1] ~= nil)
           line.deffer = {
             run = line.deffer,
+            clr = {
+              {action='tune', ic=state.program_ics[_1].kout, value=1, delay = 0},
+              {action='tune', ic=state.program_ics[_1].kout, value=0, delay = 1},
+            }
           }
         end
       end

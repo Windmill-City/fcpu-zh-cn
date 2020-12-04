@@ -279,7 +279,7 @@ function Compiler.verify(state)
 end
 
 
-function Compiler.setup(evaluator_)
-  evaluator_.setup(hdlBuilder, emitter)
+function Compiler.setup(evaluator_, controller_)
+  evaluator_.setup(hdlBuilder, emitter, controller_)
 end
 return Compiler

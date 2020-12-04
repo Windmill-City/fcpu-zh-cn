@@ -1,4 +1,5 @@
 local Assert = require('src/cpu/assert')
+local Controller
 local hdlbuilder
 local emitter
 local indication_control
@@ -25,6 +26,10 @@ local io = {}
 
 function io.for_entity(proc)
   return proc(state.entity, state)
+end
+
+function io.add_deferred(deffer)
+  Controller.add_deferred(state, deffer)
 end
 
 
@@ -145,9 +150,9 @@ function io.output_clear()
   io.GuiCache_InvalidateMemory('output', 0)
 
   -- Vector output
-  local node = io.get_node('output')
-  if node then
-    return { type = 'deffer', deffer = { {action='enable', ic=node.clr, delay = 0} } }
+  local ast = io.get_node_ast('output')
+  if ast and ast.deffer and ast.deffer.clr then
+    return { type = 'deffer', deffer = ast.deffer.clr }
   end
 end
 
@@ -202,34 +207,29 @@ end
 
 
 -- Memory
-function io.get_node(name)
-  -- same as HdlBuilder.get_node
-  return state.program_ics[state.ics_stack[name]]
-end
-
 function io.ics_set(name, index)
   state.ics_stack[name] = index
 end
 
-function io.ics_each(proc, name)
+function io.get_node_ast(name)
+  local index = state.ics_stack[name]
+  return state.program_ast[index]
+end
+
+function io.ics_each_ast(proc, name)
   if name then
     local index = state.ics_stack[name]
-    local ics = state.program_ics[index]
-    if ics then
-      proc(ics)
+    local ast = state.program_ast[index]
+    if ast then
+      proc(ast)
     end
   else
-    for _, ics in pairs(state.program_ics) do
-      if type(_) == 'number' then
-        proc(ics)
+    for k in pairs(state.program_ics) do
+      if type(k) == 'number' then
+        proc(state.program_ast[k])
       end
     end
   end
-end
-
-function io.ics_control(index)
-  local ics = state.program_ics[index]
-  return ics, ics and ics.get_or_create_control_behavior()
 end
 
 function io.memory_getchannel_read(_)
@@ -478,7 +478,8 @@ function io.bind(state_)
 end
 
 
-function io.setup(hdlbuilder_, emitter_)
+function io.setup(hdlbuilder_, emitter_, controller_)
+  Controller = controller_
   hdlbuilder = hdlbuilder_
   emitter = emitter_
 end

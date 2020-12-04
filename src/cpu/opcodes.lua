@@ -149,11 +149,14 @@ end
 
 local ics_clear = function(channel)
   local action = { type = 'deffer', deffer = {} }
-  local DisableICS = function(ics)
-    action.deffer[#action.deffer + 1] = {action='enable', ic=ics.clr, delay = 0}
-    action.deffer[#action.deffer + 1] = {action='disable', ic=ics.clr, delay = 1}
+  local ClearIC = function(ast)
+    if ast.deffer and ast.deffer.clr then
+      for _, v in ipairs(ast.deffer.clr) do
+        action.deffer[#action.deffer + 1] = v
+      end
+    end
   end
-  io.ics_each(DisableICS, channel)
+  io.ics_each_ast(ClearIC, channel)
   return action
 end
 
