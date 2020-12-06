@@ -2,11 +2,12 @@
 Version: 0.4.10
 Date: ????
   Changes:
-    - Instruction pointer move to next instruction after completing current.
-    - Refactored 'clear' and 'sync' sequence.
-    - Do not crash when updating BP (program still could not be saved, please use new BP, rather than `update contents`, see https://forums.factorio.com/viewtopic.php?f=48&t=88100).
+    - Instruction pointer moves advances after finishing current intrustion.
+    - Refactored 'clear' and 'sync' sequences.
+    - Do not crash when updating BP (program still could not be saved, please use new BP rather than `update contents`, see https://forums.factorio.com/viewtopic.php?f=48&t=88100).
   Bugfixes:
-    - Read memory from output buffer.
+    - Clock `clk` register will be correct after `slp` and `x*`.
+    - Allow read memory from output buffer.
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.9
 Date: 2020-12-03

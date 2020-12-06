@@ -158,6 +158,7 @@ local function run_deffer_command(op)
     local state = global.fcpus[op.index]
     if state and state.sleep_at == op.at then
       debug_assert(state.sleep_at + op.delay == game.tick)
+      state.clock = state.clock + state.sleep_time
       state.sleep_time = 0
       Controller.update_state(state, PSTATE_RUNNING)
       advance(state)
@@ -166,6 +167,7 @@ local function run_deffer_command(op)
     local state = global.fcpus[op.index]
     if state then
       state.need_sync = nil
+      state.clock = state.clock + op.delay
       advance(state)
     end
   elseif op.action == 'disable' then
@@ -289,13 +291,13 @@ function Controller.tick(state, sync_wait)
   Controller.validate_cache(state)
   Controller.handle_interrupts(state)
 
-::repeat_eval::
-
   -- Run Controller code.
   if state.program_state == PSTATE_RUNNING then
-    state.clock = state.clock + 1
-
     if not sync_wait then
+      state.clock = state.clock + 1
+
+      ::repeat_eval::
+
       local ast = state.program_ast[state.instruction_pointer]
       local ics = state.program_ics[state.instruction_pointer]
       local success, result = Evaluator.eval(ast, ics, state)
