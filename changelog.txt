@@ -4,6 +4,7 @@ Date: ????
   Changes:
     - Instruction pointer move to next instruction after completing current.
     - Refactored 'clear' and 'sync' sequence.
+    - Do not crash when updating BP (program still could not be saved, please use new BP, rather than `update contents`, see https://forums.factorio.com/viewtopic.php?f=48&t=88100).
   Bugfixes:
     - Read memory from output buffer.
 ---------------------------------------------------------------------------------------------------

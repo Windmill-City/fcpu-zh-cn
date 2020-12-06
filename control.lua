@@ -155,6 +155,7 @@ local function setup_blueprint_tag(blueprint, index, entity)
   end
 end
 
+local hackBP_unsaved
 local function on_player_setup_blueprint(event)
   local player = game.players[event.player_index]
   if player then
@@ -195,8 +196,19 @@ local function on_player_setup_blueprint(event)
       else
         for idx, ent in pairs(mapping) do
           if ent.name == 'fcpu' then
-            setup_blueprint_tag(blueprint, idx, ent)
+            local success = pcall(setup_blueprint_tag, blueprint, idx, ent)
+            if not success then
+              hackBP_unsaved = hackBP_unsaved or {}
+              hackBP_unsaved[idx] = ent
+            end
           end
+        end
+        if hackBP_unsaved then
+          hackBP_unsaved = nil
+
+          -- https://forums.factorio.com/viewtopic.php?f=48&t=88100
+          player.print({"fcpu-errors.blueprint-broken", "Factorio API"}, {r=0.5, g=0.5})
+          player.print({"fcpu-errors.blueprint-unavailable", "Factorio API"}, {r=0.5})
         end
       end
     end
