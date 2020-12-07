@@ -116,8 +116,8 @@ function ExecuteTest(test_title, program_text, input_signals, probe_result, max_
   local state = Controller.init(fcpu)
   state.entity = fcpu
 
-  state.program_ics.output = createFCPU_Output()
-  state.program_ics.output.get_or_create_control_behavior()
+  state.program_ics.output = { value = createFCPU_Output() }
+  state.program_ics.output.value.get_or_create_control_behavior()
 
   Controller.update_program_text(state, program_text)
   Controller.compile(state)
@@ -139,7 +139,7 @@ function ExecuteTest(test_title, program_text, input_signals, probe_result, max_
   end
   if probe_result then
     --local output = fcpu.get_control_behavior().parameters
-    local output = state.program_ics.output.get_control_behavior().parameters
+    local output = state.program_ics.output.value.get_control_behavior().parameters
     local ret = probe_result(state, output, fcpu)
     if ret ~= true and ret ~= nil then
       print(serpent.block(state.regs, {comment=true}))

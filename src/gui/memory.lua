@@ -198,7 +198,7 @@ function MemoryView.UpdateWidget(player_data, state, initial)
       if ValidateGuiCache('output') then return end
       -- Output buffer
       if state.program_ics.output then
-        local control = state.program_ics.output.get_control_behavior()
+        local control = state.program_ics.output.value.get_control_behavior()
         MemoryView.UpdateFromTable(player_data, control and control.parameters, 1, true)
         return
       end
@@ -212,7 +212,7 @@ function MemoryView.UpdateWidget(player_data, state, initial)
     elseif index == MC_MEMORY_CHANNELS + 6 then
       -- Output
       if state.program_ics.output then
-        local control = state.program_ics.output.get_control_behavior()
+        local control = state.program_ics.output.value.get_control_behavior()
         local network = control.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.constant_combinator)
         if network then
           MemoryView.UpdateFromTable(player_data, network.signals)

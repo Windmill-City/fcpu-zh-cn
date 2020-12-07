@@ -77,7 +77,7 @@ return {
       Entity.set_data(fcpu, state)
 
       if signal then
-        control = state.program_ics.output.get_control_behavior()
+        control = (state.program_ics.output and state.program_ics.output.value or state.program_ics.output).get_control_behavior()
         local params = control.parameters
         params[1].signal = signal.signal_id
         params[1].count = signal.count or 0
@@ -118,7 +118,7 @@ return {
       state.program_ics = state.program_ics or {}
       state.ics_stack = {}
       state.deffered = {}
-      state.program_ics.output = state.program_ics.output or state.output_fcpu
+      state.program_ics.output = state.program_ics.output or { value = state.output_fcpu }
       state.output_fcpu = nil
 
       if state.imposter_fcpu then
@@ -452,15 +452,22 @@ return {
             table.insert(line.deffer, {action='sync', index=state.index, delay = sync_delay + 1})
           end
           assert(state.program_ics[_1] ~= nil)
-          line.deffer = {
-            run = line.deffer,
-            clr = {
-              {action='tune', ic=state.program_ics[_1].kout, value=1, delay = 0},
-              {action='tune', ic=state.program_ics[_1].kout, value=0, delay = 1},
+          if not line.deffer.run then
+            line.deffer = {
+              run = line.deffer,
+              clr = {
+                {action='tune', ic=state.program_ics[_1].kout, value=1, delay = 0},
+                {action='tune', ic=state.program_ics[_1].kout, value=0, delay = 1},
+              }
             }
-          }
+          end
         end
       end
+
+      state.program_ics.output = {
+        value = state.program_ics.output
+      }
+      Controller.verify(state)
     end)
   end,
 }

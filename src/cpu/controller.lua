@@ -232,8 +232,8 @@ function Controller.validate_cache(state)
   local control = cache.control
 
   if not (control.output and control.output.valid) then
-    if state.program_ics.output and state.program_ics.output.valid then
-      control.output = state.program_ics.output.get_control_behavior()
+    if state.program_ics.output.value and state.program_ics.output.value.valid then
+      control.output = state.program_ics.output.value.get_control_behavior()
     end
   end
 
