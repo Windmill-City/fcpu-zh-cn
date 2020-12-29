@@ -2,16 +2,16 @@
 Version: 0.4.10
 Date: ????
   Features:
-    - Added editor width mod setting (look in the player runtime tab).
+    - Added editor width setting (look in the player runtime tab).
   Changes:
-    - SIMD `x*` instructions optimisation: 1-2 ticks less for signal handling.
-    - Instruction pointer moves advances after finishing current intrustion.
+    - SIMD `x*` instructions optimisation: 2 ticks less for signal handling.
+    - Instruction pointer advances after finishing current intrustion.
     - Refactored 'clear' and 'sync' sequences.
-    - Do not crash when updating BP (program still could not be saved, please use new BP rather than `update contents`, see https://forums.factorio.com/viewtopic.php?f=48&t=88100).
     - Some preparations for ordered memory.
   Bugfixes:
-    - Clock `clk` register will be correct after `slp` and `x*`.
     - Allow read memory from output buffer.
+    - Correct clock `clk` register after `slp` and `x*`.
+    - Crash when updating BP (program still could not be saved, please use new BP rather than `update contents`, see https://forums.factorio.com/viewtopic.php?f=48&t=88100).
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.9
 Date: 2020-12-03

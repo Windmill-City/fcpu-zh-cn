@@ -651,6 +651,7 @@ See [here](https://www.buymeacoffee.com/p/100444)
 
 
 # Dear supporters
+* Someone (v0.4.10 update)
 * Chiko (v0.4.0 update)
 * cid0rz (v0.4.0 update)
 * Quorzar (v0.4.0 update)

@@ -1,5 +1,4 @@
 # Upcoming  (in v0.4.x)
-* Factorio v1.1.0 support.
 * Multiple input/output wires.
 * New graphics.
 
@@ -42,3 +41,4 @@
 * `xflt` mnemonic for filtering signals (DONE in v0.4.0)
 * Vector compare mnemonics `xc*` (DONE in v0.4.0)
 * Being able to give a name/label to each processor (DONE in v0.4.0)
+* Factorio v1.1.0 support.
