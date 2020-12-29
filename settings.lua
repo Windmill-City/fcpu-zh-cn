@@ -9,6 +9,14 @@ data:extend({
     allowed_values = { 1, 2, 5, 10, 20, 30, 60 }
   },
   {
+    type = "int-setting",
+    name = "fcpu-gui-editor-width",
+    setting_type = "runtime-per-user",
+    default_value = 290,
+    minimum_value = 290,
+    maximum_value = 490,
+  },
+  {
     type = "bool-setting",
     name = "fcpu-gui-editor-inline-icons",
     setting_type = "runtime-global",

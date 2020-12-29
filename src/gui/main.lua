@@ -4,6 +4,7 @@ local gui
 local MemoryView
 
 local defaultToolbarInsertSignal = {type='virtual', name='signal-dot'}
+local fcpu_gui_editor_width = 290
 
 -------------------------------------------------------------------------------------------------------
 
@@ -57,7 +58,7 @@ end
 
 function MainView.RegisterTemplates()
   gui.add_templates{
-    frame_title = {type="label", style="frame_title", style_mods={maximal_width=240}},
+    frame_title = {type="label", style="frame_title"},
     frame_action_button = {type="sprite-button", style="frame_action_button", mouse_button_filter={"left"}},
     frame_action_checkbox = {type="checkbox", style="frame_action_button", mouse_button_filter={"left"}},
     drag_handle = {type="empty-widget", name="drag-handle", style="draggable_space_header", style_mods={minimal_width=30, height=24, right_margin=4, horizontally_stretchable=true}},
@@ -102,6 +103,9 @@ end
 -------------------------------------------------------------------------------------------------------
 
 local function CreateWidget_Main(rootGui)
+  -- Update settings value
+  fcpu_gui_editor_width = settings.get_player_settings(rootGui.player_index)["fcpu-gui-editor-width"].value
+
   local regslots = {}
   for i = 1, MC_REGS do
     table.insert(regslots, gui.templates.slot_button('reg'..i))
@@ -117,7 +121,7 @@ local function CreateWidget_Main(rootGui)
       {type="flow", name="titlebar", children={
         {template="frame_action_button", name="rename-button", handlers="widget.rename_button", sprite="utility/rename_icon_small_white", hovered_sprite="utility/rename_icon_small_black"},
         {type="textfield", name="custom-name", handlers="widget.rename_field", style="titlebar_search_textfield", visible=false, clear_and_focus_on_right_click=true, style_mods={ bottom_margin=2 }},
-        {template="frame_title", name="label"},
+        {template="frame_title", name="label", style_mods={maximal_width=fcpu_gui_editor_width-50}},
         {template="drag_handle", name="drag-handle"},
         {template="pin_button", save_as="gui_pin_button", handlers="widget.pin_button", state=false},
         {template="close_button", save_as="gui_exit_button", handlers="widget.close_button"},
@@ -168,15 +172,13 @@ local function CreateWidget_Main(rootGui)
           },
 
           -- Editor
-          {type="scroll-pane", horizontal_scroll_policy="never", style="scroll_pane_in_shallow_frame", children={
+          {type="scroll-pane", horizontal_scroll_policy="auto", style="scroll_pane_in_shallow_frame", children={
             {type="flow", name="inner", direction="horizontal",
               children={
                 {type="flow", name="inner", save_as="gui_breakpoints", direction="vertical",
                   style_mods={
-                    minimal_width=44,
-                    maximal_width=52,
-                    minimal_height = 2568,
-                    maximal_height = 2568,
+                    width = 44,
+                    height = 2568,
                     horizontally_stretchable=true,
                     top_padding=4,
                   },
@@ -186,11 +188,8 @@ local function CreateWidget_Main(rootGui)
                 },
                 {type="text-box", name="program-input", style="fcpu_program_input",
                   style_mods={
-                    minimal_width = 282,
-                    maximal_width = 290,
-                    minimal_height = 2568,
-                    maximal_height = 2568,
-                    horizontally_squashable=true,
+                    width = fcpu_gui_editor_width,
+                    height = 2568 + 15,
                     vertically_stretchable=false,
                     rich_text_setting=defines.rich_text_setting.enabled
                   },
@@ -200,7 +199,14 @@ local function CreateWidget_Main(rootGui)
                   save_as="gui_program_input",
                 },
               },
-              style_mods={horizontally_stretchable=false, vertically_squashable=true},
+              horizontal_scroll_policy="auto",
+              style_mods={
+                width = fcpu_gui_editor_width,
+                height = 2568,
+                horizontally_squashable=true,
+                horizontally_stretchable=true,
+                vertically_squashable=true,
+              },
             },
           }},
 

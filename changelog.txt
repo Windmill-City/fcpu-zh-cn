@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.10
 Date: ????
+  Features:
+    - Added editor width mod setting (look in the player runtime tab).
   Changes:
     - SIMD `x*` instructions optimisation: 1-2 ticks less for signal handling.
     - Instruction pointer moves advances after finishing current intrustion.
