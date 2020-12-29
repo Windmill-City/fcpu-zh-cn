@@ -54,6 +54,14 @@ end
 
 local ControlHandlers = {}
 
+ControlHandlers['fcpu-debug-reset'] = GUI_mixPlayerData(function(player_data, state)
+  if player_data.gui_error_message and player_data.gui_error_message.valid then
+    player_data.gui_error_message.caption = ""
+  end
+  Controller.compile(state)
+  Controller.halt(state, true)
+end)
+
 ControlHandlers['fcpu-debug-stop'] = GUI_mixPlayerData(function(player_data, state)
   Controller.compile(state)
   Controller.set_program_counter(state, 1)

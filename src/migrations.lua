@@ -237,6 +237,7 @@ return {
   ["0.3.15"] = function()
     foreach_fcpu(function(fcpu, state)
       state.gui_cache = state.gui_cache or {}
+      state.cache = state.cache or {}
 
       state.modified = true
       Controller.compile(state)

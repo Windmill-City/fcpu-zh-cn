@@ -391,7 +391,11 @@ function Controller.sleep(state, value)
   Controller.update_state(state, PSTATE_SLEEPING)
 end
 
-function Controller.halt(state)
+function Controller.halt(state, reset)
+  if reset then
+    Controller.set_program_counter(state, 1)
+    Evaluator.eval({ type='op', name='clr' }, nil, state)
+  end
   state.sleep_at = nil
   state.sleep_time = 0
   state.need_sync = nil
@@ -401,11 +405,12 @@ function Controller.halt(state)
 end
 
 function Controller.disable(state, disable)
-  state.disabled = (disable == nil or disable)
+  state.disabled = (disable ~= false)
   if state.disabled then
     Controller.halt(state)
+  else
+    Controller.update_state(state)
   end
-  Controller.update_state(state)
 end
 
 function Controller.is_running(state)
