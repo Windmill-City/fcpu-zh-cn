@@ -1,7 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.12
 Date: ????
-  Changes:
+  Bugfixes:
+    - Found missed deffered action on `fcpu/src/cpu/controller.lua:223` (https://mods.factorio.com/mod/fcpu/discussion/5fecb1c3ae469395d4714320)
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.11
 Date: 2021-01-03

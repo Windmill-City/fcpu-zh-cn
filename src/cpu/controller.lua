@@ -384,7 +384,7 @@ end
 function Controller.sleep(state, value)
   if 0 < value then
     debug_assert(state.sleep_time == 0)
-    state.sleep_time = value
+    state.sleep_time = math.floor(value)
   else
     state.sleep_time = 0
   end
