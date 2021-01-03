@@ -712,7 +712,7 @@ local ops = {
 
     local deffer = {
       run = {
-        {action='tune', ic=ics.kin, value=0, delay = 0},
+        {action='tune', ic=ics.kin, value=0, delay = 1},
         {action='tune', ic=ics.kout, value=1, delay = 1},
         {action='tune', ic=ics.kin, value=1, delay = 2},
         {action='tune', ic=ics.kout, value=0, delay = 2},
