@@ -343,6 +343,16 @@ Each instruction take one or more operands and modify them or state of fCPU.
   Sleep for specified ticks count.  
   fCPU do not handle interruptions while sleeping.  
 
+#### Block execution until condition met
+Instructions execute the next line immediately after them (in the same tick) as soon as the condition is met.  
+This allows them to be used to copy the input signal that triggered continuation.  
+For example:  
+```
+mov r1 0[virtual-signal=signal-green]
+btrc r1
+xmov m1 red
+```
+
 * `bkr` cnt[**C**/**R**]  
   `bkg` cnt[**C**/**R**]  
   Block until there are at least *cnt* signals on *r*ed/*g*reen wires.
