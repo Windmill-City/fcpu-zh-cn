@@ -70,7 +70,7 @@ script.on_event(defines.events.on_tick, function(event)
     handled = handled + 1
     if state.entity and state.entity.valid then
       if not state.disabled and state.entity.active then
-        if state.clock % 10 == 0 then
+        if state.out_of_power or state.clock % 10 == 0 then
           state.out_of_power = not sufficient_power(state.entity)
         end
         if not state.out_of_power then
