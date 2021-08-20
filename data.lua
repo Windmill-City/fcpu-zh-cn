@@ -1,4 +1,4 @@
-table = require('__flib__.table')
+table = require('3rdparty.flib061.table')
 
 require('src/constants')
 require('prototypes/control')

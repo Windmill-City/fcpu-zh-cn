@@ -1,5 +1,5 @@
 Entity = require('__stdlib__/stdlib/entity/entity')
-table = require('__flib__.table')
+table = require('3rdparty.flib061.table')
 Heap = require('src.utils.Heap')
 
 require('src/constants')
@@ -281,7 +281,7 @@ function register_picker_dolly_handler()
 end
 
 -------------------------------------------------------------------------------------------------------
-local event = require("__flib__.event")
+local event = require("3rdparty.flib061.event")
 local event_filters = {
   {filter = "name", name = "fcpu"},
   {filter = "name", name = "imposter-fcpu"},

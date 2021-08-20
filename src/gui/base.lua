@@ -1,6 +1,6 @@
 -- require('mod-gui')
 
-local gui = require("__flib__.gui")
+local gui = require("3rdparty.flib061.gui")
 local MainView = require("src/gui/main")
 local MemoryView = require("src/gui/memory")
 
@@ -183,7 +183,7 @@ script.on_event(defines.events.on_runtime_mod_setting_changed, UpdateModSetting)
 
 -------------------------------------------------------------------------------------------------------
 
-local migration = require("__flib__.migration")
+local migration = require("3rdparty.flib061.migration")
 local migrations = require("src/migrations.lua")
 
 script.on_init(function()

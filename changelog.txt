@@ -3,6 +3,8 @@ Version: 0.4.13
 Date: ????
   Changes:
     - Added instructions (https://mods.factorio.com/mod/fcpu/discussion/5ff1e8c767060ec2750c4a88)
+  Bugfixes:
+    - Fixed issue on startup with moderm flib 0.8.0 (https://mods.factorio.com/mod/fcpu/discussion/6111ee81a39dd8a4252da8b2)
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.12
 Date: 2021-01-03

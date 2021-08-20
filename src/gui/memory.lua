@@ -1,4 +1,4 @@
-local gui = require("__flib__.gui")
+local gui = require("3rdparty.flib061.gui")
 local MemoryView = {}
 
 -------------------------------------------------------------------------------------------------------
