@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.13
-Date: ????
+Date: 2021-08-20
   Changes:
     - Added instructions (https://mods.factorio.com/mod/fcpu/discussion/5ff1e8c767060ec2750c4a88)
   Bugfixes:
