@@ -661,6 +661,9 @@ See [here](https://www.buymeacoffee.com/p/100444)
 
 
 # Dear supporters
+* Spencer Nelson (v0.4.14 update)
+* @Baughnie (v0.4.14 update)
+* @orangedude27 (v0.4.14 update)
 * Someone (v0.4.10 update)
 * Chiko (v0.4.0 update)
 * cid0rz (v0.4.0 update)
