@@ -1,7 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.14
 Date: ????
-  Changes:
+  Bugfixes:
+    - Fixed missed `offset` to `bad` and `bas` instructions (https://mods.factorio.com/mod/fcpu/discussion/6196bc801bc21ba14dfca424)
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.13
 Date: 2021-08-20

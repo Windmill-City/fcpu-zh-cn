@@ -532,8 +532,8 @@ local opcodes = {
   blt = branch_mnemonics(function(a, b) return io.getvalue(a) <  io.getvalue(b) end), -- blt a[C/S/R/I] b[C/S/R/I] addr[L/A/R]
   bge = branch_mnemonics(function(a, b) return io.getvalue(a) >= io.getvalue(b) end), -- bge a[C/S/R/I] b[C/S/R/I] addr[L/A/R]
   ble = branch_mnemonics(function(a, b) return io.getvalue(a) <= io.getvalue(b) end), -- ble a[C/S/R/I] b[C/S/R/I] addr[L/A/R]
-  bas = function(_) -- bas a[T/R/I] b[T/R/I] addr[L/A/R]
-    Assert.three(_)
+  bas = function(_) -- bas a[T/R/I] b[T/R/I] addr[L/A/R] offset?[C/R]
+    Assert.three_or_four(_)
     local as = io.gettype(_[1], {'type', 'input', 'register'})
     local bs = io.gettype(_[2], {'type', 'input', 'register'})
     local av = (as ~= nil)
@@ -545,10 +545,10 @@ local opcodes = {
         return
       end
     end
-    return jump_op(_[3])
+    return jump_op(_[3], _[4])
   end,
-  bad = function(_) -- bad a[T/R/I] b[T/R/I] addr[L/A/R]
-    Assert.three(_)
+  bad = function(_) -- bad a[T/R/I] b[T/R/I] addr[L/A/R] offset?[C/R]
+    Assert.three_or_four(_)
     local as = io.gettype(_[1], {'type', 'input', 'register'})
     local bs = io.gettype(_[2], {'type', 'input', 'register'})
     local av = (as ~= nil)
@@ -560,7 +560,7 @@ local opcodes = {
         return
       end
     end
-    return jump_op(_[3])
+    return jump_op(_[3], _[4])
   end,
 
   lea = function(_)
