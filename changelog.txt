@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.14
-Date: ????
+Date: 2022-03-20
   Changes:
     - Updated supporters list. Thank you for supporting fCPU and our Factorio community!
   Bugfixes:
