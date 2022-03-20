@@ -661,15 +661,16 @@ See [here](https://www.buymeacoffee.com/p/100444)
 
 
 # Dear supporters
+* masterkrovel (v0.4.14 update)
 * Spencer Nelson (v0.4.14 update)
 * @Baughnie (v0.4.14 update)
 * @orangedude27 (v0.4.14 update)
-* Someone (v0.4.10 update)
+* msipos2117 (v0.4.10 update)
 * Chiko (v0.4.0 update)
 * cid0rz (v0.4.0 update)
 * Quorzar (v0.4.0 update)
 * kKdH (v0.3.0 update)
-* Someone (v0.2.12 update)
+* Blu2403 (v0.2.12 update)
 * Lukáš Venhoda (v0.2.0 update)
 
 **Thanks for supporting fCPU!**
