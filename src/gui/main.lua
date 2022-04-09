@@ -564,7 +564,7 @@ function MainView.RegisterHandlers(ControlHandlers)
       },
       paste_program = {
         on_gui_click = GUI_mixPlayerData(function(player_data, state)
-          if player_data.gui_program_input then
+          if player_data.gui_program_input and player_data.program_clipboard then
             player_data.gui_program_input.text = player_data.program_clipboard
             fcpu_update_program(state.entity, player_data.gui_program_input.text)
           end
