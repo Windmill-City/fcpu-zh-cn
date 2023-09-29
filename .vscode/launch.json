@@ -8,7 +8,6 @@
             "type": "factoriomod",
             "request": "launch",
             "name": "Factorio Mod Debug",
-            "factorioPath": "G:/SteamLibrary/steamapps/common/Factorio/bin/x64/factorio.exe",
             "hookData": true,
             "hookControl": ["fcpu"]
         },
@@ -16,7 +15,6 @@
             "type": "factoriomod",
             "request": "launch",
             "name": "Factorio Mod Profile",
-            "factorioPath": "G:/SteamLibrary/steamapps/common/Factorio/bin/x64/factorio.exe",
             "hookMode": "profile",
             "hookControl": ["fcpu"]
         },
@@ -24,8 +22,7 @@
             "type": "factoriomod",
             "request": "launch",
             "name": "Factorio Mod Debug (custom modPath)",
-            "factorioPath": "G:/SteamLibrary/steamapps/common/Factorio/bin/x64/factorio.exe",
-            "modsPath": "S:/Work/KonStg/.factorio_mods",
+            "modsPath": "W:/Work/KonStg/.factorio_mods",
             "hookData": true,
             "hookControl": ["fcpu"]
         },
@@ -33,8 +30,7 @@
             "type": "factoriomod",
             "request": "launch",
             "name": "Factorio Mod Profile (custom modPath)",
-            "factorioPath": "G:/SteamLibrary/steamapps/common/Factorio/bin/x64/factorio.exe",
-            "modsPath": "S:/Work/KonStg/.factorio_mods",
+            "modsPath": "W:/Work/KonStg/.factorio_mods",
             "hookMode": "profile",
             "hookControl": ["fcpu"]
         },
@@ -50,7 +46,6 @@
             "path": "?;?.lua;${workspaceFolder}/?.lua;${workspaceFolder}/src/?.lua",
             "cpath": "${workspaceFolder}/?.dll",
             "arg": ["${workspaceFolder}/readme.md"],
-            "consoleCoding": "utf8"
         },
         {
             "name": "Test Md2FRT",
@@ -64,7 +59,6 @@
             "path": "?;?.lua;${workspaceFolder}/?.lua;${workspaceFolder}/src/?.lua",
             "cpath": "${workspaceFolder}/?.dll",
             "arg": ["${workspaceFolder}/tests/wiki.md"],
-            "consoleCoding": "utf8"
         },
         {
             "name": "Run Tests",
@@ -78,7 +72,6 @@
             "path": "?;?.lua;${workspaceFolder}/?.lua;${workspaceFolder}/tests/?.lua;${workspaceFolder}/src/?.lua",
             "cpath": "${workspaceFolder}/?.dll",
             "arg": [],
-            "consoleCoding": "utf8"
         }
     ]
 }

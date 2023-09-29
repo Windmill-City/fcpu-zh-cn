@@ -471,4 +471,19 @@ return {
       Controller.verify(state)
     end)
   end,
+
+  ["0.4.15"] = function()
+    foreach_fcpu(function(fcpu, state)
+      if state.program_ics.output then
+        local type = type(state.program_ics.output)
+        local mt = getmetatable(state.program_ics.output)
+        if type == 'table' and mt == 'private' then
+          state.program_ics.output = {
+            value = state.program_ics.output
+          }
+          Controller.verify(state)
+        end
+      end
+    end)
+  end,
 }
