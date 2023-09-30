@@ -437,12 +437,12 @@ function GuiWidgetClose(player_index, skip_if_pinned, silent)
   end
 end
 
-function GuiEntityCloseWidget(entity)
+function GuiEntityCloseWidget(unit_number)
   for player_index, player in pairs(game.players) do
     local player_data = get_player_data(player_index)
     if not (player_data.current_fcpu and player_data.current_fcpu.valid)
-    or player_data.current_fcpu.unit_number == entity.unit_number
-    or entity.valid and Entity._are_equal(entity, player_data.current_fcpu) then
+    or player_data.current_fcpu.unit_number == unit_number
+    then
       if player_data.gui_fcpu and player_data.gui_fcpu.valid then
         if player_data.gui_pinned then
           player_data.gui_pinned_location = player_data.gui_fcpu.location

@@ -52,13 +52,12 @@ function handle_fcpu_died(entity)
   end
 end
 
-function handle_fcpu_destroy(entity, soft)
-  local state = get_fcpu_state(entity)
+function handle_fcpu_destroy(state, soft)
   if state and soft and state.may_be_revived then
     return
   end
-  HdlBuilder.destroy_nodes(entity)
-  destroy_fcpu(entity, state)
+  HdlBuilder.destroy_nodes(state)
+  destroy_fcpu(state)
 end
 
 -------------------------------------------------------------------------------------------------------

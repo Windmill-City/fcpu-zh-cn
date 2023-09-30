@@ -16,6 +16,12 @@ local function foreach_fcpu(proc)
     else
       global.fcpus[k] = nil
       global.running[k] = nil
+
+      for i,v in pairs(global.unmap) do
+        if v == k then
+          global.unmap[i] = nil
+        end
+      end
     end
   end
 end
@@ -473,7 +479,15 @@ return {
   end,
 
   ["0.4.15"] = function()
+    global.unmap = {}
+    global.destroy = {}
     foreach_fcpu(function(fcpu, state)
+      state.unit_number = fcpu.unit_number
+
+      global.destroy[state.destroy_regnum] = state.index
+      global.unmap[state.unit_number] = state.index
+      Entity.set_data(state.entity, nil)
+
       if state.program_ics.output then
         local type = type(state.program_ics.output)
         local mt = getmetatable(state.program_ics.output)

@@ -52,18 +52,16 @@ function builder.create_node(entity, type, debug_next_node)
 
   node_fcpu.destructible = false
   node_fcpu.operable = true
-  Entity.set_data(node_fcpu, {fcpu = entity})
+  Entity.set_data(node_fcpu, {fcpu = entity})-- TODO: remove, as it leaks on surface destroy
   return node_fcpu, node_fcpu.get_or_create_control_behavior()
 end
 
-function builder.destroy_nodes(entity)
+local function builder_destroy_nodes_r(entity)
   if not (entity and entity.valid) then return end
   if entity.name == "fcpu" then
     local state = get_fcpu_state(entity)
     if state and state.program_ics then
-      for _, v in pairs(state.program_ics) do
-        builder.destroy_ics(v)
-      end
+      builder.destroy_ics(state.program_ics)
       state.program_ics = {}
     end
   elseif entity.name == "entity-ghost" and entity.ghost_name == "fcpu" then
@@ -71,9 +69,20 @@ function builder.destroy_nodes(entity)
     for _, v in ipairs(node_fcpus) do
       local state_node = Entity.get_data(v)
       if state_node.fcpu == entity then
-        builder.destroy_nodes(v)
+        builder_destroy_nodes_r(v)
       end
     end
+  end
+end
+
+function builder.destroy_nodes(state)
+  local entity = state.entity
+  if entity and entity.valid then
+    builder_destroy_nodes_r(entity)
+  else
+    -- TODO: remove `Entity.[gs]et_data`, as it leaks on surface destroy
+    builder.destroy_ics(state.program_ics)
+    state.program_ics = {}
   end
 end
 
@@ -83,9 +92,10 @@ function builder.destroy_ics(entity)
       for _, e in pairs(entity) do
         builder.destroy_ics(e)
       end
-    elseif entity.valid and (entity.name == "decider-fcpu" or entity.name == "arithmetic-fcpu" or entity.name == "constant-fcpu" or entity.name == "output-fcpu") then
+    elseif not entity.valid then
+    elseif (entity.name == "decider-fcpu" or entity.name == "arithmetic-fcpu" or entity.name == "constant-fcpu" or entity.name == "output-fcpu") then
       debug_print('destroyed fcpu '.. entity.name ..' ic')
-      Entity.set_data(entity, nil)
+      Entity.set_data(entity, nil) -- TODO: remove, as it leaks on surface destroy
       entity.destroy()
     end
   end

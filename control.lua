@@ -20,17 +20,18 @@ local function on_build_fcpu(event)
   handle_fcpu_create(entity, event.tags and event.tags.fcpu)
 end
 
-local function on_destroy_fcpu(unit_number, soft)
-  local fake = { unit_number = unit_number, valid = true, name = 'fcpu' }
-  GuiEntityCloseWidget(fake)
-  handle_fcpu_destroy(fake, soft)
+local function on_destroy_fcpu(registration_number, soft)
+  local state = get_destroyed_fcpu_state(registration_number)
+  if not state then return end
+  GuiEntityCloseWidget(state.unit_number)
+  handle_fcpu_destroy(state, soft)
 end
 
 local function on_died_fcpu(event)
   local entity = event.entity
   if not (entity and entity.valid) then return end
 
-  GuiEntityCloseWidget(entity)
+  GuiEntityCloseWidget(entity.unit_number)
   handle_fcpu_died(entity)
 end
 
@@ -310,7 +311,7 @@ event.register({
 event.register({
   defines.events.on_entity_destroyed},
   function(event)
-    on_destroy_fcpu(event.unit_number, true)
+    on_destroy_fcpu(event.registration_number, true)
   end
 )
 
