@@ -24,6 +24,9 @@ local function string_insert(str1, str2, pos)
 end
 
 local function InsertTextInProgram(player_data, signal_str)
+  if not signal_str then
+    return
+  end
   -- see: https://forums.factorio.com/viewtopic.php?f=28&t=88330
   local pos = player_data.gui_program_input.text:len()
   player_data.gui_program_input.text = string_insert(player_data.gui_program_input.text, signal_str, pos)
