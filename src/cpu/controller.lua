@@ -421,6 +421,10 @@ function Controller.is_sleeping(state)
   return state.program_state == PSTATE_SLEEPING
 end
 
+function Controller.is_error(state)
+  return state.program_state == PSTATE_HALTED and state.error_line ~= nil
+end
+
 function Controller.is_first_instruction(state)
   return state.program_begin == state.instruction_pointer
 end

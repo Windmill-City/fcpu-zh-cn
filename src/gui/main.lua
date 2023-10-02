@@ -357,9 +357,10 @@ function GuiWidgetUpdate(player_data, state, initial)
       --player_data.gui_halt_button.style = "tool_button_red"
       player_data.gui_halt_button.sprite = "fcpu-stop-sprite"
       player_data.gui_halt_button.enabled = not Controller.is_first_instruction(state)
-      player_data.gui_run_button.enabled = true
+      player_data.gui_run_button.enabled = not Controller.is_error(state)
       player_data.gui_inspector.ignored_by_interaction = false
     end
+    player_data.gui_step_button.enabled = not Controller.is_error(state)
   end
   -- Update the inspector GUI
   if player_data.gui_inspector and player_data.gui_inspector.valid and state.regs then
@@ -550,6 +551,8 @@ function MainView.RegisterHandlers(ControlHandlers)
         on_gui_click = GUI_mixPlayerData(function(player_data, state, event)
           if Controller.is_running(state) then
             ControlHandlers['fcpu-debug-pause'](event)
+          elseif Controller.is_error(state) then
+            ControlHandlers['fcpu-debug-reset'](event)
           else
             ControlHandlers['fcpu-debug-stop'](event)
           end

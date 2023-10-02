@@ -50,14 +50,19 @@ function GUI_mixPlayerData(proc)
   end
 end
 
+function GUI_reset_error_message(player_data)
+  if player_data.gui_error_message and player_data.gui_error_message.valid then
+    player_data.gui_error_message.caption = ""
+  end
+end
+
 -------------------------------------------------------------------------------------------------------
 
 local ControlHandlers = {}
 
 ControlHandlers['fcpu-debug-reset'] = GUI_mixPlayerData(function(player_data, state)
-  if player_data.gui_error_message and player_data.gui_error_message.valid then
-    player_data.gui_error_message.caption = ""
-  end
+  GUI_reset_error_message(player_data)
+  Controller.set_error_message(state)
   Controller.compile(state)
   Controller.halt(state, true)
 end)
@@ -69,9 +74,7 @@ ControlHandlers['fcpu-debug-stop'] = GUI_mixPlayerData(function(player_data, sta
 end)
 
 ControlHandlers['fcpu-debug-start'] = GUI_mixPlayerData(function(player_data, state)
-  if player_data.gui_error_message and player_data.gui_error_message.valid then
-    player_data.gui_error_message.caption = ""
-  end
+  GUI_reset_error_message(player_data)
   Controller.compile(state)
   Controller.run(state)
 end)
@@ -90,18 +93,14 @@ ControlHandlers['fcpu-debug-pause'] = GUI_mixPlayerData(function(player_data, st
 end)
 
 ControlHandlers['fcpu-debug-step-over'] = GUI_mixPlayerData(function(player_data, state)
-  if player_data.gui_error_message and player_data.gui_error_message.valid then
-    player_data.gui_error_message.caption = ""
-  end
+  GUI_reset_error_message(player_data)
   Controller.compile(state)
   Controller.step(state)
 end)
 
 ControlHandlers['fcpu-debug-step-into'] = GUI_mixPlayerData(function(player_data, state)
   if not Controller.is_sleeping(state) then
-    if player_data.gui_error_message and player_data.gui_error_message.valid then
-      player_data.gui_error_message.caption = ""
-    end
+    GUI_reset_error_message(player_data)
     Controller.compile(state)
     Controller.step(state)
   end
