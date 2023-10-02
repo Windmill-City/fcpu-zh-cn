@@ -617,8 +617,10 @@ function MainView.RegisterHandlers(ControlHandlers)
         on_gui_click = GUI_mixPlayerData(function(player_data, state, event)
           if player_data.gui_breakpoints and event.element then
             local num = tonumber(string.match(event.element.name, 'break%-(%d+)$'))
-            state.breakpoints[num] = not state.breakpoints[num] or nil;
-            event.element.caption = FormatBreakpointTitle(state, num)
+            if num then
+              state.breakpoints[num] = not state.breakpoints[num] or nil;
+              event.element.caption = FormatBreakpointTitle(state, num)
+            end
           end
         end)
       },

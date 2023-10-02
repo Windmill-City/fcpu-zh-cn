@@ -8,6 +8,7 @@ Date: ????
     - Fixed issue when inserting empty register (https://mods.factorio.com/mod/fcpu/discussion/6058bee87cb82e357482dcf7, https://mods.factorio.com/mod/fcpu/discussion/6058bee87cb82e357482dcf7)
     - Fixed performance degradation when destroying surfaces if other mods observing huge amount of entities (https://mods.factorio.com/mod/fcpu/discussion/612173325ef8087625fd5d9e)
     - Fixed issue with nil ast and clr on first line in some cases.
+    - Fixed issue with nil index and breakpoints in some cases.
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.14
 Date: 2022-03-20
