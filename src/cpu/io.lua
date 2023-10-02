@@ -226,7 +226,9 @@ function io.ics_each_ast(proc, name)
   else
     for k in pairs(state.program_ics) do
       if type(k) == 'number' then
-        proc(state.program_ast[k])
+        if state.program_ast[k] then
+          proc(state.program_ast[k])
+        end
       end
     end
   end
