@@ -1,3 +1,5 @@
+chcp 65001
+
 $Original = Get-Content -Path readme.md -Raw -Encoding UTF8
 $Result = 'return [==[' + $Original + ']==]'
 
