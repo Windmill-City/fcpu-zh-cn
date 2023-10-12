@@ -1,7 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.16
 Date: ????
-  Changes:
+  Bugfixes:
+    - Fixed issue with immediate instructions at the and of script (https://mods.factorio.com/mod/fcpu/discussion/6526bcc32d8a1753132b708e)
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.15
 Date: 2023-10-05

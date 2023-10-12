@@ -328,7 +328,9 @@ function Controller.tick(state, sync_wait)
           advance(state, 2)
         elseif result.type == 'next' then
           advance(state)
-          goto repeat_eval
+          if (state.program_state ~= PSTATE_HALTED) then
+            goto repeat_eval
+          end
         elseif result.type == 'xwait' then
           if not sync_wait then
             advance(state)
