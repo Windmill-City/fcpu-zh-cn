@@ -1,7 +1,0 @@
-{
-    "Lua.diagnostics.globals": [
-        "data"
-    ],
-    "Lua.runtime.version": "Lua 5.2",
-    "factorio.package.autoCommitAuthor": "KonStg <konstg.dev@gmail.com>"
-}

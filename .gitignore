@@ -2,3 +2,4 @@
 fcpu_*.zip
 tests/wiki.md.lua
 src/wiki/readme.src.lua
+.vscode/settings.json
