@@ -91,6 +91,17 @@ local function ioWire_GUI_Update_cl(wire_type)
   end
 end
 
+local function ioLognet_GUI_Update(player_data, state, force)
+  -- Logistic (RO)
+  local control = state.entity.get_control_behavior()
+  --local lognet = state.cache.lognet
+  local lognet = state.entity.surface.find_logistic_network_by_position(state.entity.position, state.entity.force)
+  if lognet ~= nil then
+    MemoryView.UpdateFromLognet(player_data, lognet.get_contents())
+    return
+  end
+end
+
 local function io_GUI_Update(player_data, state, force)
   -- Output
   --if ioChannel_GUI_Validate(player_data, state, 'output', force) then
@@ -138,6 +149,7 @@ local ChannelsInfo = {
   { title = { 'gui-fcpu-memviewer.channel-registers' }, handler = ioRegisters_GUI_Update },
   { title = { 'gui-fcpu-memviewer.channel-input-red' }, handler = ioWire_GUI_Update_cl(defines.wire_type.red) },
   { title = { 'gui-fcpu-memviewer.channel-input-green' }, handler = ioWire_GUI_Update_cl(defines.wire_type.green) },
+  { title = { 'gui-fcpu-memviewer.channel-input-lognet' }, handler = ioLognet_GUI_Update },
   { title = { 'gui-fcpu-memviewer.channel-output-scalar' }, handler = ioWire_GUI_Update_output_cl() },
   { title = { 'gui-fcpu-memviewer.channel-output-vector' }, handler = ioOutput_GUI_Update },
   { title = { 'gui-fcpu-memviewer.channel-output' }, handler = io_GUI_Update },
@@ -160,7 +172,7 @@ function MemoryView.CreateWidget(rootGui)
   end
 
   local elems = gui.build(rootGui, {
-    {type="frame", name="fcpu-memory-view", save_as="gui_memory_view", style="inside_shallow_frame_with_padding", style_mods={ minimal_width=364 }, direction="vertical", children={
+    {type="frame", name="fcpu-memory-view", save_as="gui_memory_view", style="entity_frame", style_mods={ minimal_width=364 }, direction="vertical", children={
       {template="heading_3", caption={"gui-fcpu-memviewer.memory-channel"}},
       {type="flow", name="fcpu-panels", direction="horizontal", style_mods={ vertical_align='center' }, children={
         {type='drop-down', save_as='gui_memory_channel', items={ table.unpack(memchannels) }, selected_index=1, handlers="memory.channel_switch"},
@@ -168,16 +180,18 @@ function MemoryView.CreateWidget(rootGui)
         {type='checkbox', save_as='gui_memory_autoselect', state=false, caption={'gui-fcpu-memviewer.autoselect-channel'}, handlers="memory.channel_autoselect"},
       }},
 
-      {type="flow", direction="horizontal", style_mods={ vertical_align='center' }, children={
-        {template="heading_3", caption={"gui-fcpu-memviewer.memory-view"}},
-        {template="pushers.horizontal"},
-        {type="flow", style="flib_indicator_flow", children={
-          {type="sprite", save_as='gui_memory_sync_sprite', style="flib_indicator", sprite="flib_indicator_blue"},
-          {type="label", save_as='gui_memory_sync_label', style_mods={ minimal_width=70, left_padding=4 }, caption={"gui-fcpu-memviewer.memory-view-sync"}},
+      {type="frame", direction="vertical", style="invisible_frame_with_title_for_inventory", children={
+        {type="flow", direction="horizontal", style_mods={ vertical_align='center' }, children={
+          {template="heading_3", caption={"gui-fcpu-memviewer.memory-view"}},
+          {template="pushers.horizontal"},
+          {type="flow", style="flib_indicator_flow", children={
+            {type="sprite", save_as='gui_memory_sync_sprite', style="flib_indicator", sprite="flib_indicator_blue"},
+            {type="label", save_as='gui_memory_sync_label', style_mods={ minimal_width=70, left_padding=4 }, caption={"gui-fcpu-memviewer.memory-view-sync"}},
+          }},
         }},
-      }},
-      {type="scroll-pane", style="scroll_pane_in_shallow_frame", direction="vertical", children={
-        {type="table", save_as="gui_memory_cells", style="slot_table", column_count=8 --[[ will be populated in `MemoryView.UpdateFromTable` ]]},
+        {type="scroll-pane", direction="vertical", children={
+          {type="table", save_as="gui_memory_cells", style="logistics_slot_table", column_count=8 --[[ will be populated in `MemoryView.UpdateFromTable` ]]},
+        }}
       }}
     }}
   });
@@ -313,7 +327,7 @@ function MemoryView.UpdateFromTable(player_data, signals, format, sparse, memmap
   local style = {
     empty = memmap and "fcpu_channel_cell" or "fcpu_channel_empty_cell",
     readonly = memmap and "fcpu_channel_cell_ro" or "fcpu_channel_empty_cell",
-    index = "fcpu_channel_cell_indexed",
+    index = format == 0 and "fcpu_scalar_cell" or "fcpu_channel_cell_indexed",
   }
 
   -- order is different than in Factorio
@@ -334,7 +348,7 @@ function MemoryView.UpdateFromTable(player_data, signals, format, sparse, memmap
 
   -- show and setup visible
   for k,signal in pairs(remap) do
-    if SetCell(player_data, cells[k], signal, i2s[k] and k, format, style) then
+    if SetCell(player_data, cells[k], signal, i2s[k] and k or (format == 0) and k, format, style) then
       idx = k + 1
     elseif not sparse then
       break
@@ -350,6 +364,49 @@ function MemoryView.UpdateFromTable(player_data, signals, format, sparse, memmap
     idx = idx + 1
   end
 end
+
+function MemoryView.UpdateFromLognet(player_data, content)
+  local cells = player_data.gui_memory_cells.children
+  if not cells then
+    return
+  end
+
+  local last = (content and table_size(content) or 0)
+
+  -- add extra
+  for i = table_size(cells) + 1, math.max(MC_MEMORY_SLOTS_MIN, last) do
+    gui.build(player_data.gui_memory_cells, {
+      gui.templates.channel_cell('index-'..i, {visible=false})
+    })
+  end
+  cells = player_data.gui_memory_cells.children
+
+  local idx = 1
+  -- show and setup visible
+  if content then
+    for item, count in pairs(content) do
+      local cell = cells[idx]
+      if cell then
+        local sprite = GUI_signalToSpritePath(player_data, item)
+        cell.visible = true
+        cell.sprite = sprite
+        cell.number = sprite and count or nil
+        cell.tooltip = GUI_lognetTooltip(idx, item, count)
+        idx = idx + 1
+      end
+    end
+  end
+
+  -- clean ending
+  CleanCellRange(cells, idx, MC_MEMORY_SLOTS_MIN, "fcpu_channel_empty_cell")
+
+  -- hide others
+  while idx <= table_size(cells) and cells[idx] and cells[idx].visible do
+    cells[idx].visible = false
+    idx = idx + 1
+  end
+end
+
 -------------------------------------------------------------------------------------------------------
 
 function MemoryView.RegisterHandlers()

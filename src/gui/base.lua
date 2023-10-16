@@ -9,7 +9,9 @@ local MemoryView = require("src/gui/memory")
 function GUI_signalToSpritePath(player_data, signal)
   if signal then
     local path
-    if signal.type == "virtual" then
+    if type(signal) == "string" then
+      path = "item/".. signal
+    elseif signal.type == "virtual" then
       path = "virtual-signal/" .. signal.name
     elseif signal.name then
       path = signal.type .. '/' .. signal.name
@@ -37,6 +39,14 @@ function GUI_signalToTooltip(signal, prefix)
     return prefix .. (str and ('='.. str) or '')
   else
     return (str or '')
+  end
+end
+
+function GUI_lognetTooltip(index, item, count)
+  if item and count then
+    return '['.. index ..'] = '.. count ..'[item='.. item ..']'
+  else
+    return '['.. index ..'] = <'.. item ..'>'
   end
 end
 

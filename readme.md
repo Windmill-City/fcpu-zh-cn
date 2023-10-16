@@ -10,6 +10,7 @@
 * 128 instructions for whole program
 * 8 general purpose registers
 * 4 memory channels for vector processing
+* integrated access to the logistic network
 * 50+ opcodes
 * rich math instructions, trigonometry, rounding
 * SIMD instructions, `min`, `max`, filter, comparison, etc...

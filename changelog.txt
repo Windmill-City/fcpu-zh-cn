@@ -7,6 +7,7 @@ Date: ????
     - Added Sync indicator in the channel view.
     - Added low-power mode, thanks Rafael Dominiquini.
     - Added logistic network access (thanks to MaTaXeToS)
+    - Added logistic network viewer.
   Bugfixes:
     - Fixed some typos in user interface and docs.
     - Fixed error parsing.

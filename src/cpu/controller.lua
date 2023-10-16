@@ -255,6 +255,11 @@ function Controller.validate_cache(state)
   if not (wires.green and wires.green.valid) then
     wires.green = control.indication.get_circuit_network(defines.wire_type.green, defines.circuit_connector_id.combinator_input)
   end
+
+  -- Cache.LogNet
+  if not (cache.lognet and cache.lognet.valid) then
+    cache.lognet = state.entity.surface.find_logistic_network_by_position(state.entity.position, state.entity.force)
+  end
 end
 
 function Controller.handle_interrupts(state)
