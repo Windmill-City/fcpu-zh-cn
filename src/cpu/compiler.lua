@@ -35,7 +35,7 @@ local function tokenize(str)
   local comment
   str = string.gsub(str, ';', '#', 1)
   local i, j = string.find(str, '#')
-  if i then
+  if i and j then
     comment = string.sub(str, j)
     str = string.sub(str, 1, i - 1)
   end
@@ -64,8 +64,9 @@ local function parse(tokens)
     parseCnt = parseCnt + 1
     return result
   end
-  local rewriteLower = function()
+  local rewriteLowerAndPeek = function()
     tokens[parseCnt] = string.lower(tokens[parseCnt])
+    return peek()
   end
 
   local parseOp = function()
@@ -90,8 +91,8 @@ local function parse(tokens)
   local parseLabel = function()
     return emitter.make_label(consume())
   end
-  local parseConstant = function(fp)
-    return emitter.make_value(consume(), fp)
+  local parseConstant = function()
+    return emitter.make_value(consume())
   end
   local parseString = function()
     local str = ''
@@ -140,8 +141,8 @@ local function parse(tokens)
       return emitter.make_register_ro(REG_CLK)
     else
       local w, i = string.match(name, 'cn([rgm])(%d*)')
-      if w == 'm' and i ~= nil then
-        return emitter.make_register_ro(REG_CNM + tonumber(i) - 1)
+        if w == 'm' and i ~= nil then
+          return emitter.make_register_ro(REG_CNM + tonumber(i) - 1)
       elseif w ~= 'm' then
         return emitter.make_register_ro(w == 'r' and REG_CNR or w == 'g' and REG_CNG)
       else
@@ -190,25 +191,25 @@ local function parse(tokens)
       elseif fc == '\'' then
         return parseString()
       else
-        rewriteLower()
+        local token = rewriteLowerAndPeek()
 
-        if string.find(peek(), 'red') then
+        if string.find(token, 'red') then
           return parseInput('red')
-        elseif string.find(peek(), 'green') then
+        elseif string.find(token, 'green') then
           return parseInput('green')
-        elseif string.find(peek(), 'out') then
+        elseif string.find(token, 'out') then
           return parseOutput('out')
 
-        elseif string.find(peek(), 'mem') then
+        elseif string.find(token, 'mem') then
           return parseMemory('mem')
-        elseif string.find(peek(), 'm%d[@%[]?%d?') == 1 then
+        elseif string.find(token, 'm%d[@%[]?%d?') == 1 then
           return parseMemory('mem', 'm')
 
-        elseif string.find(peek(), 'reg') then
+        elseif string.find(token, 'reg') then
           return parseRegister('reg')
-        elseif string.find(peek(), 'r@?%d') == 1 then
+        elseif string.find(token, 'r@?%d') == 1 then
           return parseRegister('reg', 'r')
-        elseif has_pattern(peek(), {'ipt', 'cnr', 'cng', 'clk', 'cnm%d'}) then
+        elseif has_pattern(token, {'ipt', 'cnr', 'cng', 'clk', 'cnm%d'}) then
           return parseReadOnlyRegister(consume())
         else
           return parseOp()
@@ -227,9 +228,10 @@ function Compiler.compile(lines)
     local status, result = pcall(parse, tokenize(line))
     --local status, result = true, parse(tokenize(line))
     if not status then
-      local start_index = string.find(result, '@') or 1
-      result = string.sub(result, start_index+1, -1)
-      ast[i] = { type='error', error=result }
+      local error = ''..result
+      local start_index = string.find(error, '@') or 0
+      error = string.sub(error, start_index+1, -1)
+      ast[i] = { type='error', error=error }
     else
       ast[i] = result
     end

@@ -1,13 +1,14 @@
 local Assert = require('src/cpu/assert')
-local io
+local io = require('src/cpu/io')
 
+local StandartSourceTypes = {'register', 'value', 'input'}
 
 local standard_op = function(_)
   Assert.two(_)
   local _dst = _[1]
   Assert.is_register(_dst)
   local _src = _[2]
-  Assert.type(_src, {'register', 'value', 'input'})
+  Assert.type(_src, StandartSourceTypes)
   return _dst, _src
 end
 local standard_op3 = function(_)
@@ -17,9 +18,9 @@ local standard_op3 = function(_)
   local _a = _[three and 2 or 1]
   local _b = _[three and 3 or 2]
   if three then
-    Assert.type(_a, {'register', 'value', 'input'})
+    Assert.type(_a, StandartSourceTypes)
   end
-  Assert.type(_b, {'register', 'value', 'input'})
+  Assert.type(_b, StandartSourceTypes)
   return _dst, _a, _b
 end
 local jump_op = function(addr, offset)

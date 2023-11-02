@@ -45,7 +45,7 @@ function Emitter.make_register_ro(addr)
 end
 
 function Emitter.make_memory(name, index, addr, is_ptr)
-  return { type = 'memory', location = name, index = tonumber(index), addr = tonumber(addr), pointer = is_ptr }
+  return { type = 'memory', location = name, addr = tonumber(addr), pointer = is_ptr, index = tonumber(index) }
 end
 
 function Emitter.make_wire(name, address)

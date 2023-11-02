@@ -93,9 +93,9 @@ Each register or memory channel could be addressed not only by direct name:
 * **memC[M]** (**mem1[32]**, **m4[97]**, etc.. `C` is a memory channel number, `M` is a memory cell index)
 But also with indirect pointer:
 * **reg@R** (**reg@3**, **r@7**, etc... `R` is a register index)
-* **memS@R** (**mem1@3**, **mem4@8**, etc... `R` is a register index)
+* **memC@R** (**mem1@3**, **mem4@8**, etc... `R` is a register index)
 
-This allow you to use them as **array** indices.  
+This allow you to use values in registers as **array** indices.  
 
 For example:
 ```
@@ -139,9 +139,9 @@ Each instruction take one or more operands and modify them or state of fCPU.
 
 **Legend**
 
-* **C**, value: integer constant in range [-2^31..2^31), (`-3500`)
+* **V**, value: integer constant in range [-2^31..2^31), (`-3500`)
 * **T**, type: signal type (`[item=iron-ore]`)
-* **CT**, signal: consists of **C**alue and **T**ype (`123[item=copper-ore]`)
+* **VT**, signal: consists of **V**alue and **T**ype (`123[item=copper-ore]`)
 * **R**, register: (`reg1`, `r3`, ..., `reg8` or `r@4` notation, or one memory cell `m1[23]` or one input wire signal `red34`, `green@3`)
 * **M**, memory: channel (`mem1`, `m2`, ..., `mem4`)
 * **I**, wire: input wire (`red`, `green`)
@@ -174,11 +174,11 @@ Each instruction take one or more operands and modify them or state of fCPU.
 * `clr` dst...[**R**/**M**/**O**]  
   Clear specified registers, memory channels or output wires (`mem3`, `r2`, `out4`).
 
-* `mov` dst...[**R**/**O**] src[**C**/**T**/**CT**/**R**]  
+* `mov` dst...[**R**/**O**] src[**V**/**T**/**VT**/**R**]  
   Copy signal from source to destination.  
   *dst... = src*
 
-* `ssv` dst...[**R**/**O**] val[**C**/**R**]  
+* `ssv` dst...[**R**/**O**] val[**V**/**R**]  
   Set signal value.  
   *dst... = val*
 
@@ -210,22 +210,22 @@ Each instruction take one or more operands and modify them or state of fCPU.
 
 ### Arithmetic
 
-* `add` dst[**R**] src?[**C**/**R**] val[**C**/**R**]  
+* `add` dst[**R**] src?[**V**/**R**] val[**V**/**R**]  
   *dst = src + val* (if src is specified)  
   *dst = dst + val*  
-* `sub` dst[**R**] src?[**C**/**R**] val[**C**/**R**]  
+* `sub` dst[**R**] src?[**V**/**R**] val[**V**/**R**]  
   *dst = src - val* (if src is specified)  
   *dst = dst - val*  
-* `mul` dst[**R**] src?[**C**/**R**] val[**C**/**R**]  
+* `mul` dst[**R**] src?[**V**/**R**] val[**V**/**R**]  
   *dst = src \* val* (if src is specified)  
   *dst = dst \* val*  
-* `div` dst[**R**] src?[**C**/**R**] val[**C**/**R**]  
+* `div` dst[**R**] src?[**V**/**R**] val[**V**/**R**]  
   *dst = src / val* (if src is specified)  
   *dst = dst / val*  
-* `mod` dst[**R**] src?[**C**/**R**] val[**C**/**R**]  
+* `mod` dst[**R**] src?[**V**/**R**] val[**V**/**R**]  
   *dst = src % val* (if src is specified)  
   *dst = dst % val*  
-* `pow` dst[**R**] src?[**C**/**R**] val[**C**/**R**]  
+* `pow` dst[**R**] src?[**V**/**R**] val[**V**/**R**]  
   *dst = src ^ val* (if src is specified)  
   *dst = dst ^ val*  
 
@@ -234,16 +234,16 @@ Each instruction take one or more operands and modify them or state of fCPU.
 * `dec` dst[**R**]  
   *dst = dst - 1*
 
-* `subi` dst[**R**] val[**C**/**R**]  
+* `subi` dst[**R**] val[**V**/**R**]  
   *dst = val - dst*
-* `divi` dst[**R**] val[**C**/**R**]  
+* `divi` dst[**R**] val[**V**/**R**]  
   *dst = val / dst*
-* `modi` dst[**R**] val[**C**/**R**]  
+* `modi` dst[**R**] val[**V**/**R**]  
   *dst = val % dst*
-* `powi` dst[**R**] val[**C**/**R**]  
+* `powi` dst[**R**] val[**V**/**R**]  
   *dst = val ^ dst*
 
-* `rnd` dst[**R**] min[**C**/**R**] max[**C**/**R**]  
+* `rnd` dst[**R**] min[**V**/**R**] max[**V**/**R**]  
   Assigns into *dst* a pseudo-random value in range [*min* to *max*] (inclusive).  
 
 * `fract` reg[**R**]  
@@ -255,45 +255,45 @@ Each instruction take one or more operands and modify them or state of fCPU.
 * `ceil` reg[**R**]  
   Get the lowest integer greater than or equal to real number in register.  
 
-* `dig` dst[**R**] num[**C**/**R**]  
+* `dig` dst[**R**] num[**V**/**R**]  
   Get digit *num*ber from *dest*inatination and write to dst.  
   *dst = dst / 10^num % 10*
-* `dis` dst[**R**] num[**C**/**R**] val[**C**/**R**]  
+* `dis` dst[**R**] num[**V**/**R**] val[**V**/**R**]  
   Set digit to *val*ue at *num*ber in *dest*inatination.  
   *dst = dst + (val % 10 - dst / 10^num % 10) * 10^num*
 
 
 ### Trigonometry
 
-* `cos` dst[**R**] src[**C**/**R**]  
+* `cos` dst[**R**] src[**V**/**R**]  
   *dst = cos(src)*
-* `sin` dst[**R**] src[**C**/**R**]  
+* `sin` dst[**R**] src[**V**/**R**]  
   *dst = sin(src)*
-* `tan` dst[**R**] src[**C**/**R**]  
+* `tan` dst[**R**] src[**V**/**R**]  
   *dst = tan(src)*
-* `atan2` dst[**R**] y[**C**/**R**] x[**C**/**R**]  
+* `atan2` dst[**R**] y[**V**/**R**] x[**V**/**R**]  
   *dst = atan2(y, x)*
-* `sqrt` dst[**R**] src[**C**/**R**]  
+* `sqrt` dst[**R**] src[**V**/**R**]  
   *dst = sqrt(src)*
-* `exp` dst[**R**] src[**C**/**R**]  
+* `exp` dst[**R**] src[**V**/**R**]  
   *dst = exp(src)*
-* `ln` dst[**R**] src[**C**/**R**]  
+* `ln` dst[**R**] src[**V**/**R**]  
   *dst = ln(src)*
 
 
 ### Bitwise
 
-* `band` dst[**R**] src?[**C**/**R**] val[**C**/**R**]  
+* `band` dst[**R**] src?[**V**/**R**] val[**V**/**R**]  
   AND.  
   *dst = src & val* (if src is specified)
   *dst = dst & val*
 
-* `bor` dst[**R**] src?[**C**/**R**] val[**C**/**R**]  
+* `bor` dst[**R**] src?[**V**/**R**] val[**V**/**R**]  
   OR.  
   *dst = src | val* (if src is specified)
   *dst = dst | val*
 
-* `bxor` dst[**R**] src?[**C**/**R**] val[**C**/**R**]  
+* `bxor` dst[**R**] src?[**V**/**R**] val[**V**/**R**]  
   XOR.  
   *dst = src ^ val* (if src is specified)
   *dst = dst ^ val*
@@ -303,22 +303,22 @@ Each instruction take one or more operands and modify them or state of fCPU.
   *dst = ~src* (if src is specified)
   *dst = ~dst*
 
-* `bsl` dst[**R**] src?[**C**/**R**] val[**C**/**R**]  
+* `bsl` dst[**R**] src?[**V**/**R**] val[**V**/**R**]  
   Shift left.  
   *dst = src << val* (if src is specified)
   *dst = dst << val*
 
-* `bsr` dst[**R**] src?[**C**/**R**] val[**C**/**R**]  
+* `bsr` dst[**R**] src?[**V**/**R**] val[**V**/**R**]  
   Shift right.  
   *dst = src >> val* (if src is specified)
   *dst = dst >> val*
 
-* `brl` dst[**R**] src?[**C**/**R**] val[**C**/**R**]  
+* `brl` dst[**R**] src?[**V**/**R**] val[**V**/**R**]  
   Rotate left.  
   *dst = src rot<< val* (if src is specified)
   *dst = dst rot<< val*
 
-* `brr` dst[**R**] src?[**C**/**R**] val[**C**/**R**]  
+* `brr` dst[**R**] src?[**V**/**R**] val[**V**/**R**]  
   Rotate right.  
   *dst = src rot>> val* (if src is specified)
   *dst = dst rot>> val*
@@ -329,17 +329,17 @@ Each instruction take one or more operands and modify them or state of fCPU.
 * `lea` dst[**R**/**O**] addr[**L**]  
   Load label *addr*ess into *dst*.
 
-* `jmp` addr[**C**/**A**/**L**/**R**]  
+* `jmp` addr[**V**/**A**/**L**/**R**]  
   Jump to address or label.
 
-* `jmp` addr[**C**/**A**/**L**/**R**] offset[**C**/**R**]  
+* `jmp` addr[**V**/**A**/**L**/**R**] offset[**V**/**R**]  
   Jump to address + offset or label + offset.  
   For example: `jmp ipt -2`, jump at two lines before current instruction (`ipt`).
 
 * `hlt`  
   *Halt* program execution until it will be resumed by player or by *Run* signal from any **i**nput wire.
 
-* `slp` cnt[**C**/**R**]  
+* `slp` cnt[**V**/**R**]  
   Sleep for specified ticks count.  
   fCPU do not handle interruptions while sleeping.  
 
@@ -353,8 +353,8 @@ btrc r1
 xmov m1 red
 ```
 
-* `bkr` cnt[**C**/**R**]  
-  `bkg` cnt[**C**/**R**]  
+* `bkr` cnt[**V**/**R**]  
+  `bkg` cnt[**V**/**R**]  
   Block until there are at least *cnt* signals on *r*ed/*g*reen wires.
 
 * `btr` type[**T**/**R**]
@@ -382,27 +382,27 @@ jmp :counter
 ; r1 now equal to 10
 ```
 
-* `teq` a[**C**/**S**/**R**] b[**C**/**S**/**R**]  
+* `teq` a[**V**/**S**/**R**] b[**V**/**S**/**R**]  
   Equal.  
   *a == b*
 
-* `tne` a[**C**/**S**/**R**] b[**C**/**S**/**R**]  
+* `tne` a[**V**/**S**/**R**] b[**V**/**S**/**R**]  
   Not equal.  
   *a != b*
 
-* `tgt` a[**C**/**S**/**R**] b[**C**/**S**/**R**]  
+* `tgt` a[**V**/**S**/**R**] b[**V**/**S**/**R**]  
   Greater than.  
   *a > b*
 
-* `tlt` a[**C**/**S**/**R**] b[**C**/**S**/**R**]  
+* `tlt` a[**V**/**S**/**R**] b[**V**/**S**/**R**]  
   Less than.  
   *a < b*
 
-* `tge` a[**C**/**S**/**R**] b[**C**/**S**/**R**]  
+* `tge` a[**V**/**S**/**R**] b[**V**/**S**/**R**]  
   Greater or equal than.  
   *a >= b*
 
-* `tle` a[**C**/**S**/**R**] b[**C**/**S**/**R**]  
+* `tle` a[**V**/**S**/**R**] b[**V**/**S**/**R**]  
   Less or equal than.  
   *a <= b*
 
@@ -429,34 +429,34 @@ blt r1 10 :counter
 ; r1 now equal to 10
 ```
 
-* `beq` a[**C**/**S**/**R**] b[**C**/**S**/**R**] addr[**C**/**A**/**L**/**R**] offset?[**C**/**R**]  
+* `beq` a[**V**/**S**/**R**] b[**V**/**S**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]  
   Equal.  
   If *a == b* then `jmp addr offset`
 
-* `bne` a[**C**/**S**/**R**] b[**C**/**S**/**R**] addr[**C**/**A**/**L**/**R**] offset?[**C**/**R**]  
+* `bne` a[**V**/**S**/**R**] b[**V**/**S**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]  
   Not equal.  
   If *a != b* then `jmp addr offset`
 
-* `bgt` a[**C**/**S**/**R**] b[**C**/**S**/**R**] addr[**C**/**A**/**L**/**R**] offset?[**C**/**R**]  
+* `bgt` a[**V**/**S**/**R**] b[**V**/**S**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]  
   Greater than.  
   If *a > b* then `jmp addr offset`
 
-* `blt` a[**C**/**S**/**R**] b[**C**/**S**/**R**] addr[**C**/**A**/**L**/**R**] offset?[**C**/**R**]  
+* `blt` a[**V**/**S**/**R**] b[**V**/**S**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]  
   Less than.  
   If *a < b* then `jmp addr offset`
 
-* `bge` a[**C**/**S**/**R**] b[**C**/**S**/**R**] addr[**C**/**A**/**L**/**R**] offset?[**C**/**R**]  
+* `bge` a[**V**/**S**/**R**] b[**V**/**S**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]  
   Greater or equal than.  
   If *a >= b* then `jmp addr offset`
 
-* `ble` a[**C**/**S**/**R**] b[**C**/**S**/**R**] addr[**C**/**A**/**L**/**R**] offset?[**C**/**R**]  
+* `ble` a[**V**/**S**/**R**] b[**V**/**S**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]  
   Less or equal than.  
   If *a <= b* then `jmp addr offset`
 
-* `bas` a[**T**/**R**] b[**T**/**R**] addr[**C**/**A**/**L**/**R**] offset?[**C**/**R**]  
+* `bas` a[**T**/**R**] b[**T**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]  
   Branch if types are same.  
 
-* `bad` a[**T**/**R**] b[**T**/**R**] addr[**C**/**A**/**L**/**R**] offset?[**C**/**R**]  
+* `bad` a[**T**/**R**] b[**T**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]  
   Branch if types are different.  
 
 
@@ -505,7 +505,7 @@ When working with SIMD instructions, the following features should be considered
 * `xmov` dst[**M**/**O**] src[**I**/**M**]
   *dst(each) = src(each)*
 
-* `emit` dst[**M**] val...[**C**/**T**/**CT**/**R**]
+* `emit` dst[**M**] val...[**V**/**T**/**VT**/**R**]
   Append *val*ues to *dst* memory (with random ordering until v0.5.0).  
 
 * `xuni` dst[**M**/**O**] a[**I**/**M**] b[**I**/**M**]
@@ -516,27 +516,27 @@ When working with SIMD instructions, the following features should be considered
   Copy all the signals from *src* to *dst* having *mask* as whitelist.
   *Internal design by https://www.reddit.com/user/Halke1986/*
 
-* `xadd` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]
+* `xadd` dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]
   *dst(each) = dst + val* 
   *dst(each) = src + val* (if src specified)
 
-* `xsub` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]
+* `xsub` dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]
   *dst(each) = dst - val*
   *dst(each) = src - val* (if src specified)
 
-* `xmul` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]
+* `xmul` dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]
   *dst(each) = dst \* val*
   *dst(each) = src \* val* (if src specified)
 
-* `xdiv` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]
+* `xdiv` dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]
   *dst(each) = dst / val*
   *dst(each) = src / val* (if src specified)
 
-* `xmod` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]
+* `xmod` dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]
   *dst(each) = dst % val*
   *dst(each) = src % val* (if src specified)
 
-* `xpow` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]
+* `xpow` dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]
   *dst(each) = dst ^ val*
   *dst(each) = src ^ val* (if src specified)
 
@@ -546,54 +546,54 @@ When working with SIMD instructions, the following features should be considered
 Compares each signal value in memory with operand specified and pass it to destination if condition met.  
 In two operand version *src* is the same as a *dst*.  
 
-* `xceq` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]  
+* `xceq` dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]  
   Equal.  
   *dst(each) = src(each), if src(each) == val*
 
-* `xcne` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]  
+* `xcne` dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]  
   Not equal.  
   *dst(each) = src(each), if src(each) != val*
 
-* `xcgt` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]  
+* `xcgt` dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]  
   Greater than.  
   *dst(each) = src(each), if src(each) > val*
 
-* `xclt` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]  
+* `xclt` dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]  
   Less than.  
   *dst(each) = src(each), if src(each) < val*
 
-* `xcge` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]  
+* `xcge` dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]  
   Greater or equal than.  
   *dst(each) = src(each), if src(each) >= val*
 
-* `xcle` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]  
+* `xcle` dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]  
   Less or equal than.  
   *dst(each) = src(each), if src(each) <= val*
 
 
 ### SIMD Bitwise
 
-* `xand` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]
+* `xand` dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]
   AND.  
   *dst(each) = dst & val* 
   *dst(each) = src & val* (if src specified)
 
-* `xor`  dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]
+* `xor`  dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]
   OR.  
   *dst(each) = dst | val* 
   *dst(each) = src | val* (if src specified)
 
-* `xxor` dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]
+* `xxor` dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]
   XOR.  
   *dst(each) = dst ^ val* 
   *dst(each) = src ^ val* (if src specified)
 
-* `xsl`  dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]
+* `xsl`  dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]
   Shift left.  
   *dst(each) = dst << val* 
   *dst(each) = src << val* (if src specified)
 
-* `xsr`  dst[**M**/**O**] src?[**I**/**M**] val[**C**/**R**]
+* `xsr`  dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]
   Shift right.  
   *dst(each) = dst >> val* 
   *dst(each) = src >> val* (if src specified)
