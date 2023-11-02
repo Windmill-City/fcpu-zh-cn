@@ -251,7 +251,7 @@ local function GuiWidgetUpdatePinButton(player, force)
     if player_data.gui_pinned then
       player_data.gui_pin_button.style = "flib_selected_frame_action_button"
       player_data.gui_fcpu.auto_center = false
-      player_data.gui_fcpu.location = player_data.gui_pinned_location
+      player_data.gui_pinned_location = player_data.gui_fcpu.location
       player.opened = nil
     else
       player_data.gui_pin_button.style = "frame_action_button"
@@ -285,8 +285,13 @@ function GuiWidgetOpen(player, entity)
   inplace_dictionary_combine(
     player_data,
     elems,
-    {}--MemoryView.CreateWidget(elems.gui_fcpu["fcpu-panels"])
+    player_data.gui_pinned and player_data.gui_pinned_memory and MemoryView.CreateWidget(elems.gui_fcpu["fcpu-panels"]) or {}
   )
+  if player_data.gui_pinned then
+    if player_data.gui_fcpu and player_data.gui_fcpu.valid then
+      player_data.gui_fcpu.location = player_data.gui_pinned_location
+    end
+  end
 
   GuiWidgetUpdateTitle(player_data, state)
   GuiWidgetUpdatePinButton(player, true)
@@ -604,8 +609,10 @@ function MainView.RegisterHandlers(ControlHandlers)
           if player_data.gui_fcpu and player_data.gui_fcpu["fcpu-panels"] then
             local rootGui = player_data.gui_fcpu["fcpu-panels"]
             if rootGui["fcpu-memory-view"] then
+              player_data.gui_pinned_memory = false
               MemoryView.DestroyWidget(player_data)
             else
+              player_data.gui_pinned_memory = true
               local elems = MemoryView.CreateWidget(rootGui)
               inplace_dictionary_combine(player_data, elems)
               MemoryView.UpdateWidget(player_data, state, true)
