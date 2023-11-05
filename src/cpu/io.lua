@@ -8,19 +8,13 @@ local io = {}
 
 -- require('constants')
 -- {
-  NULL_SIGNAL = {signal = nil, count = 0}
-  HALT_SIGNAL = {signal = { type = "virtual", name = "signal-fcpu-halt"}, count = 1}
-  RUN_SIGNAL = {signal = { type = "virtual", name = "signal-fcpu-run"}, count = 1}
-  STEP_SIGNAL = {signal = { type = "virtual", name = "signal-fcpu-step"}, count = 1}
-  SLEEP_SIGNAL = {signal = { type = "virtual", name = "signal-fcpu-sleep"}, count = 1}
-  JUMP_SIGNAL = {signal = { type = "virtual", name = "signal-fcpu-jump"}, count = 1}
---
   REG_IP = MC_REGS_RO_FIRST + 0
   REG_CNR = MC_REGS_RO_FIRST + 1
   REG_CNG = MC_REGS_RO_FIRST + 2
   REG_CLK = MC_REGS_RO_FIRST + 3
   REG_CNM = MC_REGS_RO_MSLOT
 -- }
+require('src/cpu/signals')
 
 
 function io.for_entity(proc)
@@ -447,7 +441,7 @@ function io.getvalue(_, types)
   end
 end
 
-function io.setcount(_, count, types)
+function io.setvalue(_, count, types)
   -- TODO: optimize
   local signal = io.getsignal(_, types)
   signal.str = nil
@@ -461,6 +455,7 @@ function io.gettype(_, types)
   if type(signal) ~= 'table' or signal.signal == nil then
     Assert.exception('trying to retrieve nil type')
   end
+---@diagnostic disable-next-line: need-check-nil
   return signal.signal
 end
 

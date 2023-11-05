@@ -118,7 +118,7 @@ local opcodes_vx = {
     end
 
     if 0 < c then
-      io.setcount(_[1], s / c)
+      io.setvalue(_[1], s / c)
     end
   end,
 
@@ -138,7 +138,7 @@ local opcodes_vx = {
       end
     end
 
-    io.setcount(_[1], i)
+    io.setvalue(_[1], i)
   end,
   xmaxi = function(_, ics)
     Assert.two(_)
@@ -156,7 +156,7 @@ local opcodes_vx = {
       end
     end
 
-    io.setcount(_[1], i)
+    io.setvalue(_[1], i)
   end,
 }
 

@@ -246,7 +246,7 @@ local opcodes = {
     Assert.two_or_more(_)
     local sigcount = io.getvalue(_[#_], {'value', 'signal', 'register', 'input'})
     for i = 1, #_ - 1 do
-      io.setcount(_[i], sigcount, {'register', 'output'})
+      io.setvalue(_[i], sigcount, {'register', 'output'})
     end
   end,
   sst = function(_) -- sst dst...[R] type[T/S/R/I]
@@ -288,8 +288,8 @@ local opcodes = {
     Assert.is_register(_[1], _[2])
     local a = io.getvalue(_[1], {'register'})
     local b = io.getvalue(_[2], {'register'})
-    io.setcount(_[1], b, {'register'})
-    io.setcount(_[2], a, {'register'})
+    io.setvalue(_[1], b, {'register'})
+    io.setvalue(_[2], a, {'register'})
   end,
 
   add = function(_)
