@@ -9,6 +9,7 @@ REG_IP = MC_REGS_RO_FIRST + 0
 REG_CNR = MC_REGS_RO_FIRST + 1
 REG_CNG = MC_REGS_RO_FIRST + 2
 REG_CLK = MC_REGS_RO_FIRST + 3
+REG_CNL = MC_REGS_RO_FIRST + 4
 REG_CNM = MC_REGS_RO_MSLOT
 -- }
 
@@ -30,6 +31,8 @@ local function register_getreadonly(index)
     end
   elseif index == REG_CLK then
     return state.clock
+  elseif index == REG_CNL then
+    return io.lognet_content_size()
   elseif REG_CNM <= index then
     local address = Emitter.make_memory_bank('mem', index - REG_CNM + 1)
     return io.memory_size(address) or 0

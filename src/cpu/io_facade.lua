@@ -8,6 +8,7 @@ local ioRegister = require('src/cpu/io/register')
 local ICStack = require('src/cpu/io/icstack')
 local ioChannel = require('src/cpu/io/channel')
 local ioMemory = require('src/cpu/io/memory')
+local ioLognet = require('src/cpu/io/lognet')
 local ioWire = require('src/cpu/io/wire')
 
 State = require('src/cpu/io/state')
@@ -15,6 +16,7 @@ State.onBind(ioRegister.bind)
 State.onBind(ICStack.bind)
 State.onBind(ioChannel.bind)
 State.onBind(ioMemory.bind)
+State.onBind(ioLognet.bind)
 State.onBind(ioWire.bind)
 
 -- Some hacks
@@ -54,6 +56,10 @@ io.memory_clear = ioMemory.clear
 io.memory_address_of = ioMemory.address_of
 io.memory_free_index = ioMemory.first_free_index
 io.memory_size = ioMemory.size
+
+
+-- Lognet
+io.lognet_content_size = ioLognet.content_size
 
 
 -- General wire manipulation

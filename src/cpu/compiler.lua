@@ -133,14 +133,17 @@ local function parse(tokens)
     elseif string.find(name, 'clk') then
       return Emitter.make_special_register_ro(REG_CLK)
     else
-      local w, i = string.match(name, 'cn([rgm])(%d*)')
-        if w == 'm' and i ~= nil then
-          return Emitter.make_special_register_ro(REG_CNM + tonumber(i) - 1)
-      elseif w ~= 'm' then
-        return Emitter.make_special_register_ro(w == 'r' and REG_CNR or w == 'g' and REG_CNG)
-      else
-        Assert.exception('Unknown register `'..name..'`')
+      local w, i = string.match(name, 'cn([rglm])(%d*)')
+      if w == 'm' and i ~= nil then
+        return Emitter.make_special_register_ro(REG_CNM + tonumber(i) - 1)
+      elseif w == 'r' then
+        return Emitter.make_special_register_ro(REG_CNR)
+      elseif w == 'g' then
+        return Emitter.make_special_register_ro(REG_CNG)
+      elseif w == 'l' then
+        return Emitter.make_special_register_ro(REG_CNL)
       end
+      Assert.exception('Unknown register `'..name..'`')
     end
   end
   local parseMemory = function(name, alias)
@@ -206,7 +209,7 @@ local function parse(tokens)
           return parseRegister('reg')
         elseif string.find(token, 'r@?%d') == 1 then
           return parseRegister('reg', 'r')
-        elseif has_pattern(token, {'ipt', 'cnr', 'cng', 'clk', 'cnm%d'}) then
+        elseif has_pattern(token, {'ipt', 'cnr', 'cng', 'clk', 'cnl', 'cnm%d'}) then
           return parseReadOnlyRegister(consume())
         else
           return parseOp()

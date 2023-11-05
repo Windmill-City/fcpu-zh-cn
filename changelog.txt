@@ -8,6 +8,7 @@ Date: ????
     - Added low-power mode, thanks Rafael Dominiquini.
     - Added logistic network access (thanks to MaTaXeToS)
     - Added logistic network viewer.
+    - Added new read-only register `cnl`.
   Bugfixes:
     - Fixed some typos in user interface and docs.
     - Fixed error parsing.
