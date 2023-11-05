@@ -358,18 +358,21 @@ xmov m1 red
 
 * `bkr` cnt[**V**/**R**]  
   `bkg` cnt[**V**/**R**]  
-  Block until there are at least *cnt* signals on *r*ed/*g*reen wires.
+  `bkl` cnt[**V**/**R**]  
+  Block until there are at least *cnt* signals on *r*ed/*g*reen wires or *l*ognet.
 
-* `btr` type[**T**/**R**]
-  `btg` type[**T**/**R**]
-  `bti` type[**T**/**R**]
-  Block until signal type found on *r*ed/*g*reen/both_*i*nput wires.
+* `btr` type[**T**/**R**]  
+  `btg` type[**T**/**R**]  
+  `bti` type[**T**/**R**]  
+  `btl` type[**T**/**R**]  
+  Block until signal type found on *r*ed/*g*reen/both_*i*nput wires or *l*ognet.
 
-* `btrc` reg[**R**]
-  `btgc` reg[**R**]
-  `btic` reg[**R**]
-  Block while reference *reg*ister have same value as in *r*ed/*g*reen/both_*i*nput wires.  
-  After red/green/input value were changed, assign new value to *register* and continue execution.
+* `btrc` reg[**R**]  
+  `btgc` reg[**R**]  
+  `btic` reg[**R**]  
+  `btlc` reg[**R**]  
+  Block while reference *reg*ister have same type-value as in *r*ed/*g*reen/both_*i*nput wires or *l*ognet.  
+  After red/green/input or *l*ognet value were changed, assign new value to *register* and continue execution.
 
 
 ### Testing operands values

@@ -59,44 +59,77 @@ local branch_mnemonics = function(condition)
   end
 end
 
-local bk_mnemonics = function(color)
+local bk_mnemonics_impl = function(_, currentCount)
+  Assert.one(_)
+  Assert.type(_[1], {'value', 'register'})
+  local count = io.getvalue(_[1])
+  if currentCount < count then
+    return {type = 'block'}
+  else
+    return {type = 'next'}
+  end
+end
+local bk_mnemonics_wire = function(color)
   return function(_)
-    Assert.one(_)
-    Assert.type(_[1], {'value', 'register'})
-    local count = io.getvalue(_[1])
-    if io.wire_count(color) < count then
-      return {type = 'block'}
-    else
-      return {type = 'next'}
-    end
+    return bk_mnemonics_impl(_, io.wire_count(color))
+  end
+end
+local bk_mnemonics_lognet = function()
+  return function(_)
+    return bk_mnemonics_impl(_, io.lognet_content_size())
   end
 end
 
-local bt_mnemonics = function(color)
+local bt_mnemonics_impl = function(_, getCurrentSignal)
+  Assert.one(_)
+  local type = io.gettype(_[1], {'type', 'register'})
+  local cnt = getCurrentSignal(type)
+  if (cnt or 0) ~= 0 then
+    return {type = 'next'}
+  else
+    return {type = 'block'}
+  end
+end
+local bt_mnemonics_wire = function(color)
   return function(_)
-    Assert.one(_)
-    local type = io.gettype(_[1], {'type', 'register'})
-    if (io.wire_find_signal(color, type) or 0) ~= 0 then
-      return {type = 'next'}
-    else
-      return {type = 'block'}
-    end
+    return bt_mnemonics_impl(_, function(type)
+      return io.wire_find_signal(color, type)
+    end)
+  end
+end
+local bt_mnemonics_lognet = function()
+  return function(_)
+    return bt_mnemonics_impl(_, function(type)
+      return io.lognet_find_item(type)
+    end)
   end
 end
 
-local btc_mnemonics = function(color)
+local btc_mnemonics_impl = function(_, getCurrentSignal)
+  Assert.one(_)
+  local oldSig = io.register_get(_[1])
+  local type = oldSig.signal
+  Assert.check(type, 'Type should be specified for reference signal')
+  local newCnt = getCurrentSignal(type)
+  if newCnt == oldSig.count then
+    return {type = 'block'}
+  else
+    io.register_set(_[1], {signal=oldSig.signal, count=newCnt})
+    return {type = 'next'}
+  end
+end
+local btc_mnemonics_wire = function(color)
   return function(_)
-    Assert.one(_)
-    local oldSig = io.register_get(_[1])
-    local type = oldSig.signal
-    Assert.check(type, 'Type should be specified for reference signal')
-    local newCnt = io.wire_find_signal(color, type)
-    if newCnt == oldSig.count then
-      return {type = 'block'}
-    else
-      io.register_set(_[1], {signal=oldSig.signal, count=newCnt})
-      return {type = 'next'}
-    end
+    return btc_mnemonics_impl(_, function(type)
+      return io.wire_find_signal(color, type)
+    end)
+  end
+end
+local btc_mnemonics_lognet = function()
+  return function(_)
+    return btc_mnemonics_impl(_, function(type)
+      return io.lognet_find_item(type)
+    end)
   end
 end
 
@@ -598,16 +631,19 @@ local opcodes = {
     return { type = 'sleep', val = io.getvalue(_[1]) }
   end,
 
-  bkr = bk_mnemonics('red'),
-  bkg = bk_mnemonics('green'),
+  bkr = bk_mnemonics_wire('red'),
+  bkg = bk_mnemonics_wire('green'),
+  bkl = bk_mnemonics_lognet(),
 
-  btr = bt_mnemonics('red'),
-  btg = bt_mnemonics('green'),
-  bti = bt_mnemonics('input'),
+  btr = bt_mnemonics_wire('red'),
+  btg = bt_mnemonics_wire('green'),
+  bti = bt_mnemonics_wire('input'),
+  btl = bt_mnemonics_lognet(),
 
-  btrc = btc_mnemonics('red'),
-  btgc = btc_mnemonics('green'),
-  btic = btc_mnemonics('input'),
+  btrc = btc_mnemonics_wire('red'),
+  btgc = btc_mnemonics_wire('green'),
+  btic = btc_mnemonics_wire('input'),
+  btlc = btc_mnemonics_lognet(),
 
   nmd = function(_) -- Nuclear Meltdown
     Assert.one(_)

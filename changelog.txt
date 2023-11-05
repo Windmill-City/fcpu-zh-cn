@@ -9,6 +9,7 @@ Date: ????
     - Added logistic network access (thanks to MaTaXeToS)
     - Added logistic network viewer.
     - Added new read-only register `cnl`.
+    - Added new blocking instructions: `bkl`, `btl`, `btlc`.
   Bugfixes:
     - Fixed some typos in user interface and docs.
     - Fixed error parsing.

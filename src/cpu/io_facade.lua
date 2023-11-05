@@ -59,6 +59,7 @@ io.memory_size = ioMemory.size
 
 
 -- Lognet
+io.lognet_find_item = ioLognet.find_item
 io.lognet_content_size = ioLognet.content_size
 
 
