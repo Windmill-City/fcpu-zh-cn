@@ -1,4 +1,3 @@
-local Assert = require('src/cpu/assert')
 local io = require('src/cpu/io')
 local ops = require('src/cpu/opcodes')
 local ops_vx = require('src/cpu/opcodes_vx')

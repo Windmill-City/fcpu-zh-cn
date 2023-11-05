@@ -1,4 +1,3 @@
-local Assert = require('src/cpu/assert')
 local io = require('src/cpu/io')
 
 local StandartSourceTypes = {'register', 'value', 'input'}

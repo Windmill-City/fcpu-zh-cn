@@ -1,3 +1,4 @@
+Assert = require('src/cpu/assert')
 local Compiler = require('src/cpu/compiler')
 local Evaluator = require('src/cpu/evaluator')
 

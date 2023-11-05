@@ -1,4 +1,3 @@
-local Assert = require('src/cpu/assert')
 local emitter = require('src/cpu/emitter')
 local hdlBuilder = require('src/cpu/hdl_builder')
 
