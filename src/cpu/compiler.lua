@@ -129,15 +129,15 @@ local function parse(tokens)
   end
   local parseReadOnlyRegister = function(name)
     if string.find(name, 'ipt') then
-      return emitter.make_register_ro(REG_IP)
+      return emitter.make_special_register_ro(REG_IP)
     elseif string.find(name, 'clk') then
-      return emitter.make_register_ro(REG_CLK)
+      return emitter.make_special_register_ro(REG_CLK)
     else
       local w, i = string.match(name, 'cn([rgm])(%d*)')
         if w == 'm' and i ~= nil then
-          return emitter.make_register_ro(REG_CNM + tonumber(i) - 1)
+          return emitter.make_special_register_ro(REG_CNM + tonumber(i) - 1)
       elseif w ~= 'm' then
-        return emitter.make_register_ro(w == 'r' and REG_CNR or w == 'g' and REG_CNG)
+        return emitter.make_special_register_ro(w == 'r' and REG_CNR or w == 'g' and REG_CNG)
       else
         Assert.exception('Unknown register `'..name..'`')
       end
@@ -288,6 +288,6 @@ end
 
 
 function Compiler.setup(evaluator_, controller_)
-  evaluator_.setup(hdlBuilder, emitter, controller_)
+  evaluator_.setup(emitter, controller_)
 end
 return Compiler

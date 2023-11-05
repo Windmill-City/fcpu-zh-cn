@@ -519,12 +519,6 @@ end
 
 -------------------------------------------------------------------------------------------------------
 
-function builder.get_node(state_, name)
-  return state_.program_ics[name] or state_.program_ics[state_.ics_stack[name]]
-end
-
--------------------------------------------------------------------------------------------------------
-
 local function connect_input_from(state, arg)
   Assert.is_memory_readable(arg)
   if arg.type == 'memory' then

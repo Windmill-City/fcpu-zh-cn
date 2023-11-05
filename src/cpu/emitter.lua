@@ -22,11 +22,6 @@ function Emitter.make_string(str)
   return { type = 'string', str = str }
 end
 
-function Emitter.make_address(addr, is_ptr)
-  Assert.check(addr ~= nil)
-  return { type = 'address', addr = tonumber(addr), pointer = is_ptr }
-end
-
 function Emitter.make_signal(signal_id, countstr)
   if countstr == '' then
     return { type = 'type', signal = signal_id }
@@ -39,13 +34,19 @@ function Emitter.make_signal(signal_id, countstr)
   end
 end
 
+function Emitter.make_special_register_ro(addr)
+  return { type = 'register', location = 'readonly', addr = tonumber(addr), pointer = false }
+end
+
+function Emitter.make_address(addr, is_ptr)
+  Assert.check(addr ~= nil)
+  return { type = 'address', addr = tonumber(addr), pointer = is_ptr }
+end
+
 function Emitter.make_register(name, address)
   return { type = 'register', location = name, addr = address.addr, pointer = address.pointer }
 end
 
-function Emitter.make_register_ro(addr)
-  return { type = 'register', location = 'readonly', addr = tonumber(addr), pointer = false }
-end
 
 function Emitter.make_memory(name, index, addr, is_ptr)
   return { type = 'memory', location = name, addr = tonumber(addr), pointer = is_ptr, index = tonumber(index) }

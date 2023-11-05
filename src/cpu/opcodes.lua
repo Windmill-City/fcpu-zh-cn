@@ -1,4 +1,4 @@
-local io = require('src/cpu/io')
+local io = require('src/cpu/io_facade')
 
 local StandartSourceTypes = {'register', 'value', 'input'}
 

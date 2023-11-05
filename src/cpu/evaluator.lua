@@ -1,4 +1,4 @@
-local io = require('src/cpu/io')
+local io = require('src/cpu/io_facade')
 local ops = require('src/cpu/opcodes')
 local ops_vx = require('src/cpu/opcodes_vx')
 local Evaluator = {}
@@ -72,8 +72,8 @@ end
 
 
 
-function Evaluator.setup(hdlBuilder_, emitter_, controller_)
-  io.setup(hdlBuilder_, emitter_, controller_)
+function Evaluator.setup(emitter_, controller_)
+  io.setup(emitter_, controller_)
   ops.setup(io)
   ops_vx.setup(io)
 end
