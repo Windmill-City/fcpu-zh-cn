@@ -48,6 +48,7 @@ The following can be used as operands:
   `[item=copper-ore]` - type can be represented by pictogram or text
 - **Register**: this is a special cell that store the transmitted signal indefinitely (`reg1`, `r2`, ...)
 - **Memory** channel: one memory channel consists of multiple cells (array) that store the signal indefinitely (`mem1`, `m2`, ...)
+- **LogNet** channel: receives content of a logistic network this fCPU is placed in (`lgn[1]`, `lgn@2`, `logi[34]`, ...)
 - **Input** wire: you can receive signals on wires connected to a combinator's input (`red`,` green`, `red1`, `green@3`, ...)
 - **Output** wire: sets the values ​​at the output of a combinator (`out1`, `out2`, ..., `out256`)
 - **Address**: instruction address (line number `34`)
