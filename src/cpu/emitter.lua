@@ -2,6 +2,10 @@ local Emitter = {}
 
 
 -- Makers
+function Emitter.make_comment()
+  return { type = 'nop', name = 'comment' }
+end
+
 function Emitter.make_label(label)
   return { type = 'label', label = label }
 end

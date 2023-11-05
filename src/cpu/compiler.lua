@@ -2,12 +2,6 @@ local emitter = require('src/cpu/emitter')
 local hdlBuilder = require('src/cpu/hdl_builder')
 
 
--- require('constants')
--- {
-  OP_COMMENT = {type = 'nop', name = 'comment'}
--- }
-
-
 -- array_build from iterator
 local function array_build(...)
   local result = {}
@@ -51,7 +45,7 @@ end
 -- Parse tokens in to an AST we can store and evaluate later.
 local function parse(tokens)
   if #tokens == 0 then
-    return OP_COMMENT
+    return emitter.make_comment()
   end
 
   local parseCnt = 1
@@ -180,7 +174,7 @@ local function parse(tokens)
     if peek() then
       local fc = string.sub(peek(), 1, 1)
       if fc == '#' then
-        return OP_COMMENT
+        return emitter.make_comment()
       elseif fc == ':' then
         return parseLabel()
       elseif string.find(peek(), '(-?[%d%.]*)%[') == 1 then
@@ -221,7 +215,12 @@ end
 
 local Compiler = {}
 
-function Compiler.compile(lines)
+local function linepairs(s)
+  if s:sub(-1)~="\n" then s=s.."\n" end
+  return s:gmatch("(.-)\n")
+end
+
+local function compiler_compile(lines)
   local ast = {}
   for i, line in ipairs(lines) do
     local status, result = pcall(parse, tokenize(line))
@@ -236,6 +235,14 @@ function Compiler.compile(lines)
     end
   end
   return ast
+end
+
+function Compiler.compile(text)
+  local program_lines = {}
+  for line in linepairs(text) do
+    table.insert(program_lines, line)
+  end
+  return compiler_compile(program_lines)
 end
 
 function Compiler.build(state, force)

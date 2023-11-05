@@ -13,11 +13,6 @@ local pstateStr = {
   [PSTATE_SLEEPING] = 'signal-fcpu-sleep',
 }
 
-local function linepairs(s)
-  if s:sub(-1)~="\n" then s=s.."\n" end
-  return s:gmatch("(.-)\n")
-end
-
 local Controller = {}
 
 Controller.event_error = script.generate_event_name()
@@ -97,12 +92,7 @@ end
 
 function Controller.compile(state)
   if state.modified or not (state.program_ast and 0 < #state.program_ast) then
-    local program_lines = {}
-    for line in linepairs(state.program_text) do
-      table.insert(program_lines, line)
-    end
-
-    state.program_ast = Compiler.compile(program_lines)
+    state.program_ast = Compiler.compile(state.program_text)
     state.program_begin = SkipNOPs(state.program_ast, 1) or 1
     state.ics_stack = {}
   end
