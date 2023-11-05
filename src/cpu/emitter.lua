@@ -42,6 +42,10 @@ function Emitter.make_special_register_ro(addr)
   return { type = 'register', special = true, addr = tonumber(addr), pointer = false }
 end
 
+function Emitter.make_lognet(addr, is_ptr)
+  return { type = 'lognet', addr = tonumber(addr), pointer = is_ptr }
+end
+
 function Emitter.make_reference(addr, is_ptr)
   Assert.check(addr ~= nil)
   return { type = 'reference', addr = tonumber(addr), pointer = is_ptr }

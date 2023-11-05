@@ -161,6 +161,16 @@ local function parse(tokens)
       return address
     end
   end
+  local parseLogNet = function(name, alias)
+    local token = consume()
+    local b, d, e = string.match(token, (alias or name)..'([@%[]?)(%d*)(%]?)')
+
+    local addr
+    if b == '@' or b == '[' and e == ']' then
+      addr = d
+    end
+    return Emitter.make_lognet(addr, b ~= nil)
+  end
   local parseInput = function(name)
     local address = parseAddress(name)
     return Emitter.make_wire(name, address)
@@ -204,6 +214,11 @@ local function parse(tokens)
           return parseMemory('mem')
         elseif string.find(token, 'm%d[@%[]?%d?') == 1 then
           return parseMemory('mem', 'm')
+
+        elseif string.find(token, 'lgn') then
+          return parseLogNet('lgn')
+        elseif string.find(token, 'logi') then
+          return parseLogNet('lgn', 'logi')
 
         elseif string.find(token, 'reg') then
           return parseRegister('reg')

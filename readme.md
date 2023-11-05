@@ -90,13 +90,21 @@ Memory channels are addressed: `mem1`, ...,` mem4`.
 To access one cell: `mem2[44]` or `mem1@3` (see Arrays)  
 
 
+### Logistic network (LogNet)
+
+Acts as a single memory channel, except that it is read-only and other obvious limitations.  
+`lgn` channel could be `xmov`'ed into memory channel for manipulations.  
+
+
 ## Arrays\indirect addressing
-Each register or memory channel could be addressed not only by direct name:
+Each register, memory channel or logistic network item could be addressed not only by direct name:
 * **regN** (**reg1**, **r2**, etc... `N` is a register index)
 * **memC[M]** (**mem1[32]**, **m4[97]**, etc.. `C` is a memory channel number, `M` is a memory cell index)
+* **lgn[I]** (**lgn[43]**, **logi[12]**, etc... `I` is a logistic network item index)
 But also with indirect pointer:
 * **reg@R** (**reg@3**, **r@7**, etc... `R` is a register index)
 * **memC@R** (**mem1@3**, **mem4@8**, etc... `R` is a register index)
+* **lgn@R** (**lgn@2**, **logi@8**, etc... `R` is a register index)
 
 This allow you to use values in registers as **array** indices.  
 
@@ -147,6 +155,7 @@ Each instruction take one or more operands and modify them or state of fCPU.
 * **VT**, signal: consists of **V**alue and **T**ype (`123[item=copper-ore]`)
 * **R**, register: (`reg1`, `r3`, ..., `reg8` or `r@4` notation, or one memory cell `m1[23]` or one input wire signal `red34`, `green@3`)
 * **M**, memory: channel (`mem1`, `m2`, ..., `mem4`)
+* **N**, lognet: channel (`lgn`, `logi`, `lnc`)
 * **I**, wire: input wire (`red`, `green`)
 * **O**, wire: output buffer (`out1`, `out2`, ..., `out256`, `out`)
 

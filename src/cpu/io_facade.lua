@@ -59,6 +59,7 @@ io.memory_size = ioMemory.size
 
 
 -- Lognet
+io.lognet_get = ioLognet.get
 io.lognet_find_item = ioLognet.find_item
 io.lognet_content_size = ioLognet.content_size
 
@@ -103,12 +104,14 @@ end
 -- Multiplex Helper Functions
 function io.getsignal(_, types)
   if not types then
-    types = {'signal', 'register', 'wire'}
+    types = {'signal', 'register', 'wire', 'lognet'}
   end
   Assert.type(_, types)
   local signal = nil
   if _.type == 'wire' or _.type == 'input' then
     signal = io.wire_get(_)
+  elseif _.type == 'lognet' then
+    signal = io.lognet_get(_)
   elseif _.type == 'register' then
     signal = io.register_get(_)
   elseif _.type == 'memory' then
@@ -200,6 +203,7 @@ function io.setup(emitter_, controller_)
   ioRegister.setup(Emitter, io)
   ioChannel.setup(ICStack)
   ioMemory.setup(Emitter, ioRegister, ioChannel)
+  ioLognet.setup(ioRegister)
   ioWire.setup(Emitter, ioRegister, ioChannel)
 end
 

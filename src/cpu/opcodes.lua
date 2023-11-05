@@ -202,6 +202,7 @@ local opcodes = {
 -- V: signal value, same as C
 -- C: integer constant, same as V
 -- M: memory
+-- N: logistic network
 -- I: input wire (Red, Green)
 -- O: output wire
 -- A: instruction address

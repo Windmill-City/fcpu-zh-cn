@@ -97,6 +97,9 @@ function Assert.type(_, valid)
       --if _.type == 'wire' and (_.color == 'red' or _.color == 'green') then
         return
       end
+      if _.type == 'lognet' then
+        return
+      end
     elseif v == 'output' then
       if _.type == 'wire' and _.color == 'out' then
         return
