@@ -247,7 +247,7 @@ end
 
 function builder.create_filter_cell(entity, input_src, input_msk)
   -- NEW: Whitelist:
-  --[[ blueprint! 
+  --[[ blueprint!
   0eNrtmE2PmzAQhv9K5GMLq5jwkaB2pUo999pDVSFCJhtrwSBjskUR/71jkrAkgRTTVTaHvUSxGb8ezzP2GHZkGReQCcYl8XeERSnPif9rR3L2xMNY9ckyA+ITJiEhBuFholoriNgKhBmlyZLxUKaCVAZhfAV/iE8ro0Ngy4QssKfR2FuYP1sjreq3QYBLJhns/agbZcCLZAkCpa95YJAszXFoytW0KGdarvvgGKTEvzad4jy4PinSOFjCJtwyHIOGB6UAn63q0bnqXTORy2DwKiCMNmQ/QS5DFc2paiRZKGrffPIFx6SFzIpRqlmJ/hVcBmuRJgHjKEN8KQqo9pNyiBrXqfoRsGoHkGHLQksmooLJulljaj22Tx/XLJ4EAD/X8S4M0QdLTdppbp2bn047w+FVq++I2tJF7bwbatOitmfPZ649P4P+9d2h03PofVRdPar00ryL4qxZXQIrViQmxOi0YJGZpTH8iyN9cHpW+j8+2Y1PoWByk4BEdwafI9N5T3K9ir1NfuWgZIKeNEszwCSrfSSfR2eZRiI5F4l0zI8hWWdc0+oD5YwA5d0DKHrK59Mt+NjXQz6/ysseBsQdAcS+AyCzMyCPj29OZEilPGey0KuctIeKN4KKcwdUmuPMO6Xz7cf32+Bxe4+0IeWlD8e88ey4VI0zyzlWvAscaxZLED23876gqK1e6xUq4HTkFX0fjVcdk7Zu7DpC6mWjpdNOgIPeTEuvhDhOX9qetUvkQdLWknzZ4JtOl49uI+joBq/s9PB10a6WYFSGbRjUmjVCniaNMHruTo99tRh/M+jaFwvtfWF/7IuPfXH7fZExrr0thtaXSr1/1d9S/NanF4PE4RLQt0M2T+poxyyXE2uCBfgZLbaY5PXusOYqUgvP9ejUddyq+gv+ovmO
   ]]
   -- NEW: Blacklist:
@@ -519,20 +519,20 @@ end
 
 -------------------------------------------------------------------------------------------------------
 
-local function connect_input_from(state, arg)
-  Assert.is_memory_readable(arg)
-  if arg.type == 'memory' then
-    local ics_name = arg.location .. arg.index
+local function connect_input_from(state, address)
+  Assert.is_channel_readable(address)
+  if address.type == 'memory' then
+    local ics_name = address.channel
     local mem_ics = state.program_ics[ics_name]
     return {
       entity = mem_ics.out,
       wire = defines.wire_type.red,
       port = defines.circuit_connector_id.combinator_output
     }
-  elseif arg.type == 'wire' then
+  elseif address.type == 'wire' then
     return {
       entity = state.entity,
-      wire = defines.wire_type[arg.color],
+      wire = defines.wire_type[address.color],
       port = defines.circuit_connector_id.combinator_input
     }
   else
@@ -540,10 +540,10 @@ local function connect_input_from(state, arg)
   end
 end
 
-local function connect_output_to(state, ics, arg)
-  Assert.is_memory_writable(arg)
-  if arg.type == 'memory' then
-    local ics_name = arg.location .. arg.index
+local function connect_output_to(state, ics, address)
+  Assert.is_channel_writable(address)
+  if address.type == 'memory' then
+    local ics_name = address.channel
     local mem_ics = state.program_ics[ics_name]
     ics.out.connect_neighbour{
       source_circuit_id = defines.circuit_connector_id.combinator_output,
@@ -552,7 +552,7 @@ local function connect_output_to(state, ics, arg)
       wire = ics.color_out,
     }
     return ics_name
-  elseif arg.type == 'wire' then
+  elseif address.type == 'wire' then
 --[[ moved from `create_memory_cell`
     if input_b ~= nil then
       local isTable = (type(input_b) == 'table')

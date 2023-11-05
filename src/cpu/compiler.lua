@@ -1,4 +1,4 @@
-local emitter = require('src/cpu/emitter')
+local Emitter = require('src/cpu/emitter')
 local hdlBuilder = require('src/cpu/hdl_builder')
 
 
@@ -45,7 +45,7 @@ end
 -- Parse tokens in to an AST we can store and evaluate later.
 local function parse(tokens)
   if #tokens == 0 then
-    return emitter.make_comment()
+    return Emitter.make_comment()
   end
 
   local parseCnt = 1
@@ -82,10 +82,10 @@ local function parse(tokens)
     return node
   end
   local parseLabel = function()
-    return emitter.make_label(consume())
+    return Emitter.make_label(consume())
   end
   local parseConstant = function()
-    return emitter.make_value(consume())
+    return Emitter.make_value(consume())
   end
   local parseString = function()
     local str = ''
@@ -105,14 +105,14 @@ local function parse(tokens)
         str = str .. ' '
       end
     end
-    return emitter.make_string(str)
+    return Emitter.make_string(str)
   end
   local parseAddress = function(name)
     local token = consume()
     local a, b = string.match(token, name..'(@?)(%d+)')
-    return emitter.make_address(b or '', a == '@')
+    return Emitter.make_reference(b or '', a == '@')
   end
-  local parseSignal = function(name)
+  local parseSignal = function()
     local token = consume()
     local m = array_build{ string.match(token, '(-?[%d%.]*)%[([%a%-]+)[=%-]([%a%d%-_:,]+)%]') }
     if m[2] and not (m[2] == 'item' or m[2] == 'fluid' or m[2] == 'virtual-signal') then
@@ -121,23 +121,23 @@ local function parse(tokens)
     if m[2] == 'virtual-signal' then
       m[2] = 'virtual'
     end
-    return emitter.make_signal({type = m[2], name = m[3]}, m[1])
+    return Emitter.make_signal({type = m[2], name = m[3]}, m[1])
   end
   local parseRegister = function(name, alias)
     local address = parseAddress(alias or name)
-    return emitter.make_register(name, address)
+    return Emitter.make_register(name, address)
   end
   local parseReadOnlyRegister = function(name)
     if string.find(name, 'ipt') then
-      return emitter.make_special_register_ro(REG_IP)
+      return Emitter.make_special_register_ro(REG_IP)
     elseif string.find(name, 'clk') then
-      return emitter.make_special_register_ro(REG_CLK)
+      return Emitter.make_special_register_ro(REG_CLK)
     else
       local w, i = string.match(name, 'cn([rgm])(%d*)')
         if w == 'm' and i ~= nil then
-          return emitter.make_special_register_ro(REG_CNM + tonumber(i) - 1)
+          return Emitter.make_special_register_ro(REG_CNM + tonumber(i) - 1)
       elseif w ~= 'm' then
-        return emitter.make_special_register_ro(w == 'r' and REG_CNR or w == 'g' and REG_CNG)
+        return Emitter.make_special_register_ro(w == 'r' and REG_CNR or w == 'g' and REG_CNG)
       else
         Assert.exception('Unknown register `'..name..'`')
       end
@@ -147,16 +147,19 @@ local function parse(tokens)
     local token = consume()
     local a, b, d, e = string.match(token, (alias or name)..'(%d+)([@%[]?)(%d*)(%]?)')
 
-    local index = a
+    local bank = a
     local addr
     if b == '@' or b == '[' and e == ']' then
       addr = d
+      local address = Emitter.make_reference(addr, b == '@')
+      return Emitter.make_memory(name, bank, address)
+    else
+      return Emitter.make_memory_bank(name, bank)
     end
-    return emitter.make_memory(name, index, addr, b == '@')
   end
   local parseInput = function(name)
     local address = parseAddress(name)
-    return emitter.make_wire(name, address)
+    return Emitter.make_wire(name, address)
   end
   local parseOutput = function(name)
     local address
@@ -167,14 +170,14 @@ local function parse(tokens)
     else
       address = parseAddress(name)
     end
-    return emitter.make_wire(name, address)
+    return Emitter.make_wire(name, address)
   end
 
   parseExpr = function()
     if peek() then
       local fc = string.sub(peek(), 1, 1)
       if fc == '#' then
-        return emitter.make_comment()
+        return Emitter.make_comment()
       elseif fc == ':' then
         return parseLabel()
       elseif string.find(peek(), '(-?[%d%.]*)%[') == 1 then
@@ -288,6 +291,6 @@ end
 
 
 function Compiler.setup(evaluator_, controller_)
-  evaluator_.setup(emitter, controller_)
+  evaluator_.setup(Emitter, controller_)
 end
 return Compiler

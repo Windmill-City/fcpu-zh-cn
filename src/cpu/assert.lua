@@ -26,7 +26,7 @@ function Assert.check(b, ...)
     if ... and 0 < #... then
       exception(...)
     else
-      error('Assertion failed: condition not met', 3)
+      error('Assertion failed: condition not met', 2)
     end
   end
 end
@@ -107,39 +107,47 @@ function Assert.type(_, valid)
   exception("Expecting parameter to be a "..(table.concat(valid, ' or ')))
 end
 
-function Assert.is_register(...)
+function Assert.is_reference(...)
   for _,v in ipairs(table.pack(...)) do
-    if v.type ~= "register" then
+    if not (v.type == 'register' and v.addr ~= nil) then
       if not (v.type == 'memory' and v.addr ~= nil) then
-        exception("Expecting parameter to be a register")
+        --if not (v.type == 'channel' and v.addr ~= nil) then
+          if not (v.type == "reference") then
+            exception("Expecting parameter to be a reference")
+          end
+        --end
       end
     end
   end
 end
 
-function Assert.is_memory(...)
+function Assert.is_memory_bank(...)
   for _,v in ipairs(table.pack(...)) do
-    if v.type ~= "memory" or v.index == nil or v.addr ~= nil then
-      exception("Expecting parameter to be a memory")
+    if not (v.type == 'memory' and v.bank ~= nil and v.addr == nil) then
+      exception("Expecting parameter to be a memory bank")
     end
   end
 end
 
-function Assert.is_memory_readable(...)
+function Assert.is_channel_readable(...)
   for _,v in ipairs(table.pack(...)) do
-    if v.type ~= "memory" or v.index == nil or v.addr ~= nil then
-      if v.type ~= 'wire' or (v.color ~= 'red' and v.color ~= 'green') then
-        exception("Expecting parameter to be a memory or input wire")
+    if not (v.type == 'memory' and v.bank ~= nil and v.addr == nil) then
+      if not (v.type == 'wire' and (v.color == 'red' or v.color == 'green')) then
+        --if not (v.type == 'channel' and v.addr == nil) then
+          exception("Expecting parameter to be a memory or input wire")
+        --end
       end
     end
   end
 end
 
-function Assert.is_memory_writable(...)
+function Assert.is_channel_writable(...)
   for _,v in ipairs(table.pack(...)) do
-    if v.type ~= "memory" or v.index == nil or v.addr ~= nil then
-      if v.type ~= 'wire' or v.color ~= 'out' then
-        exception("Expecting parameter to be a memory or output")
+    if not (v.type == 'memory' and v.bank ~= nil and v.addr == nil) then
+      if not (v.type == 'wire' and v.color == 'out') then
+        --if not (v.type == 'channel' and v.addr == nil) then
+          exception("Expecting parameter to be a memory or output")
+        --end
       end
     end
   end

@@ -1,14 +1,14 @@
 local state
 local output_control
+local Emitter
 local ioRegister
-local ioMemory
-local emitter
+local ioChannel
 local ioWire = {}
 
 -- Output wire access
 local function output_get(index)
   local signal = output_control.get_signal(index)
-  return emitter.make_signal(signal.signal, signal.count)
+  return Emitter.make_signal(signal.signal, signal.count)
 end
 
 local function output_set(index, signal)
@@ -19,32 +19,32 @@ local function output_set(index, signal)
   else
     output_control.set_signal(index, nil)
   end
-  ioMemory.GuiCache_InvalidateMemory('output', 0)
+  ioChannel.GuiCache_InvalidateMemory('output', 0)
 end
 
 -- General wire manipulation
-function ioWire.get(_)
-  if _.type == 'wire' and _.color == 'out' then
-    local addr = ioRegister.addr_deref(_)
+function ioWire.get(address)
+  if address.type == 'wire' and address.color == 'out' then
+    local addr = ioRegister.addr_deref(address)
     return output_get(addr)
-  elseif _.type == 'output' then
+  elseif address.type == 'output' then
     Assert.todo()
   end
-  if not state.cache.wires[_.color] then
-    Assert.exception("Tried to access " .. _.color .. " wire when it is not connected")
+  if not state.cache.wires[address.color] then
+    Assert.exception("Tried to access " .. address.color .. " wire when it is not connected")
   end
-  if state.cache.wires[_.color].signals then
-    local addr = ioRegister.addr_deref(_)
-    return state.cache.wires[_.color].signals[addr] or NULL_SIGNAL
+  if state.cache.wires[address.color].signals then
+    local addr = ioRegister.addr_deref(address)
+    return state.cache.wires[address.color].signals[addr] or NULL_SIGNAL
   end
   return NULL_SIGNAL
 end
 
-function ioWire.set(_, signal)
-  if _.type == 'wire' and _.color == 'out' then
-    local addr = ioRegister.addr_deref(_)
+function ioWire.set(address, signal)
+  if address.type == 'wire' and address.color == 'out' then
+    local addr = ioRegister.addr_deref(address)
     output_set(addr, signal)
-  elseif _.type == 'output' then
+  elseif address.type == 'output' then
     Assert.todo()
   else
     Assert.todo()
@@ -76,10 +76,10 @@ function ioWire.bind(state_)
   output_control = state_.cache.control.output
 end
 
-function ioWire.setup(ioRegister_, ioMemory_, emitter_)
+function ioWire.setup(emitter_, ioRegister_, ioChannel_)
+  Emitter = emitter_
   ioRegister = ioRegister_
-  ioMemory = ioMemory_
-  emitter = emitter_
+  ioChannel = ioChannel_
 end
 
 return ioWire

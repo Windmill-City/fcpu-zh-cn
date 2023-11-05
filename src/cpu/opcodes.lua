@@ -5,7 +5,7 @@ local StandartSourceTypes = {'register', 'value', 'input'}
 local standard_op = function(_)
   Assert.two(_)
   local _dst = _[1]
-  Assert.is_register(_dst)
+  Assert.is_reference(_dst)
   local _src = _[2]
   Assert.type(_src, StandartSourceTypes)
   return _dst, _src
@@ -13,7 +13,7 @@ end
 local standard_op3 = function(_)
   local three = (Assert.two_or_three(_) == 3)
   local _dst = _[1]
-  Assert.is_register(_dst)
+  Assert.is_reference(_dst)
   local _a = _[three and 2 or 1]
   local _b = _[three and 3 or 2]
   if three then
@@ -177,26 +177,26 @@ local opcodes = {
   clr = function(_)
     local actions = {}
     if 0 < #_ then
-      for i, expr in ipairs(_) do
-        if expr then
-          Assert.type(expr, {'register', 'memory', 'output'})
-          if expr.type == 'register' then
-            if expr.addr then
-              io.register_set(expr, NULL_SIGNAL)
+      for i, address in ipairs(_) do
+        if address then
+          Assert.type(address, {'register', 'memory', 'output'})
+          if address.type == 'register' then
+            if address.addr then
+              io.register_set(address, NULL_SIGNAL)
             else
               for i = 1, MC_REGS do
                 io.register_set({type='register', addr=i, pointer=false}, NULL_SIGNAL)
               end
             end
-          elseif expr.color == 'out' then
-            if expr.addr == nil then
+          elseif address.color == 'out' then
+            if address.addr == nil then
               actions[#actions + 1] = io.output_clear()
             else
-              io.wire_set(expr, nil)
+              io.wire_set(address, nil)
             end
-          elseif expr.type == 'memory' then
-            io.memory_clear(expr)
-            actions[#actions + 1] = ics_clear(expr.index and (expr.location .. expr.index))
+          elseif address.type == 'memory' then
+            io.memory_clear(address)
+            actions[#actions + 1] = ics_clear(address.bank and address.channel)
           end
         end
       end
@@ -233,7 +233,7 @@ local opcodes = {
   emit = function(_) -- emit dst[M] src...[V/T/S/R/I]
     Assert.two_or_more(_)
     local dst = table.deep_copy(_[1])
-    Assert.is_memory_writable(dst)
+    Assert.is_channel_writable(dst)
     local signals = io.memory_getchannel_signals(dst)
     dst.addr = signals and #signals or 0
     for i = 2,#_ do
@@ -269,7 +269,7 @@ local opcodes = {
 
   swp = function(_) -- swp reg1[R] reg2[R]
     Assert.two(_)
-    Assert.is_register(_[1], _[2])
+    Assert.is_reference(_[1], _[2])
     local a = io.getsignal(_[1], {'register'})
     local b = io.getsignal(_[2], {'register'})
     io.setsignal(_[1], b, {'register'})
@@ -277,7 +277,7 @@ local opcodes = {
   end,
   swpt = function(_) -- swpt reg1[R] reg2[R]
     Assert.two(_)
-    Assert.is_register(_[1], _[2])
+    Assert.is_reference(_[1], _[2])
     local a = io.gettype(_[1], {'register'})
     local b = io.gettype(_[2], {'register'})
     io.settype(_[1], b, {'register'})
@@ -285,7 +285,7 @@ local opcodes = {
   end,
   swpv = function(_) -- swpv reg1[R] reg2[R]
     Assert.two(_)
-    Assert.is_register(_[1], _[2])
+    Assert.is_reference(_[1], _[2])
     local a = io.getvalue(_[1], {'register'})
     local b = io.getvalue(_[2], {'register'})
     io.setvalue(_[1], b, {'register'})
@@ -320,13 +320,13 @@ local opcodes = {
   inc = function(_)
     Assert.one(_)
     local _dst = _[1]
-    Assert.is_register(_dst)
+    Assert.is_reference(_dst)
     io.register_set_count(_dst, io.getvalue(_dst) + 1)
   end,
   dec = function(_)
     Assert.one(_)
     local _dst = _[1]
-    Assert.is_register(_dst)
+    Assert.is_reference(_dst)
     io.register_set_count(_dst, io.getvalue(_dst) - 1)
   end,
 
@@ -371,7 +371,7 @@ local opcodes = {
   rnd = function(_) -- rnd dst[R/O] min[C/R/I] max[C/R/I]
     Assert.three(_)
     local _dst = _[1]
-    Assert.is_register(_dst)
+    Assert.is_reference(_dst)
     local _min = _[2]
     local _max = _[3]
     Assert.type(_min, {'register', 'value', 'input'})
@@ -466,7 +466,7 @@ local opcodes = {
     local two = Assert.one_or_two(_)
     local _dst = _[1]
     local _src = _[two and 2 or 1]
-    Assert.is_register(_dst, _src)
+    Assert.is_reference(_dst, _src)
     local result = bit32.bnot(io.getvalue(_src))
     io.register_set_count(io.getvalue(_dst), result)
   end,
@@ -565,7 +565,7 @@ local opcodes = {
 
   lea = function(_)
     Assert.two(_)
-    Assert.is_register(_[1])
+    Assert.is_reference(_[1])
     local label = _[2]
     Assert.type(label, {'label'})
     local addr = io.for_entity(function(entity, state)

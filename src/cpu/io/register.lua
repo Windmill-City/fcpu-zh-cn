@@ -1,5 +1,6 @@
 local io
 local state
+local emitter
 local ioRegister = {}
 
 -- Special purpose Registers (read only), see make_special_register_ro
@@ -30,7 +31,8 @@ local function register_getreadonly(index)
   elseif index == REG_CLK then
     return state.clock
   elseif REG_CNM <= index then
-    local signals = io.memory_getchannel_signals({ type = 'memory', location = 'mem', index = index - REG_CNM + 1 })
+    local address = emitter.make_memory_bank('mem', index - REG_CNM + 1)
+    local signals = io.memory_getchannel_signals(address)
     return signals and #signals or 0
   else
     Assert.exception('Unknown register with internal index ' .. index)
@@ -52,13 +54,13 @@ local function register_setraw(index, signal)
 end
 
 
-function ioRegister.addr_deref(_)
-  Assert.check(_.addr ~= nil and _.pointer ~= nil, "Invalid address")
-  if _.pointer then
-    Assert.check(_.addr <= MC_REGS)
-    return register_getraw(_.addr).count
+function ioRegister.addr_deref(address)
+  Assert.check(address.addr ~= nil and address.pointer ~= nil, "Invalid address")
+  if address.pointer then
+    Assert.check(address.addr <= MC_REGS)
+    return register_getraw(address.addr).count
   else
-    return _.addr
+    return address.addr
   end
 end
 
@@ -92,8 +94,9 @@ function ioRegister.bind(state_)
   state = state_
 end
 
-function ioRegister.setup(io_)
+function ioRegister.setup(io_, emitter_)
   io = io_
+  emitter = emitter_
 end
 
 return ioRegister

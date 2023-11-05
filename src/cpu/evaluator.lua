@@ -1,6 +1,7 @@
 local io = require('src/cpu/io_facade')
 local ops = require('src/cpu/opcodes')
 local ops_vx = require('src/cpu/opcodes_vx')
+local emitter
 local Evaluator = {}
 
 
@@ -11,7 +12,8 @@ local function update_ics_stack(push_ics)
       io.add_deferred(ast.deffer.clr)
     end
     if string.sub(v.name, 1, 3) == 'mem' then
-      io.memory_clear({type='memory', location='mem', index=string.sub(v.name, 4, 4)})
+      local address = emitter.make_memory_bank('mem', string.sub(v.name, 4, 4))
+      io.memory_clear(address)
     end
   end
   for _,v in ipairs(push_ics) do
@@ -73,6 +75,7 @@ end
 
 
 function Evaluator.setup(emitter_, controller_)
+  emitter = emitter_
   io.setup(emitter_, controller_)
   ops.setup(io)
   ops_vx.setup(io)

@@ -7,6 +7,7 @@ local io = {}
 require('src/cpu/signals')
 local ioRegister = require('src/cpu/io/register')
 local ICStack = require('src/cpu/io/icstack')
+local ioChannel = require('src/cpu/io/channel')
 local ioMemory = require('src/cpu/io/memory')
 local ioWire = require('src/cpu/io/wire')
 
@@ -34,14 +35,17 @@ io.get_node_ast = ICStack.get_node_ast
 io.ics_each_ast = ICStack.ics_each_ast
 
 
+-- Channel
+io.memory_getchannel_read = ioChannel.read
+io.memory_getchannel_write = ioChannel.write
+io.memory_getchannel_signals = ioChannel.signals
+io.GuiCache_InvalidateMemory = ioChannel.GuiCache_InvalidateMemory
+
+
 -- Memory
-io.memory_getchannel_read = ioMemory.getchannel_read
-io.memory_getchannel_write = ioMemory.getchannel_write
-io.memory_getchannel_signals = ioMemory.getchannel_signals
 io.memory_get = ioMemory.get
 io.memory_set = ioMemory.set
 io.memory_clear = ioMemory.clear
-io.GuiCache_InvalidateMemory = ioMemory.GuiCache_InvalidateMemory
 
 
 -- General wire manipulation
@@ -93,7 +97,6 @@ function io.getsignal(_, types)
   elseif _.type == 'register' then
     signal = io.register_get(_)
   elseif _.type == 'memory' then
-    Assert.check(_.location == 'mem', 'expecting location `mem`')
     signal = io.memory_get(_)
   elseif _.type == 'signal' or _.type == 'type' or _.type == 'value' then
     signal = _
@@ -113,7 +116,6 @@ function io.setsignal(_, signal, types)
   if _.type == 'wire' then
     io.wire_set(_, signal)
   elseif _.type == 'register' then
-    Assert.check(_.location == 'reg', 'expecting location `reg`')
     io.register_set(_, signal)
   elseif _.type == 'memory' then
     io.memory_set(_, signal)
@@ -178,6 +180,7 @@ function io.bind(state_)
 
   ioRegister.bind(state)
   ICStack.bind(state)
+  ioChannel.bind(state)
   ioMemory.bind(state)
   ioWire.bind(state)
 end
@@ -187,8 +190,9 @@ function io.setup(emitter_, controller_)
   Emitter = emitter_
 
   ioRegister.setup(io)
-  ioMemory.setup(ICStack, ioRegister)
-  ioWire.setup(ioRegister, ioMemory, Emitter)
+  ioChannel.setup(ICStack)
+  ioMemory.setup(Emitter, ioRegister, ioChannel)
+  ioWire.setup(Emitter, ioRegister, ioChannel)
 end
 
 return io

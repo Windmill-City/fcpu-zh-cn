@@ -3,6 +3,7 @@ Version: 0.4.17
 Date: ????
   Changes:
     - Pin button memorizes the open/closed state of the memory panel.
+    - There are huge amount of refactoring in this version. So it might be some bugs introduced.
   Bugfixes:
     - Fixed some typos in user interface and docs.
     - Fixed error parsing.

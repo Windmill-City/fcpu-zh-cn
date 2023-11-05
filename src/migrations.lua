@@ -500,4 +500,19 @@ return {
       end
     end)
   end,
+
+  ["0.4.17"] = function()
+    foreach_fcpu(function(fcpu, state)
+      for _,line in pairs(state.program_ast or {}) do
+        for _,address in pairs(line.expr or {}) do
+          if address.type == 'memory' then
+            address.bank = address.index
+            address.index = nil
+            address.channel = address.location .. (address.bank or '')
+            address.location = nil
+          end
+        end
+      end
+    end)
+  end,
 }

@@ -35,25 +35,32 @@ function Emitter.make_signal(signal_id, countstr)
 end
 
 function Emitter.make_special_register_ro(addr)
-  return { type = 'register', location = 'readonly', addr = tonumber(addr), pointer = false }
+  return { type = 'register', special = true, addr = tonumber(addr), pointer = false }
 end
 
-function Emitter.make_address(addr, is_ptr)
+function Emitter.make_reference(addr, is_ptr)
   Assert.check(addr ~= nil)
-  return { type = 'address', addr = tonumber(addr), pointer = is_ptr }
+  return { type = 'reference', addr = tonumber(addr), pointer = is_ptr }
 end
 
-function Emitter.make_register(name, address)
-  return { type = 'register', location = name, addr = address.addr, pointer = address.pointer }
+function Emitter.make_register(name, ref) -- +[reference]
+  return { type = 'register', addr = ref.addr, pointer = ref.pointer }
 end
 
+--function Emitter.make_channel(name, ref) -- +[reference]
+--  return { type = 'channel', channel = name, addr = ref.addr, pointer = ref.pointer }
+--end
 
-function Emitter.make_memory(name, index, addr, is_ptr)
-  return { type = 'memory', location = name, addr = tonumber(addr), pointer = is_ptr, index = tonumber(index) }
+function Emitter.make_memory(name, bank, ref) -- +[memory_bank, reference]
+  return { type = 'memory', channel = name..bank, bank = tonumber(bank), addr = ref.addr, pointer = ref.pointer }
 end
 
-function Emitter.make_wire(name, address)
-  return { type = 'wire', color = name, addr = address.addr, pointer = address.pointer}
+function Emitter.make_memory_bank(name, bank) -- +[channel]
+  return { type = 'memory', channel = name..bank, bank = tonumber(bank) }
+end
+
+function Emitter.make_wire(name, ref)
+  return { type = 'wire', color = name, addr = ref.addr, pointer = ref.pointer}
 end
 
 
