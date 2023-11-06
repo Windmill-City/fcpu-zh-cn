@@ -1,8 +1,11 @@
 local io = require('src/cpu/io_facade')
 local ops = require('src/cpu/opcodes')
 local ops_vx = require('src/cpu/opcodes_vx')
-local emitter
+local Emitter
 local Evaluator = {}
+
+State = require('src/cpu/io/state')
+State.onBind(io.bind)
 
 
 local function update_ics_stack(push_ics)
@@ -12,7 +15,7 @@ local function update_ics_stack(push_ics)
       io.add_deferred(ast.deffer.clr)
     end
     if string.sub(v.name, 1, 3) == 'mem' then
-      local address = emitter.make_memory_bank('mem', string.sub(v.name, 4, 4))
+      local address = Emitter.make_memory_bank('mem', string.sub(v.name, 4, 4))
       io.memory_clear(address)
     end
   end
@@ -61,7 +64,7 @@ local function eval(ast, ics)
 end
 
 function Evaluator.eval(ast, ics, state)
-  io.bind(state)
+  State.bind(state)
 
   local status, results = pcall(eval, ast, ics)
   --local status, results = true, eval(ast)
@@ -75,7 +78,7 @@ end
 
 
 function Evaluator.setup(emitter_, controller_)
-  emitter = emitter_
+  Emitter = emitter_
   io.setup(emitter_, controller_)
   ops.setup(io)
   ops_vx.setup(io)

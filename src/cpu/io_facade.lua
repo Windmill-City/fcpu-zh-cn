@@ -1,9 +1,8 @@
 local Controller
 local Emitter
-local control
-local state
 
 local io = {}
+local control
 require('src/cpu/signals')
 local ioRegister = require('src/cpu/io/register')
 local ICStack = require('src/cpu/io/icstack')
@@ -11,14 +10,20 @@ local ioChannel = require('src/cpu/io/channel')
 local ioMemory = require('src/cpu/io/memory')
 local ioWire = require('src/cpu/io/wire')
 
+State = require('src/cpu/io/state')
+State.onBind(ioRegister.bind)
+State.onBind(ICStack.bind)
+State.onBind(ioChannel.bind)
+State.onBind(ioMemory.bind)
+State.onBind(ioWire.bind)
 
 -- Some hacks
 function io.for_entity(proc)
-  return proc(state.entity, state)
+  return proc(State.current.entity, State.current)
 end
 
 function io.add_deferred(deffer)
-  Controller.add_deferred(state, deffer)
+  Controller.add_deferred(State.current, deffer)
 end
 
 
@@ -175,14 +180,7 @@ end
 
 -- Setup and Binding to state
 function io.bind(state_)
-  state = state_
-  control = state.cache.control
-
-  ioRegister.bind(state)
-  ICStack.bind(state)
-  ioChannel.bind(state)
-  ioMemory.bind(state)
-  ioWire.bind(state)
+  control = State.current.cache.control
 end
 
 function io.setup(emitter_, controller_)

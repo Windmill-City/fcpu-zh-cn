@@ -1,6 +1,6 @@
 local io
 local state
-local emitter
+local Emitter
 local ioRegister = {}
 
 -- Special purpose Registers (read only), see make_special_register_ro
@@ -31,7 +31,7 @@ local function register_getreadonly(index)
   elseif index == REG_CLK then
     return state.clock
   elseif REG_CNM <= index then
-    local address = emitter.make_memory_bank('mem', index - REG_CNM + 1)
+    local address = Emitter.make_memory_bank('mem', index - REG_CNM + 1)
     local signals = io.memory_getchannel_signals(address)
     return signals and #signals or 0
   else
@@ -96,7 +96,7 @@ end
 
 function ioRegister.setup(io_, emitter_)
   io = io_
-  emitter = emitter_
+  Emitter = emitter_
 end
 
 return ioRegister
