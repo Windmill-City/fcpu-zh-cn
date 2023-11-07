@@ -24,7 +24,14 @@ function MemoryView.CreateWidget(rootGui)
         {type='checkbox', save_as='gui_memory_autoselect', state=false, caption={'gui-fcpu-memviewer.autoselect-channel'}},
       }},
 
-      {template="heading_3", caption={"gui-fcpu-memviewer.memory-view"}},
+      {type="flow", direction="horizontal", style_mods={ vertical_align='center' }, children={
+        {template="heading_3", caption={"gui-fcpu-memviewer.memory-view"}},
+        {template="pushers.horizontal"},
+        {type="flow", style="flib_indicator_flow", children={
+          {type="sprite", save_as='gui_memory_sync_sprite', style="flib_indicator", sprite="flib_indicator_blue"},
+          {type="label", save_as='gui_memory_sync_label', style_mods={ minimal_width=70 }, caption={"gui-fcpu-memviewer.memory-view-sync"}},
+        }},
+      }},
       {type="scroll-pane", style="scroll_pane_in_shallow_frame", direction="vertical", children={
         {type="table", save_as="gui_memory_cells", style="slot_table", column_count=8 --[[ will be populated in `MemoryView.UpdateFromTable` ]]},
       }}
@@ -114,6 +121,7 @@ function MemoryView.UpdateFromTable(player_data, signals, sort, sparse, order)
   end
 end
 
+local UpdateMinDelay = 0
 function MemoryView.UpdateWidget(player_data, state, initial)
   if not player_data.gui_memory_channel then return end
   local index = player_data.gui_memory_channel.selected_index
@@ -128,7 +136,7 @@ function MemoryView.UpdateWidget(player_data, state, initial)
   if state then
     index = math.max(1, index)
 
-    local ValidateGuiCache = function(channel)
+    local ValidateGuiCacheImpl = function(channel)
       player_data.gui_cache = player_data.gui_cache or {}
       if player_data.gui_cache.memory_changed == nil or initial then
         player_data.gui_cache.memory_changed = {}
@@ -140,11 +148,30 @@ function MemoryView.UpdateWidget(player_data, state, initial)
       local pmc = player_data.gui_cache.memory_changed[channel]
       local smc = state.gui_cache.memory_changed[channel]
 
-      if not (pmc and smc) or (pmc < smc) and (smc <= game.tick) then
+      if not (pmc and smc) or (pmc + UpdateMinDelay <= smc) and (smc <= game.tick) then
         player_data.gui_cache.memory_changed[channel] = smc
         return false
       end
       return true
+    end
+
+    local ValidateGuiCache = function(channel)
+      local result = ValidateGuiCacheImpl(channel)
+
+      local sync_delay
+      if state.gui_cache.memory_changed then
+        sync_delay = state.gui_cache.memory_changed[channel] - game.tick
+      end
+      if player_data.gui_memory_sync_label then
+        player_data.gui_memory_sync_label.caption = {"gui-fcpu-memviewer.memory-view-sync", (0 < sync_delay and ' in '..sync_delay or '')}
+      end
+      if player_data.gui_memory_sync_sprite then
+        player_data.gui_memory_sync_sprite.sprite =
+        state.need_sync and 'flib_indicator_red'
+        or 0 < sync_delay and 'flib_indicator_black'
+        or 'flib_indicator_green'
+      end
+      return result
     end
 
     if index <= MC_MEMORY_CHANNELS then

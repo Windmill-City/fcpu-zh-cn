@@ -155,6 +155,7 @@ local function run_deffer_command(op)
       advance(state)
     end
   elseif op.action == 'sync' then
+    Assert.check(op.index ~= nil, 'fCPU instance index is nil in SYNC')
     local state = global.fcpus[op.index]
     if state then
       state.need_sync = nil
@@ -187,9 +188,11 @@ local function run_deffer_command(op)
 end
 
 function Controller.add_deferred(state, deffer)
-  local need_sync = false
+  local will_sync = false
+  --local got_sync = false
+  --local cnt = #deffer
   -- only numeric indices, skip named one!
-  for _, op in ipairs(deffer) do
+  for i, op in ipairs(deffer) do
     if op.delay == 0 then
       run_deffer_command(op)
     else
@@ -197,14 +200,15 @@ function Controller.add_deferred(state, deffer)
       local at_tick = game.tick + t.delay
       t.at = game.tick
       Heap.put(global.deffered, at_tick, t)
-      need_sync = need_sync or (t.action == 'sync')
+      will_sync = will_sync or (t.action == 'sync')
     end
+    --got_sync = got_sync or op.action == 'sync' or not got_sync and i == cnt
   end
-  state.need_sync = need_sync
-  return need_sync
+  state.need_sync = will_sync-- or not got_sync
+  return will_sync
 end
 
-function Controller.do_defferred(state)
+function Controller.do_defferred()
   while true do
     local p = Heap.priority(global.deffered)
     if not p or game.tick < p then

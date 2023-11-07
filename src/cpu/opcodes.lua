@@ -212,13 +212,18 @@ local opcodes = {
     -- TODO: implement return {type='actions', ...}
     if 0 < #actions then
       local d = {type='deffer', deffer={}}
+      local s = 0
       for _, a in ipairs(actions) do
         if a and a.deffer then
           for _, v in ipairs(a.deffer) do
+            if s < v.delay then
+              s = v.delay
+            end
             table.insert(d.deffer, v)
           end
         end
       end
+      table.insert(d.deffer, {action='sync', delay=s + 1, index=State.current.index})
       return d
     end
   end,

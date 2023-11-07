@@ -41,20 +41,49 @@ end
 function ioMemory.set(address, signal)
   Assert.check(address.bank ~= nil, "Memory bank is not specified")
   local addr = ioRegister.addr_deref(address)
-  local was = memory_getraw(address, addr)
-  if was and was.signal then
-    was = table.deep_copy(was)
-    was.count = -was.count;
-    memory_setraw(address, addr, was, true)
+
+  local oldOutput = memory_getraw(address, addr)
+  if not (oldOutput and oldOutput.signal) and signal.count == 0 then
+    ioChannel.GuiCache_InvalidateMemory(address.channel, 5)
+    return
   end
-  if signal.count ~= 0 then
-    memory_setraw(address, addr, signal)
+
+  if oldOutput and oldOutput.signal then
+    local constCtrl = ioChannel.write(address)
+    local oldValue = constCtrl and constCtrl.enabled and constCtrl.parameters[addr] or { count = 0 }
+
+    --
+    state.memmap = state.memmap or {}
+    state.memmap[address.channel] = state.memmap[address.channel] or { i2s = {}, s2i = {} }
+    local memmap = state.memmap[address.channel]
+    local i2s, s2i = memmap.i2s, memmap.s2i
+
+    local hash = signal.signal.type ..'='.. signal.signal.name;
+    if i2s[addr] ~= hash then
+      if s2i[hash] then
+        Assert.check(s2i[hash] == addr, 'Memory remap table is broken')
+        s2i[hash] = nil
+        oldValue.count = 0
+      end
+
+      i2s[addr] = hash -- always in sync
+      s2i[hash] = addr -- always in sync
+    end
+
+    --
+    local newValue = table.deep_copy(signal)
+    newValue.count = newValue.count - (oldOutput.count - oldValue.count);
+    signal = newValue
   end
+
+  memory_setraw(address, addr, signal)
   ioChannel.GuiCache_InvalidateMemory(address.channel, 5)
 end
 
 function ioMemory.clear(address)
   if address == nil or address.bank == nil then
+    state.memmap = {}
+
     for i = 1, MC_MEMORY_CHANNELS do
       ioMemory.clear(Emitter.make_memory_bank('mem', i))
     end
@@ -64,6 +93,8 @@ function ioMemory.clear(address)
     memory_setraw(address, nil, nil, false)
     -- implicitly called inside above ^^^^ line
     -- ioChannel.GuiCache_InvalidateMemory(address.channel, 5)
+
+    state.memmap[address.channel] = { i2s = {}, s2i = {} }
   end
 end
 

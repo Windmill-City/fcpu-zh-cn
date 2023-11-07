@@ -4,6 +4,7 @@ Date: ????
   Changes:
     - Pin button memorizes the open/closed state of the memory panel.
     - There are huge amount of refactoring in this version. So it might be some bugs introduced.
+    - Added Sync indicator in the channel view.
   Bugfixes:
     - Fixed some typos in user interface and docs.
     - Fixed error parsing.
