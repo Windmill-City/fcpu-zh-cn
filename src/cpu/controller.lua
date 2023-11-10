@@ -158,7 +158,7 @@ local function run_deffer_command(op)
     Assert.check(op.index ~= nil, 'fCPU instance index is nil in SYNC')
     local state = global.fcpus[op.index]
     if state then
-      state.need_sync = nil
+      state.sync_clock = state.clock
       state.clock = state.clock + op.delay
       advance(state)
     end
@@ -290,7 +290,12 @@ function Controller.tick(state)
 
   -- Run Controller code.
   if state.program_state == PSTATE_RUNNING then
-    if not sync_wait then
+    if sync_wait then
+      if state.sync_clock and state.sync_clock <= state.clock then
+        state.sync_clock = nil
+        state.need_sync = nil
+      end
+    else
       state.clock = state.clock + 1
 
       ::repeat_eval::
@@ -360,6 +365,7 @@ end
 function Controller.run(state)
   Controller.set_error_message(state, nil)
   state.sleep_time = 0
+  state.sync_clock = nil
   state.need_sync = nil
   state.do_step = false
   Controller.update_state(state, PSTATE_RUNNING)
@@ -372,6 +378,7 @@ function Controller.step(state, over)
     Controller.halt(state)
   else
     state.sleep_time = 0
+    state.sync_clock = nil
     state.need_sync = nil
     state.do_step = true
     Controller.update_state(state, PSTATE_RUNNING)
@@ -398,6 +405,7 @@ function Controller.halt(state, reset)
   end
   state.sleep_at = nil
   state.sleep_time = 0
+  state.sync_clock = nil
   state.need_sync = nil
   state.do_step = false
   Controller.update_state(state, PSTATE_HALTED)
