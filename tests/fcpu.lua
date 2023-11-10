@@ -132,7 +132,7 @@ function ExecuteTest(test_title, program_text, input_signals, probe_result, max_
         break
       end
     end
-    Controller.tick(state, 0)
+    Controller.tick(state)
   end
   if state.error_message then
     error(state.error_message[3])

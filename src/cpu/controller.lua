@@ -278,13 +278,15 @@ function Controller.handle_interrupts(state)
   end
 end
 
-function Controller.tick(state, sync_wait)
+function Controller.tick(state)
   if state.program_state == PSTATE_BREAKPOINT then
     return
   end
 
   Controller.validate_cache(state)
   Controller.handle_interrupts(state)
+
+  local sync_wait = state.need_sync
 
   -- Run Controller code.
   if state.program_state == PSTATE_RUNNING then
@@ -327,6 +329,7 @@ function Controller.tick(state, sync_wait)
             goto repeat_eval
           end
         elseif result.type == 'xwait' then
+          -- `state.need_sync` may be modified in Evaluator.eval
           if not sync_wait then
             advance(state)
           end

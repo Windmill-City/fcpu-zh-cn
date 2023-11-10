@@ -80,7 +80,7 @@ script.on_event(defines.events.on_tick, function(event)
             Controller.set_program_counter(state, state.instruction_pointer)
             Controller.update_state(state)
           end
-          Controller.tick(state, state.need_sync)
+          Controller.tick(state)
         end
         enabled = enabled + 1
       end
