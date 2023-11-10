@@ -8,6 +8,7 @@ Date: ????
   Bugfixes:
     - Fixed some typos in user interface and docs.
     - Fixed error parsing.
+    - Fixed memory channel view 'jumping'.
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.16
 Date: 2023-10-12

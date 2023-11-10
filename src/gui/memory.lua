@@ -16,7 +16,7 @@ function MemoryView.CreateWidget(rootGui)
   memchannels[#memchannels+1] = { 'gui-fcpu-memviewer.channel-output' }
 
   local elems = gui.build(rootGui, {
-    {type="frame", name="fcpu-memory-view", save_as="gui_memory_view", style="inside_shallow_frame_with_padding", direction="vertical", children={
+    {type="frame", name="fcpu-memory-view", save_as="gui_memory_view", style="inside_shallow_frame_with_padding", style_mods={ minimal_width=364 }, direction="vertical", children={
       {template="heading_3", caption={"gui-fcpu-memviewer.memory-channel"}},
       {type="flow", name="fcpu-panels", direction="horizontal", style_mods={ vertical_align='center' }, children={
         {type='drop-down', save_as='gui_memory_channel', items={ table.unpack(memchannels) }, selected_index=1, handlers="memory.memory_channel"},
@@ -29,7 +29,7 @@ function MemoryView.CreateWidget(rootGui)
         {template="pushers.horizontal"},
         {type="flow", style="flib_indicator_flow", children={
           {type="sprite", save_as='gui_memory_sync_sprite', style="flib_indicator", sprite="flib_indicator_blue"},
-          {type="label", save_as='gui_memory_sync_label', style_mods={ minimal_width=70 }, caption={"gui-fcpu-memviewer.memory-view-sync"}},
+          {type="label", save_as='gui_memory_sync_label', style_mods={ minimal_width=70, left_padding=4 }, caption={"gui-fcpu-memviewer.memory-view-sync"}},
         }},
       }},
       {type="scroll-pane", style="scroll_pane_in_shallow_frame", direction="vertical", children={
@@ -121,7 +121,7 @@ function MemoryView.UpdateFromTable(player_data, signals, sort, sparse, order)
   end
 end
 
-local UpdateMinDelay = 0
+local UpdateMinDelay = 1
 function MemoryView.UpdateWidget(player_data, state, initial)
   if not player_data.gui_memory_channel then return end
   local index = player_data.gui_memory_channel.selected_index
@@ -158,7 +158,7 @@ function MemoryView.UpdateWidget(player_data, state, initial)
     local ValidateGuiCache = function(channel)
       local result = ValidateGuiCacheImpl(channel)
 
-      local sync_delay
+      local sync_delay = 0
       if state.gui_cache.memory_changed then
         sync_delay = state.gui_cache.memory_changed[channel] - game.tick
       end
