@@ -32,8 +32,7 @@ local function register_getreadonly(index)
     return state.clock
   elseif REG_CNM <= index then
     local address = Emitter.make_memory_bank('mem', index - REG_CNM + 1)
-    local signals = io.memory_getchannel_signals(address)
-    return signals and #signals or 0
+    return io.memory_size(address) or 0
   else
     Assert.exception('Unknown register with internal index ' .. index)
   end

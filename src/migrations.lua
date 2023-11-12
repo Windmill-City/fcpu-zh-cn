@@ -503,6 +503,12 @@ return {
 
   ["0.4.17"] = function()
     foreach_fcpu(function(fcpu, state)
+      state.memmap = {
+        mem1 = {i2s = {}, s2i = {}},
+        mem2 = {i2s = {}, s2i = {}},
+        mem3 = {i2s = {}, s2i = {}},
+        mem4 = {i2s = {}, s2i = {}},
+      }
       for _,line in pairs(state.program_ast or {}) do
         for _,address in pairs(line.expr or {}) do
           if address.type == 'memory' then

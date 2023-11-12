@@ -135,16 +135,19 @@ local index_in_channel = function(_)
   local _chan = _[2]
   Assert.type(_chan, {'input', 'memory'})
   local _type = io.gettype(_[3], {'type', 'register', 'input'})
-  local signals = io.memory_getchannel_signals(_chan)
-  if signals then
-    for k, v in ipairs(signals) do
-      if v.signal and v.signal.name == _type.name and v.signal.type == _type.type then
-        io.setsignal(_dst, {signal = _type, count = k})
-        return
-      end
-    end
+
+  local addr
+  if _chan.type == 'memory' then
+    addr = io.memory_address_of(_chan, _type)
+  else
+    addr = io.channel_address_of(_chan, _type)
   end
-  io.setsignal(_dst, NULL_SIGNAL)
+
+  if addr then
+    io.setsignal(_dst, {signal = _type, count = addr})
+  else
+    io.setsignal(_dst, NULL_SIGNAL)
+  end
 end
 
 local ics_clear = function(channel)
@@ -239,8 +242,7 @@ local opcodes = {
     Assert.two_or_more(_)
     local dst = table.deep_copy(_[1])
     Assert.is_channel_writable(dst)
-    local signals = io.memory_getchannel_signals(dst)
-    dst.addr = signals and #signals or 0
+    dst.addr = io.memory_size(dst)
     for i = 2,#_ do
       local sig = io.getsignal(_[i], {'value', 'type', 'signal', 'register', 'input'})
       dst.addr = dst.addr + 1

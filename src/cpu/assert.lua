@@ -121,9 +121,17 @@ function Assert.is_reference(...)
   end
 end
 
+function Assert.with_memory_bank(...)
+  for _,v in ipairs(table.pack(...)) do
+    if not (v.bank ~= nil and v.type == 'memory') then
+      exception("Expecting parameter with memory bank")
+    end
+  end
+end
+
 function Assert.is_memory_bank(...)
   for _,v in ipairs(table.pack(...)) do
-    if not (v.type == 'memory' and v.bank ~= nil and v.addr == nil) then
+    if not (v.addr == nil and v.bank ~= nil and v.type == 'memory') then
       exception("Expecting parameter to be a memory bank")
     end
   end

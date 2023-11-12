@@ -6,14 +6,8 @@ local ioMemory = {}
 
 
 -- Memory
-local function memory_getraw(address, addr)
-  local signals = ioChannel.signals(address)
-  --Assert.check(signals ~= nil, "Trying to retrieve nil memory channel")
-  return signals and signals[addr] or NULL_SIGNAL
-end
-
-local function memory_setraw(address, addr, signal, corrective)
-  local control = ioChannel.write(address, corrective)
+local function memory_setraw(address, addr, signal)
+  local control = ioChannel.write(address)
   Assert.check(control ~= nil, "Trying to access nil memory channel")
   if addr == nil and signal == nil then
     -- Clear entire memory
@@ -32,52 +26,106 @@ local function memory_setraw(address, addr, signal, corrective)
   end
 end
 
+local function memory_getraw(address, type)
+  local ctrl = ioChannel.read(address)
+  local value = ctrl and ctrl.get_signal(type)
+  if value then
+    return { signal = type, count = value }
+  end
+  return NULL_SIGNAL
+end
+
+local function memory_map(address)
+  Assert.with_memory_bank(address)
+  --state.memmap = state.memmap or {}
+  --state.memmap[address.channel] = state.memmap[address.channel] or { i2s = {}, s2i = {} }
+  local memmap = state.memmap[address.channel]
+  return memmap.i2s, memmap.s2i
+end
+
+------------------------------------------------------
+
+function ioMemory.address_of(address, type)
+  local i2s, s2i = memory_map(address)
+  local hash = type.type ..'='.. type.name
+  local addr = s2i[hash]
+  if not addr then
+    addr = #s2i
+    s2i[hash] = addr -- always in sync
+    i2s[addr] = hash -- always in sync
+  end
+  return addr
+end
+
+function ioMemory.size(address)
+  local ctrl = ioChannel.read(address)
+  local signals = ctrl and ctrl.signals
+  return signals and #signals or 0
+end
+
 function ioMemory.get(address)
-  Assert.check(address.bank ~= nil, "Memory bank is not specified")
+  Assert.with_memory_bank(address)
   local addr = ioRegister.addr_deref(address)
-  return table.deep_copy(memory_getraw(address, addr))
+
+  local i2s, s2i = memory_map(address)
+  local hash = i2s[addr]
+  if hash then
+    local t, n = string.match(hash, '(%a+)=([%a%-]+)')
+    local type = { type = t, name = n }
+    return table.deep_copy(memory_getraw(address, type))
+  end
+  return NULL_SIGNAL
 end
 
 function ioMemory.set(address, signal)
-  Assert.check(address.bank ~= nil, "Memory bank is not specified")
+  Assert.with_memory_bank(address)
   local addr = ioRegister.addr_deref(address)
 
-  local oldOutput = memory_getraw(address, addr)
-  if not (oldOutput and oldOutput.signal) and signal.count == 0 then
-    ioChannel.GuiCache_InvalidateMemory(address.channel, 5)
-    return
+  local i2s, s2i = memory_map(address)
+  local type = signal.signal
+  local hash = type.type ..'='.. type.name
+
+  local oldOutput
+  if type then
+    oldOutput = memory_getraw(address, type)
+  else
+    local oldHash = i2s[addr]
+    if oldHash then
+      local t, n = string.match(oldHash, '(%a+)=([%a%-]+)')
+      oldOutput = memory_getraw(address, { type = t, name = n })
+    end
   end
+  local hasOutput = oldOutput and oldOutput.signal
 
-  if oldOutput and oldOutput.signal then
-    local constCtrl = ioChannel.write(address)
-    local oldValue = constCtrl and constCtrl.enabled and constCtrl.parameters[addr] or { count = 0 }
+  if hasOutput then
+    local oldValue = { count = 0 }
 
-    --
-    state.memmap = state.memmap or {}
-    state.memmap[address.channel] = state.memmap[address.channel] or { i2s = {}, s2i = {} }
-    local memmap = state.memmap[address.channel]
-    local i2s, s2i = memmap.i2s, memmap.s2i
-
-    local hash = signal.signal.type ..'='.. signal.signal.name;
     if i2s[addr] ~= hash then
-      if s2i[hash] then
-        Assert.check(s2i[hash] == addr, 'Memory remap table is broken')
-        s2i[hash] = nil
-        oldValue.count = 0
-      end
+      local oldAddr = s2i[hash]
+      if oldAddr then
+        local constCtrl = ioChannel.write(address)
+        oldValue = constCtrl and constCtrl.enabled and constCtrl.parameters[oldAddr]
 
-      i2s[addr] = hash -- always in sync
-      s2i[hash] = addr -- always in sync
+        i2s[oldAddr] = nil -- always in sync
+        s2i[hash] = nil -- always in sync
+        memory_setraw(address, oldAddr, nil)
+      end
     end
 
-    --
     local newValue = table.deep_copy(signal)
     newValue.count = newValue.count - (oldOutput.count - oldValue.count);
     signal = newValue
+  else
+    if signal.count == 0 then
+      return
+    end
   end
 
+  i2s[addr] = hash -- always in sync
+  s2i[hash] = addr -- always in sync
   memory_setraw(address, addr, signal)
-  ioChannel.GuiCache_InvalidateMemory(address.channel, 5)
+
+  ioChannel.GuiCache_Invalidate(address.channel, 5)
 end
 
 function ioMemory.clear(address)
@@ -88,11 +136,9 @@ function ioMemory.clear(address)
       ioMemory.clear(Emitter.make_memory_bank('mem', i))
     end
   else
-    Assert.check(address.addr == nil, "Should be a memory bank")
-    memory_setraw(address, nil, nil, true)
-    memory_setraw(address, nil, nil, false)
-    -- implicitly called inside above ^^^^ line
-    -- ioChannel.GuiCache_InvalidateMemory(address.channel, 5)
+    Assert.is_memory_bank(address)
+    memory_setraw(address, nil, nil)
+    ioChannel.GuiCache_Invalidate(address.channel, 5)
 
     state.memmap[address.channel] = { i2s = {}, s2i = {} }
   end

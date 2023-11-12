@@ -19,7 +19,7 @@ local function output_set(index, signal)
   else
     output_control.set_signal(index, nil)
   end
-  ioChannel.GuiCache_InvalidateMemory('output', 0)
+  ioChannel.GuiCache_Invalidate('output', 0)
 end
 
 -- General wire manipulation

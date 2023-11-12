@@ -43,14 +43,16 @@ io.ics_each_ast = ICStack.ics_each_ast
 -- Channel
 io.memory_getchannel_read = ioChannel.read
 io.memory_getchannel_write = ioChannel.write
+io.channel_address_of = ioChannel.address_of
 io.memory_getchannel_signals = ioChannel.signals
-io.GuiCache_InvalidateMemory = ioChannel.GuiCache_InvalidateMemory
 
 
 -- Memory
 io.memory_get = ioMemory.get
 io.memory_set = ioMemory.set
 io.memory_clear = ioMemory.clear
+io.memory_address_of = ioMemory.address_of
+io.memory_size = ioMemory.size
 
 
 -- General wire manipulation
@@ -80,7 +82,7 @@ end
 function io.output_clear()
   -- Output buffer
   control.output.parameters = nil
-  io.GuiCache_InvalidateMemory('output', 0)
+  ioChannel.GuiCache_Invalidate('output', 0)
 
   -- Vector output
   local ast = io.get_node_ast('output')

@@ -39,7 +39,6 @@ function ioChannel.write(address, corrective)
         end
       else
         if ics.value and ics.value.valid then
-          ioChannel.GuiCache_InvalidateMemory(address.channel, 5)
           return ics.value.get_control_behavior()
         end
       end
@@ -52,6 +51,17 @@ function ioChannel.write(address, corrective)
     Assert.exception("Could not write to " .. address.color .. " input wire")
   else
     Assert.todo()
+  end
+end
+
+function ioChannel.address_of(address, type)
+  local signals = ioChannel.signals(address)
+  if signals then
+    for k, v in ipairs(signals) do
+      if v.signal and v.signal.name == type.name and v.signal.type == type.type then
+        return k
+      end
+    end
   end
 end
 
@@ -80,7 +90,7 @@ function ioChannel.signals(address)
   end
 end
 
-function ioChannel.GuiCache_InvalidateMemory(channel, delay)
+function ioChannel.GuiCache_Invalidate(channel, delay)
   if channel then
     if not state.gui_cache.memory_changed then
       state.gui_cache.memory_changed = {}
