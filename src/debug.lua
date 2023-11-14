@@ -39,9 +39,9 @@ function UpdateModSetting(event)
   end
 end
 
-function debug_assert(value)
+function debug_assert(value, msg)
   if fcpu_debug_enabled and 0 < fcpu_debug_enabled then
-    assert(value)
+    assert(value, msg)
   end
 end
 
