@@ -30,6 +30,8 @@ function Controller.init(mc)
   }
   local state = {
     entity = mc,
+    power_level = 1,
+    power_probe_tick = 0,
     program_text = "",
     program_lines = {},
     program_ast = {},
@@ -376,7 +378,7 @@ end
 function Controller.step(state)
   Controller.set_error_message(state, nil)
   if state.program_state == PSTATE_SLEEPING then
-    advance(state)
+    --advance(state)
     Controller.halt(state)
   else
     state.sleep_time = 0
@@ -398,6 +400,7 @@ function Controller.sleep(state, value, freeze_ip)
   else
     state.sleep_time = 0
   end
+  debug_assert(not state.need_sync)
   Controller.update_state(state, PSTATE_SLEEPING)
   Controller.add_deferred(state, {{action='wake', at=state.sleep_at, delay=state.sleep_time, index=state.index, freeze_ip=freeze_ip}})
 end

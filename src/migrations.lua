@@ -521,4 +521,12 @@ return {
       end
     end)
   end,
+
+  ["0.4.18"] = function()
+    foreach_fcpu(function(fcpu, state)
+      state.power_probe_tick = game.tick
+      state.power_level = state.out_of_power and 0 or 1
+      state.out_of_power = nil
+    end)
+  end,
 }

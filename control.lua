@@ -55,10 +55,11 @@ end
 --  update_gui()
 --end)
 
-local function sufficient_power(cpu)
+local function power_percents(cpu)
   if cpu.is_connected_to_electric_network() then
-    return cpu.electric_buffer_size <= cpu.energy
+    return math.floor(100 * cpu.energy / cpu.electric_buffer_size) * 0.01
   end
+  return 0
 end
 
 script.on_event(defines.events.on_tick, function(event)
@@ -70,17 +71,29 @@ script.on_event(defines.events.on_tick, function(event)
     local state = global.fcpus[index]
     handled = handled + 1
     if state.entity and state.entity.valid then
-      if not state.disabled and state.entity.active then
-        if state.out_of_power or state.clock % 10 == 0 then
-          state.out_of_power = not sufficient_power(state.entity)
+      if not state.disabled then
+        if state.modified then
+          Controller.compile(state)
+          Controller.set_program_counter(state, state.instruction_pointer)
+          Controller.update_state(state)
         end
-        if not state.out_of_power then
-          if state.modified then
-            Controller.compile(state)
-            Controller.set_program_counter(state, state.instruction_pointer)
-            Controller.update_state(state)
-          end
+        if 10 < game.tick - state.power_probe_tick then
+          state.power_level = power_percents(state.entity)
+          state.power_probe_tick = game.tick
+        end
+        if MC_BROWNOUT_LEVEL < state.power_level then
           Controller.tick(state)
+          if state.power_level < 1 and state.sleep_time == 0 and state.program_state == PSTATE_RUNNING then
+            local invLevel = (1 - (state.power_level - MC_BROWNOUT_LEVEL) / (1 - MC_BROWNOUT_LEVEL))
+            if 0 < invLevel then
+              if not state.need_sync then
+                Controller.sleep(state, invLevel * 60 * (1 - MC_BROWNOUT_LEVEL), true)
+              end
+              script.raise_event(Controller.event_error, {['entity'] = state.entity, message = {'gui-fcpu.power-level-low', state.power_level * 100}})
+            end
+          end
+        else
+          script.raise_event(Controller.event_error, {['entity'] = state.entity, message = {'gui-fcpu.power-level-brownout', MC_BROWNOUT_LEVEL * 100}})
         end
         enabled = enabled + 1
       end
