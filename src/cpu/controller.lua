@@ -152,7 +152,9 @@ local function run_deffer_command(op)
       state.clock = state.clock + state.sleep_time
       state.sleep_time = 0
       Controller.update_state(state, PSTATE_RUNNING)
-      advance(state)
+      if not op.freeze_ip then
+        advance(state)
+      end
     end
   elseif op.action == 'sync' then
     Assert.check(op.index ~= nil, 'fCPU instance index is nil in SYNC')
@@ -371,7 +373,7 @@ function Controller.run(state)
   Controller.update_state(state, PSTATE_RUNNING)
 end
 
-function Controller.step(state, over)
+function Controller.step(state)
   Controller.set_error_message(state, nil)
   if state.program_state == PSTATE_SLEEPING then
     advance(state)
@@ -388,7 +390,8 @@ function Controller.step(state, over)
   end
 end
 
-function Controller.sleep(state, value)
+function Controller.sleep(state, value, freeze_ip)
+  debug_assert(state.program_state ~= PSTATE_SLEEPING)
   if 0 < value then
     debug_assert(state.sleep_time == 0)
     state.sleep_time = math.floor(value)
@@ -396,6 +399,7 @@ function Controller.sleep(state, value)
     state.sleep_time = 0
   end
   Controller.update_state(state, PSTATE_SLEEPING)
+  Controller.add_deferred(state, {{action='wake', at=state.sleep_at, delay=state.sleep_time, index=state.index, freeze_ip=freeze_ip}})
 end
 
 function Controller.halt(state, reset)
@@ -476,7 +480,6 @@ function Controller.update_state(state, pstate)
       elseif pstate == PSTATE_SLEEPING and state.sleep_time then
         global.running[state.index] = nil
         state.sleep_at = game.tick
-        Controller.add_deferred(state, {{action='wake', at=state.sleep_at, delay=state.sleep_time, index=state.index}})
       else
         if pstate == PSTATE_HALTED then
           state.sleep_at = nil
