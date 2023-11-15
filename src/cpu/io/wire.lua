@@ -12,7 +12,7 @@ local function output_get(index)
 end
 
 local function output_set(index, signal)
-  Assert.check(1 <= index and index <= MC_OUTPUT, "Output cell index is out of range")
+  Assert.check(1 <= index and index <= output_control.signals_count, "Output cell index is out of range")
   if signal and signal.count and signal.count ~= 0 and signal.signal then
     Assert.check(math.abs(signal.count) ~= 1/0, "Division by zero")
     output_control.set_signal(index, signal)

@@ -15,7 +15,8 @@ local function update_ics_stack(push_ics)
       io.add_deferred(ast.deffer.clr)
     end
     if string.sub(v.name, 1, 3) == 'mem' then
-      local address = Emitter.make_memory_bank('mem', string.sub(v.name, 4, 4))
+      local bank = string.sub(v.name, 4, -1)
+      local address = Emitter.make_memory_bank('mem', bank)
       io.memory_clear(address)
     end
   end

@@ -161,21 +161,12 @@ function Assert.is_channel_writable(...)
   end
 end
 
-function Assert.regs_index_range(index, max)
+function Assert.check_range(index, max, name)
   if index == nil then
-    exception("No register address specified.")
+    exception('No '.. name ..' address specified.')
   end
   if index < 1 or index > max then
-    exception("Invalid regs address: "..index..". Out of range.")
-  end
-end
-
-function Assert.memory_index_range(index, max)
-  if index == nil then
-    exception("No memory address specified.")
-  end
-  if index < 1 or index > max then
-    exception("Invalid memory address: "..index..". Out of range.")
+    exception('Invalid '.. name ..' address: '..index..'. Out of range [1..'.. max ..']')
   end
 end
 

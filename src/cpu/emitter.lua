@@ -59,6 +59,10 @@ function Emitter.make_memory_bank(name, bank) -- +[channel]
   return { type = 'memory', channel = name..bank, bank = tonumber(bank) }
 end
 
+function Emitter.make_channel(channel)
+  return { type = 'memory', channel = channel }
+end
+
 function Emitter.make_wire(name, ref)
   return { type = 'wire', color = name, addr = ref.addr, pointer = ref.pointer}
 end

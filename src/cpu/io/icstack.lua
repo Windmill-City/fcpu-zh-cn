@@ -2,8 +2,10 @@ local state
 local ICStack = {}
 
 -- ICs
-function ICStack.get_node(state, name)
-  return state.program_ics[name] or state.program_ics[state.ics_stack[name]]
+function ICStack.get_node(name)
+  local ics = state.program_ics[name] or state.program_ics[state.ics_stack[name]]
+  Assert.check(ics, 'Unknown channel '.. name)
+  return ics
 end
 
 function ICStack.ics_set(name, index)
@@ -12,7 +14,8 @@ end
 
 function ICStack.get_node_ast(name)
   local index = state.ics_stack[name]
-  return state.program_ast[index]
+  local ast = state.program_ast[index]
+  return ast
 end
 
 function ICStack.ics_each_ast(proc, name)

@@ -71,7 +71,7 @@ local opcodes_vx = {
     Assert.type(_[1], {'register', 'output'})
     Assert.type(_[2], {'memory', 'input'})
 
-    local signals = io.memory_getchannel_signals(_[2])
+    local signals = io.channel_signals(_[2])
     Assert.check(signals ~= nil, "Input channel is unavailable")
 
     local m
@@ -88,7 +88,7 @@ local opcodes_vx = {
     Assert.type(_[1], {'register', 'output'})
     Assert.type(_[2], {'memory', 'input'})
 
-    local signals = io.memory_getchannel_signals(_[2])
+    local signals = io.channel_signals(_[2])
     Assert.check(signals ~= nil, "Input channel is unavailable")
 
     local m
@@ -105,7 +105,7 @@ local opcodes_vx = {
     Assert.type(_[1], {'register', 'output'})
     Assert.type(_[2], {'memory', 'input'})
 
-    local signals = io.memory_getchannel_signals(_[2])
+    local signals = io.channel_signals(_[2])
     Assert.check(signals ~= nil, "Input channel is unavailable")
 
     local s = 0
@@ -127,7 +127,7 @@ local opcodes_vx = {
     Assert.type(_[1], {'register', 'output'})
     Assert.type(_[2], {'memory', 'input'})
 
-    local signals = io.memory_getchannel_signals(_[2])
+    local signals = io.channel_signals(_[2])
     Assert.check(signals ~= nil, "Input channel is unavailable")
 
     local m, i
@@ -145,7 +145,7 @@ local opcodes_vx = {
     Assert.type(_[1], {'register', 'output'})
     Assert.type(_[2], {'memory', 'input'})
 
-    local signals = io.memory_getchannel_signals(_[2])
+    local signals = io.channel_signals(_[2])
     Assert.check(signals ~= nil, "Input channel is unavailable")
 
     local m, i

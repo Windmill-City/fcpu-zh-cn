@@ -626,9 +626,8 @@ To get around this, fCPU uses a trick - it partially compiles the written progra
 Unlike registers, which are implemented as ordinary variables and always retain their indices, the memory for SIMD commands is also implemented using vanilla combinators.  
 
 Here comes the most important thing:  
-To modify the memory, you need to subtract one signal and add another (it is shown on the video https://youtu.be/xOADSQPs4Z4).
+To modify the memory, you need to subtract old value and add a new one for same signal type.
 Like any other vanilla combinator operation, this breaks the signal indices.  
-That is why, if you change the state of memory, then the indexes will also change.  
 
 
 ## User Interface

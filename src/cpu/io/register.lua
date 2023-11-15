@@ -39,7 +39,7 @@ local function register_getreadonly(index)
 end
 
 local function register_getraw(index)
-  Assert.regs_index_range(index, MC_REGS)
+  Assert.check_range(index, MC_REGS, 'register')
   if state.regs[index] and not state.regs[index].count then
     state.regs[index].count = 0
   end
@@ -47,14 +47,14 @@ local function register_getraw(index)
 end
 
 local function register_setraw(index, signal)
-  Assert.regs_index_range(index, MC_REGS)
+  Assert.check_range(index, MC_REGS, 'register')
   Assert.check(math.abs(signal.count or 0) ~= 1 / 0, "Division by zero")
   state.regs[index] = signal
 end
 
 
 function ioRegister.addr_deref(address)
-  Assert.check(address.addr ~= nil and address.pointer ~= nil, "Invalid address")
+  Assert.check(address.addr ~= nil, "Invalid address")
   if address.pointer then
     Assert.check(address.addr <= MC_REGS)
     return register_getraw(address.addr).count

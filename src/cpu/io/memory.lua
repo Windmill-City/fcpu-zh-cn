@@ -7,7 +7,7 @@ local ioMemory = {}
 
 -- Memory
 local function memory_setraw(address, addr, signal)
-  local control = ioChannel.write(address)
+  local control = ioChannel.write_control(address)
   Assert.check(control ~= nil, "Trying to access nil memory channel")
   if addr == nil and signal == nil then
     -- Clear entire memory
@@ -15,7 +15,7 @@ local function memory_setraw(address, addr, signal)
     control.parameters = nil
   else
     control.enabled = true
-    Assert.check(1 <= addr and addr <= MC_OUTPUT, "Memory cell index is out of range")
+    Assert.check_range(addr, control.signals_count, 'memory')
     if signal and signal.count then
       Assert.check(signal.signal ~= nil, "Signal type should be specified when assigning to a memory cell")
       Assert.check(math.abs(signal.count) ~= 1 / 0, "Division by zero")
@@ -27,7 +27,7 @@ local function memory_setraw(address, addr, signal)
 end
 
 local function memory_getraw(address, type)
-  local ctrl = ioChannel.read(address)
+  local ctrl = ioChannel.read_network(address)
   local value = ctrl and ctrl.get_signal(type)
   if value then
     return { signal = type, count = value }
@@ -57,8 +57,18 @@ function ioMemory.address_of(address, type)
   return addr
 end
 
-function ioMemory.size(address)
-  local ctrl = ioChannel.read(address)
+function ioMemory.first_free_index(address)
+  local ctrl = ioChannel.write_control(address)
+  for _,v in ipairs(ctrl.parameters) do
+    if not v.signal.name then
+      return v.index
+    end
+  end
+  Assert.exception('Scalar memory block is full already (max '.. ctrl.signals_count ..' items)')
+end
+
+function ioMemory.size(address, scalar)
+  local ctrl = ioChannel.read_network(address)
   local signals = ctrl and ctrl.signals
   return signals and #signals or 0
 end
@@ -103,7 +113,7 @@ function ioMemory.set(address, signal)
     if i2s[addr] ~= hash then
       local oldAddr = s2i[hash]
       if oldAddr then
-        local constCtrl = ioChannel.write(address)
+        local constCtrl = ioChannel.write_control(address)
         oldValue = constCtrl and constCtrl.enabled and constCtrl.parameters[oldAddr]
 
         i2s[oldAddr] = nil -- always in sync

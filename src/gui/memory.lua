@@ -16,6 +16,7 @@ local function ioChannel_GUI_Validate(player_data, state, channel, force)
 
     if not (pmc and smc) or (UpdateMinDelay <= smc - pmc) and (smc <= game.tick) then
       player_data.gui_cache.memory_changed[channel] = game.tick
+      smc = 0
     end
     return smc - game.tick
   end
@@ -94,6 +95,9 @@ end
 
 local function io_GUI_Update(player_data, state, force)
   -- Output
+  --if ioChannel_GUI_Validate(player_data, state, 'output', force) then
+  --  return true
+  --end
   if state.program_ics.output then
     local control = state.program_ics.output.value.get_control_behavior()
     local network = control.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.constant_combinator)
@@ -107,9 +111,6 @@ end
 local function ioWire_GUI_Update_output_cl()
   -- Output buffer
   return function(player_data, state, force)
-    if ioChannel_GUI_Validate(player_data, state, 'output', force) then
-      return true
-    end
     if state.program_ics.output then
       local control = state.program_ics.output.value.get_control_behavior()
       MemoryView.UpdateFromTable(player_data, control and control.parameters, 1, true)
@@ -133,9 +134,9 @@ local ChannelsInfo = {
   { title = { 'gui-fcpu-memviewer.channel-registers' }, handler = ioRegisters_GUI_Update },
   { title = { 'gui-fcpu-memviewer.channel-input-red' }, handler = ioWire_GUI_Update_cl(defines.wire_type.red) },
   { title = { 'gui-fcpu-memviewer.channel-input-green' }, handler = ioWire_GUI_Update_cl(defines.wire_type.green) },
+  { title = { 'gui-fcpu-memviewer.channel-output-scalar' }, handler = ioWire_GUI_Update_output_cl() },
+  { title = { 'gui-fcpu-memviewer.channel-output-vector' }, handler = ioOutput_GUI_Update },
   { title = { 'gui-fcpu-memviewer.channel-output' }, handler = io_GUI_Update },
---  { title = { 'gui-fcpu-memviewer.channel-output-scalar' }, handler = ioWire_GUI_Update_output_cl() },
---  { title = { 'gui-fcpu-memviewer.channel-output-vector' }, handler = ioOutput_GUI_Update },
 }
 
 local MC_MEMORY_CHANNELS_from = #ChannelsInfo
@@ -158,9 +159,9 @@ function MemoryView.CreateWidget(rootGui)
     {type="frame", name="fcpu-memory-view", save_as="gui_memory_view", style="inside_shallow_frame_with_padding", style_mods={ minimal_width=364 }, direction="vertical", children={
       {template="heading_3", caption={"gui-fcpu-memviewer.memory-channel"}},
       {type="flow", name="fcpu-panels", direction="horizontal", style_mods={ vertical_align='center' }, children={
-        {type='drop-down', save_as='gui_memory_channel', items={ table.unpack(memchannels) }, selected_index=1, handlers="memory.memory_channel"},
+        {type='drop-down', save_as='gui_memory_channel', items={ table.unpack(memchannels) }, selected_index=1, handlers="memory.channel_switch"},
         {template="pushers.horizontal"},
-        {type='checkbox', save_as='gui_memory_autoselect', state=false, caption={'gui-fcpu-memviewer.autoselect-channel'}},
+        {type='checkbox', save_as='gui_memory_autoselect', state=false, caption={'gui-fcpu-memviewer.autoselect-channel'}, handlers="memory.channel_autoselect"},
       }},
 
       {type="flow", direction="horizontal", style_mods={ vertical_align='center' }, children={
@@ -280,7 +281,7 @@ local function SetCell(player_data, cell, signal, idx, format, style)
 
     cell.style = idx and style.index or style.readonly
     cell.tooltip = idx and {'gui-fcpu-memviewer.memory-cell-tooltip-index', idx}
-    or signal.signal and {'gui-fcpu-memviewer.memory-cell-tooltip-vector', GUI_signalToTooltip(signal)}
+    or signal.signal and signal.signal.name and {'gui-fcpu-memviewer.memory-cell-tooltip-vector', GUI_signalToTooltip(signal)}
     or {'gui-fcpu-memviewer.memory-cell-tooltip-scalar', ''}
 
     if format == 0 then
@@ -350,10 +351,21 @@ end
 function MemoryView.RegisterHandlers()
   gui.add_handlers{
     memory={
-      memory_channel = {
+      channel_switch = {
         on_gui_selection_state_changed = GUI_mixPlayerData(function(player_data, state)
           if player_data.gui_memory_autoselect then
             player_data.gui_memory_autoselect.state = false
+          end
+          if player_data.gui_memory_view then
+            MemoryView.UpdateWidget(player_data, state, true)
+          end
+        end)
+      },
+
+      channel_autoselect = {
+        on_gui_checked_state_changed = GUI_mixPlayerData(function(player_data, state)
+          if player_data.gui_memory_autoselect and not player_data.gui_memory_autoselect.state then
+            return
           end
           if player_data.gui_memory_view then
             MemoryView.UpdateWidget(player_data, state, true)

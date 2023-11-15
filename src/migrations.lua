@@ -523,6 +523,9 @@ return {
   end,
 
   ["0.4.18"] = function()
+    foreach_player(function(player, player_data)
+      GuiWidgetClose(player.index)
+    end)
     foreach_fcpu(function(fcpu, state)
       state.power_probe_tick = game.tick
       state.power_level = state.out_of_power and 0 or 1

@@ -39,6 +39,7 @@ function Controller.init(mc)
     program_begin = 1,
     program_ics = {},
     ics_stack = {},
+    memmap = { i2s = {}, s2i = {} },
     breakpoints = {},
     instruction_pointer = 1,
     gui_cache = {},
