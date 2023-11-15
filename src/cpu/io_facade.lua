@@ -189,7 +189,7 @@ function io.setup(emitter_, controller_)
   Controller = controller_
   Emitter = emitter_
 
-  ioRegister.setup(io)
+  ioRegister.setup(Emitter, io)
   ioChannel.setup(ICStack)
   ioMemory.setup(Emitter, ioRegister, ioChannel)
   ioWire.setup(Emitter, ioRegister, ioChannel)

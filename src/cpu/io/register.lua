@@ -93,9 +93,9 @@ function ioRegister.bind(state_)
   state = state_
 end
 
-function ioRegister.setup(io_, emitter_)
-  io = io_
+function ioRegister.setup(emitter_, io_)
   Emitter = emitter_
+  io = io_
 end
 
 return ioRegister

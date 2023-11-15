@@ -85,8 +85,8 @@ function MainView.RegisterTemplates()
     slot_button = function(name, title)
       return {type="sprite-button", style="slot_button_in_shallow_frame", name=name.."-inspect", tooltip=(title or name), handlers="widget.insert_register_to_program"}
     end,
-    slot_inventory = function(name, title, ...)
-      return table.deep_merge{{type="sprite-button", style="inventory_slot", name=name .."-inspect", tooltip=(title or name)}, ...}
+    channel_cell = function(name, ...)
+      return table.deep_merge{{type="sprite-button", style="fcpu_channel_cell", name=name .."-inspect"}, ...}
     end,
     breakpoints_button = function(state, num)
       return {type="label", name="break-"..num, caption=FormatBreakpointTitle(state, num),

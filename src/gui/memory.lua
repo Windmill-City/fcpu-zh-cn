@@ -1,19 +1,158 @@
 local gui = require("3rdparty.flib061.gui")
 local MemoryView = {}
 
+---
+
+local function ioChannel_GUI_Validate(player_data, state, channel, force)
+  local UpdateMinDelay = 0
+  local TestImpl = function(force)
+    player_data.gui_cache = player_data.gui_cache or {}
+    if player_data.gui_cache.memory_changed == nil or force then
+      player_data.gui_cache.memory_changed = {}
+    end
+
+    local pmc = player_data.gui_cache.memory_changed[channel]
+    local smc = state.gui_cache.memory_changed[channel]
+
+    if not (pmc and smc) or (UpdateMinDelay <= smc - pmc) and (smc <= game.tick) then
+      player_data.gui_cache.memory_changed[channel] = game.tick
+    end
+    return smc - game.tick
+  end
+
+  local sync_delay = TestImpl(force)
+  local notSync = 0 < sync_delay
+
+  if player_data.gui_memory_sync_label then
+    player_data.gui_memory_sync_label.caption = {"gui-fcpu-memviewer.memory-view-sync", (notSync and ' in '..sync_delay or '')}
+  end
+  if player_data.gui_memory_sync_sprite then
+    player_data.gui_memory_sync_sprite.sprite =
+    state.need_sync and 'flib_indicator_red'
+    or notSync and 'flib_indicator_black'
+    or 'flib_indicator_green'
+  end
+  return (sync_delay < 0) and not force
+end
+
+-------------------------------------------------------------------------------------------------------
+
+function ioMemory_GUI_Update_cl(index)
+  local channel = 'mem' .. index
+
+  return function(player_data, state, force)
+    if ioChannel_GUI_Validate(player_data, state, channel, force) then
+      return true
+    end
+    -- Memory channels
+    local ics = state.program_ics[channel]
+    if ics and ics.out and ics.out.valid then
+      local control = ics.out.get_control_behavior()
+      --if control.signals_last_tick then
+        local network = control.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_output)
+        local memmap = state.memmap[channel]
+        if network then
+          MemoryView.UpdateFromTable(player_data, network.signals, nil, nil, memmap)
+        else
+          MemoryView.UpdateFromTable(player_data, control.signals_last_tick, nil, nil, memmap)
+        end
+        return true
+      --[[else
+        if ics.value then
+          local vc = ics.value.get_control_behavior()
+          if vc.enabled and vc.parameters then
+            MemoryView.UpdateFromTable(player_data, vc.parameters, 1)
+            return true
+          end
+        end
+
+        local network = control.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_output)
+        if network then
+          MemoryView.UpdateFromTable(player_data, network.signals)
+          return true
+        end
+      end]]
+    end
+  end
+end
+
+local function ioRegisters_GUI_Update(player_data, state, force)
+  -- Registers
+  MemoryView.UpdateFromTable(player_data, state.regs, 0, true)
+  return true
+end
+
+local function ioWire_GUI_Update_cl(wire_type)
+  -- Input wires
+  return function(player_data, state, force)
+    local control = state.entity.get_control_behavior()
+    local input = control.get_circuit_network(wire_type, defines.circuit_connector_id.combinator_input)
+    MemoryView.UpdateFromTable(player_data, input and input.signals)
+    return true
+  end
+end
+
+local function io_GUI_Update(player_data, state, force)
+  -- Output
+  if state.program_ics.output then
+    local control = state.program_ics.output.value.get_control_behavior()
+    local network = control.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.constant_combinator)
+    if network then
+      MemoryView.UpdateFromTable(player_data, network.signals)
+      return true
+    end
+  end
+end
+
+local function ioWire_GUI_Update_output_cl()
+  -- Output buffer
+  return function(player_data, state, force)
+    if ioChannel_GUI_Validate(player_data, state, 'output', force) then
+      return true
+    end
+    if state.program_ics.output then
+      local control = state.program_ics.output.value.get_control_behavior()
+      MemoryView.UpdateFromTable(player_data, control and control.parameters, 1, true)
+    return true
+    end
+  end
+end
+
+local function ioOutput_GUI_Update(player_data, state, force)
+  -- Vector output
+  if state.ics_stack.output and state.program_ics[state.ics_stack.output] then
+    local control = state.program_ics[state.ics_stack.output].out.get_control_behavior()
+    MemoryView.UpdateFromTable(player_data, control and control.parameters and control.signals_last_tick)
+    return true
+  end
+end
+
+  -------------------------------------------------------------------------------------------------------
+
+local ChannelsInfo = {
+  { title = { 'gui-fcpu-memviewer.channel-registers' }, handler = ioRegisters_GUI_Update },
+  { title = { 'gui-fcpu-memviewer.channel-input-red' }, handler = ioWire_GUI_Update_cl(defines.wire_type.red) },
+  { title = { 'gui-fcpu-memviewer.channel-input-green' }, handler = ioWire_GUI_Update_cl(defines.wire_type.green) },
+  { title = { 'gui-fcpu-memviewer.channel-output' }, handler = io_GUI_Update },
+--  { title = { 'gui-fcpu-memviewer.channel-output-scalar' }, handler = ioWire_GUI_Update_output_cl() },
+--  { title = { 'gui-fcpu-memviewer.channel-output-vector' }, handler = ioOutput_GUI_Update },
+}
+
+local MC_MEMORY_CHANNELS_from = #ChannelsInfo
+for i = 1, MC_MEMORY_CHANNELS do
+  ChannelsInfo[MC_MEMORY_CHANNELS_from + i] = {
+    title = { 'gui-fcpu-memviewer.channel-memory-bank', i },
+    handler = ioMemory_GUI_Update_cl(i)
+  }
+end
+
 -------------------------------------------------------------------------------------------------------
 
 function MemoryView.CreateWidget(rootGui)
   local memchannels = {}
-  for i = 1, MC_MEMORY_CHANNELS do
-    memchannels[#memchannels + 1] = 'mem'.. i
+  for k, info in ipairs(ChannelsInfo) do
+    memchannels[k] = info.title
   end
-  memchannels[#memchannels+1] = { 'gui-fcpu-memviewer.channel-registers' }
-  memchannels[#memchannels+1] = { 'gui-fcpu-memviewer.channel-input-red' }
-  memchannels[#memchannels+1] = { 'gui-fcpu-memviewer.channel-input-green' }
-  memchannels[#memchannels+1] = { 'gui-fcpu-memviewer.channel-output-scalar' }
-  memchannels[#memchannels+1] = { 'gui-fcpu-memviewer.channel-output-vector' }
-  memchannels[#memchannels+1] = { 'gui-fcpu-memviewer.channel-output' }
 
   local elems = gui.build(rootGui, {
     {type="frame", name="fcpu-memory-view", save_as="gui_memory_view", style="inside_shallow_frame_with_padding", style_mods={ minimal_width=364 }, direction="vertical", children={
@@ -51,200 +190,31 @@ function MemoryView.DestroyWidget(player_data)
   player_data.gui_memory_cells = nil
 end
 
-function MemoryView.UpdateFromTable(player_data, signals, sort, sparse, order)
-  local cells = player_data.gui_memory_cells.children
-  if cells then
-    --[[if order ~= nil then
-      -- TODO: order is different than in Factorio
-      local t = {}
-      for _,v in ipairs(signals) do
-        t[v.signal.type..'='..v.signal.name] = v
-      end
-      local n = {}
-      for k,v in ipairs(order) do
-        local s = t[v.signal.type..'='..v.signal.name]
-        if s then
-          n[k] = s
-          t[v.signal.type..'='..v.signal.name] = nil
-        else
-          n[k] = NULL_SIGNAL
-        end
-      end
-      for _,v in pairs(t) do
-        n[#n+1] = v
-      end
-      signals = n
-    end]]
-
-    -- add extra
-    for i = #cells + 1, math.max(MC_MEMORY_SLOTS_MIN, (signals and #signals or 0)) do
-      gui.build(player_data.gui_memory_cells, { gui.templates.slot_inventory('index-'..i, '['..i..']', {visible=false}) })
-    end
-    cells = player_data.gui_memory_cells.children
-
-    local i = 1
-    -- show and setup visible
-    if signals then
-      for _, v in ipairs(signals) do
-        local cell = cells[i]
-        if v and cell then
-          local sprite = GUI_signalToSpritePath(player_data, v.signal)
-          cell.visible = true
-          cell.sprite = sprite
-          if sort == 0 then
-            cell.number = v.count
-          else
-            cell.number = sprite and v.count or nil
-          end
-          if sprite or sort then
-            i = i + 1
-          elseif not sparse then
-            break
-          end
-        end
-      end
-    end
-
-    -- clear `number`
-    while i <= MC_MEMORY_SLOTS_MIN and cells[i] do
-      cells[i].visible = true
-      cells[i].sprite = nil
-      cells[i].number = nil
-      i = i + 1
-    end
-
-    -- hide others
-    while i <= #cells and cells[i] and cells[i].visible do
-      cells[i].visible = false
-      i = i + 1
-    end
-  end
-end
-
-local UpdateMinDelay = 1
 function MemoryView.UpdateWidget(player_data, state, initial)
   if not player_data.gui_memory_channel then return end
   local index = player_data.gui_memory_channel.selected_index
 
   if player_data.gui_cache and player_data.gui_memory_autoselect and player_data.gui_memory_autoselect.state then
     if state.gui_cache.memory_autochannel then
-      index = tonumber(string.sub(state.gui_cache.memory_autochannel, 4)) or index
+      local bank = tonumber(string.sub(state.gui_cache.memory_autochannel, 4))
+      index = bank and (MC_MEMORY_CHANNELS_from + bank) or index
       player_data.gui_memory_channel.selected_index = index
+    end
+  end
+
+  if initial then
+    if player_data.gui_memory_sync_label then
+      player_data.gui_memory_sync_label.caption = {"gui-fcpu-memviewer.memory-view-sync", ''}
     end
   end
 
   if state then
     index = math.max(1, index)
 
-    local ValidateGuiCacheImpl = function(channel)
-      player_data.gui_cache = player_data.gui_cache or {}
-      if player_data.gui_cache.memory_changed == nil or initial then
-        player_data.gui_cache.memory_changed = {}
-      end
-      if state.gui_cache.memory_changed == nil then
-        return false
-      end
-
-      local pmc = player_data.gui_cache.memory_changed[channel]
-      local smc = state.gui_cache.memory_changed[channel]
-
-      if not (pmc and smc) or (pmc + UpdateMinDelay <= smc) and (smc <= game.tick) then
-        player_data.gui_cache.memory_changed[channel] = smc
-        return false
-      end
-      return true
-    end
-
-    local ValidateGuiCache = function(channel)
-      local result = ValidateGuiCacheImpl(channel)
-
-      local sync_delay = 0
-      if state.gui_cache.memory_changed then
-        sync_delay = state.gui_cache.memory_changed[channel] - game.tick
-      end
-      if player_data.gui_memory_sync_label then
-        player_data.gui_memory_sync_label.caption = {"gui-fcpu-memviewer.memory-view-sync", (0 < sync_delay and ' in '..sync_delay or '')}
-      end
-      if player_data.gui_memory_sync_sprite then
-        player_data.gui_memory_sync_sprite.sprite =
-        state.need_sync and 'flib_indicator_red'
-        or 0 < sync_delay and 'flib_indicator_black'
-        or 'flib_indicator_green'
-      end
-      return result
-    end
-
-    if index <= MC_MEMORY_CHANNELS then
-      if ValidateGuiCache('mem'..index) then return end
-      -- Memory channels
-      local ics = state.program_ics['mem' .. index]
-      if ics and ics.out and ics.out.valid then
-        local control = ics.out.get_control_behavior()
-        if control.signals_last_tick then
-          local network = control.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_output)
-          if network then
-            MemoryView.UpdateFromTable(player_data, network.signals)
-            --MemoryView.UpdateFromTable(player_data, network.signals, 0, true, control.signals_last_tick)
-          else
-            MemoryView.UpdateFromTable(player_data, control.signals_last_tick)
-          end
-          return
-        else
-          if ics.value then
-            local vc = ics.value.get_control_behavior()
-            if vc.enabled and vc.parameters then
-              MemoryView.UpdateFromTable(player_data, vc.parameters, 1)
-              return
-            end
-          end
-
-          local network = control.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_output)
-          if network then
-            MemoryView.UpdateFromTable(player_data, network.signals)
-            return
-          end
-        end
-      end
-    elseif index == MC_MEMORY_CHANNELS + 1 then
-      -- Registers
-      MemoryView.UpdateFromTable(player_data, state.regs, 0, true)
-      return
-    elseif index == MC_MEMORY_CHANNELS + 2 then
-      -- Input wires (RED)
-      local control = state.entity.get_control_behavior()
-      local input = control.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_input)
-      MemoryView.UpdateFromTable(player_data, input and input.signals)
-      return
-    elseif index == MC_MEMORY_CHANNELS + 3 then
-      -- Input wires (GREEN)
-      local control = state.entity.get_control_behavior()
-      local input = control.get_circuit_network(defines.wire_type.green, defines.circuit_connector_id.combinator_input)
-      MemoryView.UpdateFromTable(player_data, input and input.signals)
-      return
-    elseif index == MC_MEMORY_CHANNELS + 4 then
-      if ValidateGuiCache('output') then return end
-      -- Output buffer
-      if state.program_ics.output then
-        local control = state.program_ics.output.value.get_control_behavior()
-        MemoryView.UpdateFromTable(player_data, control and control.parameters, 1, true)
+    local info = ChannelsInfo[index]
+    if info then
+      if info.handler(player_data, state, initial) then
         return
-      end
-    elseif index == MC_MEMORY_CHANNELS + 5 then
-      -- Vector output
-      if state.ics_stack.output and state.program_ics[state.ics_stack.output] then
-        local control = state.program_ics[state.ics_stack.output].out.get_control_behavior()
-        MemoryView.UpdateFromTable(player_data, control and control.parameters and control.signals_last_tick)
-        return
-      end
-    elseif index == MC_MEMORY_CHANNELS + 6 then
-      -- Output
-      if state.program_ics.output then
-        local control = state.program_ics.output.value.get_control_behavior()
-        local network = control.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.constant_combinator)
-        if network then
-          MemoryView.UpdateFromTable(player_data, network.signals)
-          return
-        end
       end
     end
   end
@@ -252,6 +222,129 @@ function MemoryView.UpdateWidget(player_data, state, initial)
   MemoryView.UpdateFromTable(player_data, {})
 end
 
+local function PrepareRemap(signals, s2i)
+  local first
+  local last
+  local remap = {}
+  local queue = {}
+  if s2i then
+    for _,s in ipairs(signals) do
+      local hash = s.signal.type..'='..s.signal.name
+      local index = s2i[hash]
+      if index then
+        remap[index] = s
+        --queue[#queue + 1] = signals[index]
+        first = index < (first or 999999) and index or first
+        last = (last or -99999) < index and index or last
+      else
+        queue[#queue + 1] = s
+      end
+    end
+    local i = 1
+    for _,s in ipairs(queue) do
+      while remap[i] do
+        i = i + 1
+      end
+      remap[i] = s
+      i = i + 1
+    end
+    first = math.max(first or 1, i)
+    last = math.max(last or 1, i)
+  else
+    remap = signals
+    first = 1
+    last = table_size(signals)
+  end
+  return remap, first, last
+end
+
+local function CleanCellRange(cells, first, last, style)
+  local i = first
+  while i <= last and cells[i] do
+    local cell = cells[i]
+    cell.tooltip = {'gui-fcpu-memviewer.memory-cell-tooltip-scalar', ''}
+    cell.visible = true
+    cell.sprite = nil
+    cell.number = nil
+    cell.style = style
+    i = i + 1
+  end
+end
+
+local function SetCell(player_data, cell, signal, idx, format, style)
+  if signal and cell then
+    local sprite = GUI_signalToSpritePath(player_data, signal.signal)
+
+    cell.sprite = sprite
+    cell.visible = true
+
+    cell.style = idx and style.index or style.readonly
+    cell.tooltip = idx and {'gui-fcpu-memviewer.memory-cell-tooltip-index', idx}
+    or signal.signal and {'gui-fcpu-memviewer.memory-cell-tooltip-vector', GUI_signalToTooltip(signal)}
+    or {'gui-fcpu-memviewer.memory-cell-tooltip-scalar', ''}
+
+    if format == 0 then
+      cell.number = signal.count
+    else
+      cell.number = sprite and signal.count or nil
+    end
+
+    if sprite or format then
+      return true
+    end
+  end
+end
+
+function MemoryView.UpdateFromTable(player_data, signals, format, sparse, memmap)
+  local cells = player_data.gui_memory_cells.children
+  if not cells then
+    return
+  end
+
+  if not signals then
+    signals = {}
+  end
+
+  local style = {
+    empty = memmap and "fcpu_channel_cell" or "fcpu_channel_empty_cell",
+    readonly = memmap and "fcpu_channel_cell_ro" or "fcpu_channel_empty_cell",
+    index = "fcpu_channel_cell_indexed",
+  }
+
+  -- order is different than in Factorio
+  local remap, first, last = PrepareRemap(signals, memmap and memmap.s2i)
+  local i2s = memmap and memmap.i2s or {}
+
+  -- add extra
+  for i = table_size(cells) + 1, math.max(MC_MEMORY_SLOTS_MIN, last) do
+    gui.build(player_data.gui_memory_cells, {
+      gui.templates.channel_cell('index-'..i, {visible=false})
+    })
+  end
+  cells = player_data.gui_memory_cells.children
+
+  -- clean beginning
+  CleanCellRange(cells, 1, first - 1, style.empty);
+  local idx = first
+
+  -- show and setup visible
+  for k,signal in pairs(remap) do
+    if SetCell(player_data, cells[k], signal, i2s[k] and k, format, style) then
+      idx = k + 1
+    elseif not sparse then
+      break
+    end
+  end
+
+  -- clean ending
+  CleanCellRange(cells, idx, MC_MEMORY_SLOTS_MIN, style.empty)
+
+  -- hide others
+  while idx <= table_size(cells) and cells[idx] and cells[idx].visible do
+    cells[idx].visible = false
+    idx = idx + 1
+  end
+end
 -------------------------------------------------------------------------------------------------------
 
 function MemoryView.RegisterHandlers()

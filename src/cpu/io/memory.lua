@@ -50,7 +50,7 @@ function ioMemory.address_of(address, type)
   local hash = type.type ..'='.. type.name
   local addr = s2i[hash]
   if not addr then
-    addr = #s2i
+    addr = #s2i + 1
     s2i[hash] = addr -- always in sync
     i2s[addr] = hash -- always in sync
   end

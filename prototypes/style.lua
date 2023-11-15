@@ -53,3 +53,23 @@ default_gui["fcpu_toolbar_paste"] = {
   hovered_graphical_set = default_gui["slot_sized_button_red"].hovered_graphical_set,
   clicked_graphical_set = default_gui["slot_sized_button_red"].clicked_graphical_set,
 }
+
+default_gui["fcpu_channel_empty_cell"] = {
+  type = "button_style",
+  parent = "slot_button",
+}
+
+default_gui["fcpu_channel_cell"] = {
+  type = "button_style",
+  parent = "inventory_slot", --"inventory_slot",
+}
+
+default_gui["fcpu_channel_cell_ro"] = {
+  type = "button_style",
+  parent = "yellow_inventory_slot",
+}
+
+default_gui["fcpu_channel_cell_indexed"] = {
+  type = "button_style",
+  parent = "filter_inventory_slot",
+}
