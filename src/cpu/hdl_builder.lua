@@ -397,27 +397,29 @@ function builder.create_memory_cell(entity, input_a)
   local wire1 = input_a.wire or defines.wire_type.red
   local wire2 = inverse_wire_color(wire1)
 
+  -- Thanks for this improvement to `yaongi jigsaw`
+  --
+  -- [X*]--->[kin]--->[kout]-+--------->[out]
+  --                     ^   |            ^
+  --                     |---+->[kaux]----|
+  --
+  -- - kin guards against loops and changing input, only has a value for a single tick
+  -- - kout loops, maintaining the output
+  -- - kaux holds kout for the tick necessary for kout to read kin
   local d_key, control_key = builder.create_node(entity, 'decider')
   local d_out, control_out = builder.create_node(entity, 'decider')
+  local d_aux, control_aux = builder.create_node(entity, 'decider')
 
-  control_key.parameters = {
-    first_signal = {type='virtual', name='signal-fcpu-error'},
-    second_signal = nil,
-    constant = 1,
-    comparator = "=", -- < ≤ ≠ = ≥ >
-    output_signal = {type='virtual', name='signal-everything'},
-    copy_count_from_input = true
-  }
-
-  control_out.parameters = {
-    first_signal = {type='virtual', name='signal-fcpu-error'},
-    second_signal = nil,
-    constant = 0,
-    comparator = "=", -- < ≤ ≠ = ≥ >
-    output_signal = {type='virtual', name='signal-everything'},
-    copy_count_from_input = true
-  }
-
+  for _,c in ipairs({control_key, control_out, control_aux}) do
+    c.parameters = {
+      first_signal = {type='virtual', name='signal-fcpu-error'},
+      second_signal = nil,
+      constant = 1,
+      comparator = "=", -- < ≤ ≠ = ≥ >
+      output_signal = {type='virtual', name='signal-everything'},
+      copy_count_from_input = true
+    }
+  end
 
   d_key.connect_neighbour{
     source_circuit_id = defines.circuit_connector_id.combinator_input,
@@ -429,20 +431,26 @@ function builder.create_memory_cell(entity, input_a)
     source_circuit_id = defines.circuit_connector_id.combinator_output,
     target_circuit_id = defines.circuit_connector_id.combinator_input,
     target_entity = d_out,
-    wire = wire1,
+    wire = wire2,
   }
   d_out.connect_neighbour{
     source_circuit_id = defines.circuit_connector_id.combinator_output,
     target_circuit_id = defines.circuit_connector_id.combinator_input,
     target_entity = d_out,
-    wire = wire2,
+    wire = wire1,
+  }
+  d_out.connect_neighbour{
+    source_circuit_id = defines.circuit_connector_id.combinator_output,
+    target_circuit_id = defines.circuit_connector_id.combinator_input,
+    target_entity = d_aux,
+    wire = wire1,
   }
 
   local ics = {
-    color_out = wire1,
+    color_out = wire2,
     kin = d_key,
     kout = d_out,
-    out = d_out,
+    kaux = d_aux,
   }
 
   return ics
@@ -459,10 +467,9 @@ function builder.create_arithmetic_cell(entity, input_a, input_b, operation)
     end
   end
 
-  local ics = builder.create_memory_cell(entity, input_a)
-  local dst, control_dst = builder.create_node(entity, 'arithmetic')
+  local x, control_x = builder.create_node(entity, 'arithmetic')
 
-  control_dst.parameters = {
+  control_x.parameters = {
     first_signal = {type='virtual', name='signal-each'},
     second_signal = nil,
     first_constant  = nil,
@@ -471,32 +478,29 @@ function builder.create_arithmetic_cell(entity, input_a, input_b, operation)
     output_signal = {type='virtual', name='signal-each'}
   }
 
-  dst.connect_neighbour{
+  x.connect_neighbour{
     source_circuit_id = defines.circuit_connector_id.combinator_input,
-    target_circuit_id = defines.circuit_connector_id.combinator_output,
-    target_entity = ics.out,
-    wire = ics.color_out,
+    target_circuit_id = input_a.port,
+    target_entity = input_a.entity,
+    wire = input_a.wire,
   }
   if input_b ~= nil and constant == nil then
-    control_dst.connect_neighbour{
+    control_x.connect_neighbour{
       source_circuit_id = defines.circuit_connector_id.combinator_input,
-      target_circuit_id = defines.circuit_connector_id.combinator_output,
-      target_entity = input_b,
-      wire = inverse_wire_color(ics.color_out),
+      target_circuit_id = input_a.port,
+      target_entity = input_a.entity,
+      wire = inverse_wire_color(input_a.wire),
     }
   end
 
-  ics[#ics + 1] = ics.out
-  ics.out = dst
-  return ics
+  return x
 end
 
 
 function builder.create_decider_cell(entity, input, signal, operation)
-  local ics = builder.create_memory_cell(entity, input)
-  local dst, control_dst = builder.create_node(entity, 'decider')
+  local x, control_x = builder.create_node(entity, 'decider')
 
-  control_dst.parameters = {
+  control_x.parameters = {
     first_signal = {type='virtual', name='signal-each'},
     second_signal = nil,
     constant = 0,
@@ -505,16 +509,14 @@ function builder.create_decider_cell(entity, input, signal, operation)
     copy_count_from_input = true
   }
 
-  dst.connect_neighbour{
+  x.connect_neighbour{
     source_circuit_id = defines.circuit_connector_id.combinator_input,
-    target_entity = ics.out,
+    target_entity = input.entity,
     target_circuit_id = defines.circuit_connector_id.combinator_output,
-    wire = ics.color_out,
+    wire = input.wire,
   }
 
-  ics[#ics + 1] = ics.out
-  ics.out = dst
-  return ics
+  return x
 end
 
 -------------------------------------------------------------------------------------------------------
@@ -545,7 +547,7 @@ local function connect_output_to(state, ics, address)
   if address.type == 'memory' then
     local ics_name = address.channel
     local mem_ics = state.program_ics[ics_name]
-    ics.out.connect_neighbour{
+    ics.kout.connect_neighbour{
       source_circuit_id = defines.circuit_connector_id.combinator_output,
       target_circuit_id = defines.circuit_connector_id.combinator_input,
       target_entity = mem_ics.out,
@@ -587,13 +589,13 @@ local function connect_output_to(state, ics, address)
       ics.out = proxy
     end
 ]]
-    ics.out.connect_neighbour{
+    ics.kout.connect_neighbour{
       source_circuit_id = defines.circuit_connector_id.combinator_output,
       target_circuit_id = defines.circuit_connector_id.combinator_input,
       target_entity = state.program_ics.output.out,
       wire = ics.color_out,
     }
-    ics.out.connect_neighbour{
+    ics.kout.connect_neighbour{
       source_circuit_id = defines.circuit_connector_id.combinator_output,
       target_circuit_id = defines.circuit_connector_id.combinator_input,
       target_entity = state.program_ics.output.out,
@@ -607,6 +609,45 @@ end
 
 -------------------------------------------------------------------------------------------------------
 
+local function builder_generate_run(run_args, ics, ics_prev)
+  local actions = {
+  -- new ic: disable/reenable kout (sets out to zero ready for new input)
+    {action='tune', ic=ics.kout, value=1, delay = run_args.sync_delay},
+    {action='tune', ic=ics.kout, value=0, delay = run_args.sync_delay + 1},
+  -- new ic: capture input in kin for 1 tick
+    {action='tune', ic=ics.kin, value=0, delay = run_args.sync_delay},
+    {action='tune', ic=ics.kin, value=1, delay = run_args.sync_delay + 1},
+  -- wait for output
+    {action='sync', index=run_args.index, delay=run_args.sync_delay + 3},
+  }
+  if ics_prev then
+    if ics ~= ics_prev then
+      -- old ic: disable kout
+      actions[#actions+1] = {action='tune', ic=ics_prev.kout, value=1, delay = run_args.sync_delay}
+    end
+    -- hold kout for 1 tick until new kout has read kin
+    actions[#actions+1] = {action='tune', ic=ics_prev.kaux, value=0, delay = run_args.sync_delay}
+    actions[#actions+1] = {action='tune', ic=ics_prev.kaux, value=1, delay = run_args.sync_delay + 1}
+  end
+  return actions
+end
+
+local function generate_deffer(ics, index, sync_delay)
+  return {
+    run = builder_generate_run({ index = index, sync_delay = sync_delay }, ics),
+    --run_args = {
+    --  index = index,
+    --  sync_delay = sync_delay,
+    --},
+    clr = {
+      {action='tune', ic=ics.kout, value=1, delay = 0},
+      {action='tune', ic=ics.kout, value=0, delay = 1},
+    },
+  }
+end
+
+-------------------------------------------------------------------------------------------------------
+
 local function vector_scalar_op(operation)
   return function(state, _)
     local three = Assert.two_or_three(_) == 3
@@ -614,11 +655,18 @@ local function vector_scalar_op(operation)
     local input = connect_input_from(state, (three and _[2]) or _[1])
     local value = nil
 
-    local ics = builder.create_arithmetic_cell(state.entity, input, value, operation)
+    local x = builder.create_arithmetic_cell(state.entity, input, value, operation)
+    local ics = builder.create_memory_cell(state.entity, {
+      entity = x,
+      wire = inverse_wire_color(input.wire),
+      port = defines.circuit_connector_id.combinator_output
+    })
+    ics.x = x
 
     local ics_name = connect_output_to(state, ics, _[1])
 
-    local deffer = {
+    local deffer = generate_deffer(ics, state.index, 1)
+    --[[local deffer = {
       run = {
         {action='tune', ic=ics.kin, value=0, delay = 0},
         {action='tune', ic=ics.kout, value=1, delay = 0},
@@ -630,7 +678,7 @@ local function vector_scalar_op(operation)
         {action='tune', ic=ics.kout, value=1, delay = 0},
         {action='tune', ic=ics.kout, value=0, delay = 1},
       },
-    }
+    }]]
 
     return ics_name, ics, deffer
   end
@@ -643,11 +691,17 @@ local function vector_decide_op(operation)
     local input = connect_input_from(state, (three and _[2]) or _[1])
     local value = nil
 
-    local ics = builder.create_decider_cell(state.entity, input, value, operation)
+    local x = builder.create_decider_cell(state.entity, input, value, operation)
+    local ics = builder.create_memory_cell(state.entity, {
+      entity = x,
+      wire = inverse_wire_color(input.wire),
+      port = defines.circuit_connector_id.combinator_output
+    })
+    ics.x = x
 
     local ics_name = connect_output_to(state, ics, _[1])
 
-    local deffer = {
+    --[[local deffer = {
       run = {
         {action='tune', ic=ics.kin, value=0, delay = 0},
         {action='tune', ic=ics.kout, value=1, delay = 0},
@@ -659,7 +713,8 @@ local function vector_decide_op(operation)
         {action='tune', ic=ics.kout, value=1, delay = 0},
         {action='tune', ic=ics.kout, value=0, delay = 1},
       },
-    }
+    }]]
+    local deffer = generate_deffer(ics, state.index, 1)
 
     return ics_name, ics, deffer
   end
@@ -679,7 +734,7 @@ local ops = {
 
     local ics_name = connect_output_to(state, ics, _[1])
 
-    local deffer = {
+    --[[local deffer = {
       run = {
         {action='tune', ic=ics.kin, value=0, delay = 0},
         {action='tune', ic=ics.kout, value=1, delay = 0},
@@ -691,7 +746,8 @@ local ops = {
         {action='tune', ic=ics.kout, value=1, delay = 0},
         {action='tune', ic=ics.kout, value=0, delay = 1},
       },
-    }
+    }]]
+    local deffer = generate_deffer(ics, state.index, 0)
 
     return ics_name, ics, deffer
   end,
@@ -713,7 +769,7 @@ local ops = {
 
     local ics_name = connect_output_to(state, ics, _[1])
 
-    local deffer = {
+    --[[local deffer = {
       run = {
         {action='tune', ic=ics.kin, value=0, delay = 1},
         {action='tune', ic=ics.kout, value=1, delay = 1},
@@ -725,7 +781,8 @@ local ops = {
         {action='tune', ic=ics.kout, value=1, delay = 0},
         {action='tune', ic=ics.kout, value=0, delay = 1},
       },
-    }
+    }]]
+    local deffer = generate_deffer(ics, state.index, 1)
 
     return ics_name, ics, deffer
   end,
@@ -748,7 +805,7 @@ local ops = {
 
     local ics_name = connect_output_to(state, ics, _[1])
 
-    local deffer = {
+    --[[local deffer = {
       run = {
         {action='tune', ic=ics.kin, value=0, delay = 0},
         {action='tune', ic=ics.kout, value=2, delay = 2},
@@ -760,7 +817,8 @@ local ops = {
         {action='tune', ic=ics.kout, value=1, delay = 0},
         {action='tune', ic=ics.kout, value=0, delay = 1},
       },
-    }
+    }]]
+    local deffer = generate_deffer(ics, state.index, 2)
 
     return ics_name, ics, deffer
   end,

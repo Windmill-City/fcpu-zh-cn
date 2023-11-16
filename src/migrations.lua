@@ -531,5 +531,10 @@ return {
       state.power_level = state.out_of_power and 0 or 1
       state.out_of_power = nil
     end)
+    foreach_fcpu(function(fcpu, state)
+      Controller.verify(state)
+      state.modified = true
+      Controller.compile(state)
+    end)
   end,
 }

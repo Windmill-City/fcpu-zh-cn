@@ -121,10 +121,16 @@ end
 
 local function ioOutput_GUI_Update(player_data, state, force)
   -- Vector output
-  if state.ics_stack.output and state.program_ics[state.ics_stack.output] then
-    local control = state.program_ics[state.ics_stack.output].out.get_control_behavior()
-    MemoryView.UpdateFromTable(player_data, control and control.parameters and control.signals_last_tick)
-    return true
+  --if ioChannel_GUI_Validate(player_data, state, 'output', force) then
+  --  return true
+  --end
+  if state.ics_stack.output then
+    local ics = state.program_ics[state.ics_stack.output]
+    if ics then
+      local control = (ics.out or ics.kout).get_control_behavior()
+      MemoryView.UpdateFromTable(player_data, control and control.parameters and control.signals_last_tick)
+      return true
+    end
   end
 end
 

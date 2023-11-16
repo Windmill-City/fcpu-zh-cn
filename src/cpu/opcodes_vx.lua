@@ -5,8 +5,8 @@ local function vector_scalar_op()
   return function(_, ics)
     local src = (#_ == 3 and _[3]) or _[2]
 
-    if ics and ics.out then
-      local control = ics.out.get_or_create_control_behavior()
+    if ics and ics.x then
+      local control = ics.x.get_or_create_control_behavior()
       local params = control.parameters
       params.second_constant = io.getvalue(src, {'value', 'register', 'input'})
       control.parameters = params
@@ -18,8 +18,8 @@ local function vector_compare_op()
   return function(_, ics)
     local src = (#_ == 3 and _[3]) or _[2]
 
-    if ics and ics.out then
-      local control = ics.out.get_or_create_control_behavior()
+    if ics and ics.x then
+      local control = ics.x.get_or_create_control_behavior()
       local params = control.parameters
       params.constant = io.getvalue(src, {'value', 'register', 'input'})
       control.parameters = params
