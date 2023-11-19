@@ -93,7 +93,7 @@ function ioMemory.set(address, signal)
 
   local i2s, s2i = memory_map(address)
   local type = signal.signal
-  local hash = type.type ..'='.. type.name
+  local hash = type and type.type ..'='.. type.name
 
   local oldOutput
   if type then

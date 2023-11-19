@@ -126,7 +126,6 @@ if not MC_DEBUG then hdl_output_fcpu = table.shallow_merge(hdl_output_fcpu, {
 
   flags = {
     "not-rotatable",
-    "player-creation",
     "placeable-off-grid",
     "not-repairable",
     "not-on-map",
@@ -179,7 +178,6 @@ if not MC_DEBUG then hdl_constant_fcpu = table.shallow_merge(hdl_constant_fcpu, 
 
   flags = {
     "not-rotatable",
-    "player-creation",
     "placeable-off-grid",
     "not-repairable",
     "not-on-map",

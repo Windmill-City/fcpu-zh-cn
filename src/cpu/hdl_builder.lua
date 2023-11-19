@@ -4,6 +4,9 @@ local state
 local _destroy_on_error = {}
 local builder = {}
 
+local Enable = 0
+local Disable = 1
+
 -------------------------------------------------------------------------------------------------------
 local function inverse_wire_color(color)
   return (color ~= defines.wire_type.red) and defines.wire_type.red or defines.wire_type.green
@@ -393,15 +396,62 @@ function builder.create_filter_cell(entity, input_src, input_msk)
   return {a1,a2,a3,d1,d2,gate=d3}
 end
 
+-------------------------------------------------------------------------------------------------------
+local function builder_generate_clr(index, delay, ics)
+  local actions = {
+    {action='tune', ic=ics.kout, value=Disable, delay = delay},
+    {action='tune', ic=ics.kout, value=Enable, delay = delay + 1},
+  -- hold kout for 1 tick until new kout has read kin
+    {action='tune', ic=ics.kaux, value=Enable, delay = delay},
+    {action='tune', ic=ics.kaux, value=Disable, delay = delay + 1},
+  -- wait for clear
+    --{action='sync', index=index, delay=delay + 2},
+  }
+  return actions
+end
+
+local function builder_generate_run(index, delay, ics)
+  local actions = {
+  -- new ic: capture input in kin for 1 tick
+    {action='tune', ic=ics.kin, value=Enable, delay = delay},
+    {action='tune', ic=ics.kin, value=Disable, delay = delay + 1},
+  -- new ic: disable/reenable kout (sets out to zero ready for new input)
+    {action='tune', ic=ics.kout, value=Disable, delay = delay},
+    {action='tune', ic=ics.kout, value=Enable, delay = delay + 1},
+  -- wait for output
+    {action='sync', index=index, delay=delay + 3}, -- kin, kout, out
+  }
+  return actions
+end
+
+local function builder_generate_retain(index, delay, ics)
+  local actions = {}
+  if ics ~= ics_prev then
+    -- old ic: disable kout
+    actions[#actions+1] = {action='tune', ic=ics.kout, value=Disable, delay = delay}
+  end
+  -- hold kout for 1 tick until new kout has read kin
+  actions[#actions+1] = {action='tune', ic=ics.kaux, value=Enable, delay = delay}
+  actions[#actions+1] = {action='tune', ic=ics.kaux, value=Disable, delay = delay + 1}
+  return actions
+end
+
+local function generate_deffer(ics, index, delay)
+  return {
+    clr = builder_generate_clr(index, delay, ics),
+    run = builder_generate_run(index, delay, ics),
+  }
+end
+
 function builder.create_memory_cell(entity, input_a)
   local wire1 = input_a.wire or defines.wire_type.red
   local wire2 = inverse_wire_color(wire1)
 
   -- Thanks for this improvement to `yaongi jigsaw`
   --
-  -- [X*]--->[kin]--->[kout]-+--------->[out]
-  --                     ^   |            ^
-  --                     |---+->[kaux]----|
+  -- [X*]--->[kin]-+->[kout]-+---------+->[out]
+  --               ^         |         ^
+  --               |---------+->[kaux]-|
   --
   -- - kin guards against loops and changing input, only has a value for a single tick
   -- - kout loops, maintaining the output
@@ -443,7 +493,13 @@ function builder.create_memory_cell(entity, input_a)
     source_circuit_id = defines.circuit_connector_id.combinator_output,
     target_circuit_id = defines.circuit_connector_id.combinator_input,
     target_entity = d_aux,
-    wire = wire1,
+    wire = wire2,
+  }
+  d_aux.connect_neighbour{
+    source_circuit_id = defines.circuit_connector_id.combinator_output,
+    target_circuit_id = defines.circuit_connector_id.combinator_input,
+    target_entity = d_aux,
+    wire = wire2,
   }
 
   local ics = {
@@ -605,45 +661,6 @@ local function connect_output_to(state, ics, address)
   else
     Assert.todo()
   end
-end
-
--------------------------------------------------------------------------------------------------------
-
-local function builder_generate_run(run_args, ics, ics_prev)
-  local actions = {
-  -- new ic: disable/reenable kout (sets out to zero ready for new input)
-    {action='tune', ic=ics.kout, value=1, delay = run_args.sync_delay},
-    {action='tune', ic=ics.kout, value=0, delay = run_args.sync_delay + 1},
-  -- new ic: capture input in kin for 1 tick
-    {action='tune', ic=ics.kin, value=0, delay = run_args.sync_delay},
-    {action='tune', ic=ics.kin, value=1, delay = run_args.sync_delay + 1},
-  -- wait for output
-    {action='sync', index=run_args.index, delay=run_args.sync_delay + 3},
-  }
-  if ics_prev then
-    if ics ~= ics_prev then
-      -- old ic: disable kout
-      actions[#actions+1] = {action='tune', ic=ics_prev.kout, value=1, delay = run_args.sync_delay}
-    end
-    -- hold kout for 1 tick until new kout has read kin
-    actions[#actions+1] = {action='tune', ic=ics_prev.kaux, value=0, delay = run_args.sync_delay}
-    actions[#actions+1] = {action='tune', ic=ics_prev.kaux, value=1, delay = run_args.sync_delay + 1}
-  end
-  return actions
-end
-
-local function generate_deffer(ics, index, sync_delay)
-  return {
-    run = builder_generate_run({ index = index, sync_delay = sync_delay }, ics),
-    --run_args = {
-    --  index = index,
-    --  sync_delay = sync_delay,
-    --},
-    clr = {
-      {action='tune', ic=ics.kout, value=1, delay = 0},
-      {action='tune', ic=ics.kout, value=0, delay = 1},
-    },
-  }
 end
 
 -------------------------------------------------------------------------------------------------------
