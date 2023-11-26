@@ -1,13 +1,11 @@
 # Upcoming  (in v0.4.x)
-* Multiple input/output wires.
-* New graphics.
-
-# Upcoming  (in v0.5.x)
 * Hex number support.
 * Test result flags to extend one condition line limitation.
-* Logistics network access (@Chiko)
-* Memory array with constant memory indices.
 * Add push, pop, call, ret semantics for subroutines and stacks.
+
+# Upcoming  (in v0.5.x)
+* Multiple input/output wires.
+* New graphics.
 
 # Upcoming (in v0.6.x)
 * Examples, demos and docs.
@@ -42,3 +40,5 @@
 * Vector compare mnemonics `xc*` (DONE in v0.4.0)
 * Being able to give a name/label to each processor (DONE in v0.4.0)
 * Factorio v1.1.0 support.
+* Memory array with constant memory indices (DONE in v0.4.17)
+* Logistics network access [@Chiko] (DONE in v0.4.18)

@@ -671,7 +671,7 @@ See: https://mods.factorio.com/mod/fcpu/faq and [Discord channel](https://discor
 
 
 # Roadmap & TODOs
-See [here](https://www.buymeacoffee.com/p/100444)
+See [here](https://boosty.to/konstg)
 
 
 # Dear supporters
@@ -691,6 +691,6 @@ See [here](https://www.buymeacoffee.com/p/100444)
 
 
 # Support fCPU
-[![Buy Me A Coffee](https://cdn.buymeacoffee.com/buttons/lato-orange.png)](https://www.buymeacoffee.com/konstg)
+[![Boosty](https://static.boosty.to/assets/images/boostyLogo.60ihp.svg)](https://boosty.to/konstg/donate)
 
 [comment]: <> (md2frt-skip-section-end)
