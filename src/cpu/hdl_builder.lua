@@ -143,19 +143,10 @@ local function verify_channel(state, ics_name, debug_i)
   end
 
   if not (ics.value and ics.value.valid) then
-    local ent_val1, ctrl_val1 = builder.create_node(state.entity, 'output', debug_i * 2 + 1)
+    local ent_val, ctrl_val = builder.create_node(state.entity, 'output', debug_i * 2 + 1)
 
-    ics.value = ent_val1
-    ctrl_val1.enabled = false
-
-    updated = true
-  end
-
-  if not (ics.value2 and ics.value2.valid) then
-    local ent_val2, ctrl_val2 = builder.create_node(state.entity, 'output', debug_i * 2 + 1.5)
-
-    ics.value2 = ent_val2
-    ctrl_val2.enabled = false
+    ics.value = ent_val
+    ctrl_val.enabled = false
 
     updated = true
   end
@@ -168,19 +159,6 @@ local function verify_channel(state, ics_name, debug_i)
       wire = defines.wire_type.green,
     }
     ics.value.connect_neighbour{
-      source_circuit_id = defines.circuit_connector_id.constant_combinator,
-      target_circuit_id = defines.circuit_connector_id.combinator_output,
-      target_entity = ics.out,
-      wire = defines.wire_type.red,
-    }
-
-    ics.value2.connect_neighbour{
-      source_circuit_id = defines.circuit_connector_id.constant_combinator,
-      target_circuit_id = defines.circuit_connector_id.combinator_output,
-      target_entity = ics.out,
-      wire = defines.wire_type.green,
-    }
-    ics.value2.connect_neighbour{
       source_circuit_id = defines.circuit_connector_id.constant_combinator,
       target_circuit_id = defines.circuit_connector_id.combinator_output,
       target_entity = ics.out,

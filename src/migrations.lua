@@ -536,5 +536,16 @@ return {
       state.modified = true
       Controller.compile(state)
     end)
+    foreach_fcpu(function(fcpu, state)
+      for i = 1,4 do
+        local mem = state.program_ics and state.program_ics['mem'..i]
+        if mem and mem.value then
+          if mem.value2.valid then
+            mem.value2.destroy()
+          end
+          mem.value2 = nil
+        end
+      end
+    end)
   end,
 }
