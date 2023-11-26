@@ -176,7 +176,7 @@ end
 
 function io.gettype(_, types)
   local signal = io.getsignal(_, types)
-  if type(signal) ~= 'table' or signal.signal == nil then
+  if type(signal) ~= 'table' then 
     Assert.exception('trying to retrieve nil type')
   end
 ---@diagnostic disable-next-line: need-check-nil
