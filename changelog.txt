@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.18
-Date: ????
+Date: 2023-11-26
   Changes:
     - Pin button memorizes the open/closed state of the memory panel.
     - There are huge amount of refactoring in this version. So it might be some bugs introduced.
