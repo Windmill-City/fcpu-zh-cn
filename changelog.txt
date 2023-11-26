@@ -10,6 +10,7 @@ Date: ????
     - Added logistic network viewer.
     - Added new read-only register `cnl`.
     - Added new blocking instructions: `bkl`, `btl`, `btlc`.
+    - Increased program lines from 128 up to 256.
   Bugfixes:
     - Fixed some typos in user interface and docs.
     - Fixed error parsing.
