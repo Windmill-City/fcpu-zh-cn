@@ -178,12 +178,34 @@ local function verify_lognet(state, debug_i)
   if not (ics.out and ics.out.valid) then
     local ent_lognet, ctrl_lognet = builder.create_node(state.entity, 'lognet', debug_i * 2)
 
-    --ctrl_lognet.parameters = {}
-
     ics.out = ent_lognet
     ics.out_connector = defines.circuit_connector_id.roboport
 
     updated = true
+  end
+
+  if not (ics.pole and ics.pole.valid) then
+    local ent_pole, ctrl_pole = builder.create_node(state.entity, 'output', debug_i * 2 + 1)
+
+    ics.pole = ent_pole
+    ctrl_pole.enabled = false
+
+    updated = true
+  end
+
+  if updated then
+    ics.out.connect_neighbour{
+      source_circuit_id = ics.out_connector,
+      target_circuit_id = defines.circuit_connector_id.constant_combinator,
+      target_entity = ics.pole,
+      wire = defines.wire_type.green,
+    }
+    ics.out.connect_neighbour{
+      source_circuit_id = ics.out_connector,
+      target_circuit_id = defines.circuit_connector_id.constant_combinator,
+      target_entity = ics.pole,
+      wire = defines.wire_type.red,
+    }
   end
 
   return updated

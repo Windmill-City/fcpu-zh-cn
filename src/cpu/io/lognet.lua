@@ -4,7 +4,7 @@ local ioLognet = {}
 
 -- Logistic
 local function lognet_getchannel_contents()
-  local lognet = state.cache.lognet
+  local lognet = state.cache.wires.lognet
   if not lognet then
     Assert.exception("Tried to access logistic network while it is unreachable")
   end
@@ -22,17 +22,17 @@ end
 
 function ioLognet.find_item(signal_to_find)
   if signal_to_find then
-    local lognet = state.cache.lognet
+    local lognet = state.cache.wires.lognet
     if not lognet then
       Assert.exception("Tried to access logistic network while it is unreachable")
     end
-    local count = lognet.get_item_count(signal_to_find)
+    local count = lognet.get_signal(signal_to_find)
     return count
   end
 end
 
 function ioLognet.content_size()
-  return state.cache.lognet and table_size(state.cache.lognet.get_contents()) or 0
+  return state.cache.wires.lognet and table_size(state.cache.wires.lognet.signals) or 0
 end
 
 function ioLognet.bind(state_)

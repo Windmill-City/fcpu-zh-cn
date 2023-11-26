@@ -257,8 +257,12 @@ function Controller.validate_cache(state)
   end
 
   -- Cache.LogNet
-  if not (cache.lognet and cache.lognet.valid) then
-    cache.lognet = state.entity.surface.find_logistic_network_by_position(state.entity.position, state.entity.force)
+  if not (wires.lognet and wires.lognet.valid) then
+    local ics = state.program_ics.lognet
+    if ics and ics.out and ics.out.valid then
+      local ctrl = ics.out.get_control_behavior()
+      wires.lognet = ctrl.get_circuit_network(ics.color_out or defines.wire_type.red, ics.out_connector or defines.circuit_connector_id.roboport)
+    end
   end
 end
 

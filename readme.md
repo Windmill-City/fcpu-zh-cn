@@ -517,41 +517,41 @@ When working with SIMD instructions, the following features should be considered
 
 ### SIMD Common
 
-* `xmov` dst[**M**/**O**] src[**I**/**M**]
+* `xmov` dst[**M**/**O**] src[**I**/**M**/**N**]
   *dst(each) = src(each)*
 
 * `emit` dst[**M**] val...[**V**/**T**/**VT**/**R**]
   Append *val*ues to *dst* memory (with random ordering until v0.5.0).  
 
-* `xuni` dst[**M**/**O**] a[**I**/**M**] b[**I**/**M**]
+* `xuni` dst[**M**/**O**] a[**I**/**M**/**N**] b[**I**/**M**/**N**]
   Merge two memory channels into unite one.  
   *dst(each) = a(each) + b(each)*
 
-* `xflt` dst[**M**/**O**] src?[**I**/**M**] mask[**I**/**M**]
+* `xflt` dst[**M**/**O**] src?[**I**/**M**/**N**] mask[**I**/**M**/**N**]
   Copy all the signals from *src* to *dst* having *mask* as whitelist.
   *Internal design by https://www.reddit.com/user/Halke1986/*
 
-* `xadd` dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]
+* `xadd` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
   *dst(each) = dst + val* 
   *dst(each) = src + val* (if src specified)
 
-* `xsub` dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]
+* `xsub` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
   *dst(each) = dst - val*
   *dst(each) = src - val* (if src specified)
 
-* `xmul` dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]
+* `xmul` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
   *dst(each) = dst \* val*
   *dst(each) = src \* val* (if src specified)
 
-* `xdiv` dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]
+* `xdiv` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
   *dst(each) = dst / val*
   *dst(each) = src / val* (if src specified)
 
-* `xmod` dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]
+* `xmod` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
   *dst(each) = dst % val*
   *dst(each) = src % val* (if src specified)
 
-* `xpow` dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]
+* `xpow` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
   *dst(each) = dst ^ val*
   *dst(each) = src ^ val* (if src specified)
 
@@ -561,54 +561,54 @@ When working with SIMD instructions, the following features should be considered
 Compares each signal value in memory with operand specified and pass it to destination if condition met.  
 In two operand version *src* is the same as a *dst*.  
 
-* `xceq` dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]  
+* `xceq` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]  
   Equal.  
   *dst(each) = src(each), if src(each) == val*
 
-* `xcne` dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]  
+* `xcne` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]  
   Not equal.  
   *dst(each) = src(each), if src(each) != val*
 
-* `xcgt` dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]  
+* `xcgt` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]  
   Greater than.  
   *dst(each) = src(each), if src(each) > val*
 
-* `xclt` dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]  
+* `xclt` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]  
   Less than.  
   *dst(each) = src(each), if src(each) < val*
 
-* `xcge` dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]  
+* `xcge` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]  
   Greater or equal than.  
   *dst(each) = src(each), if src(each) >= val*
 
-* `xcle` dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]  
+* `xcle` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]  
   Less or equal than.  
   *dst(each) = src(each), if src(each) <= val*
 
 
 ### SIMD Bitwise
 
-* `xand` dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]
+* `xand` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
   AND.  
   *dst(each) = dst & val* 
   *dst(each) = src & val* (if src specified)
 
-* `xor`  dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]
+* `xor`  dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
   OR.  
   *dst(each) = dst | val* 
   *dst(each) = src | val* (if src specified)
 
-* `xxor` dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]
+* `xxor` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
   XOR.  
   *dst(each) = dst ^ val* 
   *dst(each) = src ^ val* (if src specified)
 
-* `xsl`  dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]
+* `xsl`  dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
   Shift left.  
   *dst(each) = dst << val* 
   *dst(each) = src << val* (if src specified)
 
-* `xsr`  dst[**M**/**O**] src?[**I**/**M**] val[**V**/**R**]
+* `xsr`  dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
   Shift right.  
   *dst(each) = dst >> val* 
   *dst(each) = src >> val* (if src specified)
@@ -616,16 +616,16 @@ In two operand version *src* is the same as a *dst*.
 
 ### SIMD Statistics
 
-* `xmin` dst[**R**/**O**] src[**I**/**M**]
+* `xmin` dst[**R**/**O**] src[**I**/**M**/**N**]
   Searches minimum signal in `src` and copy it to `dst`.
-* `xmax` dst[**R**/**O**] src[**I**/**M**]
+* `xmax` dst[**R**/**O**] src[**I**/**M**/**N**]
   Searches maximum signal in `src` and copy it to `dst`.
-* `xavg` dst[**R**/**O**] src[**I**/**M**]
+* `xavg` dst[**R**/**O**] src[**I**/**M**/**N**]
   Compute average value in `src` and assign `dst` to it.
 
-* `xmini` dst[**R**/**O**] src[**I**/**M**]
+* `xmini` dst[**R**/**O**] src[**I**/**M**/**N**]
   Searches minimum signal in `src` and assing its index into `dst`.
-* `xmaxi` dst[**R**/**O**] src[**I**/**M**]
+* `xmaxi` dst[**R**/**O**] src[**I**/**M**/**N**]
   Searches maximum signal in `src` and assing its index into `dst`.
 
 
