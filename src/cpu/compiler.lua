@@ -261,6 +261,7 @@ function Compiler.build(state, force)
   end
 
   state.d_j = nil
+  local hdlError = false
 
   for k, v in ipairs(state.program_ast) do
     if v.type == 'ic' then
@@ -273,6 +274,7 @@ function Compiler.build(state, force)
           local start_index = string.find(result, '@') or 1
           result = string.sub(result, start_index+1, -1)
           state.program_ast[k] = { type='error', error=result }
+          hdlError = true
         else
           state.program_ast[k].deffer = deffer
           state.program_ics[k] = result
@@ -284,6 +286,8 @@ function Compiler.build(state, force)
       state.program_ics[k] = nil
     end
   end
+
+  return hdlError
 end
 
 function Compiler.verify(state)

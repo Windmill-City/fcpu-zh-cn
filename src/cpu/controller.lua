@@ -100,7 +100,9 @@ function Controller.compile(state)
     state.ics_stack = {}
   end
 
-  Compiler.build(state, state.modified)
+  if not Compiler.build(state, state.modified) then
+    Controller.set_error_message(state, nil)
+  end
 
   state.modified = false
 end
@@ -110,6 +112,7 @@ function Controller.set_error_message(state, err_message)
     Controller.GuiCache_InvalidateLine(state, state.error_line)
     state.error_line = nil
     state.error_message = nil
+    script.raise_event(Controller.event_error, {['entity'] = state.entity})
   else
     state.error_line = state.instruction_pointer
     state.error_message = {"gui-fcpu.program_error", state.instruction_pointer, err_message}

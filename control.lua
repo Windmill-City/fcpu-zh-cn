@@ -123,7 +123,7 @@ script.on_event(Controller.event_error, function(event)
     local player_data = get_player_data(player.index)
     if player_data.gui_fcpu and player_data.gui_fcpu.valid then
       if Entity._are_equal(entity, player_data.current_fcpu) then
-        player_data.gui_error_message.caption = event.message
+        player_data.gui_error_message.caption = event.message or ""
       end
     end
   end

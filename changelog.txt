@@ -9,6 +9,7 @@ Date: ????
   Bugfixes:
     - Fixed some typos in user interface and docs.
     - Fixed error parsing.
+    - Fixed clear error state after `x*` mnemonics correction.
     - Fixed memory channel view 'jumping'.
     - Fixed memory indexing after modification.
 ---------------------------------------------------------------------------------------------------

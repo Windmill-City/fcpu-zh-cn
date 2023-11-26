@@ -62,7 +62,7 @@ local ControlHandlers = {}
 
 ControlHandlers['fcpu-debug-reset'] = GUI_mixPlayerData(function(player_data, state)
   GUI_reset_error_message(player_data)
-  Controller.set_error_message(state)
+  Controller.set_error_message(state, nil)
   Controller.compile(state)
   Controller.halt(state, true)
 end)
