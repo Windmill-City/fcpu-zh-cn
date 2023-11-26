@@ -83,6 +83,16 @@ function ioMemory.get(address)
     local t, n = string.match(hash, '(%a+)=([%a%-]+)')
     local type = { type = t, name = n }
     return table.deep_copy(memory_getraw(address, type))
+  else
+    local ctrl = ioChannel.read_network(address)
+    local s = ctrl.signals[addr]
+    if s then
+      local type = s.signal
+      hash = type and type.type ..'='.. type.name
+      i2s[addr] = hash
+      s2i[hash] = addr
+      return s
+    end
   end
   return NULL_SIGNAL
 end
