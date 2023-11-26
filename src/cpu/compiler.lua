@@ -169,7 +169,7 @@ local function parse(tokens)
     if b == '@' or b == '[' and e == ']' then
       addr = d
     end
-    return Emitter.make_lognet(addr, b ~= nil)
+    return addr and Emitter.make_lognet(addr, b ~= nil) or Emitter.make_channel('lognet')
   end
   local parseInput = function(name)
     local address = parseAddress(name)

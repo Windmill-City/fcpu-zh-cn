@@ -95,7 +95,7 @@ function builder.destroy_ics(entity)
         builder.destroy_ics(e)
       end
     elseif not entity.valid then
-    elseif (entity.name == "decider-fcpu" or entity.name == "arithmetic-fcpu" or entity.name == "constant-fcpu" or entity.name == "output-fcpu") then
+    elseif (entity.name == "decider-fcpu" or entity.name == "arithmetic-fcpu" or entity.name == "constant-fcpu" or entity.name == "output-fcpu" or entity.name == "lognet-fcpu") then
       debug_print('destroyed fcpu '.. entity.name ..' ic')
       Entity.set_data(entity, nil) -- TODO: remove, as it leaks on surface destroy
       entity.destroy()
@@ -191,6 +191,26 @@ local function verify_channel(state, ics_name, debug_i)
   return updated
 end
 
+local function verify_lognet(state, debug_i)
+  local ics_name = 'lognet'
+  state.program_ics[ics_name] = state.program_ics[ics_name] or {}
+  local ics = state.program_ics[ics_name]
+  local updated
+
+  if not (ics.out and ics.out.valid) then
+    local ent_lognet, ctrl_lognet = builder.create_node(state.entity, 'lognet', debug_i * 2)
+
+    --ctrl_lognet.parameters = {}
+
+    ics.out = ent_lognet
+    ics.out_connector = defines.circuit_connector_id.roboport
+
+    updated = true
+  end
+
+  return updated
+end
+
 function builder.verify(state)
   state.program_ics = state.program_ics or {}
 
@@ -213,6 +233,8 @@ function builder.verify(state)
     local ics_name = 'mem'..i
     verify_channel(state, ics_name, 1 + i)
   end
+
+  verify_lognet(state, 1 + MC_MEMORY_CHANNELS + 2)
 end
 
 -------------------------------------------------------------------------------------------------------

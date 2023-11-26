@@ -29,6 +29,7 @@ local empty_picture = {
   frame_count = 1,
   shift = {0, 0},
 }
+local empty_animation = empty_picture
 
 
 local fcpu = table.shallow_merge(table.deep_copy(data.raw['arithmetic-combinator']['arithmetic-combinator']), generate_fcpu_combinator{
@@ -109,6 +110,76 @@ data:extend{
 }
 
 require('legacy/imposter_fcpu')
+
+local hdl_lognet_fcpu = table.shallow_merge(table.deep_copy(data.raw['roboport']['roboport']), {
+  name = "lognet-fcpu",
+  energy_source = {
+    type = "void",
+    usage_priority = "primary-input"
+  },
+  energy_usage = "2KW",
+  robot_slots_count = 0,
+  material_slots_count = 0,
+
+  logistics_radius = 0,
+  construction_radius = 0,
+  charging_energy = "0W",
+
+  --default_available_logistic_output_signaloptional = { type = "virtual", name = "R" },
+  --default_total_logistic_output_signaloptional = { type = "virtual", name = "R" },
+  --default_available_construction_output_signaloptional = { type = "virtual", name = "R" },
+  --default_total_construction_output_signal = { type = "virtual", name = "R" },
+  circuit_wire_max_distance = 10000,
+
+  draw_logistic_radius_visualization = false,
+  draw_construction_radius_visualization = false,
+
+  charging_station_count = 0,
+  charging_offsets = {},
+  robot_limit = 0,
+})
+if not MC_DEBUG then hdl_lognet_fcpu = table.shallow_merge(hdl_lognet_fcpu, {
+  icon = "__fcpu__/graphics/icons/fcpu.png",
+  icon_size = 1,
+  icon_mipmaps = 0,
+  allow_copy_paste = false,
+  selectable_in_game = false,
+  create_ghost_on_death = false,
+
+  flags = {
+    "not-rotatable",
+    "placeable-off-grid",
+    "not-repairable",
+    "not-on-map",
+    "not-blueprintable",
+    "not-deconstructable", -- can't be deconstructed by 'demolition blueprint'. reducing bounds marker spam
+    "hidden",
+    "hide-alt-info",
+    "not-flammable",
+    "not-in-kill-statistics",
+  },
+  collision_mask = {"not-colliding-with-itself"},
+
+  base = empty_picture,
+  base_patch = empty_picture,
+  base_animation = empty_animation,
+  door_animation_up = empty_animation,
+  door_animation_down = empty_animation,
+  recharging_animation = empty_animation,
+  circuit_connector_sprites = {
+    led_red = empty_picture,
+    led_green = empty_picture,
+    led_blue = empty_picture,
+    led_light = {
+      intensity = 0,
+      size = 0,
+    },
+  },
+
+  draw_copper_wires = false,
+  draw_circuit_wires = false,
+})
+end
 
 local hdl_output_fcpu = table.shallow_merge(table.deep_copy(data.raw['constant-combinator']['constant-combinator']), {
   name = "output-fcpu",
@@ -326,6 +397,7 @@ if not MC_DEBUG then hdl_arithmetic_fcpu = table.shallow_merge(hdl_arithmetic_fc
 end
 
 data:extend{
+  hdl_lognet_fcpu,
   hdl_output_fcpu,
   hdl_constant_fcpu,
   hdl_decider_fcpu,
