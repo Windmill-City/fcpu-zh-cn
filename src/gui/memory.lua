@@ -38,9 +38,7 @@ end
 
 -------------------------------------------------------------------------------------------------------
 
-function ioMemory_GUI_Update_cl(index)
-  local channel = 'mem' .. index
-
+local function ioChannel_GUI_Update_cl(channel)
   return function(player_data, state, force)
     if ioChannel_GUI_Validate(player_data, state, channel, force) then
       return true
@@ -50,7 +48,7 @@ function ioMemory_GUI_Update_cl(index)
     if ics and ics.out and ics.out.valid then
       local control = ics.out.get_control_behavior()
       --if control.signals_last_tick then
-        local network = control.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_output)
+        local network = control.get_circuit_network(defines.wire_type.red, ics.out_connector or defines.circuit_connector_id.combinator_output)
         local memmap = state.memmap[channel]
         if network then
           MemoryView.UpdateFromTable(player_data, network.signals, nil, nil, memmap)
@@ -149,7 +147,7 @@ local MC_MEMORY_CHANNELS_from = #ChannelsInfo
 for i = 1, MC_MEMORY_CHANNELS do
   ChannelsInfo[MC_MEMORY_CHANNELS_from + i] = {
     title = { 'gui-fcpu-memviewer.channel-memory-bank', i },
-    handler = ioMemory_GUI_Update_cl(i)
+    handler = ioChannel_GUI_Update_cl('mem'.. i)
   }
 end
 

@@ -24,14 +24,18 @@ function ioChannel.write_control(address)
 end
 
 function ioChannel.read_network(address)
-  if address.type == 'memory' then
+  if address.type == 'memory' or address.type == 'channel' then
     local ics = ICStack.get_node(address.channel)
     if ics.out and ics.out.valid then
       local control = ics.out.get_control_behavior()
-      local network = control.get_circuit_network(ics.color_out or defines.wire_type.red, defines.circuit_connector_id.combinator_output)
+      local network = control.get_circuit_network(ics.color_out or defines.wire_type.red, ics.out_connector or defines.circuit_connector_id.combinator_output)
       return network
     else
-      Assert.exception("Memory channel does not exists")
+      if address.type == 'memory' then
+        Assert.exception("Memory bank ".. address.channel .." does not exists")
+      else
+        Assert.exception("Channel ".. address.channel .." does not exists")
+      end
     end
   elseif address.type == 'wire' then
     if address.color == 'out' then

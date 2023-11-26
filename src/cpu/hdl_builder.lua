@@ -579,13 +579,13 @@ end
 
 local function connect_input_from(state, address)
   Assert.is_channel_readable(address)
-  if address.type == 'memory' then
+  if address.type == 'memory' or address.type == 'channel' then
     local ics_name = address.channel
-    local mem_ics = state.program_ics[ics_name]
+    local ics = state.program_ics[ics_name]
     return {
-      entity = mem_ics.out,
+      entity = ics.out,
       wire = defines.wire_type.red,
-      port = defines.circuit_connector_id.combinator_output
+      port = ics.out_connector or defines.circuit_connector_id.combinator_output
     }
   elseif address.type == 'wire' then
     return {

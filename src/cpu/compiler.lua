@@ -154,7 +154,7 @@ local function parse(tokens)
       local address = Emitter.make_reference(addr, b == '@')
       return Emitter.make_memory(name, bank, address)
     else
-      local address = bank and Emitter.make_memory_bank(name, bank) or Emitter.make_channel(name)
+      local address = bank and Emitter.make_memory_bank(name, bank) or Emitter.make_abstract('memory')
       return address
     end
   end

@@ -6,6 +6,10 @@ function Emitter.make_comment()
   return { type = 'nop', name = 'comment' }
 end
 
+function Emitter.make_abstract(type)
+  return { type = type }
+end
+
 function Emitter.make_label(label)
   return { type = 'label', label = label }
 end
@@ -47,7 +51,11 @@ function Emitter.make_register(name, ref) -- +[reference]
   return { type = 'register', addr = ref.addr, pointer = ref.pointer }
 end
 
---function Emitter.make_channel(name, ref) -- +[reference]
+function Emitter.make_channel(name)
+  return { type = 'channel', channel = name }
+end
+
+--function Emitter.make_channel_ref(name, ref) -- +[reference]
 --  return { type = 'channel', channel = name, addr = ref.addr, pointer = ref.pointer }
 --end
 
@@ -57,10 +65,6 @@ end
 
 function Emitter.make_memory_bank(name, bank) -- +[channel]
   return { type = 'memory', channel = name..bank, bank = tonumber(bank) }
-end
-
-function Emitter.make_channel(channel)
-  return { type = 'memory', channel = channel }
 end
 
 function Emitter.make_wire(name, ref)

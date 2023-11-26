@@ -8,6 +8,10 @@ local function exception(e)
   error('@'..e, 2)
 end
 
+local function expecting(address, msg)
+  return 'Expecting '.. msg ..', got '.. address.type
+end
+
 -- Assertion Helper Functions
 function Assert.exception(...)
   exception(...)
@@ -104,7 +108,7 @@ function Assert.type(_, valid)
       return
     end
   end
-  exception("Expecting parameter to be a "..(table.concat(valid, ' or ')))
+  expecting(_, "parameter to be a "..(table.concat(valid, ' or ')))
 end
 
 function Assert.is_reference(...)
@@ -113,7 +117,7 @@ function Assert.is_reference(...)
       if not (v.type == 'memory' and v.addr ~= nil) then
         --if not (v.type == 'channel' and v.addr ~= nil) then
           if not (v.type == "reference") then
-            exception("Expecting parameter to be a reference")
+            expecting(v, "parameter to be a reference")
           end
         --end
       end
@@ -124,7 +128,7 @@ end
 function Assert.with_memory_bank(...)
   for _,v in ipairs(table.pack(...)) do
     if not (v.bank ~= nil and v.type == 'memory') then
-      exception("Expecting parameter with memory bank")
+      expecting(v, "parameter with memory bank")
     end
   end
 end
@@ -132,18 +136,18 @@ end
 function Assert.is_memory_bank(...)
   for _,v in ipairs(table.pack(...)) do
     if not (v.addr == nil and v.bank ~= nil and v.type == 'memory') then
-      exception("Expecting parameter to be a memory bank")
+      expecting(v, "parameter to be a memory bank")
     end
   end
 end
 
 function Assert.is_channel_readable(...)
   for _,v in ipairs(table.pack(...)) do
-    if not (v.type == 'memory' and v.bank ~= nil and v.addr == nil) then
-      if not (v.type == 'wire' and (v.color == 'red' or v.color == 'green')) then
-        --if not (v.type == 'channel' and v.addr == nil) then
-          exception("Expecting parameter to be a memory or input wire")
-        --end
+    if not (v.type == 'memory' and v.bank ~= nil and v.addr == nil) then -- is_memory_bank
+      if not (v.type == 'wire' and (v.color == 'red' or v.color == 'green')) then -- is_input_wire
+        if not (v.type == 'channel' and v.addr == nil and (v.channel == 'lognet')) then
+          expecting(v, "parameter to be an input wire or memory or lognet")
+        end
       end
     end
   end
@@ -154,7 +158,7 @@ function Assert.is_channel_writable(...)
     if not (v.type == 'memory' and v.bank ~= nil and v.addr == nil) then
       if not (v.type == 'wire' and v.color == 'out') then
         --if not (v.type == 'channel' and v.addr == nil) then
-          exception("Expecting parameter to be a memory or output")
+          expecting(v, "parameter to be a memory or output")
         --end
       end
     end
