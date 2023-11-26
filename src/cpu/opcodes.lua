@@ -221,7 +221,7 @@ local opcodes = {
             if address.addr then
               io.register_set(address, NULL_SIGNAL)
             else
-              for i = 1, MC_REGS do
+              for i = 1, MC_REGS_EXT do
                 io.register_set({type='register', addr=i, pointer=false}, NULL_SIGNAL)
               end
             end
@@ -238,7 +238,7 @@ local opcodes = {
         end
       end
     else
-      for i = 1, MC_REGS do
+      for i = 1, MC_REGS_EXT do
         io.register_set({type='register', addr=i, pointer=false}, NULL_SIGNAL)
       end
       io.control_set(table.deep_copy(NULL_SIGNAL))

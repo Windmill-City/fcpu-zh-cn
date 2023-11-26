@@ -61,7 +61,7 @@ end
 function Controller.init_registers(state)
   if state.regs == nil then
     state.regs = {}
-    for i = 1, MC_REGS do
+    for i = 1, MC_REGS_EXT do
       state.regs[i] = NULL_SIGNAL
     end
   end

@@ -537,6 +537,11 @@ return {
       Controller.compile(state)
     end)
     foreach_fcpu(function(fcpu, state)
+      for i = MC_REGS + 1, MC_REGS_EXT do
+        state.regs[i] = NULL_SIGNAL
+      end
+    end)
+    foreach_fcpu(function(fcpu, state)
       for i = 1,4 do
         local mem = state.program_ics and state.program_ics['mem'..i]
         if mem and mem.value then

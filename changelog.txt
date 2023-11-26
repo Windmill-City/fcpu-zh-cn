@@ -11,6 +11,7 @@ Date: ????
     - Added new read-only register `cnl`.
     - Added new blocking instructions: `bkl`, `btl`, `btlc`.
     - Increased program lines from 128 up to 256.
+    - Increased registers count from 8 up to 64.
   Bugfixes:
     - Fixed some typos in user interface and docs.
     - Fixed error parsing.

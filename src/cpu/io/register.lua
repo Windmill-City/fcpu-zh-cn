@@ -42,7 +42,7 @@ local function register_getreadonly(index)
 end
 
 local function register_getraw(index)
-  Assert.check_range(index, MC_REGS, 'register')
+  Assert.check_range(index, MC_REGS_EXT, 'register')
   if state.regs[index] and not state.regs[index].count then
     state.regs[index].count = 0
   end
@@ -50,7 +50,7 @@ local function register_getraw(index)
 end
 
 local function register_setraw(index, signal)
-  Assert.check_range(index, MC_REGS, 'register')
+  Assert.check_range(index, MC_REGS_EXT, 'register')
   Assert.check(math.abs(signal.count or 0) ~= 1 / 0, "Division by zero")
   state.regs[index] = signal
 end
@@ -59,7 +59,7 @@ end
 function ioRegister.addr_deref(address)
   Assert.check(address.addr ~= nil, "Invalid address")
   if address.pointer then
-    Assert.check(address.addr <= MC_REGS)
+    Assert.check(address.addr <= MC_REGS_EXT)
     return register_getraw(address.addr).count
   else
     return address.addr
@@ -69,7 +69,7 @@ end
 function ioRegister.get(index_expr)
   Assert.check(index_expr.type == 'register', "Register expected")
   local addr = ioRegister.addr_deref(index_expr)
-  if MC_REGS < addr then
+  if MC_REGS_EXT < addr then
     local result = table.deep_copy(NULL_SIGNAL)
     result.count = register_getreadonly(addr)
     return result

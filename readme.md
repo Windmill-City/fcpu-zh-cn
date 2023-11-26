@@ -8,7 +8,7 @@
 * supports [Informatron](https://mods.factorio.com/mod/informatron) and [Booktorio](https://mods.factorio.com/mod/Booktorio) in-game wiki
 * in-game debugger with breakpoints
 * 256 instructions for whole program
-* 8 general purpose registers
+* 64 general purpose registers
 * 4 memory channels for vector processing
 * integrated access to the logistic network
 * 50+ opcodes

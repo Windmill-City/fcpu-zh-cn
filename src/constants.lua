@@ -2,7 +2,8 @@ MC_DEBUG = __DebugAdapter ~= nil and __DebugAdapter.instrument
 
 MC_LINES = 256
 MC_OUTPUT = 256
-MC_REGS = 8
+MC_REGS = 8 -- used for GUI preview
+MC_REGS_EXT = 64
 MC_REGS_RO_FIRST = 1000
 MC_REGS_RO_MSLOT = 2000
 MC_MEMORY_CHANNELS = 4
