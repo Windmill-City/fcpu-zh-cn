@@ -85,7 +85,7 @@ function ioMemory.get(address)
     return table.deep_copy(memory_getraw(address, type))
   else
     local ctrl = ioChannel.read_network(address)
-    local s = ctrl.signals[addr]
+    local s = ctrl.signals and ctrl.signals[addr]
     if s then
       local type = s.signal
       hash = type and type.type ..'='.. type.name

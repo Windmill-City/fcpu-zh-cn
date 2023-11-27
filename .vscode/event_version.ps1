@@ -12,7 +12,7 @@ if($mod_vs.Count -eq 1) {
 $mod_dir = "W:\Work\KonStg\.factorio_mods"
 $mod_vs = Get-ChildItem "$mod_dir\${env:FACTORIO_MODNAME}_*.*.*"
 if($mod_vs.Count -eq 1) {
-    if($mod_vs -eq "$mod_dir\${env:FACTORIO_MODNAME}_${env:FACTORIO_MODVERSION}") {
+    if($mod_vs -ne "$mod_dir\${env:FACTORIO_MODNAME}_${env:FACTORIO_MODVERSION}") {
         Rename-Item -Path $mod_vs -NewName "${env:FACTORIO_MODNAME}_${env:FACTORIO_MODVERSION}"
     }
 } else {
