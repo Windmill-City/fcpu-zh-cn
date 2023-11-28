@@ -553,4 +553,19 @@ return {
       end
     end)
   end,
+
+  ["0.4.22"] = function()
+    foreach_player(function(player, player_data)
+      player_data.gui_cache.memory_changed = player_data.gui_cache.memory_changed or {}
+    end)
+    foreach_fcpu(function(fcpu, state)
+      state.gui_cache.memory_changed = state.gui_cache.memory_changed or {}
+
+      state.memmap = state.memmap or {}
+      for i = 1,4 do
+        local channel = 'mem'.. i
+        state.memmap[channel] = state.memmap[channel] or { i2s = {}, s2i = {} }
+      end
+    end)
+  end,
 }

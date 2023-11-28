@@ -73,9 +73,6 @@ end
 
 function ioChannel.GuiCache_Invalidate(channel, delay)
   if channel then
-    if not state.gui_cache.memory_changed then
-      state.gui_cache.memory_changed = {}
-    end
     if (state.gui_cache.memory_changed[channel] or 0) < game.tick then
       -- do not add cache until gui initialize it
       state.gui_cache.memory_changed[channel] = game.tick + (delay or 0)
@@ -83,7 +80,7 @@ function ioChannel.GuiCache_Invalidate(channel, delay)
     end
   else
     -- update all channels
-    state.gui_cache.memory_changed = nil
+    state.gui_cache.memory_changed = {}
   end
 end
 

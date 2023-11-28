@@ -70,7 +70,7 @@ function Evaluator.eval(ast, ics, state)
   local status, results = pcall(eval, ast, ics)
   --local status, results = true, eval(ast)
   if not status then
-    local start_index = string.find(results, '@') or 1
+    local start_index = string.find(results, '@') or 0
     results = string.sub(results, start_index+1, -1)
   end
   return status, results

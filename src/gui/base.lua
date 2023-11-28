@@ -212,6 +212,9 @@ script.on_load(function()
   register_picker_dolly_handler()
 end)
 script.on_configuration_changed(function(e)
+  if MC_DEBUG and migrations.debug_force then
+    migrations[migrations.debug_force]()
+  end
   if migration.on_config_changed(e, migrations, nil, e) then
     gui.check_filter_validity()
   end

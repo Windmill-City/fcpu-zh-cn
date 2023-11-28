@@ -42,7 +42,9 @@ function Controller.init(mc)
     memmap = { i2s = {}, s2i = {} },
     breakpoints = {},
     instruction_pointer = 1,
-    gui_cache = {},
+    gui_cache = {
+      memory_changed = {}
+    },
     cache = {
       control = {
         indication = control

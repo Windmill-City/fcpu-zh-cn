@@ -289,7 +289,7 @@ function Compiler.build(state, force)
         local status, result, deffer = pcall(construct, k, v)
         --local status, result, deffer = construct(k, v)
         if not status then
-          local start_index = string.find(result, '@') or 1
+          local start_index = string.find(result, '@') or 0
           result = string.sub(result, start_index+1, -1)
           state.program_ast[k] = { type='error', error=result }
           hdlError = true
