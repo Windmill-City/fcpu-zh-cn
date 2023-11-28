@@ -121,7 +121,11 @@ function io.getsignal(_, types)
   elseif _.type == 'string' then
     Assert.exception('not supported yet')
   else
-    Assert.exception('trying to retrieve nil signal')
+    if _ then
+      Assert.exception('unexpected '.. ((_.name and '"'.. _.name ..'"') or _.type or ' lexem'))
+    else
+      Assert.exception('trying to retrieve nil signal')
+    end
   end
   return signal
 end

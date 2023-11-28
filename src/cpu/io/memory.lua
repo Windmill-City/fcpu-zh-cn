@@ -50,9 +50,10 @@ function ioMemory.address_of(address, type)
   local hash = type.type ..'='.. type.name
   local addr = s2i[hash]
   if not addr then
-    addr = #s2i + 1
+    addr = #i2s + 1
     s2i[hash] = addr -- always in sync
     i2s[addr] = hash -- always in sync
+    ioChannel.GuiCache_Invalidate(address.channel, 2)
   end
   return addr
 end
@@ -89,8 +90,10 @@ function ioMemory.get(address)
     if s then
       local type = s.signal
       hash = type and type.type ..'='.. type.name
+      Assert.check(s2i[hash] == nil)
       i2s[addr] = hash
       s2i[hash] = addr
+      ioChannel.GuiCache_Invalidate(address.channel, 2)
       return s
     end
   end
