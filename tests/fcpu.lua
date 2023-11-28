@@ -43,7 +43,7 @@ function createFCPU(input)
           v = v_
           break
         end
-        local t, n = string.match(k, '(%a+)=([%a%-]+)')
+        local t, n = string.match(k, '(%a+)=([%a%d%-]+)')
         table.insert(signals, { signal = { type = t, name = n }, count = v })
       end
     end
