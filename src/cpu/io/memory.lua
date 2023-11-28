@@ -106,7 +106,6 @@ function ioMemory.set(address, signal)
 
   local i2s, s2i = memory_map(address)
   local type = signal.signal
-  local hash = type and type.type ..'='.. type.name
 
   local oldOutput
   if type then
@@ -118,35 +117,38 @@ function ioMemory.set(address, signal)
       oldOutput = memory_getraw(address, { type = t, name = n })
     end
   end
+
   local hasOutput = oldOutput and oldOutput.signal
-
-  if hasOutput then
-    local oldValue = { count = 0 }
-
-    if i2s[addr] ~= hash then
-      local oldAddr = s2i[hash]
-      if oldAddr then
-        local constCtrl = ioChannel.write_control(address)
-        oldValue = constCtrl and constCtrl.enabled and constCtrl.parameters[oldAddr]
-
-        i2s[oldAddr] = nil -- always in sync
-        s2i[hash] = nil -- always in sync
-        memory_setraw(address, oldAddr, nil)
-      end
-    end
-
-    local newValue = table.deep_copy(signal)
-    newValue.count = newValue.count - (oldOutput.count - oldValue.count);
-    signal = newValue
-  else
+  if not hasOutput then
     if signal.count == 0 then
       return
     end
   end
 
+  local oldValue = { count = 0 }
+  local newValue = table.deep_copy(signal)
+
+  local hash = type and type.type ..'='.. type.name
+  if not hash then
+    hash = i2s[addr]
+    newValue.signal = oldOutput.signal
+  elseif i2s[addr] ~= hash then
+    local oldAddr = s2i[hash]
+    if oldAddr then
+      local constCtrl = ioChannel.write_control(address)
+      oldValue = constCtrl and constCtrl.enabled and constCtrl.parameters[oldAddr]
+
+      i2s[oldAddr] = nil -- always in sync
+      s2i[hash] = nil -- always in sync
+      memory_setraw(address, oldAddr, nil)
+    end
+  end
+
+  newValue.count = newValue.count - (oldOutput.count - oldValue.count);
+
   i2s[addr] = hash -- always in sync
   s2i[hash] = addr -- always in sync
-  memory_setraw(address, addr, signal)
+  memory_setraw(address, addr, newValue)
 
   ioChannel.GuiCache_Invalidate(address.channel, 5)
 end
