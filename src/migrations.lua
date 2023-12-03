@@ -556,6 +556,7 @@ return {
 
   ["0.4.22"] = function()
     foreach_player(function(player, player_data)
+      player_data.gui_cache = player_data.gui_cache or {}
       player_data.gui_cache.memory_changed = player_data.gui_cache.memory_changed or {}
     end)
     foreach_fcpu(function(fcpu, state)
