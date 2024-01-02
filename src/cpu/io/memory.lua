@@ -37,8 +37,7 @@ end
 
 local function memory_map(address)
   Assert.with_memory_bank(address)
-  --state.memmap = state.memmap or {}
-  --state.memmap[address.channel] = state.memmap[address.channel] or { i2s = {}, s2i = {} }
+  state.memmap[address.channel] = state.memmap[address.channel] or { i2s = {}, s2i = {} }
   local memmap = state.memmap[address.channel]
   return memmap.i2s, memmap.s2i
 end
@@ -142,6 +141,9 @@ function ioMemory.set(address, signal)
       s2i[hash] = nil -- always in sync
       memory_setraw(address, oldAddr, nil)
     end
+  else
+    local constCtrl = ioChannel.write_control(address)
+    oldValue = constCtrl and constCtrl.enabled and constCtrl.parameters[addr] or oldValue
   end
 
   newValue.count = newValue.count - (oldOutput.count - oldValue.count);
