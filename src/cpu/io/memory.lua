@@ -100,6 +100,7 @@ function ioMemory.get(address)
 end
 
 function ioMemory.set(address, signal)
+  Assert.type(signal, {'signal'})
   Assert.with_memory_bank(address)
   local addr = ioRegister.addr_deref(address)
 
@@ -130,6 +131,7 @@ function ioMemory.set(address, signal)
   local hash = type and type.type ..'='.. type.name
   if not hash then
     hash = i2s[addr]
+    oldValue.count = oldOutput.count
     newValue.signal = oldOutput.signal
   elseif i2s[addr] ~= hash then
     local oldAddr = s2i[hash]
@@ -143,7 +145,10 @@ function ioMemory.set(address, signal)
     end
   else
     local constCtrl = ioChannel.write_control(address)
-    oldValue = constCtrl and constCtrl.enabled and constCtrl.parameters[addr] or oldValue
+    oldValue = constCtrl and constCtrl.enabled and constCtrl.parameters[addr]
+    if not oldValue or oldOutput.count ~= oldValue.count then
+      oldValue = { count = 0 }
+    end
   end
 
   newValue.count = newValue.count - (oldOutput.count - oldValue.count);

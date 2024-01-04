@@ -9,7 +9,7 @@ local function exception(e)
 end
 
 local function expecting(address, msg)
-  return 'Expecting '.. msg ..', got '.. address.type
+  error('@Expecting '.. msg ..', got '.. (address.type or '<nil>'), 2)
 end
 
 -- Assertion Helper Functions
@@ -108,6 +108,8 @@ function Assert.type(_, valid)
         return
       end
     elseif v == 'register' and _.type == 'memory' and _.addr ~= nil then
+      return
+    elseif v == 'signal' and (_.signal == nil and _.type == nil and _.count == 0 or _.signal ~= nil and _.count ~= nil) then
       return
     end
   end
