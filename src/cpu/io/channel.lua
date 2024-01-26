@@ -56,7 +56,7 @@ function ioChannel.output_signals(address)
   if address.type == 'memory' then
     return network.signals or {}
   elseif address.type == 'wire' then
-    return network.parameters or {}
+    return network.signals or {}
   end
 end
 
