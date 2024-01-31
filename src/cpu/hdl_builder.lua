@@ -590,7 +590,7 @@ function builder.create_decider_cell(entity, input, signal, operation)
   x.connect_neighbour{
     source_circuit_id = defines.circuit_connector_id.combinator_input,
     target_entity = input.entity,
-    target_circuit_id = defines.circuit_connector_id.combinator_output,
+    target_circuit_id = input.port or defines.circuit_connector_id.combinator_output,
     wire = input.wire,
   }
 
