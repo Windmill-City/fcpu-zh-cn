@@ -11,6 +11,7 @@ local ioChannel = require('src/cpu/io/channel')
 local ioMemory = require('src/cpu/io/memory')
 local ioLognet = require('src/cpu/io/lognet')
 local ioWire = require('src/cpu/io/wire')
+local ioStack = require('src/cpu/io/stack')
 
 State = require('src/cpu/io/state')
 State.onBind(ioRegister.bind)
@@ -19,6 +20,7 @@ State.onBind(ioChannel.bind)
 State.onBind(ioMemory.bind)
 State.onBind(ioLognet.bind)
 State.onBind(ioWire.bind)
+State.onBind(ioStack.bind)
 
 -- Some hacks
 function io.for_entity(proc)
@@ -41,6 +43,11 @@ io.get_node = ICStack.get_node
 io.ics_set = ICStack.ics_set
 io.get_node_ast = ICStack.get_node_ast
 io.ics_each_ast = ICStack.ics_each_ast
+
+-- Stack
+io.stack_push = ioStack.push
+io.stack_pop = ioStack.pop
+io.stack_clear = ioStack.clear
 
 
 -- Channel

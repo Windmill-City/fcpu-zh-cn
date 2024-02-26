@@ -38,6 +38,23 @@ local jump_op = function(address, offset)
   end
 end
 
+local call_op = function(addr, offset)
+  local ip = io.register_get({type = 'register', addr = REG_IP, pointer = false})
+  io.stack_push({type = 'jump', val = ip.count})
+
+  return jump_op(addr, offset)
+end
+
+local ret_op = function()
+  local jump = io.stack_pop()
+
+  if not jump or jump.type ~= "jump" then
+    Assert.exception("Current stack item is not a jump")
+  end
+
+  return { type = 'jump', val = jump.val + 1 }
+end
+
 local test_mnemonics = function(condition)
   return function(_)
     Assert.two(_)
@@ -248,6 +265,7 @@ local opcodes = {
       io.memory_clear()
       actions[#actions + 1] = io.output_clear()
       actions[#actions + 1] = ics_clear()
+      actions[#actions + 1] = io.stack_clear()
     end
     -- TODO: implement return {type='actions', ...}
     if 0 < #actions then
@@ -645,8 +663,31 @@ local opcodes = {
     Assert.one_or_two(_)
     return jump_op(_[1], _[2])
   end,
+  call = function(_)
+    Assert.one_or_two(_)
+    return jts_op(_[1], _[2])
+  end,
+  ret = function(_)
+    return rts_op()
+  end,
   hlt = function(_)
     return { type = 'halt' }
+  end,
+  push = function(_)
+    Assert.one(_)
+    local sig = io.getsignal(_[#_], {'value', 'type', 'signal', 'input', 'register'})
+    io.stack_push({ type = 'signal', signal = sig })
+  end,
+  pop = function(_)
+    Assert.one(_)
+
+    local val = io.stack_pop()
+
+    if not val or val.type ~= "signal" then
+      Assert.exception("Current stack item is not a signal")
+    end
+
+    io.setsignal(_[1], val.signal, {'register', 'wire'})
   end,
   slp = function(_)
     Assert.one(_)

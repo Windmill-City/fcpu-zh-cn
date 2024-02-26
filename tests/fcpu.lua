@@ -1,10 +1,11 @@
 local World = require('__stdlib__/faketorio/world')
-World.bootstrap()
+World.init()
 
 
 Heap = require('../src/utils/Heap')
 Entity = require('__stdlib__/stdlib/entity/entity')
 table = require('__stdlib__/stdlib/utils/table')
+Heap = require('../src/utils/Heap')
 
 require('../src/constants')
 require('../src/storage')
@@ -30,6 +31,15 @@ script.register_on_object_destroyed = function(ent)
   ent.valid = true
   return unit_number
 end
+
+-- Init global variables
+global = global or {}
+global.gui_update_on_tick = 0
+global.unmap = {}
+global.destroy = {}
+global.fcpus = {}
+global.running = {}
+global.deffered = Heap.new()
 
 function createFCPU(input)
   local fcpu = table.deep_copy(require('__stdlib__/faketorio/raw/arithmetic-combinator')['arithmetic-combinator'])
@@ -87,7 +97,7 @@ function createFCPU(input)
 
   fcpu.get_merged_signal = function(signal)
     local control = fcpu.get_control_behavior()
-    return 
+    return
       control.get_circuit_network(defines.wire_type.green).get_signal(signal)
     + control.get_circuit_network(defines.wire_type.red).get_signal(signal)
   end
@@ -108,6 +118,7 @@ function createFCPU(input)
     end
     return fcpu.get_control_behavior()
   end
+
   return fcpu
 end
 
@@ -118,7 +129,7 @@ function createFCPU_Output(input)
   ent.name = 'output-fcpu'
   ent.valid = true
   ent.get_control_behavior = function()
-    if ent._control_behavior.parameters == nil then
+    if ent._control_behavior == nill or ent._control_behavior.parameters == nil then
       ent._control_behavior = nil
       ent.get_or_create_control_behavior()
     end
@@ -161,6 +172,10 @@ function ExecuteTest(test_title, program_text, input_signals, probe_result, max_
 
   state.program_ics.output = { value = createFCPU_Output() }
   state.program_ics.output.value.get_or_create_control_behavior()
+
+  for i = 1, MC_MEMORY_CHANNELS do
+    state.program_ics['mem'..i] = { value = createFCPU_Output() }
+  end
 
   for i = 1, 4 do
     state.program_ics['mem'..i] = { value = createFCPU_Output() }
@@ -205,6 +220,66 @@ function ExecuteTest(test_title, program_text, input_signals, probe_result, max_
 end
 
 ----------------------------------------------------------------------------------------------------------------
+
+local fcpu, state = ExecuteTest(
+  'Test Subroutines',
+  [[
+    clr
+    mov reg1 1
+    jts :test_sub
+    jts :test_sub
+    hlt
+
+    :test_sub
+    inc reg1
+    rts
+  ]],
+  {},
+  function (state, output)
+    return state.regs[1].count == 3
+  end,
+  8
+)
+
+local fcpu, state = ExecuteTest(
+  'Test Stack',
+  [[
+    clr
+    mov reg1 1
+    psh reg1
+    inc reg1
+    psh reg1
+
+    pop reg2
+    pop reg3
+  ]],
+  {},
+  function(state, output)
+    return state.regs[2].count == 2 and state.regs[3].count == 1
+  end,
+  8
+)
+
+local fcpu, state = ExecuteTest(
+  'Bug in fixedpoint',
+  [[
+    clr
+    :loop
+    mov reg2 clk
+    #mul reg2 0.001
+    sin reg1 reg2
+    mul reg1 5
+    add reg1 5
+    jmp :loop
+  ]],
+  {},
+  function(state, output)
+    local expected = math.sin(3.0) * 5.0 + 5.0
+    return
+    (state.regs[1].count == expected)
+  end,
+  6
+)
 
 local fcpu, state = ExecuteTest(
   'check input/output',
@@ -385,7 +460,7 @@ local fcpu, state = ExecuteTest(
   ]],
   {},
   function(state, output)
-    return 
+    return
     (state.regs[3].count == 6) and
     (state.regs[4].count == 1234587890) and
     (state.regs[5].count == 801234567890) and
@@ -401,30 +476,10 @@ local fcpu, state = ExecuteTest(
   ]],
   {},
   function(state, output)
-    return 
+    return
     (state.clock == 100)
   end,
   100
-)
-
-local fcpu, state = ExecuteTest(
-  'Bug in fixedpoint',
-  [[
-    clr  
-    :loop
-    mov reg2 clk
-    #mul reg2 0.001
-    sin reg1 reg2
-    mul reg1 5
-    add reg1 5
-    jmp :loop
-  ]],
-  {},
-  function(state, output)
-    return 
-    (state.regs[1].count == math.sin(2.0) * 5.0 + 5.0)
-  end,
-  5
 )
 
 local fcpu, state = ExecuteTest(
@@ -437,7 +492,7 @@ local fcpu, state = ExecuteTest(
   ]],
   {},
   function(state, output)
-    return 
+    return
     Assert.result_signal(state.regs[1], {count=1, signal={type='virtual', name='signal-X'}}) and
     Assert.result_signal(state.regs[2], {count=2, signal={type='virtual', name='signal-Y'}}) and
     Assert.result_signal(state.regs[3], {count=3}) and
