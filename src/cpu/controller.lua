@@ -381,6 +381,44 @@ function Controller.tick(state)
   end
 end
 
+local function power_percents(cpu)
+  if cpu.is_connected_to_electric_network() then
+    return math.floor(100 * cpu.energy / cpu.electric_buffer_size) * 0.01
+  end
+  return 0
+end
+
+function Controller.handle(state)
+  if state.entity and state.entity.valid then
+    if not state.disabled then
+      if state.modified then
+        Controller.compile(state)
+        Controller.set_program_counter(state, state.instruction_pointer)
+        Controller.update_state(state)
+      end
+      if 10 < game.tick - state.power_probe_tick then
+        state.power_level = power_percents(state.entity)
+        state.power_probe_tick = game.tick
+      end
+      if MC_BROWNOUT_LEVEL < state.power_level then
+        Controller.tick(state)
+        if state.power_level < 1 and state.sleep_time == 0 and state.program_state == PSTATE_RUNNING then
+          local invLevel = (1 - (state.power_level - MC_BROWNOUT_LEVEL) / (1 - MC_BROWNOUT_LEVEL))
+          if 0 < invLevel then
+            if not state.need_sync then
+              Controller.sleep(state, invLevel * 60 * (1 - MC_BROWNOUT_LEVEL), true)
+            end
+            script.raise_event(Controller.event_error, {['entity'] = state.entity, message = {'gui-fcpu.power-level-low', state.power_level * 100}})
+          end
+        end
+      else
+        script.raise_event(Controller.event_error, {['entity'] = state.entity, message = {'gui-fcpu.power-level-brownout', MC_BROWNOUT_LEVEL * 100}})
+      end
+      return true
+    end
+  end
+end
+
 function Controller.run(state)
   Controller.set_error_message(state, nil)
   state.sleep_time = 0

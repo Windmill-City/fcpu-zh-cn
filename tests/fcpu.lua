@@ -2,16 +2,34 @@ local World = require('__stdlib__/faketorio/world')
 World.bootstrap()
 
 
+Heap = require('../src/utils/Heap')
 Entity = require('__stdlib__/stdlib/entity/entity')
 table = require('__stdlib__/stdlib/utils/table')
 
 require('../src/constants')
+require('../src/storage')
 Controller = require('../src/cpu/controller')
 Assert = require('../src/cpu/assert')
 
 ----------------------------------------------------------------------------------------------------------------
 
-unit_number = 0
+function init_globals()
+  World.init()
+
+  global.gui_update_on_tick = 0
+  global.unmap = {}
+  global.destroy = {}
+  global.fcpus = {}
+  global.running = {}
+  global.deffered = Heap.new()
+
+  unit_number = 0
+end
+
+script.register_on_entity_destroyed = function(ent)
+  ent.valid = true
+  return unit_number
+end
 
 function createFCPU(input)
   local fcpu = table.deep_copy(require('__stdlib__/faketorio/raw/arithmetic-combinator')['arithmetic-combinator'])
@@ -21,6 +39,19 @@ function createFCPU(input)
   fcpu.get_control_behavior = function()
     return fcpu._control_behavior
   end
+
+  fcpu.is_connected_to_electric_network = function()
+    return true
+  end
+
+  fcpu.surface = {
+    create_entity = function(params)
+      return Entity.create_entity(params)
+    end
+  }
+
+  fcpu.energy = 1000
+  fcpu.electric_buffer_size = fcpu.energy
 
   local MakeBus = function(bus)
     local signals = {}
@@ -85,6 +116,7 @@ function createFCPU_Output(input)
   unit_number = unit_number + 1
   ent.unit_number = unit_number
   ent.name = 'output-fcpu'
+  ent.valid = true
   ent.get_control_behavior = function()
     if ent._control_behavior.parameters == nil then
       ent._control_behavior = nil
@@ -97,27 +129,43 @@ function createFCPU_Output(input)
     if ent._control_behavior == nil then
       ent._control_behavior = {
         parameters = {},
+        signals_count = 100,
       }
-      for i = 1, 100 do
+      for i = 1, ent._control_behavior.signals_count do
         ent._control_behavior.parameters[i] = {
           signal = {type='virtual', name=''},
           count = 0,
           index = i,
         }
       end
+
+      ent._control_behavior.set_signal = function(index, signal)
+        ent._control_behavior.parameters[index] = signal
+      end
     end
+
     return ent.get_control_behavior()
   end
+
   return ent
 end
 
 function ExecuteTest(test_title, program_text, input_signals, probe_result, max_ticks)
+  init_globals()
+
   local fcpu = createFCPU(input_signals)
   local state = Controller.init(fcpu)
-  state.entity = fcpu
+  register_fcpu(fcpu, state)
+
+  Controller.verify(state);
 
   state.program_ics.output = { value = createFCPU_Output() }
   state.program_ics.output.value.get_or_create_control_behavior()
+
+  for i = 1, 4 do
+    state.program_ics['mem'..i] = { value = createFCPU_Output() }
+    state.program_ics['mem'..i].value.get_or_create_control_behavior()
+  end
 
   Controller.update_program_text(state, program_text)
   Controller.compile(state)
@@ -132,7 +180,10 @@ function ExecuteTest(test_title, program_text, input_signals, probe_result, max_
         break
       end
     end
-    Controller.tick(state)
+    if not Controller.handle(state) then
+      break
+    end
+    World.update()
   end
   if state.error_message then
     error(state.error_message[3])
@@ -147,6 +198,9 @@ function ExecuteTest(test_title, program_text, input_signals, probe_result, max_
       error(ret or ("Test '"..test_title.."' failed"), 2)
     end
   end
+
+  World.quit()
+
   return fcpu, state
 end
 
