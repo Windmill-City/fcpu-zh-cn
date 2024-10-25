@@ -1,4 +1,4 @@
-Entity = require('__stdlib__/stdlib/entity/entity')
+Entity = require('3rdparty.stdlib.entity')
 table = require('3rdparty.flib061.table')
 Heap = require('src.utils.Heap')
 
