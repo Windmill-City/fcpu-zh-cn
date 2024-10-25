@@ -97,7 +97,7 @@ function flib_event.register(ids, handler, filters)
 end
 
 --- Register an entity to raise `on_entity_destroyed` when it's destroyed.
--- @function register_on_entity_destroyed
+-- @function register_on_object_destroyed
 -- Once an entity is registered it's registered forever (until it's destroyed) and persists through save/load.
 --
 -- Registered is global across all mods: once an entity is registered the event will be fired for all mods when its
@@ -109,7 +109,7 @@ end
 -- of the next tick.
 -- @tparam LuaEntity entity The entity to register.
 -- @treturn number The registration number.
-flib_event.register_on_entity_destroyed = script.register_on_entity_destroyed
+flib_event.register_on_object_destroyed = script.register_on_object_destroyed
 
 --- Generate a new, unique event ID.
 -- @function generate_id

@@ -290,7 +290,7 @@ event.register({
 )
 
 event.register({
-  defines.events.on_entity_destroyed},
+  defines.events.on_object_destroyed},
   function(event)
     on_destroy_fcpu(event.registration_number, true)
   end

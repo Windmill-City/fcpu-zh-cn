@@ -17,7 +17,7 @@ end
 -------------------------------------------------------------------------------------------------------
 
 function register_fcpu(entity, state)
-  state.destroy_regnum = script.register_on_entity_destroyed(entity)
+  state.destroy_regnum = script.register_on_object_destroyed(entity)
   state.unit_number = entity.unit_number
   state.entity = entity
   if not (state.index and global.fcpus[state.index]) then

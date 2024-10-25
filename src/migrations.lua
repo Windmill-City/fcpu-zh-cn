@@ -112,7 +112,7 @@ return {
     local fcpus = {}
     for _,v in pairs(global.fcpus) do
       local state = Entity.get_data(v)
-      state.destroy_regnum = script.register_on_entity_destroyed(v)
+      state.destroy_regnum = script.register_on_object_destroyed(v)
       state.index = #fcpus + 1
       fcpus[state.index] = state
       Entity.set_data(state.entity, state.index)

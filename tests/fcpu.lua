@@ -26,7 +26,7 @@ function init_globals()
   unit_number = 0
 end
 
-script.register_on_entity_destroyed = function(ent)
+script.register_on_object_destroyed = function(ent)
   ent.valid = true
   return unit_number
 end
