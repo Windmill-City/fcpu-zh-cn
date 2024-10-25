@@ -41,7 +41,7 @@ local fcpu = table.shallow_merge(table.deep_copy(data.raw['arithmetic-combinator
   selection_box = {{-1, -1}, {1, 1}},
   additional_pastable_entities = {"fcpu", "arithmetic-combinator", "decider-combinator", "constant-combinator"},
 
-  active_energy_usage = "20KW",
+  active_energy_usage = "20kW",
 
   and_symbol_sprites = empty_picture,
   divide_symbol_sprites = empty_picture,
@@ -76,9 +76,15 @@ data:extend{
     type = "recipe",
     name = "fcpu",
     enabled = false,
-    ingredients = {{"arithmetic-combinator", 10}, {"decider-combinator", 10}, {"processing-unit", 1}},
+    ingredients = {
+      {type = "item", name = "arithmetic-combinator", amount = 10},
+      {type = "item", name = "decider-combinator", amount = 10},
+      {type = "item", name = "processing-unit", amount = 1}
+    },
     energy_required = 20,
-    results = {{"fcpu", 1}},
+    results = {
+      {type = "item", name = "fcpu", amount = 1}
+    },
     unlock_results = true
   },
   {
@@ -93,7 +99,7 @@ data:extend{
         recipe = "fcpu"
       }
     },
-    prerequisites = {"circuit-network", "advanced-electronics-2"},
+    prerequisites = {"circuit-network", "processing-unit"},
     unit =
     {
       count = 200,
@@ -117,7 +123,7 @@ local hdl_lognet_fcpu = table.shallow_merge(table.deep_copy(data.raw['roboport']
     type = "void",
     usage_priority = "primary-input"
   },
-  energy_usage = "2KW",
+  energy_usage = "2kW",
   robot_slots_count = 0,
   material_slots_count = 0,
 
@@ -153,12 +159,15 @@ if not MC_DEBUG then hdl_lognet_fcpu = table.shallow_merge(hdl_lognet_fcpu, {
     "not-on-map",
     "not-blueprintable",
     "not-deconstructable", -- can't be deconstructed by 'demolition blueprint'. reducing bounds marker spam
-    "hidden",
+    "not-in-made-in",
     "hide-alt-info",
     "not-flammable",
     "not-in-kill-statistics",
   },
-  collision_mask = {"not-colliding-with-itself"},
+  collision_mask = {
+    layers = {},
+    not_colliding_with_itself = true,
+  },
 
   base = empty_picture,
   base_patch = empty_picture,
@@ -202,12 +211,15 @@ if not MC_DEBUG then hdl_output_fcpu = table.shallow_merge(hdl_output_fcpu, {
     "not-on-map",
     "not-blueprintable",
     "not-deconstructable", -- can't be deconstructed by 'demolition blueprint'. reducing bounds marker spam
-    "hidden",
+    "not-in-made-in",
     "hide-alt-info",
     "not-flammable",
     "not-in-kill-statistics",
   },
-  collision_mask = {"not-colliding-with-itself"},
+  collision_mask = {
+    layers = {},
+    not_colliding_with_itself = true,
+  },
 
   sprites =
   {
@@ -241,7 +253,10 @@ local hdl_constant_fcpu = table.shallow_merge(table.deep_copy(data.raw['constant
     usage_priority = "primary-input"
   },
 
-  collision_mask = {"not-colliding-with-itself"},
+  collision_mask = {
+    layers = {},
+    not_colliding_with_itself = true,
+  },
 })
 if not MC_DEBUG then hdl_constant_fcpu = table.shallow_merge(hdl_constant_fcpu, {
   selectable_in_game = false,
@@ -254,7 +269,7 @@ if not MC_DEBUG then hdl_constant_fcpu = table.shallow_merge(hdl_constant_fcpu, 
     "not-on-map",
     "not-blueprintable",
     "not-deconstructable", -- can't be deconstructed by 'demolition blueprint'. reducing bounds marker spam
-    "hidden",
+    "not-in-made-in",
     "hide-alt-info",
     "not-flammable",
     "not-in-kill-statistics",
@@ -291,7 +306,10 @@ local hdl_decider_fcpu = table.shallow_merge(table.deep_copy(data.raw['decider-c
     usage_priority = "primary-input"
   },
 
-  collision_mask = {"not-colliding-with-itself"},
+  collision_mask = {
+    layers = {},
+    not_colliding_with_itself = true,
+  },
 })
 if not MC_DEBUG then hdl_decider_fcpu = table.shallow_merge(hdl_decider_fcpu, {
   selectable_in_game = false,
@@ -304,7 +322,7 @@ if not MC_DEBUG then hdl_decider_fcpu = table.shallow_merge(hdl_decider_fcpu, {
     "not-on-map",
     "not-blueprintable",
     "not-deconstructable", -- can't be deconstructed by 'demolition blueprint'. reducing bounds marker spam
-    "hidden",
+    "not-in-made-in",
     "hide-alt-info",
     "not-flammable",
     "not-in-kill-statistics",
@@ -348,7 +366,10 @@ local hdl_arithmetic_fcpu = table.shallow_merge(table.deep_copy(data.raw['arithm
     usage_priority = "primary-input"
   },
 
-  collision_mask = {"not-colliding-with-itself"},
+  collision_mask = {
+    layers = {},
+    not_colliding_with_itself = true,
+  },
 })
 if not MC_DEBUG then hdl_arithmetic_fcpu = table.shallow_merge(hdl_arithmetic_fcpu, {
   selectable_in_game = false,
@@ -361,7 +382,7 @@ if not MC_DEBUG then hdl_arithmetic_fcpu = table.shallow_merge(hdl_arithmetic_fc
     "not-on-map",
     "not-blueprintable",
     "not-deconstructable", -- can't be deconstructed by 'demolition blueprint'. reducing bounds marker spam
-    "hidden",
+    "not-in-made-in",
     "hide-alt-info",
     "not-flammable",
     "not-in-kill-statistics",

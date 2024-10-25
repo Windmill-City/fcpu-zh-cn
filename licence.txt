@@ -1,11 +1,11 @@
 Limited Distribution Only Licence
 Priority copy: https://docs.google.com/document/d/1ngMMo0RHpcQE_u6S1M5jq_rRczpdt3tPkWsWX0dHI0c
 
-Copyright (c) 2020, KonStg
+Copyright (c) 2024, KonStg
 
 Commercial Use: Yes, but with the following conditions:
 You should specify a direct link to the Factorio Mod Portal page of the mod (https://mods.factorio.com/mod/fcpu).
-Any help to mod developers is appreciated (https://www.buymeacoffee.com/konstg).
+Any help to mod developers is appreciated (https://boosty.to/konstg/donate).
 
 Distribution: Yes, but with the following conditions:
 The mod must not be modified (except for mod developers). Repackaging the mod does not count as modification. It can be used in mod packs.

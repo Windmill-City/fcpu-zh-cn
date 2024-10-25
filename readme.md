@@ -693,6 +693,6 @@ See [here](https://boosty.to/konstg)
 
 
 # Support fCPU
-[![Boosty](https://static.boosty.to/assets/images/boostyLogo.60ihp.svg)](https://boosty.to/konstg/donate)
+[![Boosty](https://static.boosty.to/assets/images/boostyLogo.660f9.svg)](https://boosty.to/konstg/donate)
 
 [comment]: <> (md2frt-skip-section-end)

@@ -13,7 +13,7 @@ local imposter_fcpu_item ={
   name = "imposter-fcpu",
   icon = "__fcpu__/graphics/icons/fcpu.png",
   icon_size = 1,
-  flags = { "hidden" },
+  flags = { "hide-from-bonus-gui", "hide-from-fuel-tooltip" },
   subgroup = "circuit-network",
   place_result="imposter-fcpu",
   order = "c[combinators]-f[imposter-fcpu]",
@@ -44,7 +44,10 @@ local imposter_fcpu = table.shallow_merge(table.deep_copy(data.raw['constant-com
   },
   selection_box = {{-1, -1}, {1, 1}},
   collision_box = {{-0.65, -0.65}, {0.65, 0.65}},
-  collision_mask = {"layer-13"},--"not-colliding-with-itself"},
+  collision_mask = {
+    layers = {},--{"layer-13"},
+    --not_colliding_with_itself = true,
+  },
 
   item_slot_count = MC_SAVESLOTS,
   sprites =
