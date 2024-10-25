@@ -198,12 +198,12 @@ local migrations = require("src/migrations.lua")
 script.on_init(function()
   gui.init()
   gui.build_lookup_tables()
-  global.gui_update_on_tick = 0
-  global.unmap = {}
-  global.destroy = {}
-  global.fcpus = {}
-  global.running = {}
-  global.deffered = Heap.new()
+  storage.gui_update_on_tick = 0
+  storage.unmap = {}
+  storage.destroy = {}
+  storage.fcpus = {}
+  storage.running = {}
+  storage.deffered = Heap.new()
   register_picker_dolly_handler()
   fcpu_wiki_booktorio_init()
 end)

@@ -58,10 +58,10 @@ end
 script.on_event(defines.events.on_tick, function(event)
   local handled = 0
   local enabled = 0
-  local start = global.last_index
+  local start = storage.last_index
 
   local HandleCPU = function(index, k)
-    local state = global.fcpus[index]
+    local state = storage.fcpus[index]
     handled = handled + 1
     if Controller.handle(state, power_percents) then
         enabled = enabled + 1
@@ -74,13 +74,13 @@ script.on_event(defines.events.on_tick, function(event)
 
   local limit = fcpu_maximum_updates_per_tick
   local ended
-  global.last_index, _, ended = table.for_n_of(global.running, global.last_index, limit, HandleCPU)
+  storage.last_index, _, ended = table.for_n_of(storage.running, storage.last_index, limit, HandleCPU)
   if start and ended and handled < limit then
-    global.last_index = table.for_n_of(global.running, nil, limit - handled, HandleCPU)
+    storage.last_index = table.for_n_of(storage.running, nil, limit - handled, HandleCPU)
   end
 
-  if (global.gui_update_on_tick or 0) <= game.tick then
-    global.gui_update_on_tick = game.tick + fcpu_gui_updates_every_tick
+  if (storage.gui_update_on_tick or 0) <= game.tick then
+    storage.gui_update_on_tick = game.tick + fcpu_gui_updates_every_tick
     update_gui()
   end
 end)

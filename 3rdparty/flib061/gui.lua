@@ -68,7 +68,7 @@ end
 
 local function generate_filter_lookup()
   -- add filter lookup to each handler
-  for _, players in pairs(global.__flib.gui) do
+  for _, players in pairs(storage.__flib.gui) do
     for player_index, filters in pairs(players) do
       if player_index ~= "__size" then
         for filter, handler_name in pairs(filters) do
@@ -101,10 +101,10 @@ end
 --
 -- This function can also be used to wipe all GUI filters for all players.
 function flib_gui.init()
-  if not global.__flib then
-    global.__flib = {gui={}}
+  if not storage.__flib then
+    storage.__flib = {gui={}}
   else
-    global.__flib.gui = {}
+    storage.__flib.gui = {}
     for _, data in pairs(handler_lookup) do
       data.filters = {}
     end
@@ -120,17 +120,17 @@ function flib_gui.build_lookup_tables()
   for k, v in pairs(handlers) do
     generate_handler_lookup(v, k, {})
   end
-  if global.__flib and global.__flib.gui then
+  if storage.__flib and storage.__flib.gui then
     generate_filter_lookup()
   end
 end
 
---- Purge all filters tied to non-existent handlers from `global`.
+--- Purge all filters tied to non-existent handlers from `storage`.
 -- Must be called during `on_configuration_changed`.
 -- This function is necessary in order to prevent crashes when a handler was removed between mod versions, but still has
--- filters assigned to it stored in `global`.
+-- filters assigned to it stored in `storage`.
 function flib_gui.check_filter_validity()
-  local filters_table = global.__flib.gui
+  local filters_table = storage.__flib.gui
   for event_name, event_filters in pairs(filters_table) do
     for player_index, player_filters in pairs(event_filters) do
       if player_index ~= "__size" then
@@ -376,7 +376,7 @@ end
 function flib_gui.dispatch_handlers(event_data)
   if not event_data.element or not event_data.player_index then return false end
 
-  local event_filters = global.__flib.gui[event_data.name]
+  local event_filters = storage.__flib.gui[event_data.name]
   if not event_filters then return false end
 
   local player_filters = event_filters[event_data.player_index]
@@ -419,8 +419,8 @@ function flib_gui.update_filters(name, player_index, filters, mode)
     local id = handler_data.id
     local handler_filters = handler_data.filters
 
-    -- saved filters table (in global)
-    local __gui = global.__flib.gui
+    -- saved filters table (in storage)
+    local __gui = storage.__flib.gui
     local saved_event_filters = __gui[id]
     if not saved_event_filters then
       __gui[id] = {__size=1, [player_index]={__size=0}}

@@ -100,7 +100,7 @@ end
 -- @function register_on_object_destroyed
 -- Once an entity is registered it's registered forever (until it's destroyed) and persists through save/load.
 --
--- Registered is global across all mods: once an entity is registered the event will be fired for all mods when its
+-- Registered is storage across all mods: once an entity is registered the event will be fired for all mods when its
 -- destroyed.
 --
 -- An entity registered multiple times will only fire the event once and gives back the same registration number.

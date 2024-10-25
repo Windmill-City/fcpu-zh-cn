@@ -154,7 +154,7 @@ local function run_deffer_command(op)
   debug_assert(not op.at or op.at + op.delay == game.tick, "Out of order deffered action executed")
 
   if op.action == 'wake' then
-    local state = global.fcpus[op.index]
+    local state = storage.fcpus[op.index]
     if state and state.sleep_at == op.at then
       debug_assert(state.sleep_at + op.delay == game.tick)
       state.clock = state.clock + state.sleep_time
@@ -166,7 +166,7 @@ local function run_deffer_command(op)
     end
   elseif op.action == 'sync' then
     Assert.check(op.index ~= nil, 'fCPU instance index is nil in SYNC')
-    local state = global.fcpus[op.index]
+    local state = storage.fcpus[op.index]
     if state then
       state.sync_clock = state.clock
       state.clock = state.clock + op.delay
@@ -209,7 +209,7 @@ function Controller.add_deferred(state, deffer)
       local t = table.deep_copy(op)
       local at_tick = game.tick + t.delay
       t.at = game.tick
-      Heap.put(global.deffered, at_tick, t)
+      Heap.put(storage.deffered, at_tick, t)
       will_sync = will_sync or (t.action == 'sync')
     end
     --got_sync = got_sync or op.action == 'sync' or not got_sync and i == cnt
@@ -220,11 +220,11 @@ end
 
 function Controller.do_deferred()
   while true do
-    local p = Heap.priority(global.deffered)
+    local p = Heap.priority(storage.deffered)
     if not p or game.tick < p then
       break
     end
-    local at_tick, op = Heap.pop(global.deffered)
+    local at_tick, op = Heap.pop(storage.deffered)
     assert(at_tick == game.tick, "Found missed deffered action")
     run_deffer_command(op)
   end
@@ -377,7 +377,7 @@ function Controller.tick(state)
       Controller.halt(state)
     end
   elseif state.program_state == PSTATE_SLEEPING then
-    global.running[state.index] = nil
+    storage.running[state.index] = nil
   end
 end
 
@@ -531,17 +531,17 @@ function Controller.update_state(state, pstate)
     if pstate ~= nil then
       state.program_state = pstate
       if pstate == PSTATE_RUNNING then
-        global.running[state.index] = state.index
+        storage.running[state.index] = state.index
         state.sleep_at = nil
       elseif pstate == PSTATE_SLEEPING and state.sleep_time then
-        global.running[state.index] = nil
+        storage.running[state.index] = nil
         state.sleep_at = game.tick
       else
         if pstate == PSTATE_HALTED then
           state.sleep_at = nil
         end
         if state.disabled then
-          global.running[state.index] = nil
+          storage.running[state.index] = nil
         end
       end
     end

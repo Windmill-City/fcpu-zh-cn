@@ -1,5 +1,5 @@
 local function foreach_fcpu_v1(proc)
-  for _, fcpu in pairs(global.fcpus) do
+  for _, fcpu in pairs(storage.fcpus) do
     if fcpu.valid then
       local state = Entity.get_data(fcpu)
       if state then
@@ -10,16 +10,16 @@ local function foreach_fcpu_v1(proc)
 end
 
 local function foreach_fcpu(proc)
-  for k, state in pairs(global.fcpus) do
+  for k, state in pairs(storage.fcpus) do
     if state and state.entity and state.entity.valid then
       proc(state.entity, state)
     else
-      global.fcpus[k] = nil
-      global.running[k] = nil
+      storage.fcpus[k] = nil
+      storage.running[k] = nil
 
-      for i,v in pairs(global.unmap) do
+      for i,v in pairs(storage.unmap) do
         if v == k then
-          global.unmap[i] = nil
+          storage.unmap[i] = nil
         end
       end
     end
@@ -110,14 +110,14 @@ return {
 
   ["0.3.0"] = function()
     local fcpus = {}
-    for _,v in pairs(global.fcpus) do
+    for _,v in pairs(storage.fcpus) do
       local state = Entity.get_data(v)
       state.destroy_regnum = script.register_on_object_destroyed(v)
       state.index = #fcpus + 1
       fcpus[state.index] = state
       Entity.set_data(state.entity, state.index)
     end
-    global.fcpus = fcpus
+    storage.fcpus = fcpus
 
     foreach_fcpu(function(fcpu, state)
       state.program_begin = 1
@@ -206,7 +206,7 @@ return {
       end
     end
     local invalids = {}
-    for k,v in pairs(global.fcpus) do
+    for k,v in pairs(storage.fcpus) do
       if not v then
         invalids[#invalids + 1] = k
       elseif v.index ~= k then
@@ -222,8 +222,8 @@ return {
       end
     end
     for _,v in ipairs(invalids) do
-      global.fcpus[v] = nil
-      global.running[v] = nil
+      storage.fcpus[v] = nil
+      storage.running[v] = nil
     end
   end,
 
@@ -261,23 +261,23 @@ return {
   end,
 
   ["0.3.20"] = function()
-    global.migrated = nil
+    storage.migrated = nil
     -- Validation {
-    global._entity_data = global._entity_data or {}
-    for k, v in pairs(global._entity_data) do
+    storage._entity_data = storage._entity_data or {}
+    for k, v in pairs(storage._entity_data) do
       if type(v) == 'table' and (not v.fcpu or not v.fcpu.valid) then
-        global._entity_data[k] = nil
+        storage._entity_data[k] = nil
       end
     end
     local fcpu2ents = {}
-    for k, v in pairs(global._entity_data) do
+    for k, v in pairs(storage._entity_data) do
       if type(v) == 'number' then
-        if global.fcpus[v] and global.fcpus[v].entity and global.fcpus[v].entity.valid and global.fcpus[v].entity.unit_number == k then
+        if storage.fcpus[v] and storage.fcpus[v].entity and storage.fcpus[v].entity.valid and storage.fcpus[v].entity.unit_number == k then
           -- valid
           fcpu2ents[v] = fcpu2ents[v] or {}
           table.insert(fcpu2ents[v], k)
         else
-          global._entity_data[k] = nil
+          storage._entity_data[k] = nil
         end
       end
     end
@@ -330,33 +330,33 @@ return {
       end
     end
     -- }
-    global.gui_update_on_tick = 0
-    global.running = {}
-    global.deffered = Heap.new()
+    storage.gui_update_on_tick = 0
+    storage.running = {}
+    storage.deffered = Heap.new()
     foreach_fcpu(function(fcpu, state)
       if next(state.deffered) ~= nil then
         local sync_at
         for _,v in pairs(state.deffered) do
           local at_tick = game.tick + v.delay
           v.at = game.tick
-          Heap.put(global.deffered, at_tick, v)
+          Heap.put(storage.deffered, at_tick, v)
           if not sync_at or sync_at < at_tick then
             sync_at = at_tick
           end
         end
         if sync_at then
           state.need_sync = true
-          Heap.put(global.deffered, sync_at + 1, {action='sync', index=state.index, at=game.tick, delay=sync_at + 1 - game.tick})
+          Heap.put(storage.deffered, sync_at + 1, {action='sync', index=state.index, at=game.tick, delay=sync_at + 1 - game.tick})
         end
         state.deffered = nil
       end
       if state.program_state == PSTATE_SLEEPING then
-        global.running[state.index] = nil
+        storage.running[state.index] = nil
         state.sleep_at = game.tick
-        Heap.put(global.deffered, game.tick + state.sleep_time, {action='wake', at=game.tick, delay=state.sleep_time, index=state.index})
+        Heap.put(storage.deffered, game.tick + state.sleep_time, {action='wake', at=game.tick, delay=state.sleep_time, index=state.index})
       elseif state.program_state == PSTATE_RUNNING or not state.disabled then
         state.sleep_time = 0
-        global.running[state.index] = state.index
+        storage.running[state.index] = state.index
       end
     end)
   end,
@@ -410,7 +410,7 @@ return {
       ic.destroy()
     end
     for _,fcpu in pairs(altered_fcpus) do
-      local state = global.fcpus[Entity.get_data(fcpu)]
+      local state = storage.fcpus[Entity.get_data(fcpu)]
       if state then
         Controller.verify(state)
         state.modified = true
@@ -419,9 +419,9 @@ return {
     end
     -- }
 
-    for k, v in pairs(global._entity_data) do
+    for k, v in pairs(storage._entity_data) do
       if type(v) == 'table' and (not v.fcpu or not v.fcpu.valid) then
-        global._entity_data[k] = nil
+        storage._entity_data[k] = nil
       end
     end
   end,
@@ -479,13 +479,13 @@ return {
   end,
 
   ["0.4.15"] = function()
-    global.unmap = {}
-    global.destroy = {}
+    storage.unmap = {}
+    storage.destroy = {}
     foreach_fcpu(function(fcpu, state)
       state.unit_number = fcpu.unit_number
 
-      global.destroy[state.destroy_regnum] = state.index
-      global.unmap[state.unit_number] = state.index
+      storage.destroy[state.destroy_regnum] = state.index
+      storage.unmap[state.unit_number] = state.index
       Entity.set_data(state.entity, nil)
 
       if state.program_ics.output then

@@ -23,10 +23,10 @@ local type = type
 -- This function will effectively cancel all running translations, so if that functionality is desired, this function is
 -- a good fit for it.
 function flib_translation.init()
-  if not global.__flib then
-    global.__flib = {}
+  if not storage.__flib then
+    storage.__flib = {}
   end
-  global.__flib.translation = {
+  storage.__flib.translation = {
     players = {},
     translating_players_count = 0
   }
@@ -38,7 +38,7 @@ end
 -- Must be called during an `on_tick` event.
 -- @tparam OnTickEventData event_data
 function flib_translation.iterate_batch(event_data)
-  local __translation = global.__flib.translation
+  local __translation = storage.__flib.translation
   if __translation.translating_players_count == 0 then return end
   local translations_per_tick = settings.global["flib-translations-per-tick"].value
   local iterations = math.ceil(translations_per_tick / __translation.translating_players_count)
@@ -123,7 +123,7 @@ end
 -- @treturn ResultSortData
 -- @treturn boolean If all of the player's translations are complete.
 function flib_translation.process_result(event_data)
-  local __translation = global.__flib.translation
+  local __translation = storage.__flib.translation
   if __translation.translating_players_count == 0 then return end
   local player_table = __translation.players[event_data.player_index]
   if not player_table then return end
@@ -151,7 +151,7 @@ end
 -- @tparam number player_index
 -- @tparam StringData[] strings
 function flib_translation.add_requests(player_index, strings)
-  local __translation = global.__flib.translation
+  local __translation = storage.__flib.translation
   local player_table = __translation.players[player_index]
   if player_table then
     player_table.state = "sort"
@@ -191,7 +191,7 @@ end
 --- Cancel a player's translations.
 -- @tparam number player_index
 function flib_translation.cancel(player_index)
-  local __translation = global.__flib.translation
+  local __translation = storage.__flib.translation
   local player_table = __translation.players[player_index]
   if not player_table then
     log("Tried to cancel translations for player ["..player_index.."] when no translations were running!")
@@ -205,13 +205,13 @@ end
 -- @tparam number player_index
 -- @treturn boolean
 function flib_translation.is_translating(player_index)
-  return global.__flib.translation.players[player_index] and true or false
+  return storage.__flib.translation.players[player_index] and true or false
 end
 
 --- Check the number of players currently translating.
 -- @treturn number
 function flib_translation.translating_players_count()
-  return global.__flib.translation.translating_players_count
+  return storage.__flib.translation.translating_players_count
 end
 
 --- Serialise a localised string into a form readable by the API.
