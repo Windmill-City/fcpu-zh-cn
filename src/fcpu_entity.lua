@@ -2,14 +2,7 @@ local HdlBuilder = require('src/cpu/hdl_builder')
 
 -------------------------------------------------------------------------------------------------------
 
-local handle_fcpu_create_v1 = require('legacy/handle_fcpu_create_v1')
-
 local function handle_fcpu_create_v2(ent, tags)
-  if ent.name == "imposter-fcpu" or ent.name == "entity-ghost" and ent.ghost_name == "imposter-fcpu" then
-    ent.destroy()
-    return
-  end
-
   if ent.name == "fcpu" then
     local state = get_fcpu_state(ent)
     state.entity = ent
@@ -41,7 +34,12 @@ function handle_fcpu_create(ent, tags)
   if tags or ent.tags then
     handle_fcpu_create_v2(ent, tags or ent.tags)
   else
-    handle_fcpu_create_v1(ent)
+    --error('OBSOLETE: handle_fcpu_create_v1')
+    if ent.name == "fcpu" then
+      debug_print("handling "..ent.name)
+      local fcpu_state = get_fcpu_state(ent)
+      Controller.verify(fcpu_state)
+    end
   end
 end
 

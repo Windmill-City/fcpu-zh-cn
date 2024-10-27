@@ -115,8 +115,6 @@ data:extend{
   },
 }
 
-require('legacy/imposter_fcpu')
-
 local hdl_lognet_fcpu = table.shallow_merge(table.deep_copy(data.raw['roboport']['roboport']), {
   name = "lognet-fcpu",
   energy_source = {

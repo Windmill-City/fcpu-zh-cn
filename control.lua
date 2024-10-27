@@ -215,7 +215,6 @@ local function on_entity_cloned(event)
       if src_state then
         local dst_state = table.deep_copy(src_state)
 
-        dst_state.imposter_fcpu = nil
         dst_state.program_ics = {}
         dst_state.index = nil
         register_fcpu(dst_entity, dst_state)
@@ -266,7 +265,6 @@ end
 local event = require("3rdparty.flib061.event")
 local event_filters = {
   {filter = "name", name = "fcpu"},
-  {filter = "name", name = "imposter-fcpu"},
 }
 
 event.register({
