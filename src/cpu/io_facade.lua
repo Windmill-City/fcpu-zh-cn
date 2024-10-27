@@ -90,7 +90,7 @@ end
 -- Output wire access
 function io.output_clear()
   -- Output buffer
-  control.output.parameters = nil
+  control.output.sections[1] = nil
   ioChannel.GuiCache_Invalidate('output', 0)
 
   -- Vector output

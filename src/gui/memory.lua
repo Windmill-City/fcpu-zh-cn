@@ -48,7 +48,7 @@ local function ioChannel_GUI_Update_cl(channel)
     if ics and ics.out and ics.out.valid then
       local control = ics.out.get_control_behavior()
       --if control.signals_last_tick then
-        local network = control.get_circuit_network(defines.wire_type.red, ics.out_connector or defines.circuit_connector_id.combinator_output)
+        local network = control.get_circuit_network(ics.out_connector or defines.wire_connector_id.combinator_output_red)
         local memmap = state.memmap[channel]
         if network then
           MemoryView.UpdateFromTable(player_data, network.signals, nil, nil, memmap)
@@ -65,7 +65,7 @@ local function ioChannel_GUI_Update_cl(channel)
           end
         end
 
-        local network = control.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_output)
+        local network = control.get_circuit_network(defines.wire_connector_id.combinator_output_red)
         if network then
           MemoryView.UpdateFromTable(player_data, network.signals)
           return true
@@ -81,11 +81,11 @@ local function ioRegisters_GUI_Update(player_data, state, force)
   return true
 end
 
-local function ioWire_GUI_Update_cl(wire_type)
+local function ioWire_GUI_Update_cl(wire_connector)
   -- Input wires
   return function(player_data, state, force)
     local control = state.entity.get_control_behavior()
-    local input = control.get_circuit_network(wire_type, defines.circuit_connector_id.combinator_input)
+    local input = control.get_circuit_network(wire_connector)
     MemoryView.UpdateFromTable(player_data, input and input.signals)
     return true
   end
@@ -98,7 +98,7 @@ local function io_GUI_Update(player_data, state, force)
   --end
   if state.program_ics.output then
     local control = state.program_ics.output.value.get_control_behavior()
-    local network = control.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.constant_combinator)
+    local network = control.get_circuit_network(defines.wire_connector_id.combinator_output_red)
     if network then
       MemoryView.UpdateFromTable(player_data, network.signals)
       return true
@@ -106,13 +106,14 @@ local function io_GUI_Update(player_data, state, force)
   end
 end
 
-local function ioWire_GUI_Update_output_cl()
+local function ioWire_GUI_Update_output_cl(wire_connector)
   -- Output buffer
   return function(player_data, state, force)
     if state.program_ics.output then
       local control = state.program_ics.output.value.get_control_behavior()
-      MemoryView.UpdateFromTable(player_data, control and control.parameters, 1, true)
-    return true
+      local circuit = control and control.get_circuit_network(wire_connector)
+      MemoryView.UpdateFromTable(player_data, circuit and circuit.signals, 1, true)
+      return true
     end
   end
 end
@@ -136,10 +137,10 @@ end
 
 local ChannelsInfo = {
   { title = { 'gui-fcpu-memviewer.channel-registers' }, handler = ioRegisters_GUI_Update },
-  { title = { 'gui-fcpu-memviewer.channel-input-red' }, handler = ioWire_GUI_Update_cl(defines.wire_type.red) },
-  { title = { 'gui-fcpu-memviewer.channel-input-green' }, handler = ioWire_GUI_Update_cl(defines.wire_type.green) },
+  { title = { 'gui-fcpu-memviewer.channel-input-red' }, handler = ioWire_GUI_Update_cl(defines.wire_connector_id.combinator_input_red) },
+  { title = { 'gui-fcpu-memviewer.channel-input-green' }, handler = ioWire_GUI_Update_cl(defines.wire_connector_id.combinator_input_green) },
   { title = { 'gui-fcpu-memviewer.channel-input-lognet' }, handler = ioChannel_GUI_Update_cl('lognet') },
-  { title = { 'gui-fcpu-memviewer.channel-output-scalar' }, handler = ioWire_GUI_Update_output_cl() },
+  { title = { 'gui-fcpu-memviewer.channel-output-scalar' }, handler = ioWire_GUI_Update_output_cl(defines.wire_connector_id.combinator_output_red) },
   { title = { 'gui-fcpu-memviewer.channel-output-vector' }, handler = ioOutput_GUI_Update },
   { title = { 'gui-fcpu-memviewer.channel-output' }, handler = io_GUI_Update },
 }
@@ -169,7 +170,7 @@ function MemoryView.CreateWidget(rootGui)
         {type='checkbox', save_as='gui_memory_autoselect', state=false, caption={'gui-fcpu-memviewer.autoselect-channel'}, handlers="memory.channel_autoselect"},
       }},
 
-      {type="frame", direction="vertical", style="invisible_frame_with_title_for_inventory", children={
+      {type="frame", direction="vertical", style="invisible_frame", children={
         {type="flow", direction="horizontal", style_mods={ vertical_align='center' }, children={
           {template="heading_3", caption={"gui-fcpu-memviewer.memory-view"}},
           {template="pushers.horizontal"},
@@ -179,7 +180,7 @@ function MemoryView.CreateWidget(rootGui)
           }},
         }},
         {type="scroll-pane", direction="vertical", children={
-          {type="table", save_as="gui_memory_cells", style="logistics_slot_table", column_count=8 --[[ will be populated in `MemoryView.UpdateFromTable` ]]},
+          {type="table", save_as="gui_memory_cells", style="slot_table", column_count=8 --[[ will be populated in `MemoryView.UpdateFromTable` ]]},
         }}
       }}
     }}

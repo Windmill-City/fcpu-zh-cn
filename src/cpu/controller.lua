@@ -251,11 +251,11 @@ function Controller.validate_cache(state)
   local wires = cache.wires
 
   if not (wires.red and wires.red.valid) then
-    wires.red = control.indication.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_input)
+    wires.red = control.indication.get_circuit_network(defines.wire_connector_id.combinator_input_red)
   end
 
   if not (wires.green and wires.green.valid) then
-    wires.green = control.indication.get_circuit_network(defines.wire_type.green, defines.circuit_connector_id.combinator_input)
+    wires.green = control.indication.get_circuit_network(defines.wire_connector_id.combinator_input_green)
   end
 
   -- Cache.LogNet
@@ -263,14 +263,14 @@ function Controller.validate_cache(state)
     local ics = state.program_ics.lognet
     if ics and ics.out and ics.out.valid then
       local ctrl = ics.out.get_control_behavior()
-      wires.lognet = ctrl.get_circuit_network(ics.color_out or defines.wire_type.red, ics.out_connector or defines.circuit_connector_id.roboport)
+      wires.lognet = ctrl.get_circuit_network(ics.color_out or defines.wire_type.red, ics.out_connector or defines.wire_connector_id.roboport)
     end
   end
 end
 
 function Controller.handle_interrupts(state)
   local get_signal = function(signal)
-    local t = state.entity.get_merged_signal(signal.signal, defines.circuit_connector_id.combinator_input)
+    local t = state.entity.get_signal(signal.signal, defines.wire_connector_id.combinator_input_red, defines.wire_connector_id.combinator_input_green)
     return t or 0
   end
   if state.program_state == PSTATE_RUNNING then

@@ -8,6 +8,35 @@ local Enable = 0
 local Disable = 1
 
 -------------------------------------------------------------------------------------------------------
+--- MIGRATION TO Factorio Lua API 2.0
+-------------------------------------------------------------------------------------------------------
+local function connect_neighbour(source_entity, dict)
+  local source_connector = source_entity.get_wire_connector(dict.source_circuit_id, true)
+  local target_connector = dict.target_entity.get_wire_connector(dict.target_circuit_id, true)
+  source_connector.connect_to(target_connector, false)
+end
+
+local function combinator_input(wire_type)
+  if wire_type == defines.wire_type.green then
+    return defines.wire_connector_id.combinator_input_green
+  elseif wire_type == defines.wire_type.red then
+    return defines.wire_connector_id.combinator_input_red
+  else
+    Assert.todo("combinator_input")
+  end
+end
+
+local function combinator_output(wire_type)
+  if wire_type == defines.wire_type.green then
+    return defines.wire_connector_id.combinator_output_green
+  elseif wire_type == defines.wire_type.red then
+    return defines.wire_connector_id.combinator_output_red
+  else
+    Assert.todo("combinator_output")
+  end
+end
+
+-------------------------------------------------------------------------------------------------------
 local function inverse_wire_color(color)
   return (color ~= defines.wire_type.red) and defines.wire_type.red or defines.wire_type.green
 end
@@ -152,18 +181,16 @@ local function verify_channel(state, ics_name, debug_i)
   end
 
   if updated then
-    ics.value.connect_neighbour{
-      source_circuit_id = defines.circuit_connector_id.constant_combinator,
-      target_circuit_id = defines.circuit_connector_id.combinator_output,
+    connect_neighbour(ics.value, {
+      source_circuit_id = defines.wire_connector_id.circuit_green,
+      target_circuit_id = defines.wire_connector_id.combinator_output_green,
       target_entity = ics.out,
-      wire = defines.wire_type.green,
-    }
-    ics.value.connect_neighbour{
-      source_circuit_id = defines.circuit_connector_id.constant_combinator,
-      target_circuit_id = defines.circuit_connector_id.combinator_output,
+    })
+    connect_neighbour(ics.value, {
+      source_circuit_id = defines.wire_connector_id.circuit_red,
+      target_circuit_id = defines.wire_connector_id.combinator_output_red,
       target_entity = ics.out,
-      wire = defines.wire_type.red,
-    }
+    })
   end
 
   return updated
@@ -179,7 +206,7 @@ local function verify_lognet(state, debug_i)
     local ent_lognet, ctrl_lognet = builder.create_node(state.entity, 'lognet', debug_i * 2)
 
     ics.out = ent_lognet
-    ics.out_connector = defines.circuit_connector_id.roboport
+    ics.out_connector = defines.wire_connector_id.circuit_red --roboport
 
     updated = true
   end
@@ -194,18 +221,18 @@ local function verify_lognet(state, debug_i)
   end
 
   if updated then
-    ics.out.connect_neighbour{
+    connect_neighbour(ics.out, {
       source_circuit_id = ics.out_connector,
-      target_circuit_id = defines.circuit_connector_id.constant_combinator,
+      target_circuit_id = defines.wire_connector_id.circuit_green,
       target_entity = ics.pole,
       wire = defines.wire_type.green,
-    }
-    ics.out.connect_neighbour{
+    })
+    connect_neighbour(ics.out, {
       source_circuit_id = ics.out_connector,
-      target_circuit_id = defines.circuit_connector_id.constant_combinator,
+      target_circuit_id = defines.wire_connector_id.circuit_red,
       target_entity = ics.pole,
       wire = defines.wire_type.red,
-    }
+    })
   end
 
   return updated
@@ -215,18 +242,18 @@ function builder.verify(state)
   state.program_ics = state.program_ics or {}
 
   if verify_channel(state, 'output', 1) then
-    state.entity.connect_neighbour{
-      source_circuit_id = defines.circuit_connector_id.combinator_output,
-      target_circuit_id = defines.circuit_connector_id.combinator_output,
+    connect_neighbour(state.entity, {
+      source_circuit_id = defines.wire_connector_id.combinator_output_green,
+      target_circuit_id = defines.wire_connector_id.combinator_output_green,
       target_entity = state.program_ics.output.out,
       wire = defines.wire_type.green,
-    }
-    state.entity.connect_neighbour{
-      source_circuit_id = defines.circuit_connector_id.combinator_output,
-      target_circuit_id = defines.circuit_connector_id.combinator_output,
+    })
+    connect_neighbour(state.entity, {
+      source_circuit_id = defines.wire_connector_id.combinator_output_red,
+      target_circuit_id = defines.wire_connector_id.combinator_output_red,
       target_entity = state.program_ics.output.out,
       wire = defines.wire_type.red,
-    }
+    })
   end
 
   for i = 1, MC_MEMORY_CHANNELS  do
@@ -254,18 +281,18 @@ function builder.create_merger_cell(entity, input_a, input_b)
     copy_count_from_input = true
   }
 
-  proxy.connect_neighbour{
-    source_circuit_id = defines.circuit_connector_id.combinator_input,
+  connect_neighbour(proxy, {
+    source_circuit_id = combinator_input(wire1),
     target_circuit_id = input_a.port,
     target_entity = input_a.entity,
     wire = wire1,
-  }
-  proxy.connect_neighbour{
-    source_circuit_id = defines.circuit_connector_id.combinator_input,
+  })
+  connect_neighbour(proxy, {
+    source_circuit_id = combinator_input(wire2),
     target_circuit_id = input_b.port,
     target_entity = input_b.entity,
     wire = wire2,
-  }
+  })
 
   return proxy
 end
@@ -344,76 +371,76 @@ function builder.create_filter_cell(entity, input_src, input_msk)
     copy_count_from_input = true
   }
 
-  a1.connect_neighbour{
-    source_circuit_id = defines.circuit_connector_id.combinator_input,
+  connect_neighbour(a1, {
+    source_circuit_id = combinator_input(wireM),
     target_circuit_id = input_msk.port,
     target_entity = input_msk.entity,
     wire = wireM,
-  }
-  a2.connect_neighbour{
-    source_circuit_id = defines.circuit_connector_id.combinator_input,
-    target_circuit_id = defines.circuit_connector_id.combinator_input,
+  })
+  connect_neighbour(a2, {
+    source_circuit_id = combinator_input(wireM),
+    target_circuit_id = combinator_input(wireM),
     target_entity = a1,
     wire = wireM,
-  }
-  a2.connect_neighbour{
-    source_circuit_id = defines.circuit_connector_id.combinator_output,
-    target_circuit_id = defines.circuit_connector_id.combinator_output,
+  })
+  connect_neighbour(a2, {
+    source_circuit_id = defines.wire_connector_id.combinator_output_green,
+    target_circuit_id = defines.wire_connector_id.combinator_output_green,
     target_entity = a1,
     wire = defines.wire_type.green,
-  }
+  })
 
-  a3.connect_neighbour{
-    source_circuit_id = defines.circuit_connector_id.combinator_input,
-    target_circuit_id = defines.circuit_connector_id.combinator_input,
+  connect_neighbour(a3, {
+    source_circuit_id = combinator_input(wireS),
+    target_circuit_id = combinator_input(wireS),
     target_entity = d1,
     wire = wireS,
-  }
-  d1.connect_neighbour{
-    source_circuit_id = defines.circuit_connector_id.combinator_input,
+  })
+  connect_neighbour(d1, {
+    source_circuit_id = combinator_input(wireS),
     target_circuit_id = input_src.port,
     target_entity = input_src.entity,
     wire = wireS,
-  }
-  d1.connect_neighbour{
-    source_circuit_id = defines.circuit_connector_id.combinator_output,
-    target_circuit_id = defines.circuit_connector_id.combinator_input,
+  })
+  connect_neighbour(d1, {
+    source_circuit_id = defines.wire_connector_id.combinator_output_red,
+    target_circuit_id = defines.wire_connector_id.combinator_input_red,
     target_entity = d3,
     wire = defines.wire_type.red,
-  }
+  })
 
-  a2.connect_neighbour{
-    source_circuit_id = defines.circuit_connector_id.combinator_output,
-    target_circuit_id = defines.circuit_connector_id.combinator_input,
+  connect_neighbour(a2, {
+    source_circuit_id = defines.wire_connector_id.combinator_output_green,
+    target_circuit_id = defines.wire_connector_id.combinator_input_green,
     target_entity = d2,
     wire = defines.wire_type.green,
-  }
-  a3.connect_neighbour{
-    source_circuit_id = defines.circuit_connector_id.combinator_output,
-    target_circuit_id = defines.circuit_connector_id.combinator_input,
+  })
+  connect_neighbour(a3, {
+    source_circuit_id = defines.wire_connector_id.combinator_output_red,
+    target_circuit_id = defines.wire_connector_id.combinator_input_red,
     target_entity = d2,
     wire = defines.wire_type.red,
-  }
+  })
 
   --[[ Tie outputs for each color ]]
-  d2.connect_neighbour{
-    source_circuit_id = defines.circuit_connector_id.combinator_input,
-    target_circuit_id = defines.circuit_connector_id.combinator_input,
+  connect_neighbour(d2, {
+    source_circuit_id = defines.wire_connector_id.combinator_input_green,
+    target_circuit_id = defines.wire_connector_id.combinator_input_green,
     target_entity = d3,
     wire = defines.wire_type.green,
-  }
-  d2.connect_neighbour{
-    source_circuit_id = defines.circuit_connector_id.combinator_output,
-    target_circuit_id = defines.circuit_connector_id.combinator_output,
+  })
+  connect_neighbour(d2, {
+    source_circuit_id = defines.wire_connector_id.combinator_output_green,
+    target_circuit_id = defines.wire_connector_id.combinator_output_green,
     target_entity = d3,
     wire = defines.wire_type.green,
-  }
-  d2.connect_neighbour{
-    source_circuit_id = defines.circuit_connector_id.combinator_output,
-    target_circuit_id = defines.circuit_connector_id.combinator_output,
+  })
+  connect_neighbour(d2, {
+    source_circuit_id = defines.wire_connector_id.combinator_output_red,
+    target_circuit_id = defines.wire_connector_id.combinator_output_red,
     target_entity = d3,
     wire = defines.wire_type.red,
-  }
+  })
 
   return {a1,a2,a3,d1,d2,gate=d3}
 end
@@ -493,36 +520,36 @@ function builder.create_memory_cell(entity, input_a)
     }
   end
 
-  d_key.connect_neighbour{
-    source_circuit_id = defines.circuit_connector_id.combinator_input,
+  connect_neighbour(d_key, {
+    source_circuit_id = combinator_input(wire1),
     target_circuit_id = input_a.port,
     target_entity = input_a.entity,
     wire = wire1,
-  }
-  d_key.connect_neighbour{
-    source_circuit_id = defines.circuit_connector_id.combinator_output,
-    target_circuit_id = defines.circuit_connector_id.combinator_input,
+  })
+  connect_neighbour(d_key, {
+    source_circuit_id = combinator_output(wire2),
+    target_circuit_id = combinator_input(wire2),
     target_entity = d_out,
     wire = wire2,
-  }
-  d_out.connect_neighbour{
-    source_circuit_id = defines.circuit_connector_id.combinator_output,
-    target_circuit_id = defines.circuit_connector_id.combinator_input,
+  })
+  connect_neighbour(d_out, {
+    source_circuit_id = combinator_output(wire1),
+    target_circuit_id = combinator_input(wire1),
     target_entity = d_out,
     wire = wire1,
-  }
-  d_out.connect_neighbour{
-    source_circuit_id = defines.circuit_connector_id.combinator_output,
-    target_circuit_id = defines.circuit_connector_id.combinator_input,
+  })
+  connect_neighbour(d_out, {
+    source_circuit_id = combinator_output(wire2),
+    target_circuit_id = combinator_input(wire2),
     target_entity = d_aux,
     wire = wire2,
-  }
-  d_aux.connect_neighbour{
-    source_circuit_id = defines.circuit_connector_id.combinator_output,
-    target_circuit_id = defines.circuit_connector_id.combinator_input,
+  })
+  connect_neighbour(d_aux, {
+    source_circuit_id = combinator_output(wire2),
+    target_circuit_id = combinator_input(wire2),
     target_entity = d_aux,
     wire = wire2,
-  }
+  })
 
   local ics = {
     color_out = wire2,
@@ -556,19 +583,20 @@ function builder.create_arithmetic_cell(entity, input_a, input_b, operation)
     output_signal = {type='virtual', name='signal-each'}
   }
 
-  x.connect_neighbour{
-    source_circuit_id = defines.circuit_connector_id.combinator_input,
+  connect_neighbour(x, {
+    source_circuit_id = combinator_input(input_a.wire),
     target_circuit_id = input_a.port,
     target_entity = input_a.entity,
     wire = input_a.wire,
-  }
+  })
   if input_b ~= nil and constant == nil then
-    control_x.connect_neighbour{
-      source_circuit_id = defines.circuit_connector_id.combinator_input,
+    local inv_a_wire = inverse_wire_color(input_a.wire)
+    connect_neighbour(control_x, {
+      source_circuit_id = combinator_input(inv_a_wire),
       target_circuit_id = input_a.port,
       target_entity = input_a.entity,
-      wire = inverse_wire_color(input_a.wire),
-    }
+      wire = inv_a_wire,
+    })
   end
 
   return x
@@ -587,12 +615,12 @@ function builder.create_decider_cell(entity, input, signal, operation)
     copy_count_from_input = true
   }
 
-  x.connect_neighbour{
-    source_circuit_id = defines.circuit_connector_id.combinator_input,
+  connect_neighbour(x, {
+    source_circuit_id = combinator_input(input.wire),
     target_entity = input.entity,
-    target_circuit_id = input.port or defines.circuit_connector_id.combinator_output,
+    target_circuit_id = input.port or combinator_output(input.wire),
     wire = input.wire,
-  }
+  })
 
   return x
 end
@@ -607,13 +635,13 @@ local function connect_input_from(state, address)
     return {
       entity = ics.out,
       wire = defines.wire_type.red,
-      port = ics.out_connector or defines.circuit_connector_id.combinator_output
+      port = ics.out_connector or defines.wire_connector_id.combinator_output_red
     }
   elseif address.type == 'wire' then
     return {
       entity = state.entity,
       wire = defines.wire_type[address.color],
-      port = defines.circuit_connector_id.combinator_input
+      port = combinator_input(defines.wire_type[address.color])
     }
   else
     Assert.todo()
@@ -625,12 +653,12 @@ local function connect_output_to(state, ics, address)
   if address.type == 'memory' then
     local ics_name = address.channel
     local mem_ics = state.program_ics[ics_name]
-    ics.kout.connect_neighbour{
-      source_circuit_id = defines.circuit_connector_id.combinator_output,
-      target_circuit_id = defines.circuit_connector_id.combinator_input,
+    connect_neighbour(ics.kout, {
+      source_circuit_id = combinator_output(ics.color_out),
+      target_circuit_id = combinator_input(ics.color_out),
       target_entity = mem_ics.out,
       wire = ics.color_out,
-    }
+    })
     return ics_name
   elseif address.type == 'wire' then
 --[[ moved from `create_memory_cell`
@@ -647,16 +675,16 @@ local function connect_output_to(state, ics, address)
         copy_count_from_input = true
       }
 
-      proxy.connect_neighbour{
-        source_circuit_id = defines.circuit_connector_id.combinator_input,
-        target_circuit_id = defines.circuit_connector_id.combinator_output,
+      connect_neighbour(proxy, {
+        source_circuit_id = defines.wire_connector_id.combinator_input,
+        target_circuit_id = defines.wire_connector_id.combinator_output,
         target_entity = ics.out,
         wire = inverse_wire_color(isTable and input_b.wire),
       }
 
       if isTable and input_b.entity then
-        proxy.connect_neighbour{
-          source_circuit_id = defines.circuit_connector_id.combinator_input,
+        connect_neighbour(proxy, {
+          source_circuit_id = defines.wire_connector_id.combinator_input,
           target_circuit_id = input_b.port,
           target_entity = input_b.entity,
           wire = input_b.wire or defines.wire_type.red,
@@ -667,18 +695,18 @@ local function connect_output_to(state, ics, address)
       ics.out = proxy
     end
 ]]
-    ics.kout.connect_neighbour{
-      source_circuit_id = defines.circuit_connector_id.combinator_output,
-      target_circuit_id = defines.circuit_connector_id.combinator_input,
+    connect_neighbour(ics.kout, {
+      source_circuit_id = combinator_output(ics.color_out),
+      target_circuit_id = combinator_input(ics.color_out),
       target_entity = state.program_ics.output.out,
       wire = ics.color_out,
-    }
-    ics.kout.connect_neighbour{
-      source_circuit_id = defines.circuit_connector_id.combinator_output,
-      target_circuit_id = defines.circuit_connector_id.combinator_input,
+    })
+    connect_neighbour(ics.kout, {
+      source_circuit_id = combinator_output(ics.color_out),
+      target_circuit_id = combinator_input(ics.color_out),
       target_entity = state.program_ics.output.out,
       wire = ics.color_out,
-    }
+    })
     return 'output'
   else
     Assert.todo()
@@ -695,10 +723,11 @@ local function vector_scalar_op(operation)
     local value = nil
 
     local x = builder.create_arithmetic_cell(state.entity, input, value, operation)
+    local inv_wire = inverse_wire_color(input.wire)
     local ics = builder.create_memory_cell(state.entity, {
       entity = x,
-      wire = inverse_wire_color(input.wire),
-      port = defines.circuit_connector_id.combinator_output
+      wire = inv_wire,
+      port = combinator_output(inv_wire)
     })
     ics.x = x
 
@@ -731,10 +760,11 @@ local function vector_decide_op(operation)
     local value = nil
 
     local x = builder.create_decider_cell(state.entity, input, value, operation)
+    local inv_wire = inverse_wire_color(input.wire)
     local ics = builder.create_memory_cell(state.entity, {
       entity = x,
-      wire = inverse_wire_color(input.wire),
-      port = defines.circuit_connector_id.combinator_output
+      wire = inv_wire,
+      port = combinator_output(inv_wire)
     })
     ics.x = x
 
@@ -802,7 +832,7 @@ local ops = {
     local ics = builder.create_memory_cell(state.entity, {
       entity = merger,
       wire = input_a.wire,
-      port = defines.circuit_connector_id.combinator_output
+      port = combinator_output(input_a.wire)
     })
     ics[#ics + 1] = merger
 
@@ -836,7 +866,7 @@ local ops = {
     local ics = builder.create_memory_cell(state.entity, {
       entity = merger.gate,
       wire = input_a.wire,
-      port = defines.circuit_connector_id.combinator_output
+      port = combinator_output(input_a.wire)
     })
     for _,ic in pairs(merger) do
       ics[#ics + 1] = ic

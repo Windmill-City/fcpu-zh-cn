@@ -58,7 +58,7 @@ function ioWire.find_signal(color, signal_to_find)
     if wire then
       count = wire.get_signal(signal_to_find)
     elseif color == 'input' then
-      count = state.entity.get_merged_signal(signal_to_find, defines.circuit_connector_id.combinator_input)
+      count = state.entity.get_merged_signal(signal_to_find, defines.wire_connector_id.combinator_input)
     else
       Assert.exception("Tried to access " .. color .. " wire while it is not connected")
     end

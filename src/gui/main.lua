@@ -66,7 +66,7 @@ function MainView.RegisterTemplates()
     frame_action_checkbox = {type="checkbox", style="frame_action_button", mouse_button_filter={"left"}},
     drag_handle = {type="empty-widget", name="drag-handle", style="draggable_space_header", style_mods={minimal_width=30, height=24, right_margin=4, horizontally_stretchable=true}},
     pin_button = {template="frame_action_button", sprite="fcpu-pin-white", hovered_sprite="fcpu-pin-black"},
-    close_button = {template="frame_action_button", sprite="utility/close_white", hovered_sprite="utility/close_black"},
+    close_button = {type="sprite-button", style="close_button", sprite="utility/close"},
 
     pushers = {
       horizontal = {type="empty-widget", style_mods={horizontally_stretchable=true}},
@@ -80,8 +80,8 @@ function MainView.RegisterTemplates()
       return table.deep_merge{{type="sprite-button", style="shortcut_bar_button_small"..(color and "_"..color or ""), name=name.."-program", sprite="fcpu-"..sprite.."-sprite", handlers="widget."..name.."_program"}, ...}
     end,
 
-    heading_2 = {type="frame", style="invisible_frame_with_title"},
-    heading_3 = {type="label", style="heading_3_label", style_mods={padding=4}},
+    heading_2 = {type="label", style="caption_label", style_mods={padding=4}},
+    heading_3 = {type="label", style="semibold_label", style_mods={padding=4}},
     slot_button = function(name, title)
       return {type="sprite-button", style="slot_button_in_shallow_frame", name=name.."-inspect", tooltip=(title or name), handlers="widget.insert_register_to_program"}
     end,
@@ -120,10 +120,10 @@ local function CreateWidget_Main(rootGui)
   end
 
   local elems = gui.build(rootGui, {
-    {type="frame", save_as="gui_fcpu", name="fcpu-widget", style="inner_frame_in_outer_frame", direction="vertical", children={
+    {type="frame", save_as="gui_fcpu", name="fcpu-widget", style="frame", direction="vertical", children={
       {type="flow", name="titlebar", children={
-        {template="frame_action_button", name="rename-button", handlers="widget.rename_button", sprite="utility/rename_icon_small_white", hovered_sprite="utility/rename_icon_small_black"},
-        {type="textfield", name="custom-name", handlers="widget.rename_field", style="titlebar_search_textfield", visible=false, clear_and_focus_on_right_click=true, style_mods={ bottom_margin=2 }},
+        {template="frame_action_button", name="rename-button", handlers="widget.rename_button", sprite="utility/rename_icon", hovered_sprite="utility/rename_icon"},
+        {type="textfield", name="custom-name", handlers="widget.rename_field", style="search_popup_textfield", visible=false, clear_and_focus_on_right_click=true, style_mods={ bottom_margin=2 }},
         {template="frame_title", name="label", style_mods={maximal_width=fcpu_gui_editor_width-50}},
         {template="drag_handle", name="drag-handle"},
         {template="pin_button", save_as="gui_pin_button", handlers="widget.pin_button", state=false},
@@ -138,7 +138,7 @@ local function CreateWidget_Main(rootGui)
             gui.templates.control_button("run", "play", "green"),
             gui.templates.control_button("step", "next"),
             {template="pushers.horizontal"},
-            {type="switch", style_mods={ right_margin=10 }, left_label_caption={"gui-constant.off"}, right_label_caption={"gui-constant.on"}, save_as="gui_enable_switch", handlers="widget.enable_program"},
+            {type="switch", left_label_caption={"gui-constant.off"}, right_label_caption={"gui-constant.on"}, save_as="gui_enable_switch", handlers="widget.enable_program"},
             {template="pushers.horizontal"},
             gui.templates.control_button("memory", "memory", "blue", "view_memory"),
           }},
@@ -181,7 +181,7 @@ local function CreateWidget_Main(rootGui)
                 {type="flow", name="inner", save_as="gui_breakpoints", direction="vertical",
                   style_mods={
                     width = 44,
-                    height = 2568,
+                    height = 2568 * 2,
                     horizontally_stretchable=true,
                     top_padding=4,
                   },
@@ -192,7 +192,7 @@ local function CreateWidget_Main(rootGui)
                 {type="text-box", name="program-input", style="fcpu_program_input",
                   style_mods={
                     width = fcpu_gui_editor_width,
-                    height = 2568 + 15,
+                    height = 2568 * 2 + 15,
                     vertically_stretchable=false,
                     rich_text_setting=defines.rich_text_setting.enabled
                   },
@@ -205,7 +205,7 @@ local function CreateWidget_Main(rootGui)
               horizontal_scroll_policy="auto",
               style_mods={
                 width = fcpu_gui_editor_width,
-                height = 2568,
+                height = 2568 * 2,
                 horizontally_squashable=true,
                 horizontally_stretchable=true,
                 vertically_squashable=true,
