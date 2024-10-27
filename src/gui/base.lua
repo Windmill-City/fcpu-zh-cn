@@ -14,10 +14,14 @@ function GUI_signalToSpritePath(player_data, signal)
     elseif signal.type == "virtual" then
       path = "virtual-signal/" .. signal.name
     elseif signal.name then
-      path = signal.type .. '/' .. signal.name
+      if signal.type then
+        path = signal.type .. '/' .. signal.name
+      else
+        path = 'item/' .. signal.name
+      end
     end
     if path and (player_data and player_data.gui_fcpu and player_data.gui_fcpu.gui) then
-      if player_data.gui_fcpu.gui.is_valid_sprite_path(path) then
+      if helpers.is_valid_sprite_path(path) then
         return path
       end
     end
@@ -32,7 +36,11 @@ function GUI_signalToTooltip(signal, prefix)
     if signal.signal.type == 'virtual' then
       str = str .. '[virtual-signal='.. signal.signal.name ..']'
     else
-      str = str .. '['.. signal.signal.type ..'='.. signal.signal.name ..']'
+      if signal.signal.type then
+        str = str .. '['.. signal.signal.type ..'='.. signal.signal.name ..']'
+      else
+        str = str .. '[item='.. signal.signal.name ..']'
+      end
     end
   end
   if prefix then
