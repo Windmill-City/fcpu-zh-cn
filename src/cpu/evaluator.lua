@@ -64,11 +64,17 @@ local function eval(ast, ics)
   end
 end
 
+function eval_debug(ast, ics)
+  if MC_DEBUG then
+    return true, eval(ast, ics) -- forces scenario crash on any exception
+  end
+  return pcall(eval, ast, ics)
+end
+
 function Evaluator.eval(ast, ics, state)
   State.bind(state)
 
-  local status, results = pcall(eval, ast, ics)
-  --local status, results = true, eval(ast)
+  local status, results = eval_debug(ast, ics)
   if not status then
     local start_index = string.find(results, '@') or 0
     results = string.sub(results, start_index+1, -1)
