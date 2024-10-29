@@ -28,7 +28,7 @@ function ioChannel.read_network(address)
     local ics = ICStack.get_node(address.channel)
     if ics.out and ics.out.valid then
       local control = ics.out.get_control_behavior()
-      local network = control.get_circuit_network(ics.color_out or defines.wire_type.red, ics.out_connector or defines.wire_connector_id.combinator_output)
+      local network = control.get_circuit_network(ics.out_connector or defines.wire_connector_id.combinator_output_red)
       return network
     else
       if address.type == 'memory' then
