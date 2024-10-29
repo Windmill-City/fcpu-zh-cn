@@ -213,7 +213,7 @@ local opcodes = {
 
   clr = function(_)
     local actions = {}
-    if 0 < #_ then
+    if _ and  0 < #_ then
       for i, address in ipairs(_) do
         if address then
           Assert.type(address, {'register', 'memory', 'output'})
