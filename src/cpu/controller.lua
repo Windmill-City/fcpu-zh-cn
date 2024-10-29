@@ -218,7 +218,7 @@ function Controller.add_deferred(state, deffer)
   return will_sync
 end
 
-function Controller.do_defferred()
+function Controller.do_deferred()
   while true do
     local p = Heap.priority(global.deffered)
     if not p or game.tick < p then

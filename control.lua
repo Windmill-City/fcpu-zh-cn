@@ -70,7 +70,7 @@ script.on_event(defines.events.on_tick, function(event)
   end
 
   -- TODO: add explicit HandleCPU call for deffered fCPUs!
-  Controller.do_defferred()
+  Controller.do_deferred()
 
   local limit = fcpu_maximum_updates_per_tick
   local ended
