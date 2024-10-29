@@ -675,6 +675,8 @@ See [here](https://boosty.to/konstg)
 
 
 # Dear supporters
+
+* Sakari (v0.4.31 update)
 * masterkrovel (v0.4.14 update)
 * Spencer Nelson (v0.4.14 update)
 * @Baughnie (v0.4.14 update)
