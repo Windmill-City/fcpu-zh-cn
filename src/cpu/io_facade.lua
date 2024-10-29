@@ -83,7 +83,7 @@ function io.control_set(signal)
   local params = control.indication.parameters
   params.first_constant = signal.count
   params.output_signal = signal.signal
-  control.indication.parameters = params
+  control.indication.parameters = params -- https://lua-api.factorio.com/stable/concepts/ArithmeticCombinatorParameters.html
 end
 
 

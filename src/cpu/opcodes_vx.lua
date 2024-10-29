@@ -9,7 +9,7 @@ local function vector_scalar_op()
       local control = ics.x.get_or_create_control_behavior()
       local params = control.parameters
       params.second_constant = io.getvalue(src, {'value', 'register', 'input'})
-      control.parameters = params
+      control.parameters = params -- https://lua-api.factorio.com/stable/concepts/ArithmeticCombinatorParameters.html
     end
   end
 end
@@ -21,8 +21,8 @@ local function vector_compare_op()
     if ics and ics.x then
       local control = ics.x.get_or_create_control_behavior()
       local params = control.parameters
-      params.constant = io.getvalue(src, {'value', 'register', 'input'})
-      control.parameters = params
+      params.conditions[1].constant = io.getvalue(src, {'value', 'register', 'input'})
+      control.parameters = params -- https://lua-api.factorio.com/stable/concepts/DeciderCombinatorParameters.html
     end
   end
 end

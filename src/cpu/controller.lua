@@ -20,7 +20,7 @@ Controller.event_halt = script.generate_event_name()
 
 function Controller.init(mc)
   local control = mc.get_or_create_control_behavior()
-  control.parameters = {
+  control.parameters = { -- https://lua-api.factorio.com/stable/concepts/ArithmeticCombinatorParameters.html
     first_signal = nil,
     second_signal = nil,
     first_constant = nil,
@@ -186,8 +186,8 @@ local function run_deffer_command(op)
     if op.ic and op.ic.valid then
       local control = op.ic.get_or_create_control_behavior()
       local params = control.parameters
-      params.constant = op.value
-      control.parameters = params
+      params.conditions[1].constant = op.value
+      control.parameters = params -- https://lua-api.factorio.com/stable/concepts/DeciderCombinatorParameters.html
     end
   elseif op.action == 'exec' then
     local proc = load('return '..op.proc)
@@ -515,7 +515,7 @@ function Controller.update_ip(state)
   --local control = state.cache.control.indication
   --local param = control.parameters
   --param.second_constant = state.instruction_pointer
-  --control.parameters = param
+  --control.parameters = param -- https://lua-api.factorio.com/stable/concepts/ArithmeticCombinatorParameters.html
 
   -- Stop on next instruction if breakpoint found
   if state.breakpoints[state.instruction_pointer] then
@@ -564,7 +564,7 @@ function Controller.update_state(state, pstate)
           params.first_signal = { type="virtual", name=str }
           params.output_signal = nil
         end
-        indication_ctrl.parameters = params
+        indication_ctrl.parameters = params -- https://lua-api.factorio.com/stable/concepts/ArithmeticCombinatorParameters.html
       end
     end
   end

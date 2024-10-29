@@ -36,6 +36,24 @@ local function combinator_output(wire_type)
   end
 end
 
+local function decider_combinator_params(lapi) -- Factorio 1.0 legacy API
+  return { -- https://lua-api.factorio.com/stable/concepts/DeciderCombinatorParameters.html
+    conditions = {{
+      first_signal = lapi.first_signal,
+      second_signal = lapi.second_signal,
+      constant = lapi.constant,
+      comparator = lapi.comparator,
+      first_signal_networks = { red=true, green=true, },
+      second_signal_networks = { red=true, green=true, }
+    }},
+    outputs = {{
+      signal = lapi.output_signal,
+      copy_count_from_input = lapi.copy_count_from_input,
+      networks = { red=true, green=true, }
+    }}
+  }
+end
+
 -------------------------------------------------------------------------------------------------------
 local function inverse_wire_color(color)
   return (color ~= defines.wire_type.red) and defines.wire_type.red or defines.wire_type.green
@@ -159,14 +177,14 @@ local function verify_channel(state, ics_name, debug_i)
 
     ics.out = ent_mem
 
-    ctrl_mem.parameters = {
+    ctrl_mem.parameters = decider_combinator_params({
       first_signal = {type='virtual', name='signal-fcpu-error'},
       second_signal = nil,
       constant = 0,
       comparator = "=",
       output_signal = {type='virtual', name='signal-everything'},
       copy_count_from_input = true
-    }
+    })
 
     updated = true
   end
@@ -272,14 +290,14 @@ function builder.create_merger_cell(entity, input_a, input_b)
 
   local proxy, control_proxy = builder.create_node(entity, 'decider')
 
-  control_proxy.parameters = {
+  control_proxy.parameters = decider_combinator_params({
     first_signal = {type='virtual', name='signal-fcpu-error'},
     second_signal = nil,
     constant = 0,
     comparator = "=",
     output_signal = {type='virtual', name='signal-everything'},
     copy_count_from_input = true
-  }
+  })
 
   connect_neighbour(proxy, {
     source_circuit_id = combinator_input(wire1),
@@ -346,30 +364,30 @@ function builder.create_filter_cell(entity, input_src, input_msk)
     output_signal = {type='virtual', name='signal-each'}
   }
 
-  control_d1.parameters = {
+  control_d1.parameters = decider_combinator_params({
     first_signal = {type='virtual', name='signal-each'},
     second_signal = nil,
     constant = 0,
     comparator = "<",
     output_signal = {type='virtual', name='signal-each'},
     copy_count_from_input = false
-  }
-  control_d2.parameters = {
+  })
+  control_d2.parameters = decider_combinator_params({
     first_signal = {type='virtual', name='signal-each'},
     second_signal = nil,
     constant = 0,
     comparator = "<",
     output_signal = {type='virtual', name='signal-each'},
     copy_count_from_input = true
-  }
-  control_d3.parameters = {
+  })
+  control_d3.parameters = decider_combinator_params({
     first_signal = {type='virtual', name='signal-each'},
     second_signal = nil,
     constant = -2147483648,
     comparator = "=",
     output_signal = {type='virtual', name='signal-each'},
     copy_count_from_input = true
-  }
+  })
 
   connect_neighbour(a1, {
     source_circuit_id = combinator_input(wireM),
@@ -510,14 +528,14 @@ function builder.create_memory_cell(entity, input_a)
   local d_aux, control_aux = builder.create_node(entity, 'decider')
 
   for _,c in ipairs({control_key, control_out, control_aux}) do
-    c.parameters = {
+    c.parameters = decider_combinator_params({
       first_signal = {type='virtual', name='signal-fcpu-error'},
       second_signal = nil,
       constant = 1,
       comparator = "=", -- < ≤ ≠ = ≥ >
       output_signal = {type='virtual', name='signal-everything'},
       copy_count_from_input = true
-    }
+    })
   end
 
   connect_neighbour(d_key, {
@@ -606,14 +624,14 @@ end
 function builder.create_decider_cell(entity, input, signal, operation)
   local x, control_x = builder.create_node(entity, 'decider')
 
-  control_x.parameters = {
+  control_x.parameters = decider_combinator_params({
     first_signal = {type='virtual', name='signal-each'},
     second_signal = nil,
     constant = 0,
     comparator = operation,
     output_signal = {type='virtual', name='signal-each'},
     copy_count_from_input = true
-  }
+  })
 
   connect_neighbour(x, {
     source_circuit_id = combinator_input(input.wire),
@@ -666,14 +684,14 @@ local function connect_output_to(state, ics, address)
       local isTable = (type(input_b) == 'table')
       local proxy, control_proxy = builder.create_node(entity, 'decider')
 
-      control_proxy.parameters = {
+      control_proxy.parameters = decider_combinator_params({
         first_signal = {type='virtual', name='signal-fcpu-error'},
         second_signal = nil,
         constant = 0,
         comparator = "=",
         output_signal = {type='virtual', name='signal-everything'},
         copy_count_from_input = true
-      }
+      })
 
       connect_neighbour(proxy, {
         source_circuit_id = defines.wire_connector_id.combinator_input,
