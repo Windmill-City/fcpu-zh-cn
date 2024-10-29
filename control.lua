@@ -14,7 +14,7 @@ require('src/wiki')
 -------------------------------------------------------------------------------------------------------
 
 local function on_build_fcpu(event)
-  local entity = event.created_entity
+  local entity = event.entity
   if not (entity and entity.valid) then return end
 
   handle_fcpu_create(entity, event.tags and event.tags.fcpu)
@@ -272,10 +272,7 @@ event.register({
   defines.events.script_raised_revive,
   },
   function(event)
-    on_build_fcpu({
-      created_entity = event.entity,
-      tags = event.tags
-    })
+    on_build_fcpu(event)
   end
 )
 
