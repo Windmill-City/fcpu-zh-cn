@@ -70,3 +70,11 @@ function fcpu_update_program(fcpu, program_text)
     end
   end
 end
+
+function is_entity(obj, check_metatable)
+  local t = type(obj)
+  if not ((t == 'userdata' and MC_FACTORIO2) or (t == 'table' and not MC_FACTORIO2)) then
+    return false
+  end
+  return check_metatable ~= true or getmetatable(obj) == 'private'
+end

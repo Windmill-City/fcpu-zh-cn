@@ -136,16 +136,18 @@ function builder.destroy_nodes(state)
 end
 
 function builder.destroy_ics(entity)
-  if type(entity) == 'table' then
-    if getmetatable(entity) ~= 'private' then
-      for _, e in pairs(entity) do
-        builder.destroy_ics(e)
-      end
-    elseif not entity.valid then
+  if is_entity(entity, true) then
+    if not entity.valid then
     elseif (entity.name == "decider-fcpu" or entity.name == "arithmetic-fcpu" or entity.name == "constant-fcpu" or entity.name == "output-fcpu" or entity.name == "lognet-fcpu") then
       debug_print('destroyed fcpu '.. entity.name ..' ic')
       Entity.set_data(entity, nil) -- TODO: remove, as it leaks on surface destroy
       entity.destroy()
+    end
+    return
+  end
+  if type(entity) == 'table' then
+    for _, e in pairs(entity) do
+      builder.destroy_ics(e)
     end
   end
 end
@@ -156,7 +158,7 @@ function builder.validate_ics(ics)
   if type(ics) == 'table' then
     local cnt = 0
     for _, e in pairs(ics) do
-      if type(e) == 'table' then
+      if is_entity(e) then
         cnt = cnt + 1
         if not e.valid then
           return false

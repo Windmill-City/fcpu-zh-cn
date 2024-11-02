@@ -1,4 +1,5 @@
 MC_DEBUG = __DebugAdapter ~= nil
+MC_FACTORIO2 = storage ~= nil
 
 MC_LINES = 256
 MC_OUTPUT = 256

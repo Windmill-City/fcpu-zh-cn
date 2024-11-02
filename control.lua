@@ -63,7 +63,7 @@ script.on_event(defines.events.on_tick, function(event)
   local HandleCPU = function(index, k)
     local state = storage.fcpus[index]
     handled = handled + 1
-    if Controller.handle(state, power_percents) then
+    if Controller.handle(state) then
         enabled = enabled + 1
     end
     return nil, not state.destroy_regnum, start == k
@@ -239,11 +239,11 @@ local function on_picker_dolly_moved(event)
 
         if state.program_ics then
           for _, ics in pairs(state.program_ics) do
-            if ics and type(ics) == 'table' and ics.valid then
+            if ics and is_entity(ics) and ics.valid then
               ics.teleport{x = ics.position.x + offset_x, y = ics.position.y + offset_y}
             else
               for _, e in pairs(ics) do
-                if e and type(e) == 'table' and e.valid then
+                if e and is_entity(e) and e.valid then
                   e.teleport{x = e.position.x + offset_x, y = e.position.y + offset_y}
                 end
               end

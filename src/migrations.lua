@@ -145,7 +145,7 @@ return {
     -- Validation {
     storage._entity_data = storage._entity_data or {}
     for k, v in pairs(storage._entity_data) do
-      if type(v) == 'table' and (not v.fcpu or not v.fcpu.valid) then
+      if is_entity(v) and (not v.fcpu or not v.fcpu.valid) then
         storage._entity_data[k] = nil
       end
     end
@@ -246,14 +246,14 @@ return {
     local valid_ics = {}
     foreach_fcpu(function(fcpu, state)
       for _,v in pairs(state.program_ics) do
-        if type(v) == 'table' and not v.unit_number then
+        if is_entity(v) and v.valid then
+          valid_ics[v.unit_number] = v
+        elseif type(v) == 'table' and not v.unit_number then
           for _,vv in pairs(v) do
             if type(vv) == 'table' and vv.unit_number then
               valid_ics[vv.unit_number] = vv
             end
           end
-        elseif v.valid then
-          valid_ics[v.unit_number] = v
         end
       end
     end)
@@ -300,7 +300,7 @@ return {
     -- }
 
     for k, v in pairs(storage._entity_data) do
-      if type(v) == 'table' and (not v.fcpu or not v.fcpu.valid) then
+      if is_entity(v) and (not v.fcpu or not v.fcpu.valid) then
         storage._entity_data[k] = nil
       end
     end
@@ -369,13 +369,14 @@ return {
       Entity.set_data(state.entity, nil)
 
       if state.program_ics.output then
-        local type = type(state.program_ics.output)
         local mt = getmetatable(state.program_ics.output)
-        if type == 'table' and mt == 'private' then
-          state.program_ics.output = {
-            value = state.program_ics.output
-          }
-          Controller.verify(state)
+        if is_entity(state.program_ics.output) then
+          if mt == 'private' then
+            state.program_ics.output = {
+              value = state.program_ics.output
+            }
+            Controller.verify(state)
+          end
         end
       end
     end)
