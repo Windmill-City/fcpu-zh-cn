@@ -184,6 +184,7 @@ local function run_deffer_command(op)
     end
   elseif op.action == 'tune' then
     if op.ic and op.ic.valid then
+      assert(op.ic.type == "decider-combinator")
       local control = op.ic.get_or_create_control_behavior()
       local params = control.parameters
       params.conditions[1].constant = op.value
@@ -219,6 +220,7 @@ function Controller.add_deferred(state, deffer)
 end
 
 function Controller.do_deferred()
+  local handled_this_frame = 0
   while true do
     local p = Heap.priority(storage.deffered)
     if not p or game.tick < p then
@@ -227,6 +229,7 @@ function Controller.do_deferred()
     local at_tick, op = Heap.pop(storage.deffered)
     assert(at_tick == game.tick, "Found missed deffered action")
     run_deffer_command(op)
+    handled_this_frame = handled_this_frame + 1
   end
 end
 
