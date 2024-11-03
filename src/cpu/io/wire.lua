@@ -7,17 +7,17 @@ local ioWire = {}
 
 -- Output wire access
 local function output_get(index)
-  local signal = output_control.get_signal(index)
+  local signal = get_ctrl_slot_signal(output_control, index)
   return Emitter.make_signal(signal.signal, signal.count)
 end
 
 local function output_set(index, signal)
-  Assert.check(1 <= index and index <= output_control.signals_count, "Output cell index is out of range")
+  Assert.check(1 <= index and index <= get_ctrl_signals_limit(output_control), "Output cell index is out of range")
   if signal and signal.count and signal.count ~= 0 and signal.signal then
     Assert.check(math.abs(signal.count) ~= 1/0, "Division by zero")
-    output_control.set_signal(index, signal)
+    set_ctrl_slot_signal(output_control, index, signal)
   else
-    output_control.set_signal(index, nil)
+    set_ctrl_slot_signal(output_control, index, nil)
   end
   ioChannel.GuiCache_Invalidate('output', 0)
 end
@@ -52,11 +52,11 @@ function ioWire.set(address, signal)
 end
 
 function ioWire.find_signal(color, signal_to_find)
-  local wire = state.cache.wires[color]
+  local network = state.cache.wires[color]
   if signal_to_find then
     local count
-    if wire then
-      count = wire.get_signal(signal_to_find)
+    if network then
+      count = network.get_signal(signal_to_find)
     elseif color == 'input' then
       count = state.entity.get_signal(signal_to_find, defines.wire_connector_id.combinator_input_red, defines.wire_connector_id.combinator_input_green)
     else

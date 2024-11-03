@@ -15,20 +15,20 @@ local function memory_setraw(address, addr, signal)
     control.sections[1] = nil
   else
     control.enabled = true
-    Assert.check_range(addr, control.signals_count, 'memory')
+    Assert.check_range(addr, get_ctrl_signals_count(control), 'memory')
     if signal and signal.count then
       Assert.check(signal.signal ~= nil, "Signal type should be specified when assigning to a memory cell")
       Assert.check(math.abs(signal.count) ~= 1 / 0, "Division by zero")
-      control.set_signal(addr, signal)
+      set_ctrl_slot_signal(control, addr, signal)
     else
-      control.set_signal(addr, nil)
+      set_ctrl_slot_signal(control, addr, nil)
     end
   end
 end
 
 local function memory_getraw(address, type)
-  local ctrl = ioChannel.read_network(address)
-  local value = ctrl and ctrl.get_signal(type)
+  local network = ioChannel.read_network(address)
+  local value = network and network.get_signal(type)
   if value then
     return { signal = type, count = value }
   end
@@ -46,7 +46,7 @@ end
 
 function ioMemory.address_of(address, type)
   local i2s, s2i = memory_map(address)
-  local hash = type.type ..'='.. type.name
+  local hash = hashSignalType(type)
   local addr = s2i[hash]
   if not addr then
     addr = #i2s + 1
@@ -87,8 +87,7 @@ function ioMemory.get(address)
     local ctrl = ioChannel.read_network(address)
     local s = ctrl.signals and ctrl.signals[addr]
     if s then
-      local type = s.signal
-      hash = type and type.type ..'='.. type.name
+      hash = hashSignalType(s.signal)
       Assert.check(s2i[hash] == nil)
       i2s[addr] = hash
       s2i[hash] = addr
@@ -128,7 +127,7 @@ function ioMemory.set(address, signal)
   local oldValue = { count = 0 }
   local newValue = table.deep_copy(signal)
 
-  local hash = type and type.type ..'='.. type.name
+  local hash = hashSignalType(type)
   if not hash then
     hash = i2s[addr]
     oldValue.count = oldOutput.count
@@ -137,7 +136,7 @@ function ioMemory.set(address, signal)
     local oldAddr = s2i[hash]
     if oldAddr then
       local constCtrl = ioChannel.write_control(address)
-      oldValue = constCtrl and constCtrl.enabled and constCtrl.parameters[oldAddr]
+      oldValue = constCtrl and constCtrl.enabled and get_ctrl_slot_signal(constCtrl, oldAddr)
 
       i2s[oldAddr] = nil -- always in sync
       s2i[hash] = nil -- always in sync
@@ -145,7 +144,7 @@ function ioMemory.set(address, signal)
     end
   else
     local constCtrl = ioChannel.write_control(address)
-    oldValue = constCtrl and constCtrl.enabled and constCtrl.parameters[addr]
+    oldValue = constCtrl and constCtrl.enabled and get_ctrl_slot_signal(constCtrl, addr)
     if not oldValue or oldOutput.count ~= oldValue.count then
       oldValue = { count = 0 }
     end

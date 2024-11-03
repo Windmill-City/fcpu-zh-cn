@@ -450,4 +450,24 @@ return {
       end
     end)
   end,
+
+  ["0.4.31"] = function()
+    foreach_fcpu(function(fcpu, state)
+      Controller.verify(state)
+      state.modified = true
+      Controller.compile(state)
+    end)
+    foreach_fcpu(function(fcpu, state)
+      for i = 1,4 do
+        local channel = 'mem'.. i
+        local control = state.program_ics[channel].value.get_control_behavior()
+        for j = 1,control.sections[1].filters_count do
+          control.sections[1].clear_slot(j)
+        end
+        state.memmap[channel] = { i2s = {}, s2i = {} }
+      end
+    end)
+
+--    error("could not migrate yet. please wait for fCPU v0.4.32")
+  end,
 }

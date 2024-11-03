@@ -4,6 +4,7 @@ local Emitter
 local io = {}
 local control
 require('src/cpu/signals')
+require('src/cpu/io/control')
 local ioRegister = require('src/cpu/io/register')
 local ICStack = require('src/cpu/io/icstack')
 local ioChannel = require('src/cpu/io/channel')

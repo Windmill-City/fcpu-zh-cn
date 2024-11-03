@@ -146,12 +146,12 @@ local ChannelsInfo = {
   { title = { 'gui-fcpu-memviewer.channel-output-scalar' }, handler = ioWire_GUI_Update_output_cl() },
   { title = { 'gui-fcpu-memviewer.channel-output-vector' }, handler = ioOutput_GUI_Update_cl() },
   { title = { 'gui-fcpu-memviewer.channel-output' }, handler = io_GUI_Update_cl() },
-  { title = { 'gui-fcpu-memviewer.channel-output-scalar-red' }, handler = ioWire_GUI_Update_output_cl(defines.wire_connector_id.combinator_output_red) },
-  { title = { 'gui-fcpu-memviewer.channel-output-scalar-green' }, handler = ioWire_GUI_Update_output_cl(defines.wire_connector_id.combinator_output_green) },
-  { title = { 'gui-fcpu-memviewer.channel-output-vector-red' }, handler = ioOutput_GUI_Update_cl(defines.wire_connector_id.combinator_output_red) },
-  { title = { 'gui-fcpu-memviewer.channel-output-vector-green' }, handler = ioOutput_GUI_Update_cl(defines.wire_connector_id.combinator_output_green) },
-  { title = { 'gui-fcpu-memviewer.channel-output-red' }, handler = io_GUI_Update_cl(defines.wire_connector_id.combinator_output_red) },
-  { title = { 'gui-fcpu-memviewer.channel-output-green' }, handler = io_GUI_Update_cl(defines.wire_connector_id.combinator_output_green) },
+--  { title = { 'gui-fcpu-memviewer.channel-output-scalar-red' }, handler = ioWire_GUI_Update_output_cl(defines.wire_connector_id.combinator_output_red) },
+--  { title = { 'gui-fcpu-memviewer.channel-output-scalar-green' }, handler = ioWire_GUI_Update_output_cl(defines.wire_connector_id.combinator_output_green) },
+--  { title = { 'gui-fcpu-memviewer.channel-output-vector-red' }, handler = ioOutput_GUI_Update_cl(defines.wire_connector_id.combinator_output_red) },
+--  { title = { 'gui-fcpu-memviewer.channel-output-vector-green' }, handler = ioOutput_GUI_Update_cl(defines.wire_connector_id.combinator_output_green) },
+--  { title = { 'gui-fcpu-memviewer.channel-output-red' }, handler = io_GUI_Update_cl(defines.wire_connector_id.combinator_output_red) },
+--  { title = { 'gui-fcpu-memviewer.channel-output-green' }, handler = io_GUI_Update_cl(defines.wire_connector_id.combinator_output_green) },
 }
 
 local MC_MEMORY_CHANNELS_from = #ChannelsInfo
@@ -247,7 +247,7 @@ local function PrepareRemap(signals, s2i)
   local queue = {}
   if s2i then
     for _,s in ipairs(signals) do
-      local hash = s.signal.type..'='..s.signal.name
+      local hash = hashSignalType(s.signal)
       local index = s2i[hash]
       if index then
         remap[index] = s

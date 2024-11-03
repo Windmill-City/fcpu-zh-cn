@@ -585,10 +585,7 @@ function MainView.RegisterHandlers(ControlHandlers)
         on_gui_elem_changed = GUI_mixPlayerData(function(player_data, state, event)
           local signal = event.element.elem_value
           if signal then
-            if signal.type == 'virtual' then
-              signal.type = 'virtual-signal'
-            end
-            local signal_str = '['.. signal.type ..'='.. signal.name ..']'
+            local signal_str = signalToStr(signal)
             event.element.elem_value = defaultToolbarInsertSignal
             InsertTextInProgram(player_data, signal_str)
           end

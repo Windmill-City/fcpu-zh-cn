@@ -1,5 +1,7 @@
 require('prototypes/entities/pictures')
 
+MC_OUTPUT = data.raw['utility-constants']['default'].max_logistic_filter_count
+
 function table.shallow_merge(tblA, tblB, array_merge, raw)
   if not tblB then
       return tblA
@@ -173,13 +175,15 @@ if not MC_DEBUG then hdl_lognet_fcpu = table.shallow_merge(hdl_lognet_fcpu, {
   door_animation_up = empty_animation,
   door_animation_down = empty_animation,
   recharging_animation = empty_animation,
-  circuit_connector_sprites = {
-    led_red = empty_picture,
-    led_green = empty_picture,
-    led_blue = empty_picture,
-    led_light = {
-      intensity = 0,
-      size = 0,
+  circuit_connector = {
+    sprites = {
+      led_red = empty_picture,
+      led_green = empty_picture,
+      led_blue = empty_picture,
+      led_light = {
+        intensity = 0,
+        size = 0,
+      },
     },
   },
 

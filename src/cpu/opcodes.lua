@@ -152,8 +152,8 @@ local find_in_channel = function(_)
   local _chan = _[2]
   Assert.type(_chan, {'input', 'memory'})
   local _type = io.gettype(_[3], {'type', 'register', 'input'})
-  local control = io.channel_read_network(_chan)
-  local count = control.get_signal(_type)
+  local network = io.channel_read_network(_chan)
+  local count = network.get_signal(_type)
   if count and count ~= 0 then
     io.setsignal(_dst, {signal = _type, count = count})
   else
@@ -671,12 +671,7 @@ local opcodes = {
     local signal = io.gettype(_[2], {'type', 'register'})
     if signal.type ~= 'item' then
       io.setsignal(_[1], NULL_SIGNAL)
-      --local str
-      --if signal.type == 'virtual' then
-      --  str = '[virtual-signal='.. signal.name ..']'
-      --else
-      --  str = '['.. signal.type ..'='.. signal.name ..']'
-      --end
+      --local str = signalToStr(signal)
       --Assert.exception('Expecting `[item=...]` signal type, got \''.. str ..'\'.')
     else
       local proto = game.item_prototypes[signal.name]
