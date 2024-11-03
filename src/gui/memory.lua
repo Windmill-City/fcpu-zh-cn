@@ -91,44 +91,47 @@ local function ioWire_GUI_Update_cl(wire_connector)
   end
 end
 
-local function io_GUI_Update(player_data, state, force)
-  -- Output
-  --if ioChannel_GUI_Validate(player_data, state, 'output', force) then
-  --  return true
-  --end
-  if state.program_ics.output then
-    local control = state.program_ics.output.value.get_control_behavior()
-    local network = control.get_circuit_network(defines.wire_connector_id.combinator_output_red)
-    if network then
-      MemoryView.UpdateFromTable(player_data, network.signals)
-      return true
+local function io_GUI_Update_cl(wire_connector)
+  return function(player_data, state, force)
+    -- Output
+    --if ioChannel_GUI_Validate(player_data, state, 'output', force) then
+    --  return true
+    --end
+    if state.program_ics.output then
+      local control = state.program_ics.output.value.get_control_behavior()
+      local network = control.get_circuit_network(defines.wire_connector_id.combinator_output_red)
+      if network then
+        MemoryView.UpdateFromTable(player_data, network.signals)
+        return true
+      end
     end
   end
 end
 
 local function ioWire_GUI_Update_output_cl(wire_connector)
-  -- Output buffer
+  -- Scalar output buffer
   return function(player_data, state, force)
     if state.program_ics.output then
       local control = state.program_ics.output.value.get_control_behavior()
-      local circuit = control and control.get_circuit_network(wire_connector)
-      MemoryView.UpdateFromTable(player_data, circuit and circuit.signals, 1, true)
+      MemoryView.UpdateFromTable(player_data, control and control.sections[1].filters, 1, true)
       return true
     end
   end
 end
 
-local function ioOutput_GUI_Update(player_data, state, force)
-  -- Vector output
-  --if ioChannel_GUI_Validate(player_data, state, 'output', force) then
-  --  return true
-  --end
-  if state.ics_stack.output then
-    local ics = state.program_ics[state.ics_stack.output]
-    if ics then
-      local control = (ics.out or ics.kout).get_control_behavior()
-      MemoryView.UpdateFromTable(player_data, control and control.parameters and control.signals_last_tick)
-      return true
+local function ioOutput_GUI_Update_cl(wire_connector)
+  return function(player_data, state, force)
+    -- Vector output
+    --if ioChannel_GUI_Validate(player_data, state, 'output', force) then
+    --  return true
+    --end
+    if state.ics_stack.output then
+      local ics = state.program_ics[state.ics_stack.output]
+      if ics then
+        local control = (ics.out or ics.kout).get_control_behavior()
+        MemoryView.UpdateFromTable(player_data, control and control.parameters and control.signals_last_tick)
+        return true
+      end
     end
   end
 end
@@ -140,9 +143,15 @@ local ChannelsInfo = {
   { title = { 'gui-fcpu-memviewer.channel-input-red' }, handler = ioWire_GUI_Update_cl(defines.wire_connector_id.combinator_input_red) },
   { title = { 'gui-fcpu-memviewer.channel-input-green' }, handler = ioWire_GUI_Update_cl(defines.wire_connector_id.combinator_input_green) },
   { title = { 'gui-fcpu-memviewer.channel-input-lognet' }, handler = ioChannel_GUI_Update_cl('lognet') },
-  { title = { 'gui-fcpu-memviewer.channel-output-scalar' }, handler = ioWire_GUI_Update_output_cl(defines.wire_connector_id.combinator_output_red) },
-  { title = { 'gui-fcpu-memviewer.channel-output-vector' }, handler = ioOutput_GUI_Update },
-  { title = { 'gui-fcpu-memviewer.channel-output' }, handler = io_GUI_Update },
+  { title = { 'gui-fcpu-memviewer.channel-output-scalar' }, handler = ioWire_GUI_Update_output_cl() },
+  { title = { 'gui-fcpu-memviewer.channel-output-vector' }, handler = ioOutput_GUI_Update_cl() },
+  { title = { 'gui-fcpu-memviewer.channel-output' }, handler = io_GUI_Update_cl() },
+  { title = { 'gui-fcpu-memviewer.channel-output-scalar-red' }, handler = ioWire_GUI_Update_output_cl(defines.wire_connector_id.combinator_output_red) },
+  { title = { 'gui-fcpu-memviewer.channel-output-scalar-green' }, handler = ioWire_GUI_Update_output_cl(defines.wire_connector_id.combinator_output_green) },
+  { title = { 'gui-fcpu-memviewer.channel-output-vector-red' }, handler = ioOutput_GUI_Update_cl(defines.wire_connector_id.combinator_output_red) },
+  { title = { 'gui-fcpu-memviewer.channel-output-vector-green' }, handler = ioOutput_GUI_Update_cl(defines.wire_connector_id.combinator_output_green) },
+  { title = { 'gui-fcpu-memviewer.channel-output-red' }, handler = io_GUI_Update_cl(defines.wire_connector_id.combinator_output_red) },
+  { title = { 'gui-fcpu-memviewer.channel-output-green' }, handler = io_GUI_Update_cl(defines.wire_connector_id.combinator_output_green) },
 }
 
 local MC_MEMORY_CHANNELS_from = #ChannelsInfo
