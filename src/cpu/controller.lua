@@ -272,28 +272,28 @@ function Controller.validate_cache(state)
 end
 
 function Controller.handle_interrupts(state)
-  local get_signal = function(signal)
+  local get_input_signal = function(signal)
     local t = state.entity.get_signal(signal.signal, defines.wire_connector_id.combinator_input_red, defines.wire_connector_id.combinator_input_green)
     return t or 0
   end
   if state.program_state == PSTATE_RUNNING then
-    if 0 < get_signal(HALT_SIGNAL) then
+    if 0 < get_input_signal(HALT_SIGNAL) then
       Controller.halt(state)
     else
-      local value = get_signal(SLEEP_SIGNAL)
+      local value = get_input_signal(SLEEP_SIGNAL)
       if value ~= 0 then
         Controller.sleep(state, value)
       end
     end
   elseif state.program_state == PSTATE_HALTED then
-    if 0 < get_signal(RUN_SIGNAL) then
+    if 0 < get_input_signal(RUN_SIGNAL) then
       Controller.run(state)
-    elseif 0 < get_signal(STEP_SIGNAL) then
+    elseif 0 < get_input_signal(STEP_SIGNAL) then
       Controller.step(state)
     end
   end
   if true then
-    local value = get_signal(JUMP_SIGNAL)
+    local value = get_input_signal(JUMP_SIGNAL)
     if 0 < value then
       Controller.set_program_counter(state, value)
     end
