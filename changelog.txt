@@ -5,6 +5,7 @@ Date: ????
     - Undo action reverts fCPU state.
     - Halt/Reset button tooltip.
     - `xuni` opcode, when merging two memory banks.
+    - `emit` opcode.
     - `uiss` and `ugpf` opcodes.
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.32

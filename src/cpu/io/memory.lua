@@ -59,12 +59,16 @@ end
 
 function ioMemory.first_free_index(address)
   local ctrl = ioChannel.write_control(address)
-  for _,v in ipairs(ctrl.parameters) do
-    if not v.signal.name then
-      return v.index
-    end
+  local index = ctrl.sections[1].filters_count + 1
+  if index <= MC_OUTPUT then
+    return index
   end
-  Assert.exception('Scalar memory block is full already (max '.. ctrl.signals_count ..' items)')
+--  for _,v in ipairs(ctrl.sections[1].filters) do
+--    if not v.signal.name then
+--      return v.index
+--    end
+--  end
+  Assert.exception('Scalar memory block is full already (max '.. (index - 1) ..' items)')
 end
 
 function ioMemory.size(address, scalar)
