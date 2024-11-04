@@ -4,6 +4,7 @@ Date: ????
   Bugfixes:
     - Undo action reverts fCPU state.
     - Halt/Reset button tooltip.
+    - `xuni` opcode, when merging two memory banks.
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.32
 Date: 2024-11-03

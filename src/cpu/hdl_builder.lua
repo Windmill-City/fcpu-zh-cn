@@ -647,15 +647,15 @@ end
 
 -------------------------------------------------------------------------------------------------------
 
-local function connect_input_from(state, address)
+local function connect_input_from(state, address, default_color)
   Assert.is_channel_readable(address)
   if address.type == 'memory' or address.type == 'channel' then
     local ics_name = address.channel
     local ics = state.program_ics[ics_name]
     return {
       entity = ics.out,
-      wire = defines.wire_type.red,
-      port = ics.out_connector or defines.wire_connector_id.combinator_output_red
+      wire = default_color or defines.wire_type.red,
+      port = ics.out_connector or default_color and combinator_output(default_color) or defines.wire_connector_id.combinator_output_red
     }
   elseif address.type == 'wire' then
     return {
@@ -845,8 +845,10 @@ local ops = {
     Assert.three(_)
 
     local mainWireIsFirst = (_[2].type == 'wire')
-    local input_a = connect_input_from(state, _[mainWireIsFirst and 2 or 3])
-    local input_b = connect_input_from(state, _[mainWireIsFirst and 3 or 2])
+    local address1 = _[mainWireIsFirst and 2 or 3]
+    local address2 = _[mainWireIsFirst and 3 or 2]
+    local input_a = connect_input_from(state, address1, defines.wire_type.red)
+    local input_b = connect_input_from(state, address2, defines.wire_type.green)
 
     local merger = builder.create_merger_cell(state.entity, input_a, input_b)
     local ics = builder.create_memory_cell(state.entity, {
