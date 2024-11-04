@@ -356,12 +356,14 @@ function GuiWidgetUpdate(player_data, state, initial)
     if isRunning then
       --player_data.gui_halt_button.style = "highlighted_tool_button"
       player_data.gui_halt_button.sprite = "fcpu-pause-sprite"
+      player_data.gui_halt_button.tooltip = {"gui-fcpu.halt-program"}
       player_data.gui_halt_button.enabled = true
       player_data.gui_run_button.enabled = false
       player_data.gui_inspector.ignored_by_interaction = true
     else
       --player_data.gui_halt_button.style = "tool_button_red"
       player_data.gui_halt_button.sprite = "fcpu-stop-sprite"
+      player_data.gui_halt_button.tooltip = {"gui-fcpu.reset-program"}
       player_data.gui_halt_button.enabled = not Controller.is_first_instruction(state)
       player_data.gui_run_button.enabled = not Controller.is_error(state)
       player_data.gui_inspector.ignored_by_interaction = false
