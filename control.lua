@@ -20,10 +20,17 @@ local function on_build_fcpu(event)
   handle_fcpu_create(entity, event.tags and event.tags.fcpu)
 end
 
+local function register_undo_tags(state)
+  for _, player in pairs(game.players) do
+    player.undo_redo_stack.set_undo_tag(1, 1, 'fcpu', create_fcpu_tag_for(state))
+  end
+end
+
 local function on_destroy_fcpu(registration_number, soft)
   local state = get_destroyed_fcpu_state(registration_number)
   if not state then return end
   GuiEntityCloseWidget(state.unit_number)
+  register_undo_tags(state)
   handle_fcpu_destroy(state, soft)
 end
 
@@ -127,13 +134,7 @@ end
 local function setup_blueprint_tag(blueprint, index, entity)
   local state = get_fcpu_state(entity)
   if state then
-    blueprint.set_blueprint_entity_tag(index, 'fcpu', {
-      t = state.program_text,
-      i = state.instruction_pointer,
-      r = Controller.is_running(state),
-      d = state.disabled,
-      n = state.custom_name,
-    })
+    blueprint.set_blueprint_entity_tag(index, 'fcpu', create_fcpu_tag_for(state))
   end
 end
 

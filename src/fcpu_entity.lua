@@ -2,6 +2,16 @@ local HdlBuilder = require('src/cpu/hdl_builder')
 
 -------------------------------------------------------------------------------------------------------
 
+function create_fcpu_tag_for(state)
+  return {
+    t = state.program_text,
+    i = state.instruction_pointer,
+    r = Controller.is_running(state),
+    d = state.disabled,
+    n = state.custom_name,
+  }
+end
+
 local function handle_fcpu_create_v2(ent, tags)
   if ent.name == "fcpu" then
     local state = get_fcpu_state(ent)

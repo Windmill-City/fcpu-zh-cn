@@ -4,8 +4,8 @@
   "title": "fCPU",
   "description": "Factorio Customizable Processing Unit.",
   "author": "KonStg & Krul",
-  "contact": "https://buymeacoffee.com/konstg",
-  "homepage": "https://www.reddit.com/r/factorio/comments/i8e7dh/new_mod_fcpu/",
+  "contact": "https://discord.gg/vPnDPhV",
+  "homepage": "https://boosty.to/konstg",
   "factorio_version": "2.0",
   "dependencies": [
     "base >= 0.18",
