@@ -176,7 +176,7 @@ function MemoryView.CreateWidget(rootGui)
       {type="flow", name="fcpu-panels", direction="horizontal", style_mods={ vertical_align='center' }, children={
         {type='drop-down', save_as='gui_memory_channel', items={ table.unpack(memchannels) }, selected_index=1, handlers="memory.channel_switch"},
         {template="pushers.horizontal"},
-        {type='checkbox', save_as='gui_memory_autoselect', state=false, caption={'gui-fcpu-memviewer.autoselect-channel'}, handlers="memory.channel_autoselect"},
+        {type='checkbox', save_as='gui_memory_autoselect', state=false, caption={'gui-fcpu-memviewer.autoselect-channel'}, tooltip={"gui-fcpu-memviewer.autoselect-channel-tooltip"}, handlers="memory.channel_autoselect"},
       }},
 
       {type="frame", direction="vertical", style="invisible_frame", children={
@@ -185,7 +185,7 @@ function MemoryView.CreateWidget(rootGui)
           {template="pushers.horizontal"},
           {type="flow", style="flib_indicator_flow", children={
             {type="sprite", save_as='gui_memory_sync_sprite', style="flib_indicator", sprite="flib_indicator_blue"},
-            {type="label", save_as='gui_memory_sync_label', style_mods={ minimal_width=70, left_padding=4 }, caption={"gui-fcpu-memviewer.memory-view-sync"}},
+            {type="label", save_as='gui_memory_sync_label', style_mods={ minimal_width=70, left_padding=4 }, caption={"gui-fcpu-memviewer.memory-view-sync"}, tooltip={"gui-fcpu-memviewer.memory-view-sync-tooltip"}},
           }},
         }},
         {type="scroll-pane", direction="vertical", children={
