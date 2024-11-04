@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.33
-Date: ????
+Date: 2024-11-04
   Bugfixes:
     - Undo action reverts fCPU state.
     - Halt/Reset button tooltip.
