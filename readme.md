@@ -483,7 +483,7 @@ blt r1 10 :counter
     1. https://lua-api.factorio.com/latest/LuaItemPrototype.html
     2. https://lua-api.factorio.com/latest/LuaEntityPrototype.html
   For example:  
-  - `ugpf r1 [item=inserter] 'inserter_rotation_speed'`
+  - `ugpf r1 [item=inserter] 'inserter_stack_size_bonus'`
   - `ugpf r2 [item=copper-ore] 'stack_size'` (this is a same as `uiss r1 [item=copper-ore]`)
   - `ugpf r3 [item=logistic-chest-buffer] 'get_inventory_size(defines.inventory.item_main)'`
 

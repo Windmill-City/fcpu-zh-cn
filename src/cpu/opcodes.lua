@@ -674,7 +674,7 @@ local opcodes = {
       --local str = signalToStr(signal)
       --Assert.exception('Expecting `[item=...]` signal type, got \''.. str ..'\'.')
     else
-      local proto = game.item_prototypes[signal.name]
+      local proto = prototypes.item[signal.name]
       Assert.check(proto ~= nil, 'Unknown item name specified.')
       io.setsignal(_[1], { signal=signal, count=proto.stack_size })
     end
@@ -686,7 +686,7 @@ local opcodes = {
     if signal.type ~= 'item' then
       io.setsignal(_[1], NULL_SIGNAL)
     else
-      local proto = game.item_prototypes[signal.name]
+      local proto = prototypes.item[signal.name]
       if proto == nil then
         Assert.exception('Unknown prototype '.. signal.name ..' specified.')
       end
