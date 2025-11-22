@@ -4,6 +4,7 @@ Date: 2025-11-20
   Bugfixes:
     - Internal parts in upgrade planner.
     - Removed low res graphics (https://mods.factorio.com/mod/fcpu/discussion/68d8eec68fd0071a6905a9e9).
+    - Issue with `clr mem` that hides a problem related to signal collisions (https://mods.factorio.com/mod/fcpu/discussion/6728115807632e845b434889).
   Features:
     - Compatibility with even-pickier-dollies mod.
 ---------------------------------------------------------------------------------------------------

@@ -12,7 +12,9 @@ local function memory_setraw(address, addr, signal)
   if addr == nil and signal == nil then
     -- Clear entire memory
     control.enabled = false
-    control.sections[1] = nil
+    if control.remove_section(1) then
+      control.add_section()
+    end
   else
     control.enabled = true
     Assert.check_range(addr, get_ctrl_signals_count(control), 'memory')
