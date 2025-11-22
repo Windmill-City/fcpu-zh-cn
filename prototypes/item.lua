@@ -130,6 +130,8 @@ local hdl_lognet_fcpu = table.shallow_merge(table.deep_copy(data.raw['roboport']
   logistics_radius = 0,
   construction_radius = 0,
   charging_energy = "0W",
+  hidden = true,
+  minable = { mining_time = 1 },
 
   --default_available_logistic_output_signaloptional = { type = "virtual", name = "R" },
   --default_total_logistic_output_signaloptional = { type = "virtual", name = "R" },
@@ -149,13 +151,13 @@ if not MC_DEBUG then hdl_lognet_fcpu = table.shallow_merge(hdl_lognet_fcpu, {
   icon_size = 1,
   icon_mipmaps = 0,
   allow_copy_paste = false,
-  selectable_in_game = false,
   create_ghost_on_death = false,
 
   flags = {
     "not-rotatable",
     "placeable-off-grid",
     "not-repairable",
+    "not-upgradable",
     "not-on-map",
     "not-blueprintable",
     "not-deconstructable", -- can't be deconstructed by 'demolition blueprint'. reducing bounds marker spam
@@ -196,13 +198,14 @@ local hdl_output_fcpu = table.shallow_merge(table.deep_copy(data.raw['constant-c
   name = "output-fcpu",
   circuit_wire_max_distance = 10000,
   item_slot_count = MC_OUTPUT,
+  hidden = true,
+  minable = { mining_time = 1 },
 })
 if not MC_DEBUG then hdl_output_fcpu = table.shallow_merge(hdl_output_fcpu, {
   icon = "__fcpu__/graphics/icons/fcpu.png",
   icon_size = 1,
   icon_mipmaps = 0,
   allow_copy_paste = false,
-  selectable_in_game = false,
   draw_circuit_wires = false,
   create_ghost_on_death = false,
 
@@ -210,6 +213,7 @@ if not MC_DEBUG then hdl_output_fcpu = table.shallow_merge(hdl_output_fcpu, {
     "not-rotatable",
     "placeable-off-grid",
     "not-repairable",
+    "not-upgradable",
     "not-on-map",
     "not-blueprintable",
     "not-deconstructable", -- can't be deconstructed by 'demolition blueprint'. reducing bounds marker spam
@@ -247,6 +251,8 @@ local hdl_constant_fcpu = table.shallow_merge(table.deep_copy(data.raw['constant
   icon_mipmaps = 0,
   allow_copy_paste = false,
   create_ghost_on_death = false,
+  hidden = true,
+  minable = { mining_time = 1 },
   item_slot_count = 1,
 
   circuit_wire_max_distance = 10000,
@@ -261,13 +267,13 @@ local hdl_constant_fcpu = table.shallow_merge(table.deep_copy(data.raw['constant
   },
 })
 if not MC_DEBUG then hdl_constant_fcpu = table.shallow_merge(hdl_constant_fcpu, {
-  selectable_in_game = false,
   draw_circuit_wires = false,
 
   flags = {
     "not-rotatable",
     "placeable-off-grid",
     "not-repairable",
+    "not-upgradable",
     "not-on-map",
     "not-blueprintable",
     "not-deconstructable", -- can't be deconstructed by 'demolition blueprint'. reducing bounds marker spam
@@ -301,6 +307,8 @@ local hdl_decider_fcpu = table.shallow_merge(table.deep_copy(data.raw['decider-c
   icon_mipmaps = 0,
   allow_copy_paste = false,
   create_ghost_on_death = false,
+  hidden = true,
+  minable = { mining_time = 1 },
 
   circuit_wire_max_distance = 10000,
   energy_source = {
@@ -314,13 +322,13 @@ local hdl_decider_fcpu = table.shallow_merge(table.deep_copy(data.raw['decider-c
   },
 })
 if not MC_DEBUG then hdl_decider_fcpu = table.shallow_merge(hdl_decider_fcpu, {
-  selectable_in_game = false,
   draw_circuit_wires = false,
 
   flags = {
     "not-rotatable",
     "placeable-off-grid",
     "not-repairable",
+    "not-upgradable",
     "not-on-map",
     "not-blueprintable",
     "not-deconstructable", -- can't be deconstructed by 'demolition blueprint'. reducing bounds marker spam
@@ -361,6 +369,8 @@ local hdl_arithmetic_fcpu = table.shallow_merge(table.deep_copy(data.raw['arithm
   icon_mipmaps = 0,
   allow_copy_paste = false,
   create_ghost_on_death = false,
+  hidden = true,
+  minable = { mining_time = 1 },
 
   circuit_wire_max_distance = 10000,
   energy_source = {
@@ -374,13 +384,13 @@ local hdl_arithmetic_fcpu = table.shallow_merge(table.deep_copy(data.raw['arithm
   },
 })
 if not MC_DEBUG then hdl_arithmetic_fcpu = table.shallow_merge(hdl_arithmetic_fcpu, {
-  selectable_in_game = false,
   draw_circuit_wires = false,
 
   flags = {
     "not-rotatable",
     "placeable-off-grid",
     "not-repairable",
+    "not-upgradable",
     "not-on-map",
     "not-blueprintable",
     "not-deconstructable", -- can't be deconstructed by 'demolition blueprint'. reducing bounds marker spam
