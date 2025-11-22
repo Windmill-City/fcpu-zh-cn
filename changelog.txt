@@ -3,6 +3,7 @@ Version: 0.4.34
 Date: 2025-11-20
   Bugfixes:
     - Internal parts in upgrade planner.
+    - Removed low res graphics (https://mods.factorio.com/mod/fcpu/discussion/68d8eec68fd0071a6905a9e9).
   Features:
     - Compatibility with even-pickier-dollies mod.
 ---------------------------------------------------------------------------------------------------

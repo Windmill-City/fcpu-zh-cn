@@ -3,38 +3,21 @@ function generate_fcpu_combinator(combinator)
     make_4way_animation_from_spritesheet({ layers =
       {
         {
-          filename = "__fcpu__/graphics/entity/combinator/fcpu-combinator.png",
-          width = 74,
-          height = 64,
+          scale = 0.5,
+          filename = "__fcpu__/graphics/entity/combinator/hr-fcpu-combinator.png",
+          width = 144,
+          height = 124,
           frame_count = 1,
-          shift = util.by_pixel(1, 8),
-          hr_version =
-          {
-            scale = 0.5,
-            filename = "__fcpu__/graphics/entity/combinator/hr-fcpu-combinator.png",
-            width = 144,
-            height = 124,
-            frame_count = 1,
-            shift = util.by_pixel(0.5, 7.5)
-          }
+          shift = util.by_pixel(0.5, 7.5)
         },
         {
-          filename = "__fcpu__/graphics/entity/combinator/fcpu-combinator-shadow.png",
-          width = 76,
-          height = 78,
+          scale = 0.5,
+          filename = "__fcpu__/graphics/entity/combinator/hr-fcpu-combinator-shadow.png",
+          width = 148,
+          height = 156,
           frame_count = 1,
-          shift = util.by_pixel(14, 24),
-          draw_as_shadow = true,
-          hr_version =
-          {
-            scale = 0.5,
-            filename = "__fcpu__/graphics/entity/combinator/hr-fcpu-combinator-shadow.png",
-            width = 148,
-            height = 156,
-            frame_count = 1,
-            shift = util.by_pixel(13.5, 24.5),
-            draw_as_shadow = true
-          }
+          shift = util.by_pixel(13.5, 24.5),
+          draw_as_shadow = true
         }
       }
     })
