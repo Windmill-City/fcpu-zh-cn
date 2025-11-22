@@ -3,6 +3,8 @@ Version: 0.4.34
 Date: 2025-11-20
   Bugfixes:
     - Internal parts in upgrade planner.
+  Features:
+    - Compatibility with even-pickier-dollies mod.
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.33
 Date: 2024-11-04
