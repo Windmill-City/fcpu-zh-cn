@@ -294,7 +294,8 @@ event.register({
 
 event.register({
   defines.events.on_pre_ghost_deconstructed,
-  defines.events.on_player_mined_entity
+  defines.events.on_player_mined_entity,
+  defines.events.on_space_platform_mined_entity,
   },
   function(event)
     if event.ghost then
@@ -312,6 +313,7 @@ event.register({
 
 event.register({
   defines.events.on_built_entity,
+  defines.events.on_space_platform_built_entity,
   defines.events.on_robot_built_entity,
   },
   on_build_fcpu,
