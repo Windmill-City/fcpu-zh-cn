@@ -151,6 +151,7 @@ if not MC_DEBUG then hdl_lognet_fcpu = table.shallow_merge(hdl_lognet_fcpu, {
   icon_size = 1,
   icon_mipmaps = 0,
   allow_copy_paste = false,
+  selectable_in_game = false,
   create_ghost_on_death = false,
 
   flags = {
@@ -206,6 +207,7 @@ if not MC_DEBUG then hdl_output_fcpu = table.shallow_merge(hdl_output_fcpu, {
   icon_size = 1,
   icon_mipmaps = 0,
   allow_copy_paste = false,
+  selectable_in_game = false,
   draw_circuit_wires = false,
   create_ghost_on_death = false,
 
@@ -267,6 +269,7 @@ local hdl_constant_fcpu = table.shallow_merge(table.deep_copy(data.raw['constant
   },
 })
 if not MC_DEBUG then hdl_constant_fcpu = table.shallow_merge(hdl_constant_fcpu, {
+  selectable_in_game = false,
   draw_circuit_wires = false,
 
   flags = {
@@ -322,6 +325,7 @@ local hdl_decider_fcpu = table.shallow_merge(table.deep_copy(data.raw['decider-c
   },
 })
 if not MC_DEBUG then hdl_decider_fcpu = table.shallow_merge(hdl_decider_fcpu, {
+  selectable_in_game = false,
   draw_circuit_wires = false,
 
   flags = {
@@ -384,6 +388,7 @@ local hdl_arithmetic_fcpu = table.shallow_merge(table.deep_copy(data.raw['arithm
   },
 })
 if not MC_DEBUG then hdl_arithmetic_fcpu = table.shallow_merge(hdl_arithmetic_fcpu, {
+  selectable_in_game = false,
   draw_circuit_wires = false,
 
   flags = {
