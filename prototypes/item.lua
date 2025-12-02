@@ -62,9 +62,7 @@ if MC_DEBUG then fcpu = table.shallow_merge(fcpu, {
 })
 end
 
-data:extend{
-  fcpu,
-  {
+local fcpu_item = {
     type = "item",
     name = "fcpu",
     place_result = 'fcpu',
@@ -73,8 +71,12 @@ data:extend{
     stack_size = 20,
     subgroup = "circuit-network",
     order = "c[combinators]-f[fcpu]"
-  },
-  {
+}
+if mods["SchallCircuitGroup"] then
+  fcpu_item.subgroup = "circuit-combinator"
+end
+
+local fcpu_recipe = {
     type = "recipe",
     name = "fcpu",
     enabled = false,
@@ -88,8 +90,9 @@ data:extend{
       {type = "item", name = "fcpu", amount = 1}
     },
     unlock_results = true
-  },
-  {
+}
+
+local fcpu_technology = {
     type = "technology",
     name = "fcpu",
     icon_size = 128,
@@ -114,8 +117,25 @@ data:extend{
       time = 45
     },
     order = "a-d-d"
-  },
 }
+
+--[[ Need to remove compatibility from __Ultracube__/updates/compatibility/fcpu.lua
+if mods['Ultracube'] then
+  fcpu_recipe.category = 'cube-fabricator-handcraft'
+  fcpu_recipe.enabled = false
+  for i, ingredient in ipairs(fcpu_recipe.ingredients) do
+      if ingredient.name == 'processing-unit' then
+        ingredient.name = 'cube-spectral-processor'
+      end
+  end
+
+  fcpu_item.subgroup = "cube-combinator-extra"
+  fcpu_item.order = "cube-" .. fcpu_item.order
+
+  fcpu_technology.prerequisites = { 'cube-combinatorics', 'cube-spectral-processor' }
+  fcpu_technology.unit = tech_cost_unit('2', 200)
+end
+]]
 
 local hdl_lognet_fcpu = table.shallow_merge(table.deep_copy(data.raw['roboport']['roboport']), {
   name = "lognet-fcpu",
@@ -433,6 +453,14 @@ if not MC_DEBUG then hdl_arithmetic_fcpu = table.shallow_merge(hdl_arithmetic_fc
   },
 })
 end
+
+
+data:extend{
+  fcpu,
+  fcpu_item,
+  fcpu_recipe,
+  fcpu_technology,
+}
 
 data:extend{
   hdl_lognet_fcpu,
