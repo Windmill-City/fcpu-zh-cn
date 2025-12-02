@@ -9,6 +9,7 @@ Date: ????
   Bugfixes:
     - Restore running state after copy-paste.
     - Scalar signals viewer.
+    - remove_section issue after 0.4.34
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.35
 Date: 2025-11-29

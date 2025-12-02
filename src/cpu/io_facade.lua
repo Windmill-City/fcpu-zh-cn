@@ -91,8 +91,8 @@ end
 -- Output wire access
 function io.output_clear()
   -- Output buffer
-  if control.remove_section(1) then
-    control.add_section()
+  if control.output.remove_section(1) then
+    control.output.add_section()
   end
   ioChannel.GuiCache_Invalidate('output', 0)
 

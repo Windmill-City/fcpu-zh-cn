@@ -470,4 +470,15 @@ return {
 
 --    error("could not migrate yet. please wait for fCPU v0.4.32")
   end,
+
+  ["0.4.36"] = function()
+    -- same as in 0.3.17
+    foreach_fcpu(function(fcpu, state)
+      state.cache = state.cache or {}
+      state.cache.wires = state.cache.wires or {}
+      state.cache.control = state.cache.control or {}
+      state.cache.control.indication = fcpu.get_control_behavior()
+      state.cache.control.output = state.program_ics.output.value.get_control_behavior()
+    end)
+  end,
 }
