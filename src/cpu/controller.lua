@@ -573,7 +573,7 @@ function Controller.update_state(state, pstate)
   end
 
   if control then
-    local output_ctrl = control.output
+    local output_ctrl = control.output or state.program_ics.output.value.get_control_behavior()
     if output_ctrl and output_ctrl.valid then
       output_ctrl.enabled = not state.disabled
     end

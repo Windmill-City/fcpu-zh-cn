@@ -3,6 +3,8 @@ Version: 0.4.36
 Date: ????
   Features:
     - Tweak for SchallCircuitGroup.
+  Bugfixes:
+    - Restore running state on copy-paste.
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.35
 Date: 2025-11-29
