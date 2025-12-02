@@ -5,9 +5,10 @@ Date: ????
     - Tweak for SchallCircuitGroup.
     - Added support for compaktcircuit with limitations: every time you enter the IC, the fCPU state is cleared (same behavior as with default combinators).
   Changes:
-    - Separated debug mode in settings.
+    - Separated debug mode into its own setting.
   Bugfixes:
-    - Restore running state on copy-paste.
+    - Restore running state after copy-paste.
+    - Scalar signals viewer.
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.35
 Date: 2025-11-29

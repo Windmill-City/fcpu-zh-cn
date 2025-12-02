@@ -99,7 +99,7 @@ local function io_GUI_Update_cl(wire_connector)
     --end
     if state.program_ics.output then
       local control = state.program_ics.output.value.get_control_behavior()
-      local network = control.get_circuit_network(defines.wire_connector_id.combinator_output_red)
+      local network = control.get_circuit_network(defines.wire_connector_id.circuit_red)
       if network then
         MemoryView.UpdateFromTable(player_data, network.signals)
         return true
@@ -153,8 +153,8 @@ local ChannelsInfo = {
 --  { title = { 'gui-fcpu-memviewer.channel-output-red' }, handler = io_GUI_Update_cl(defines.wire_connector_id.combinator_output_red) },
 --  { title = { 'gui-fcpu-memviewer.channel-output-green' }, handler = io_GUI_Update_cl(defines.wire_connector_id.combinator_output_green) },
 }
-
-local MC_MEMORY_CHANNELS_from = #ChannelsInfo
+local MC_OUTPUT_CHANNEL_index = #ChannelsInfo
+local MC_MEMORY_CHANNELS_from = MC_OUTPUT_CHANNEL_index
 for i = 1, MC_MEMORY_CHANNELS do
   ChannelsInfo[MC_MEMORY_CHANNELS_from + i] = {
     title = { 'gui-fcpu-memviewer.channel-memory-bank', i },
@@ -214,8 +214,12 @@ function MemoryView.UpdateWidget(player_data, state, initial)
 
   if player_data.gui_cache and player_data.gui_memory_autoselect and player_data.gui_memory_autoselect.state then
     if state.gui_cache.memory_autochannel then
-      local bank = tonumber(string.sub(state.gui_cache.memory_autochannel, 4))
-      index = bank and (MC_MEMORY_CHANNELS_from + bank) or index
+      if state.gui_cache.memory_autochannel == 'output' then
+        index = MC_OUTPUT_CHANNEL_index or index
+      else
+        local bank = tonumber(string.sub(state.gui_cache.memory_autochannel, 4))
+        index = bank and (MC_MEMORY_CHANNELS_from + bank) or index
+      end
       player_data.gui_memory_channel.selected_index = index
     end
   end
@@ -291,6 +295,13 @@ end
 
 local function SetCell(player_data, cell, signal, idx, format, style)
   if signal and cell then
+    if not signal.signal then
+      signal = {
+        count = signal.min,
+        signal = signal.value
+      }
+    end
+
     local sprite = GUI_signalToSpritePath(player_data, signal.signal)
 
     cell.sprite = sprite
