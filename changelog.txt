@@ -3,6 +3,7 @@ Version: 0.4.36
 Date: ????
   Features:
     - Tweak for SchallCircuitGroup.
+    - Added support for compaktcircuit with limitations: every time you enter the IC, the fCPU state is cleared (same behavior as with default combinators).
   Changes:
     - Separated debug mode in settings.
   Bugfixes:

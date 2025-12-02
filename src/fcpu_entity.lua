@@ -3,7 +3,7 @@ local HdlBuilder = require('src/cpu/hdl_builder')
 -------------------------------------------------------------------------------------------------------
 
 function is_fcpu(entity)
-  return entity.name == 'fcpu'
+  return entity.name == 'fcpu' or entity.name == 'fcpu-packed'
 end
 
 function create_fcpu_tag_for(state)

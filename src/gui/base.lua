@@ -205,11 +205,13 @@ script.on_init(function()
   storage.running = {}
   storage.deffered = Heap.new()
   register_picker_dolly_handler()
+  register_compaktcircuit_handler()
   fcpu_wiki_booktorio_init()
 end)
 script.on_load(function()
   gui.build_lookup_tables()
   register_picker_dolly_handler()
+  register_compaktcircuit_handler()
 end)
 script.on_configuration_changed(function(e)
   if MC_DEBUG and migrations.debug_force then

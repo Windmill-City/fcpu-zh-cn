@@ -14,6 +14,7 @@
     "(?) booktorio >= 1.0.0",
     "? even-pickier-dollies >= 2.1.0",
     "(?) SchallCircuitGroup >= 2.0.0",
+    "(?) compaktcircuit >= 2.0.0"
   ],
   "package": {
     "ignore": [ "tests/**", "*.psd", "todos.md"],
