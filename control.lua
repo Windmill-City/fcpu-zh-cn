@@ -109,13 +109,13 @@ local function on_entity_settings_pasted(event)
   local dst_entity = event.destination
   if not (dst_entity and dst_entity.valid) then return end
 
-  if dst_entity.name == "fcpu" then
+  if is_fcpu(dst_entity) then
     local src_entity = event.source
     if not (src_entity and src_entity.valid) then return end
 
     -- TODO: handle "arithmetic-combinator", "decider-combinator", "constant-combinator"
 
-    if src_entity.name == "fcpu" then
+    if is_fcpu(src_entity) then
       local src_state = get_fcpu_state(src_entity)
       local dst_state = get_fcpu_state(dst_entity)
 
@@ -156,7 +156,7 @@ local function on_player_setup_blueprint(event)
       if #mapping == 0 and entities and 0 < #entities then
         local pos2idx = {}
         for _,v in ipairs(entities) do
-          if v.name == 'fcpu' then
+          if is_fcpu(v) then
             local pos = v.position.x ..';'.. v.position.y
             pos2idx[pos] = v.entity_number
           end
@@ -178,7 +178,7 @@ local function on_player_setup_blueprint(event)
         end
       else
         for idx, ent in pairs(mapping) do
-          if ent.name == 'fcpu' then
+          if is_fcpu(ent) then
             local success = pcall(setup_blueprint_tag, blueprint, idx, ent)
             if not success then
               hackBP_unsaved = hackBP_unsaved or {}
@@ -207,11 +207,11 @@ local function on_entity_cloned(event)
     return
   end
 
-  if dst_entity.name == "fcpu" then
+  if is_fcpu(dst_entity) then
     local src_entity = event.source
     if not (src_entity and src_entity.valid) then return end
 
-    if src_entity.name == "fcpu" then
+    if is_fcpu(src_entity) then
       local src_state = get_fcpu_state(src_entity)
       if src_state then
         local dst_state = table.deep_copy(src_state)
@@ -230,7 +230,7 @@ end
 local function on_picker_dolly_moved(event)
   if event and event.moved_entity then
     local entity = event.moved_entity
-    if entity.name == 'fcpu' then
+    if is_fcpu(entity) then
       local state = get_fcpu_state(entity)
       if state then
         local fcpu = state.entity

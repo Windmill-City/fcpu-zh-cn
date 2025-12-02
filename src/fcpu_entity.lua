@@ -2,6 +2,10 @@ local HdlBuilder = require('src/cpu/hdl_builder')
 
 -------------------------------------------------------------------------------------------------------
 
+function is_fcpu(entity)
+  return entity.name == 'fcpu'
+end
+
 function create_fcpu_tag_for(state)
   return {
     t = state.program_text,
@@ -13,7 +17,7 @@ function create_fcpu_tag_for(state)
 end
 
 local function handle_fcpu_create_v2(ent, tags)
-  if ent.name == "fcpu" then
+  if is_fcpu(ent) then
     local state = get_fcpu_state(ent)
     state.entity = ent
     state.disabled = tags.d
@@ -30,7 +34,7 @@ local function handle_fcpu_create_v2(ent, tags)
 end
 
 function handle_fcpu_create(ent, tags)
-  if ent.name == "fcpu" then
+  if is_fcpu(ent) then
     local state = get_fcpu_state(ent)
     if state and state.may_be_revived then
       state.may_be_revived = false
@@ -45,7 +49,7 @@ function handle_fcpu_create(ent, tags)
     handle_fcpu_create_v2(ent, tags or ent.tags)
   else
     --error('OBSOLETE: handle_fcpu_create_v1')
-    if ent.name == "fcpu" then
+    if is_fcpu(ent) then
       debug_print("handling "..ent.name)
       local fcpu_state = get_fcpu_state(ent)
       Controller.verify(fcpu_state)

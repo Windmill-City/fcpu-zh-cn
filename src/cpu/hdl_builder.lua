@@ -107,7 +107,7 @@ end
 
 local function builder_destroy_nodes_r(entity)
   if not (entity and entity.valid) then return end
-  if entity.name == "fcpu" then
+  if is_fcpu(entity) then
     local state = get_fcpu_state(entity)
     if state and state.program_ics then
       builder.destroy_ics(state.program_ics)
