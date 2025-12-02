@@ -1,4 +1,4 @@
-MC_DEBUG = __DebugAdapter ~= nil
+MC_DEBUG = __DebugAdapter ~= nil and settings.startup['fcpu-debug-enabled'].value
 MC_FACTORIO2 = storage ~= nil
 
 MC_LINES = 256

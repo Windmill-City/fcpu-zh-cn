@@ -3,6 +3,8 @@ Version: 0.4.36
 Date: ????
   Features:
     - Tweak for SchallCircuitGroup.
+  Changes:
+    - Separated debug mode in settings.
   Bugfixes:
     - Restore running state on copy-paste.
 ---------------------------------------------------------------------------------------------------

@@ -23,8 +23,14 @@ data:extend({
     default_value = true
   },
   {
-    type = "string-setting",
+    type = "bool-setting",
     name = "fcpu-debug-enabled",
+    setting_type = "startup",
+    default_value = false
+  },
+  {
+    type = "string-setting",
+    name = "fcpu-debug-mode",
     setting_type = "runtime-global",
     default_value = "d",
     allowed_values = { 'd', 'c', 'l', 'b' }

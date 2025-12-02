@@ -20,7 +20,7 @@ local function update_debug_enabled()
 end
 
 function UpdateModSetting(event)
-  if event.setting == "fcpu-debug-enabled" then
+  if event.setting == "fcpu-debug-mode" then
     local log_format_map = {d=0, c=1, l=2, b=3}
     fcpu_debug_enabled = log_format_map[settings.global[event.setting].value]
     if MC_DEBUG and fcpu_debug_enabled == 0 then
@@ -67,7 +67,7 @@ function debug_notify(state, msg)
 end
 
 
-UpdateModSetting{setting = "fcpu-debug-enabled"}
+UpdateModSetting{setting = "fcpu-debug-mode"}
 UpdateModSetting{setting = "fcpu-gui-editor-inline-icons"}
 UpdateModSetting{setting = "fcpu-gui-updates-every-tick"}
 UpdateModSetting{setting = "fcpu-maximum-updates-per-tick"}
