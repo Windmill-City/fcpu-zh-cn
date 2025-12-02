@@ -647,6 +647,12 @@ end
 
 -------------------------------------------------------------------------------------------------------
 
+local function append_ics(ics, merger)
+  for _,ic in pairs(merger) do
+    ics[#ics + 1] = ic
+  end
+end
+
 local function connect_input_from(state, address, default_color)
   Assert.is_channel_readable(address)
   if address.type == 'memory' or address.type == 'channel' then
@@ -890,9 +896,8 @@ local ops = {
       wire = input_a.wire,
       port = combinator_output(input_a.wire)
     })
-    for _,ic in pairs(merger) do
-      ics[#ics + 1] = ic
-    end
+    append_ics(ics, merger)
+
 
     local ics_name = connect_output_to(state, ics, _[1])
 
