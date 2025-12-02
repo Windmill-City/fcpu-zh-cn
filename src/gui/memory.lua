@@ -184,7 +184,7 @@ function MemoryView.CreateWidget(rootGui)
           {template="heading_3", caption={"gui-fcpu-memviewer.memory-view"}},
           {template="pushers.horizontal"},
           {type="flow", style="flib_indicator_flow", children={
-            {type="sprite", save_as='gui_memory_sync_sprite', style="flib_indicator", sprite="flib_indicator_blue"},
+            {type="sprite", save_as='gui_memory_sync_sprite', style="flib_indicator", sprite="flib_indicator_black"},
             {type="label", save_as='gui_memory_sync_label', style_mods={ minimal_width=70, left_padding=4 }, caption={"gui-fcpu-memviewer.memory-view-sync"}, tooltip={"gui-fcpu-memviewer.memory-view-sync-tooltip"}},
           }},
         }},
