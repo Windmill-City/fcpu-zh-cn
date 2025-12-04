@@ -3,6 +3,7 @@ Version: 0.4.39
 Date: ????
   Features:
     - New `qn` opcode for quality to number conversion (normal=1, ..., legendary=5).
+    - New `swpq` opcode for quality swap.
   Bugfixes:
     - Correct handling for quality signals (https://mods.factorio.com/mod/fcpu/discussion/67d6031674c917270dd4b67f).
     - `lgn` reference.

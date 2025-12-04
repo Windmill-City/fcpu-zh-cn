@@ -219,11 +219,13 @@ Each instruction take one or more operands and modify them or state of fCPU.
 ### Swap
 
 * `swp` reg1[**R**] reg2[**R**]  
-  Swap signals in memory cells.
+  Swap signals in registers or memory cells.
 * `swpt` reg1[**R**] reg2[**R**]  
-  Swap signal types in memory cells.
+  Swap signal types in registers or memory cells.
 * `swpv` reg1[**R**] reg2[**R**]  
-  Swap signal values in memory cells.
+  Swap signal values in registers or memory cells.
+* `swpq` reg1[**R**] reg2[**R**]  
+  Swap signal quality in registers or memory cells.
 
 
 ### Arithmetic

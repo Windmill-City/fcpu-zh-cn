@@ -332,6 +332,14 @@ local opcodes = {
     io.setvalue(_[1], b, {'register'})
     io.setvalue(_[2], a, {'register'})
   end,
+  swpq = function(_) -- swpq reg1[R] reg2[R]
+    Assert.two(_)
+    Assert.is_reference(_[1], _[2])
+    local a = io.getquality(_[1], {'register'})
+    local b = io.getquality(_[2], {'register'})
+    io.setquality(_[1], b, {'register'})
+    io.setquality(_[2], a, {'register'})
+  end,
 
   add = function(_)
     local _dst, _a, _b = standard_op3(_)
