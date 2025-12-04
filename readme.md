@@ -5,6 +5,7 @@
 * supports blueprints
 * supports copy & paste
 * supports multiplayer
+* supports quality
 * supports [Informatron](https://mods.factorio.com/mod/informatron) and [Booktorio](https://mods.factorio.com/mod/Booktorio) in-game wiki
 * in-game debugger with breakpoints
 * 256 instructions for whole program
@@ -705,6 +706,6 @@ See [here](https://boosty.to/konstg)
 
 
 # Support fCPU
-[![Boosty](https://static.boosty.to/assets/images/boostyLogo.660f9.svg)](https://boosty.to/konstg/donate)
+[![Boosty](https://upload.wikimedia.org/wikipedia/commons/9/92/Boosty_logo.svg)](https://boosty.to/konstg/donate)
 
 [comment]: <> (md2frt-skip-section-end)
