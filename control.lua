@@ -58,6 +58,19 @@ local function update_gui()
   end
 end
 
+local function reopen_gui_for(entity)
+  for _, player in pairs(game.players) do
+    local player_data = get_player_data(player.index)
+    if player_data and player_data.current_fcpu and player_data.gui_fcpu and player_data.gui_fcpu.valid then
+      if player_data.current_fcpu.valid then
+        if player_data.current_fcpu == entity then
+          GuiWidgetOpen(player, entity)
+        end
+      end
+    end
+  end
+end
+
 --script.on_nth_tick(fcpu_gui_updates_every_tick, function(event)
 --  update_gui()
 --end)
@@ -126,6 +139,8 @@ local function on_entity_settings_pasted(event)
         if Controller.is_running(src_state) then
           Controller.run(dst_state)
         end
+
+        reopen_gui_for(dst_entity)
       end
     end
   end
