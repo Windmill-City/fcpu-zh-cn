@@ -205,10 +205,15 @@ Each instruction take one or more operands and modify them or state of fCPU.
 * `idx` dst[**R**] src[**I**/**M**] type[**T**/**R**]  
   Find *type* in *src* (memory or red/green input wire), then assing *dst* to the index of memory cell or input wire location.
 
-
 * `fir` dst[**R**/**O**] type[**T**/**R**]  
   `fig` dst[**R**/**O**] type[**T**/**R**]  
-  Shorthands for `fid ... red ...` and `fid ... green ...`.  
+  Shorthands for `fid ... red ...` and `fid ... green ...`.
+
+### Quality
+
+* `qn` dst[**R**/**O**] type[**T**/**R**/**I**]  
+  Quality as a number (normal=1, uncommon=2, rare=3, epic=4, legendary=5).  
+  *dst = quality_of(type)*
 
 
 ### Swap

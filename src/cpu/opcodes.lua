@@ -604,6 +604,16 @@ local opcodes = {
     return jump_op(_[3], _[4])
   end,
 
+  qn = function(_) -- qn dst[R/O] type[T/R/I]
+    Assert.two(_)
+    Assert.type(_[1], {'register', 'output'})
+    local _type = io.gettype(_[2], {'type', 'register', 'input'})
+    local q2i = {
+      normal = 1, uncommon = 2, rare = 3, epic = 4, legendary = 5
+    }
+    io.register_set(_[1], {signal=_type, count=(_type and q2i[_type.quality or 'normal'] or 1) or 0})
+  end,
+
   lea = function(_)
     Assert.two(_)
     Assert.is_reference(_[1])
