@@ -485,7 +485,7 @@ blt r1 10 :counter
   For example:  
   - `ugpf r1 [item=inserter] 'inserter_stack_size_bonus'`
   - `ugpf r2 [item=copper-ore] 'stack_size'` (this is a same as `uiss r1 [item=copper-ore]`)
-  - `ugpf r3 [item=logistic-chest-buffer] 'get_inventory_size(defines.inventory.item_main)'`
+  - `ugpf r3 [item=buffer-chest] 'get_inventory_size(defines.inventory.item_main)'`
 
   You may use dot `.` for diving inside this prototypes.  
   To check if the item is a science pack use this example:  

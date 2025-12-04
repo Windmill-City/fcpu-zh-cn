@@ -669,62 +669,62 @@ local opcodes = {
   uiss = function(_) -- Utility Item Stack Size
     Assert.two(_)
     local signal = io.gettype(_[2], {'type', 'register'})
-    if signal.type ~= 'item' then
-      io.setsignal(_[1], NULL_SIGNAL)
-      --local str = signalToStr(signal)
-      --Assert.exception('Expecting `[item=...]` signal type, got \''.. str ..'\'.')
-    else
-      local proto = prototypes.item[signal.name]
-      Assert.check(proto ~= nil, 'Unknown item name specified.')
-      io.setsignal(_[1], { signal=signal, count=proto.stack_size })
-    end
+    --if signal.type ~= 'item' then
+    --  io.setsignal(_[1], NULL_SIGNAL)
+    --  --local str = signalToStr(signal)
+    --  --Assert.exception('Expecting `[item=...]` signal type, got \''.. str ..'\'.')
+    --  return
+    --end
+    local proto = prototypes.item[signal.name]
+    Assert.check(proto ~= nil, 'Unknown item name specified.')
+    io.setsignal(_[1], { signal=signal, count=proto.stack_size })
   end,
 
   ugpf = function(_) -- Utility Get Prototype Field
     Assert.three(_)
     local signal = io.gettype(_[2], {'type', 'register'})
-    if signal.type ~= 'item' then
-      io.setsignal(_[1], NULL_SIGNAL)
-    else
-      local proto = prototypes.item[signal.name]
-      if proto == nil then
-        Assert.exception('Unknown prototype '.. signal.name ..' specified.')
-      end
+    --if signal.type ~= 'item' then
+    --  io.setsignal(_[1], NULL_SIGNAL)
+    --  return
+    --end
+    local proto = prototypes.item[signal.name]
+    if proto == nil then
+      Assert.exception('Unknown prototype '.. signal.name ..' specified.')
+    end
 
-      local getFieldValue = function(var, field)
-        local bak
-        for v, b in string.gmatch(field, '([^%.()]+)([()]?)') do
-          if type(var[v]) == 'function' and b == '(' then
-            bak = var[v]
-            var = _G
-          else
-            var = var[v]
-            if b == ')' then
-              Assert.check(bak, 'Unmatched brace found')
-              var = bak(var)
-              bak = nil
-            end
+    local getFieldValue = function(var, field)
+      local bak
+      for v, b in string.gmatch(field, '([^%.()]+)([()]?)') do
+        if type(var[v]) == 'function' and b == '(' then
+          bak = var[v]
+          var = _G
+        else
+          var = var[v]
+          if b == ')' then
+            Assert.check(bak, 'Unmatched brace found')
+            var = bak(var)
+            bak = nil
           end
         end
-        return tonumber(var) or var
       end
+      return tonumber(var) or var
+    end
 
-      local field = io.getvalue(_[3])
+    local field = io.getvalue(_[3])
 
-      local success, value = pcall(getFieldValue, proto, field)
-      if not success then
-        success, value = pcall(getFieldValue, proto.place_result, field)
-      end
-      Assert.check(success, value)
+    local success, value = pcall(getFieldValue, proto, field)
+    if not success then
+      success, value = pcall(getFieldValue, proto.place_result, field)
+    end
+    Assert.check(success, value)
 
-      local t = type(value)
-      if t == 'number' then
-        io.setsignal(_[1], { signal=signal, count=value })
-      elseif t == 'string' then
-        io.setsignal(_[1], { signal=signal, str=value })
-      else
-        io.setsignal(_[1], NULL_SIGNAL)
-      end
+    local t = type(value)
+    if t == 'number' then
+      io.setsignal(_[1], { signal=signal, count=value })
+    elseif t == 'string' then
+      io.setsignal(_[1], { signal=signal, str=value })
+    else
+      io.setsignal(_[1], NULL_SIGNAL)
     end
   end,
 }

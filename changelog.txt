@@ -5,6 +5,7 @@ Date: ????
   Bugfixes:
     - Removed blue sync indication.
     - Paste settings while fCPU gui is visible (https://mods.factorio.com/mod/fcpu/discussion/69307aa6cdeef7d61e4eb52a).
+    - `ugpf` issue after v0.4.31 (https://mods.factorio.com/mod/fcpu/discussion/679a799ad1022ec243d0ad07).
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.36
 Date: 2025-12-02
