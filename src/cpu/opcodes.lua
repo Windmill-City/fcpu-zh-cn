@@ -298,6 +298,7 @@ local opcodes = {
     end
   end,
   ssq = function(_) -- ssq dst...[R] quality[T/Q/S/R/I]
+    Assert.mod_enabled('quality')
     Assert.two_or_more(_)
     local sigtier = io.getquality(_[#_], {'type', 'quality', 'signal', 'register', 'input'})
     for i = 1, #_ - 1 do
@@ -340,6 +341,7 @@ local opcodes = {
     io.setvalue(_[2], a, {'register'})
   end,
   swpq = function(_) -- swpq reg1[R] reg2[R]
+    Assert.mod_enabled('quality')
     Assert.two(_)
     Assert.is_reference(_[1], _[2])
     local a = io.getquality(_[1], {'register'})
@@ -620,13 +622,14 @@ local opcodes = {
   end,
 
   qn = function(_) -- qn dst[R/O] type[T/R/I]
+    Assert.mod_enabled('quality')
     Assert.two(_)
     Assert.type(_[1], {'register', 'output'})
     local _type = io.gettype(_[2], {'type', 'register', 'input'})
     local q2i = {
       normal = 1, uncommon = 2, rare = 3, epic = 4, legendary = 5
     }
-    io.register_set(_[1], {signal=_type, count=(_type and q2i[_type.quality or 'normal'] or 1) or 0})
+    io.register_set(_[1], {signal=_type, count=(_type and q2i[_type.quality or 'normal'] or 1)})
   end,
 
   lea = function(_)

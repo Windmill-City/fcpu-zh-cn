@@ -35,6 +35,12 @@ function Assert.check(b, ...)
   end
 end
 
+function Assert.mod_enabled(modname)
+  if not script.active_mods[modname] then
+    exception("Opcode is unavailable while mod ".. modname .." is disabled")
+  end
+end
+
 function Assert.one(_)
   if #_ ~= 1 then
     exception("Expecting one parameter after opcode")
