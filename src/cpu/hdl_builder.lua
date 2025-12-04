@@ -168,7 +168,7 @@ local function deep_replace_ic(value, remap_ic, remap_index, visited)
   end
   visited[value] = true
 
-  if value.action == 'sync' and remap_index[value.index] then
+  if (value.action == 'sync' or value.action == 'wake') and remap_index[value.index] then
     value.index = remap_index[value.index]
   end
 
