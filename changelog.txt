@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.39
-Date: ????
+Date: 2025-12-04
   Features:
     - New `qn` opcode for quality to number conversion (normal=1, ..., legendary=5).
     - New `swpq` opcode for quality swap.
