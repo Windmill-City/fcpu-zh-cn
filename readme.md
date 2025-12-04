@@ -151,8 +151,9 @@ Each instruction take one or more operands and modify them or state of fCPU.
 **Legend**
 
 * **V**, value: integer constant in range [-2^31..2^31), (`-3500`)
-* **T**, type: signal type (`[item=iron-ore]`)
-* **VT**, signal: consists of **V**alue and **T**ype (`123[item=copper-ore]`)
+* **T**, type: signal type, supports specifying quality (`[item=iron-ore]`, `[item=copper-plate,quality=rare]`)
+* **Q**, quality: signal quality only (`'epic'`, `[quality=legendary]`) _WIP_
+* **VT**, signal: consists of **V**alue and **T**ype (`123[item=copper-ore]`, `456[item=iron-plate,quality=uncommon]`)
 * **R**, register: (`reg1`, `r3`, ..., `reg8` or `r@4` notation, or one memory cell `m1[23]` or one input wire signal `red34`, `green@3`)
 * **M**, memory: channel (`mem1`, `m2`, ..., `mem4`)
 * **N**, lognet: channel (`lgn`, `logi`, `lnc`)

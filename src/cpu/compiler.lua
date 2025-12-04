@@ -114,14 +114,19 @@ local function parse(tokens)
   end
   local parseSignal = function()
     local token = consume()
-    local m = array_build{ string.match(token, '(-?[%d%.]*)%[([%a%-]+)[=%-]([%a%d%-_:,]+)%]') }
-    if m[2] and not (m[2] == 'item' or m[2] == 'fluid' or m[2] == 'virtual-signal') then
-      Assert.exception("Signal with type '".. (m[2] or 'nil') .."' is not supported")
+    local pattern_quality = '(-?[%d%.]*)%[([%a%-]+)[=%-]([%a%d%-_:]+),quality=([%a]+)%]'
+    local pattern_no_qual = '(-?[%d%.]*)%[([%a%-]+)[=%-]([%a%d%-_:,]+)%]'
+    local c, t, n, q = string.match(token, pattern_quality)
+    if not t then
+      c, t, n = string.match(token, pattern_no_qual)
     end
-    if m[2] == 'virtual-signal' then
-      m[2] = 'virtual'
+    if t and not (t == 'item' or t == 'fluid' or t == 'virtual-signal') then
+      Assert.exception("Signal with type '".. (t or 'nil') .."' is not supported")
     end
-    return Emitter.make_signal({type = m[2], name = m[3]}, m[1])
+    if t == 'virtual-signal' then
+      t = 'virtual'
+    end
+    return Emitter.make_signal({type = t, name = n, quality = q}, c)
   end
   local parseRegister = function(name, alias)
     local address = parseAddress(alias or name)

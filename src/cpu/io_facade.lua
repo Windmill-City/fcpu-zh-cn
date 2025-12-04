@@ -198,6 +198,24 @@ function io.settype(_, sigtype, types)
 end
 
 
+function io.getquality(_, types)
+  local signal = io.getsignal(_, types)
+  if type(signal) ~= 'table' then
+    Assert.exception('trying to retrieve nil quality')
+  end
+---@diagnostic disable-next-line: need-check-nil
+  return signal.signal.quality or 'normal'
+end
+
+function io.setquality(_, sigtier, types)
+  -- TODO: optimize
+  local signal = io.getsignal(_, types)
+  signal.signal = signal.signal or {}
+  signal.signal.quality = sigtier
+  io.setsignal(_, signal, types)
+end
+
+
 -- Setup and Binding to state
 function io.bind(state_)
   control = State.current.cache.control

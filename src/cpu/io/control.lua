@@ -1,31 +1,54 @@
 function signalToStr(signal)
   local type = signal.type == 'virtual' and 'virtual-signal' or signal.type or 'item';
-  return '['.. type ..'='.. signal.name ..']'
+  local name = signal.name
+  local quality = signal.quality
+  if name and not quality then
+    return '['.. type ..'='.. name .. ']'
+  elseif name then
+    return '['.. type ..'='.. name ..',quality='.. quality ..']'
+  elseif quality then
+    return '[quality='.. quality .. ']'
+  end
+  return '[quality=normal]'
 end
 
 function hashSignalType(signalType)
-  return signalType and (signalType.type or 'item') ..'='.. signalType.name
+  local q = signalType.quality and (signalType.quality ~= 'normal') and ','..signalType.quality or ''
+  return signalType and (signalType.type or 'item') ..'='.. signalType.name .. q
+end
+
+function hashTypeFromSignal(hash)
+  local t, n, q = string.match(hash, '(%a+)=([%a%d%-_:]+),?([%a]*)')
+  local signalType = { type = t, name = n, quality = (q ~= '' and q or nil) }
+  return signalType;
 end
 
 local function signalToSlot(signal)
-  local t, n
-  if not signal.signal.name then
+  local t, n, q
+  if type(signal.signal) == 'string' then
     local str = signal.signal
-    local i, j = string.find(str, '/')
+    local i, j = string.find(str, '/', 1, true)
     if i and j then
       t = string.sub(str, 1, i - 1)
       n = string.sub(str, j + 1)
     end
+    local k, l = string.find(str, ',', j + 1, true)
+    if k and l then
+      n = string.sub(str, j + 1, k - 1)
+      q = string.sub(str, l + 1)
+    end
+  else
+    t = signal.signal.type
+    n = signal.signal.name
+    q = signal.signal.quality
   end
-  t = t or signal.signal.type or 'item'
-  n = n or signal.signal.name
 
   return {
     value = {
-      type = t,
+      type = t or 'item',
       name = n,
       comparator = '=',
-      quality = 'normal'
+      quality = q or 'normal'
     },
     min = signal.count
   }

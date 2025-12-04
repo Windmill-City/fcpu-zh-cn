@@ -19,6 +19,8 @@ function GUI_signalToSpritePath(player_data, signal)
       else
         path = 'item/' .. signal.name
       end
+    elseif signal.quality then
+      path = 'quality/' .. signal.quality
     end
     if path and (player_data and player_data.gui_fcpu and player_data.gui_fcpu.gui) then
       if helpers.is_valid_sprite_path(path) then
