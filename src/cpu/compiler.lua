@@ -308,6 +308,10 @@ function Compiler.build(state, force)
   return hdlError
 end
 
+function Compiler.clone_to(src_state, dst_state)
+  hdlBuilder.clone_to(src_state, dst_state)
+end
+
 function Compiler.verify(state)
   hdlBuilder.verify(state)
 end

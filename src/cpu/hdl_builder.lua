@@ -153,6 +153,109 @@ function builder.destroy_ics(entity)
 end
 
 -------------------------------------------------------------------------------------------------------
+local function deep_replace_ic(value, remap_ic, remap_index, visited)
+  if visited[value] then
+    return value
+  end
+
+  if is_entity(value) then
+    local unit_number = value.unit_number
+    return unit_number and remap_ic[unit_number] and remap_ic[unit_number].newic or nil
+  end
+
+  if type(value) ~= "table" then
+    return value
+  end
+  visited[value] = true
+
+  if value.action == 'sync' and remap_index[value.index] then
+    value.index = remap_index[value.index]
+  end
+
+  for k, v in pairs(value) do
+    local new_v = deep_replace_ic(v, remap_ic, remap_index, visited)
+    if new_v ~= v then
+      value[k] = new_v
+    end
+  end
+
+  return value
+end
+
+function builder.clone_to(src_state, dst_state)
+  if not (src_state and src_state.program_ics) then
+    return false
+  end
+
+  builder.destroy_nodes(dst_state)
+
+  local remap_ic = {}
+
+  remap_ic[src_state.entity.unit_number] = { ic = src_state.entity, newic = dst_state.entity}
+
+  HACK_do_not_destroy_cloned = true -- disable delete fCPU parts in on_entity_cloned
+  for k, ics in pairs(src_state.program_ics) do
+    local newics = {}
+
+    for j, ic in pairs(ics) do
+      if is_entity(ic) then
+        local newpos = {
+          x = dst_state.entity.position.x + (ic.position.x - src_state.entity.position.x),
+          y = dst_state.entity.position.y + (ic.position.y - src_state.entity.position.y)
+        }
+
+        local newic = ic.clone({
+          position = newpos,
+          surface = dst_state.entity.surface,
+          force = dst_state.entity.force,
+          create_build_effect_smoke = false
+        })
+
+        newics[j] = newic
+
+        remap_ic[ic.unit_number] = { ic = ic, newic = newic }
+      else
+        newics[j] = table.deep_copy(ic)
+      end
+    end
+
+    dst_state.program_ics[k] = newics
+  end
+  HACK_do_not_destroy_cloned = false
+
+  -- clone wiring
+  for _, tpl in pairs(remap_ic) do
+    local ic = tpl.ic
+    local new_ic = tpl.newic
+    local wiring = ic.get_wire_connectors(false)
+    for id, wire in pairs(wiring) do
+      if wire then
+        local new_from = new_ic.get_wire_connector(id, true)
+        for _,connection in pairs(wire.connections) do
+          local new_target = remap_ic[connection.target.owner.unit_number]
+          new_target = new_target and new_target.newic or nil --connection.target.owner
+          if new_target then
+            local target_connector = new_target.get_wire_connector(connection.target.wire_connector_id, true)
+            new_from.connect_to(target_connector, false, defines.wire_origin.player)
+          end
+        end
+      end
+    end
+  end
+
+  -- fix ast deffer
+  local remap_index = { [src_state.index] = dst_state.index }
+  local visited = {}
+  dst_state.program_ast = deep_replace_ic(dst_state.program_ast, remap_ic, remap_index, visited)
+
+  if dst_state.need_sync then
+    dst_state.sync_clock = dst_state.sync_clock or dst_state.clock - 5 -- HACK big value
+  end
+
+  return true
+end
+
+-------------------------------------------------------------------------------------------------------
 
 function builder.validate_ics(ics)
   if type(ics) == 'table' then

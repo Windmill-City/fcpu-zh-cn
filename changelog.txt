@@ -2,6 +2,7 @@
 Version: 0.4.37
 Date: ????
   Changes:
+    - Cloning of fCPU now saves the entire internal state, including SIMD. Space Exploration should work correctly now (https://mods.factorio.com/mod/fcpu/discussion/62373a9a890886e28763b450, https://mods.factorio.com/mod/fcpu/discussion/5fd796b0dd1123db68cfcd1e).
   Bugfixes:
     - Removed blue sync indication.
     - Paste settings while fCPU gui is visible (https://mods.factorio.com/mod/fcpu/discussion/69307aa6cdeef7d61e4eb52a).

@@ -42,18 +42,14 @@ function Controller.init(mc)
     memmap = { i2s = {}, s2i = {} },
     breakpoints = {},
     instruction_pointer = 1,
-    gui_cache = {
-      memory_changed = {}
-    },
-    cache = {
-      control = {
-        indication = control
-      },
-      wires = {},
-    }
   }
+  Controller.invalidate_cache(state)
   Controller.init_registers(state)
   return state
+end
+
+function Controller.clone_to(src_state, dst_state)
+  Compiler.clone_to(src_state, dst_state)
 end
 
 function Controller.verify(state)
@@ -231,6 +227,11 @@ function Controller.do_deferred()
     run_deffer_command(op)
     handled_this_frame = handled_this_frame + 1
   end
+end
+
+function Controller.invalidate_cache(state)
+  state.gui_cache = { memory_changed = {} }
+  state.cache = { control = {}, wires = {} }
 end
 
 function Controller.validate_cache(state)

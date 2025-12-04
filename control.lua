@@ -213,12 +213,15 @@ local function on_player_setup_blueprint(event)
   end
 end
 
+HACK_do_not_destroy_cloned = false
 local function on_entity_cloned(event)
   local dst_entity = event.destination
   if not (dst_entity and dst_entity.valid) then return end
 
   if string.find(dst_entity.name, '-fcpu') then
-    dst_entity.destroy()
+    if not HACK_do_not_destroy_cloned then
+      dst_entity.destroy()
+    end
     return
   end
 
@@ -234,8 +237,12 @@ local function on_entity_cloned(event)
         dst_state.program_ics = {}
         dst_state.index = nil
         register_fcpu(dst_entity, dst_state)
-        Controller.verify(dst_state)
-        Controller.compile(dst_state)
+
+        --Controller.verify(dst_state)
+        --Controller.compile(dst_state)
+        Controller.invalidate_cache(dst_state)
+        Controller.clone_to(src_state, dst_state)
+        Controller.validate_cache(dst_state)
       end
     end
   end
