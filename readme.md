@@ -557,7 +557,7 @@ When working with SIMD instructions, the following features should be considered
   *dst(each) = src ^ val* (if src specified)
 
 
-### SIMD Comparision
+### SIMD Comparison
 
 Compares each signal value in memory with operand specified and pass it to destination if condition met.  
 In two operand version *src* is the same as a *dst*.  

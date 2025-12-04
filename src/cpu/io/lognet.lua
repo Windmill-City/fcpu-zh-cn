@@ -8,7 +8,7 @@ local function lognet_getchannel_contents()
   if not lognet then
     Assert.exception("Tried to access logistic network while it is unreachable")
   end
-  return lognet.get_contents()
+  return lognet.signals
 end
 
 function ioLognet.get(address)

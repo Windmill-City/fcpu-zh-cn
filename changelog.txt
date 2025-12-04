@@ -3,6 +3,7 @@ Version: 0.4.39
 Date: ????
   Bugfixes:
     - Correct handling for quality signals (https://mods.factorio.com/mod/fcpu/discussion/67d6031674c917270dd4b67f).
+    - `lgn` reference.
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.38
 Date: 2025-12-04
@@ -269,7 +270,7 @@ Date: 2020-11-21
     - Added `bti` (break until input have type) mnemonic.
     - Added `btrc`,`btgc`,`btic` (break until input type changed) mnemonics.
     - Added `ugpf` *Utility Get Prototype Field*.
-    - Added `xc*` SIMD *Comparision*.
+    - Added `xc*` SIMD *Comparison*.
     - Added basic string support.
     - Added pin button.
     - Added debugging hotkeys.
