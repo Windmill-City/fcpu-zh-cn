@@ -297,6 +297,13 @@ local opcodes = {
       io.settype(_[i], sigtype, {'register', 'output'})
     end
   end,
+  ssq = function(_) -- ssq dst...[R] quality[T/Q/S/R/I]
+    Assert.two_or_more(_)
+    local sigtier = io.getquality(_[#_], {'type', 'quality', 'signal', 'register', 'input'})
+    for i = 1, #_ - 1 do
+      io.setquality(_[i], sigtier, {'register', 'output'})
+    end
+  end,
 
   fir = find_in_wire('red'), -- fir dst[R/O] type[T/R/I]
   fig = find_in_wire('green'), -- fig dst[R/O] type[T/R/I]

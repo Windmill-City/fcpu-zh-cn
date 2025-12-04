@@ -199,6 +199,10 @@ Each instruction take one or more operands and modify them or state of fCPU.
   Set signal type.  
   *dst... = type*
 
+* `ssq` dst...[**R**/**O**] quality[**T**/**Q**/**R**]  
+  Set signal quality.  
+  *dst... = quality*
+
 * `fid` dst[**R**/**O**] src[**I**/**M**] type[**T**/**R**]  
   Find *type* in *src* (memory or red/green input wire), then assign *dst* to signal type and number value.
 
