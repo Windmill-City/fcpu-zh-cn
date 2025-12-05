@@ -360,7 +360,7 @@ event.register({
   defines.events.on_robot_built_entity,
   },
   on_build_fcpu,
-  {{filter = "name", name = "entity-ghost"}, unpack(event_filters)}
+  {{filter = "name", name = "entity-ghost"}, table.unpack(event_filters)}
 )
 
 event.register({
@@ -369,7 +369,7 @@ event.register({
   --defines.events.on_pre_player_mined_item,
   },
   on_died_fcpu,
-  {{filter = "name", name = "entity-ghost"}, unpack(event_filters)}
+  {{filter = "name", name = "entity-ghost"}, table.unpack(event_filters)}
 )
 
 event.register(
