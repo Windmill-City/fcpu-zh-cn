@@ -1,6 +1,7 @@
 Assert = require('src/cpu/assert')
 local Compiler = require('src/cpu/compiler')
 local Evaluator = require('src/cpu/evaluator')
+local HdlBuilder = require('src/cpu/hdl_builder')
 
 PSTATE_HALTED = 0
 PSTATE_RUNNING = 1
@@ -48,12 +49,17 @@ function Controller.init(mc)
   return state
 end
 
+function Controller.teleport_to(state, position)
+  HdlBuilder.teleport_to(state, position)
+end
+
 function Controller.clone_to(src_state, dst_state)
-  Compiler.clone_to(src_state, dst_state)
+  HdlBuilder.clone_to(src_state, dst_state)
 end
 
 function Controller.verify(state)
   Compiler.verify(state)
+  HdlBuilder.verify(state)
 end
 
 function Controller.init_registers(state)
@@ -98,7 +104,7 @@ function Controller.compile(state)
     state.ics_stack = {}
   end
 
-  if not Compiler.build(state, state.modified) then
+  if not Compiler.build(state, HdlBuilder, state.modified) then
     Controller.set_error_message(state, nil)
   end
 

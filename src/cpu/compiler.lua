@@ -1,5 +1,4 @@
 local Emitter = require('src/cpu/emitter')
-local hdlBuilder = require('src/cpu/hdl_builder')
 
 
 -- array_build from iterator
@@ -272,7 +271,7 @@ function Compiler.compile(text)
   return compiler_compile(program_lines)
 end
 
-function Compiler.build(state, force)
+function Compiler.build(state, hdlBuilder, force)
   local construct = function(k, ast)
     local name, ics, deffer = hdlBuilder.construct(ast, state)
     if name then
@@ -313,12 +312,7 @@ function Compiler.build(state, force)
   return hdlError
 end
 
-function Compiler.clone_to(src_state, dst_state)
-  hdlBuilder.clone_to(src_state, dst_state)
-end
-
 function Compiler.verify(state)
-  hdlBuilder.verify(state)
 end
 
 

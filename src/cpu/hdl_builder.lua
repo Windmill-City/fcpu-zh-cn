@@ -153,6 +153,27 @@ function builder.destroy_ics(entity)
 end
 
 -------------------------------------------------------------------------------------------------------
+function builder.teleport_to(state, position)
+  local fcpu = state.entity
+
+  local offset_x = fcpu.position.x - position.x
+  local offset_y = fcpu.position.y - position.y
+
+  if state.program_ics then
+    for _, ics in pairs(state.program_ics) do
+      if ics and is_entity(ics) and ics.valid then
+        ics.teleport{x = ics.position.x + offset_x, y = ics.position.y + offset_y}
+      else
+        for _, e in pairs(ics) do
+          if e and is_entity(e) and e.valid then
+            e.teleport{x = e.position.x + offset_x, y = e.position.y + offset_y}
+          end
+        end
+      end
+    end
+  end
+end
+
 local function deep_replace_ic(value, remap_ic, remap_index, visited)
   if visited[value] then
     return value

@@ -89,7 +89,7 @@ script.on_event(defines.events.on_tick, function(event)
     return nil, not state.destroy_regnum, start == k
   end
 
-  -- TODO: add explicit HandleCPU call for deffered fCPUs!
+  -- TODO: add explicit HandleCPU call for deferred fCPUs!
   Controller.do_deferred()
 
   local limit = fcpu_maximum_updates_per_tick
@@ -255,24 +255,7 @@ local function on_picker_dolly_moved(event)
     if is_fcpu(entity) then
       local state = get_fcpu_state(entity)
       if state then
-        local fcpu = state.entity
-
-        local offset_x = fcpu.position.x - event.start_pos.x
-        local offset_y = fcpu.position.y - event.start_pos.y
-
-        if state.program_ics then
-          for _, ics in pairs(state.program_ics) do
-            if ics and is_entity(ics) and ics.valid then
-              ics.teleport{x = ics.position.x + offset_x, y = ics.position.y + offset_y}
-            else
-              for _, e in pairs(ics) do
-                if e and is_entity(e) and e.valid then
-                  e.teleport{x = e.position.x + offset_x, y = e.position.y + offset_y}
-                end
-              end
-            end
-          end
-        end
+        Controller.teleport_to(state, event.start_pos)
       end
     end
   end
