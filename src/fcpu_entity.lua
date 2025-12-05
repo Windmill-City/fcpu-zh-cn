@@ -87,7 +87,7 @@ end
 
 function is_entity(obj, check_metatable)
   local t = type(obj)
-  if not ((t == 'userdata' and MC_FACTORIO2) or (t == 'table' and not MC_FACTORIO2)) then
+  if not (t == 'userdata') then
     return false
   end
   return check_metatable ~= true or getmetatable(obj) == 'private'

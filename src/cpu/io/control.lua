@@ -55,45 +55,29 @@ local function signalToSlot(signal)
 end
 
 function get_ctrl_signals_limit(control)
-  if MC_FACTORIO2 then
-    --return control.sections[1].filters_count
-    return MC_OUTPUT
-  else
-    return control.signals_count
-  end
+  return MC_OUTPUT
+  --return control.sections[1].filters_count
 end
 
 function get_ctrl_signals_count(control)
-  if MC_FACTORIO2 then
-    assert(control.type == defines.control_behavior.type.constant_combinator)
-    return MC_OUTPUT
-    --return control.sections[1].filters_count
-  else
-    return control.signals_count
-  end
+  --assert(control.type == defines.control_behavior.type.constant_combinator)
+  return MC_OUTPUT
+  --return control.sections[1].filters_count
 end
 
 function get_ctrl_slot_signal(control, index)
-  if MC_FACTORIO2 then
-    assert(control.type == defines.control_behavior.type.constant_combinator)
-    local slot = control.sections[1].get_slot(index)
-    local signal = slot.value and { signal = slot.value.type ..'/'.. slot.value.name, count = slot.min or 0 } or { count = 0}
-    return signal
-  else
-    return control.get_signal(index)
-  end
+  --assert(control.type == defines.control_behavior.type.constant_combinator)
+  local slot = control.sections[1].get_slot(index)
+  local signal = slot.value and { signal = slot.value.type ..'/'.. slot.value.name, count = slot.min or 0 } or { count = 0}
+  return signal
 end
 
 function set_ctrl_slot_signal(control, index, signal)
-  if MC_FACTORIO2 then
-    assert(control.type == defines.control_behavior.type.constant_combinator)
-    if signal then
-      local slot = signalToSlot(signal)
-      control.sections[1].set_slot(index, slot)
-    else
-      control.sections[1].clear_slot(index)
-    end
+  --assert(control.type == defines.control_behavior.type.constant_combinator)
+  if signal then
+    local slot = signalToSlot(signal)
+    control.sections[1].set_slot(index, slot)
   else
-    control.set_signal(index, signal)
+    control.sections[1].clear_slot(index)
   end
 end
