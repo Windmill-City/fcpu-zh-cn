@@ -44,13 +44,13 @@ function GUI_signalToTooltip(signal, prefix)
   end
 end
 
-function GUI_lognetTooltip(index, item, count)
+--[[function GUI_lognetTooltip(index, item, count)
   if item and count then
     return '['.. index ..'] = '.. count ..'[item='.. item ..']'
   else
     return '['.. index ..'] = <'.. item ..'>'
   end
-end
+end]]
 
 function GUI_mixPlayerData(proc)
   return function(event)

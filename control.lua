@@ -308,6 +308,7 @@ end
 -------------------------------------------------------------------------------------------------------
 local event = require("3rdparty.flib061.event")
 local event_filters = {
+  {filter = "name", name = "entity-ghost"},
   {filter = "name", name = "fcpu"},
 }
 
@@ -317,16 +318,18 @@ event.register({
   },
   function(event)
     on_build_fcpu(event)
-  end
+  end,
+  event_filters
 )
 
+--[[
 event.register({
   defines.events.script_raised_destroy,
   },
   function(event)
     --on_destroy_fcpu(event.unit_number)
   end
-)
+)]]
 
 event.register({
   defines.events.on_object_destroyed},
@@ -351,7 +354,7 @@ event.register({
       end
     end
   end,
-  {{filter = "name", name = "entity-ghost"}, {filter = "name", name = "fcpu"}}
+  event_filters
 )
 
 event.register({
@@ -360,7 +363,7 @@ event.register({
   defines.events.on_robot_built_entity,
   },
   on_build_fcpu,
-  {{filter = "name", name = "entity-ghost"}, table.unpack(event_filters)}
+  event_filters
 )
 
 event.register({
@@ -369,7 +372,7 @@ event.register({
   --defines.events.on_pre_player_mined_item,
   },
   on_died_fcpu,
-  {{filter = "name", name = "entity-ghost"}, table.unpack(event_filters)}
+  event_filters
 )
 
 event.register(
