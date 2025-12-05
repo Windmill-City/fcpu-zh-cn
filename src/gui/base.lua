@@ -206,14 +206,11 @@ script.on_init(function()
   storage.fcpus = {}
   storage.running = {}
   storage.deffered = Heap.new()
-  register_picker_dolly_handler()
-  register_compaktcircuit_handler()
-  fcpu_wiki_booktorio_init()
+  Compatibility.on_init()
 end)
 script.on_load(function()
   gui.build_lookup_tables()
-  register_picker_dolly_handler()
-  register_compaktcircuit_handler()
+  Compatibility.on_load()
 end)
 script.on_configuration_changed(function(e)
   if MC_DEBUG and migrations.debug_force then
@@ -222,5 +219,5 @@ script.on_configuration_changed(function(e)
   if migration.on_config_changed(e, migrations, nil, e) then
     gui.check_filter_validity()
   end
-  fcpu_wiki_booktorio_init()
+  Compatibility.on_configuration_changed(e)
 end)

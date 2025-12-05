@@ -8,7 +8,7 @@ function table.shallow_merge(tblA, tblB, array_merge, raw)
   end
   if array_merge then
       for _, v in pairs(tblB) do
-          Table.insert(tblA, v)
+          table.insert(tblA, v)
       end
   else
       for k, v in pairs(tblB) do
@@ -69,9 +69,6 @@ local fcpu_item = {
   subgroup = "circuit-network",
   order = "c[combinators]-f[fcpu]"
 }
-if mods["SchallCircuitGroup"] then
-  fcpu_item.subgroup = "circuit-combinator"
-end
 
 local fcpu_recipe = {
   type = "recipe",
@@ -115,24 +112,6 @@ local fcpu_technology = {
   },
   order = "a-d-d"
 }
-
---[[ Need to remove compatibility from __Ultracube__/updates/compatibility/fcpu.lua
-if mods['Ultracube'] then
-  fcpu_recipe.category = 'cube-fabricator-handcraft'
-  fcpu_recipe.enabled = false
-  for i, ingredient in ipairs(fcpu_recipe.ingredients) do
-      if ingredient.name == 'processing-unit' then
-        ingredient.name = 'cube-spectral-processor'
-      end
-  end
-
-  fcpu_item.subgroup = "cube-combinator-extra"
-  fcpu_item.order = "cube-" .. fcpu_item.order
-
-  fcpu_technology.prerequisites = { 'cube-combinatorics', 'cube-spectral-processor' }
-  fcpu_technology.unit = tech_cost_unit('2', 200)
-end
-]]
 
 local hdl_lognet_fcpu = table.shallow_merge(table.deep_copy(data.raw['roboport']['roboport']), {
   name = "lognet-fcpu",
@@ -357,37 +336,6 @@ else
       },
     },
   })
-end
-
----------------------------------------------------------------------------------
-if mods["compaktcircuit"] then
-  local function tune_for_compaktcircuit(packed_entity)
-    local wire_conn = { wire = { red = { 0, 0 }, green = { 0, 0 } }, shadow = { red = { 0, 0 }, green = { 0, 0 } } }
-    packed_entity.flags = { 'placeable-off-grid' , "hide-alt-info", "not-on-map", "not-upgradable", "not-deconstructable", "not-blueprintable" }
-    packed_entity.collision_mask = { layers={} }
-    packed_entity.collision_box = {{-0.0001,-0.0001},{0.0001,0.0001}}
-    packed_entity.selection_box = {{-0.01,-0.01},{0.01,0.01}}
-    packed_entity.minable = nil
-    packed_entity.selectable_in_game = false
-    packed_entity.circuit_wire_max_distance = 64
-    packed_entity.sprites = empty_picture
-    packed_entity.activity_led_sprites = empty_picture
-    packed_entity.activity_led_light_offsets = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }
-    packed_entity.circuit_wire_connection_points = { wire_conn, wire_conn, wire_conn, wire_conn }
-    packed_entity.draw_circuit_wires = false
-    packed_entity.created_smoke = nil
-  end
-
-  if MC_DEBUG then
-    fcpu.collision_box = {{-0.65, -0.65}, {0.65, 1.65}}
-    fcpu.selection_box = {{-1, -1}, {1, 2}}
-  end
-
-  local packed_entity = table.deepcopy(fcpu)
-  packed_entity.name = 'fcpu-packed'
-  packed_entity.circuit_wire_max_distance = 10000
-  tune_for_compaktcircuit(packed_entity)
-  data:extend { packed_entity }
 end
 
 ---------------------------------------------------------------------------------

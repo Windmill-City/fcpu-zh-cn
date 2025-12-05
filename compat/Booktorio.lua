@@ -1,6 +1,6 @@
 local wiki_pages
 
-function fcpu_wiki_booktorio_register(sections, fulltext)
+local function fcpu_wiki_booktorio_register(sections, fulltext)
   if wiki_pages == nil then
     local topics = {}
     for _, v in ipairs(sections) do
@@ -23,10 +23,15 @@ function fcpu_wiki_booktorio_register(sections, fulltext)
   end
 end
 
-function fcpu_wiki_booktorio_init()
+local function fcpu_wiki_booktorio_init()
   if remote.interfaces["Booktorio"] then
     remote.call("Booktorio", "add_thread", wiki_pages)
   end
 end
 
-return remote.interfaces["Booktorio"]
+--return remote.interfaces["Booktorio"]
+return {
+  wiki_register = fcpu_wiki_booktorio_register,
+  on_init = fcpu_wiki_booktorio_init,
+  on_configuration_changed = fcpu_wiki_booktorio_init,
+}

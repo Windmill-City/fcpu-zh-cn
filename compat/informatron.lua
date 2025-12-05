@@ -90,7 +90,7 @@ local function fcpu_page_content(page_name, player_index, element)
   end
 end
 
-function fcpu_wiki_informatron_register(sections, fulltext)
+local function fcpu_wiki_informatron_register(sections, fulltext)
   Text_readme = fulltext
   fcpu_load_docs(sections)
 
@@ -110,4 +110,7 @@ function fcpu_wiki_informatron_register(sections, fulltext)
   })
 end
 
-return remote.interfaces["informatron"]
+--return remote.interfaces["informatron"]
+return {
+  wiki_register = fcpu_wiki_informatron_register,
+}

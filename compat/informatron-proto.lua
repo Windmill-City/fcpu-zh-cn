@@ -1,0 +1,1 @@
+informatron_make_image("fcpu_image_thumbnail", "__fcpu__/thumbnail.png", 145, 145)
