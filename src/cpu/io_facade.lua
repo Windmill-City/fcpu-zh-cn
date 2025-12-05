@@ -1,5 +1,5 @@
 local Controller
-local Emitter
+local Emitter ---@type Emitter
 
 local io = {}
 local control
@@ -73,6 +73,7 @@ io.wire_count = ioWire.count
 
 
 -- Control output
+---@return Signal
 function io.control_get()
   local params = control.indication.parameters
   local count = params.first_constant
@@ -80,6 +81,7 @@ function io.control_get()
   return Emitter.make_signal(signal_id, count)
 end
 
+---@param signal Signal
 function io.control_set(signal)
   local params = control.indication.parameters
   params.first_constant = signal.count
@@ -105,6 +107,8 @@ end
 
 
 -- Multiplex Helper Functions
+---@param _ OpRef
+---@param types string[]?
 function io.getsignal(_, types)
   if not types then
     types = {'signal', 'register', 'wire', 'lognet'}

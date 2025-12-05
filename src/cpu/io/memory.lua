@@ -1,5 +1,5 @@
 local state
-local Emitter
+local Emitter ---@type Emitter
 local ioRegister
 local ioChannel
 local ioMemory = {}
@@ -183,6 +183,7 @@ function ioMemory.bind(state_)
   state = state_
 end
 
+---@param emitter_ Emitter
 function ioMemory.setup(emitter_, ioRegister_, ioChannel_)
   Emitter = emitter_
   ioRegister = ioRegister_

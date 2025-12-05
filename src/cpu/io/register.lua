@@ -1,6 +1,6 @@
 local io
 local state
-local Emitter
+local Emitter ---@type Emitter
 local ioRegister = {}
 
 -- Special purpose Registers (read only), see make_special_register_ro
@@ -96,6 +96,7 @@ function ioRegister.bind(state_)
   state = state_
 end
 
+---@param emitter_ Emitter
 function ioRegister.setup(emitter_, io_)
   Emitter = emitter_
   io = io_

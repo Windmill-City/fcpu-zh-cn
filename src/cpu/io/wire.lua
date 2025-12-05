@@ -1,6 +1,6 @@
 local state
 local output_control
-local Emitter
+local Emitter ---@type Emitter
 local ioRegister
 local ioChannel
 local ioWire = {}
@@ -76,6 +76,7 @@ function ioWire.bind(state_)
   output_control = state_.cache.control.output
 end
 
+---@param emitter_ Emitter
 function ioWire.setup(emitter_, ioRegister_, ioChannel_)
   Emitter = emitter_
   ioRegister = ioRegister_

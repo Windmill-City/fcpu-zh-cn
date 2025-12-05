@@ -1,7 +1,7 @@
 local io = require('src/cpu/io_facade')
 local ops = require('src/cpu/opcodes')
 local ops_vx = require('src/cpu/opcodes_vx')
-local Emitter
+local Emitter ---@type Emitter
 local Evaluator = {}
 
 State = require('src/cpu/io/state')
@@ -84,6 +84,7 @@ end
 
 
 
+---@param emitter_ Emitter
 function Evaluator.setup(emitter_, controller_)
   Emitter = emitter_
   io.setup(emitter_, controller_)

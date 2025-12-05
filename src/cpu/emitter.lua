@@ -1,79 +1,196 @@
-local Emitter = {}
+---@class (exact) OpRef_Base
+
+---@class (exact) OpRef_Comment : OpRef_Base
+---@field type 'nop'
+---@field name 'comment'
+
+---@class (exact) OpRef_Abstract : OpRef_Base
+---@field type string
+
+---@class (exact) OpRef_Label : OpRef_Base
+---@field type 'label'
+---@field label string
+
+---@class (exact) OpRef_Value : OpRef_Base
+---@field type 'value'
+---@field count number?
+
+---@class (exact) OpRef_String : OpRef_Base
+---@field type 'string'
+---@field str string
+
+---@class (exact) OpRef_Type : OpRef_Base
+---@field type 'type'
+---@field signal SignalID
+---@class (exact) OpRef_Sig : OpRef_Base, Signal
+---@field type 'signal'
+---@alias OpRef_Signal OpRef_Sig | OpRef_Type
+
+---@class (exact) OpRef_Address : OpRef_Base
+---@field addr integer?
+
+---@class (exact) OpRef_Special : OpRef_Address
+---@field type 'register'
+---@field special boolean
+---@field pointer boolean
+
+---@class (exact) OpRef_LogNet : OpRef_Address
+---@field type 'lognet'
+---@field pointer boolean
+
+---@class (exact) OpRef_Reference : OpRef_Address
+---@field type 'reference'
+---@field pointer boolean
+
+---@class (exact) OpRef_Register : OpRef_Address
+---@field type 'register'
+---@field pointer boolean
+
+---@class (exact) OpRef_Channel : OpRef_Base
+---@field type 'channel'
+---@field channel string
+
+---@class (exact) OpRef_Memory : OpRef_MemoryBank
+---@field pointer boolean
+
+---@class (exact) OpRef_MemoryBank : OpRef_Base
+---@field type 'memory'
+---@field channel string
+---@field bank number?
+
+---@class (exact) OpRef_Wire : OpRef_Address
+---@field type 'wire'
+---@field color string
+---@field pointer boolean
+
+---@alias OpRef
+---| OpRef_Comment
+---| OpRef_Abstract
+---| OpRef_Label
+---| OpRef_Value
+---| OpRef_String
+---| OpRef_Signal
+---| OpRef_Special
+---| OpRef_LogNet
+---| OpRef_Reference
+---| OpRef_Register
+---| OpRef_Channel
+---| OpRef_Memory
+---| OpRef_MemoryBank
+---| OpRef_Wire
+
+---@class Emitter
+local Emitter = {
+
+  ---@return OpRef_Comment
+  make_comment = function()
+    return { type = 'nop', name = 'comment' } ---@type OpRef_Comment
+  end,
+
+  ---@param type string
+  ---@return OpRef_Abstract
+  make_abstract = function(type)
+    return { type = type } ---@type OpRef_Abstract
+  end,
 
 
--- Makers
-function Emitter.make_comment()
-  return { type = 'nop', name = 'comment' }
-end
+  ---@param label string
+  ---@return OpRef_Label
+  make_label = function(label)
+    return { type = 'label', label = label } ---@type OpRef_Label
+  end,
 
-function Emitter.make_abstract(type)
-  return { type = type }
-end
 
-function Emitter.make_label(label)
-  return { type = 'label', label = label }
-end
-
-function Emitter.make_value(numstr)
-  local number = tonumber(numstr)
-  if number == nil then
-    Assert.exception("Can't parse number '".. numstr .."'")
-  end
-  return { type = 'value', count = number }
-end
-
-function Emitter.make_string(str)
-  return { type = 'string', str = str }
-end
-
-function Emitter.make_signal(signal_id, countstr)
-  if countstr == '' then
-    return { type = 'type', signal = signal_id }
-  else
-    local count = tonumber(countstr)
-    if count == nil then
-      Assert.exception("Can't parse count '".. (countstr or 'nil') .."'")
+  ---@param numstr string
+  ---@return OpRef_Value
+  make_value = function(numstr)
+    local number = tonumber(numstr)
+    if number == nil then
+      Assert.exception("Can't parse number '".. numstr .."'")
     end
-    return { type = 'signal', signal = signal_id, count = count or 0 }
-  end
-end
+    return { type = 'value', count = number } ---@type OpRef_Value
+  end,
 
-function Emitter.make_special_register_ro(addr)
-  return { type = 'register', special = true, addr = tonumber(addr), pointer = false }
-end
+  ---@param str string
+  ---@return OpRef_String
+  make_string = function(str)
+    return { type = 'string', str = str } ---@type OpRef_String
+  end,
 
-function Emitter.make_lognet(addr, is_ptr)
-  return { type = 'lognet', addr = tonumber(addr), pointer = is_ptr }
-end
+  ---@param signal_id SignalID
+  ---@param countstr string | number | ''
+  ---@return OpRef_Signal
+  make_signal = function(signal_id, countstr)
+    if countstr == '' then
+      return { type = 'type', signal = signal_id } ---@type OpRef_Signal
+    else
+      local count = tonumber(countstr)
+      if count == nil then
+        Assert.exception("Can't parse count '".. (countstr or 'nil') .."'")
+      end
+      return { type = 'signal', signal = signal_id, count = count or 0 } ---@type OpRef_Signal
+    end
+  end,
 
-function Emitter.make_reference(addr, is_ptr)
-  Assert.check(addr ~= nil)
-  return { type = 'reference', addr = tonumber(addr), pointer = is_ptr }
-end
+  ---@param addr integer
+  ---@return OpRef_Special
+  make_special_register_ro = function(addr)
+    return { type = 'register', special = true, addr = tonumber(addr), pointer = false } ---@type OpRef_Special
+  end,
 
-function Emitter.make_register(name, ref) -- +[reference]
-  return { type = 'register', addr = ref.addr, pointer = ref.pointer }
-end
+  ---@param addr integer
+  ---@param is_ptr boolean
+  ---@return OpRef_LogNet
+  make_lognet = function(addr, is_ptr)
+    return { type = 'lognet', addr = tonumber(addr), pointer = is_ptr } ---@type OpRef_LogNet
+  end,
 
-function Emitter.make_channel(name)
-  return { type = 'channel', channel = name }
-end
+  ---@param addr integer
+  ---@param is_ptr boolean
+  ---@return OpRef_Reference
+  make_reference = function(addr, is_ptr)
+    Assert.check(addr ~= nil)
+    return { type = 'reference', addr = tonumber(addr), pointer = is_ptr } ---@type OpRef_Reference
+  end,
 
---function Emitter.make_channel_ref(name, ref) -- +[reference]
---  return { type = 'channel', channel = name, addr = ref.addr, pointer = ref.pointer }
---end
+  ---@param name string?
+  ---@param ref any
+  ---@return OpRef_Register
+  make_register = function(name, ref) -- +[reference]
+    return { type = 'register', addr = ref.addr, pointer = ref.pointer } ---@type OpRef_Register
+  end,
 
-function Emitter.make_memory(name, bank, ref) -- +[memory_bank, reference]
-  return { type = 'memory', channel = name..bank, bank = tonumber(bank), addr = ref.addr, pointer = ref.pointer }
-end
+  ---@param name string
+  ---@return OpRef_Channel
+  make_channel = function(name)
+    return { type = 'channel', channel = name } ---@type OpRef_Channel
+  end,
 
-function Emitter.make_memory_bank(name, bank) -- +[channel]
-  return { type = 'memory', channel = name..bank, bank = tonumber(bank) }
-end
+  --make_channel_ref = function(name, ref) -- +[reference]
+  --  return { type = 'channel', channel = name, addr = ref.addr, pointer = ref.pointer } ---@type OpRef
+  --end,
 
-function Emitter.make_wire(name, ref)
-  return { type = 'wire', color = name, addr = ref.addr, pointer = ref.pointer}
-end
+  ---@param name string
+  ---@param bank integer|string
+  ---@param ref any
+  ---@return OpRef_Memory
+  make_memory = function(name, bank, ref) -- +[memory_bank, reference]
+    return { type = 'memory', channel = name..bank, bank = tonumber(bank), addr = ref.addr, pointer = ref.pointer } ---@type OpRef_Memory
+  end,
 
+  ---@param name string
+  ---@param bank integer|string
+  ---@return OpRef_MemoryBank
+  make_memory_bank = function(name, bank) -- +[channel]
+    return { type = 'memory', channel = name..bank, bank = tonumber(bank) } ---@type OpRef_MemoryBank
+  end,
+
+  ---@param name string
+  ---@param ref any
+  ---@return OpRef_Wire
+  make_wire = function(name, ref)
+    return { type = 'wire', color = name, addr = ref.addr, pointer = ref.pointer} ---@type OpRef_Wire
+  end,
+}
 
 return Emitter

@@ -23,7 +23,8 @@ function hashTypeFromSignal(hash)
   return signalType;
 end
 
-local function signalToSlot(signal) --[[@as LogisticFilter]]
+---@return LogisticFilter
+local function signalToSlot(signal)
   local t, n, q
   if type(signal.signal) == 'string' then
     local str = signal.signal
