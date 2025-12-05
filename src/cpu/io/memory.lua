@@ -48,7 +48,7 @@ end
 
 function ioMemory.address_of(address, type)
   local i2s, s2i = memory_map(address)
-  local hash = hashSignalType(type)
+  local hash = hash_FromSignalType(type)
   local addr = s2i[hash]
   if not addr then
     addr = #i2s + 1
@@ -86,13 +86,13 @@ function ioMemory.get(address)
   local i2s, s2i = memory_map(address)
   local hash = i2s[addr]
   if hash then
-    local type = hashTypeFromSignal(hash)
+    local type = hash_ToSignalType(hash)
     return table.deep_copy(memory_getraw(address, type))
   else
     local ctrl = ioChannel.read_network(address)
     local s = ctrl.signals and ctrl.signals[addr]
     if s then
-      hash = hashSignalType(s.signal)
+      hash = hash_FromSignalType(s.signal)
       Assert.check(s2i[hash] == nil)
       i2s[addr] = hash
       s2i[hash] = addr
@@ -117,7 +117,7 @@ function ioMemory.set(address, signal)
   else
     local oldHash = i2s[addr]
     if oldHash then
-      oldOutput = memory_getraw(address, hashTypeFromSignal(oldHash))
+      oldOutput = memory_getraw(address, hash_ToSignalType(oldHash))
     end
   end
 
@@ -131,7 +131,7 @@ function ioMemory.set(address, signal)
   local oldValue = { count = 0 }
   local newValue = table.deep_copy(signal)
 
-  local hash = hashSignalType(type)
+  local hash = hash_FromSignalType(type)
   if not hash then
     hash = i2s[addr]
     oldValue.count = oldOutput.count

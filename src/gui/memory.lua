@@ -251,7 +251,7 @@ local function PrepareRemap(signals, s2i)
   local queue = {}
   if s2i then
     for _,s in ipairs(signals) do
-      local hash = hashSignalType(s.signal)
+      local hash = hash_FromSignalType(s.signal)
       local index = s2i[hash]
       if index then
         remap[index] = s

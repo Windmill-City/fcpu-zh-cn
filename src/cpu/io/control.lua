@@ -12,12 +12,13 @@ function signalToStr(signal)
   return '[quality=normal]'
 end
 
-function hashSignalType(signalType)
+function hash_FromSignalType(signalType)
   local q = signalType.quality and (signalType.quality ~= 'normal') and ','..signalType.quality or ''
-  return signalType and (signalType.type or 'item') ..'='.. signalType.name .. q
+  local hash = signalType and (signalType.type or 'item') ..'='.. signalType.name .. q
+  return hash
 end
 
-function hashTypeFromSignal(hash)
+function hash_ToSignalType(hash)
   local t, n, q = string.match(hash, '(%a+)=([%a%d%-_:]+),?([%a]*)')
   local signalType = { type = t, name = n, quality = (q ~= '' and q or nil) }
   return signalType;
