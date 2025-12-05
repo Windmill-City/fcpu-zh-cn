@@ -5,9 +5,9 @@ Heap = require('src.utils.Heap')
 require('src/constants')
 Profiler = require('src/debug')
 Controller = require('src/cpu/controller')
+local gui = require('src/gui/base')
 
 require('src/storage')
-require('src/gui/base')
 require('src/fcpu_entity')
 require('src/compat')
 require('src/wiki')
@@ -76,7 +76,7 @@ end
 --  update_gui()
 --end)
 
-script.on_event(defines.events.on_tick, function(event)
+local function on_tick(event)
   local handled = 0
   local enabled = 0
   local start = storage.last_index
@@ -104,9 +104,9 @@ script.on_event(defines.events.on_tick, function(event)
     storage.gui_update_on_tick = game.tick + fcpu_gui_updates_every_tick
     update_gui()
   end
-end)
+end
 
-script.on_event(Controller.event_error, function(event)
+local function on_error(event)
   local entity = event.entity
   for _, player in pairs(game.players) do
     local player_data = get_player_data(player.index)
@@ -116,7 +116,7 @@ script.on_event(Controller.event_error, function(event)
       end
     end
   end
-end)
+end
 
 
 local function on_entity_settings_pasted(event)
@@ -250,6 +250,43 @@ local function on_entity_cloned(event)
 end
 
 -------------------------------------------------------------------------------------------------------
+
+script.on_event(Controller.event_error, on_error)
+script.on_event(defines.events.on_tick, on_tick)
+script.on_event(defines.events.on_runtime_mod_setting_changed, UpdateModSetting)
+
+-------------------------------------------------------------------------------------------------------
+
+local migration = require("3rdparty.flib061.migration")
+local migrations = require("src/migrations.lua")
+
+script.on_init(function()
+  gui.init()
+  gui.build_lookup_tables()
+  storage.gui_update_on_tick = 0
+  storage.unmap = {}
+  storage.destroy = {}
+  storage.fcpus = {}
+  storage.running = {}
+  storage.deffered = Heap.new()
+  Compatibility.on_init()
+end)
+script.on_load(function()
+  gui.build_lookup_tables()
+  Compatibility.on_load()
+end)
+script.on_configuration_changed(function(e)
+  if MC_DEBUG and migrations.debug_force then
+    migrations[migrations.debug_force]()
+  end
+  if migration.on_config_changed(e, migrations, nil, e) then
+    gui.check_filter_validity()
+  end
+  Compatibility.on_configuration_changed(e)
+end)
+
+-------------------------------------------------------------------------------------------------------
+
 local event = require("3rdparty.flib061.event")
 local event_filters = {
   {filter = "name", name = "entity-ghost"},

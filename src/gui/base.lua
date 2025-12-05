@@ -189,35 +189,4 @@ script.on_event(defines.events.on_player_changed_position, function(event)
   end
 end)
 
-
-script.on_event(defines.events.on_runtime_mod_setting_changed, UpdateModSetting)
-
--------------------------------------------------------------------------------------------------------
-
-local migration = require("3rdparty.flib061.migration")
-local migrations = require("src/migrations.lua")
-
-script.on_init(function()
-  gui.init()
-  gui.build_lookup_tables()
-  storage.gui_update_on_tick = 0
-  storage.unmap = {}
-  storage.destroy = {}
-  storage.fcpus = {}
-  storage.running = {}
-  storage.deffered = Heap.new()
-  Compatibility.on_init()
-end)
-script.on_load(function()
-  gui.build_lookup_tables()
-  Compatibility.on_load()
-end)
-script.on_configuration_changed(function(e)
-  if MC_DEBUG and migrations.debug_force then
-    migrations[migrations.debug_force]()
-  end
-  if migration.on_config_changed(e, migrations, nil, e) then
-    gui.check_filter_validity()
-  end
-  Compatibility.on_configuration_changed(e)
-end)
+return gui
