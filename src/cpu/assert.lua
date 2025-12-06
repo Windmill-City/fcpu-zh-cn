@@ -35,24 +35,29 @@ function Assert.check(b, ...)
   end
 end
 
+---@param modname string
 function Assert.mod_enabled(modname)
   if not script.active_mods[modname] then
     exception("Opcode is unavailable while mod ".. modname .." is disabled")
   end
 end
 
+---@param _ OpRef
 function Assert.one(_)
   if #_ ~= 1 then
     exception("Expecting one parameter after opcode")
   end
 end
 
+---@param _ OpRef
 function Assert.two(_)
   if #_ ~= 2 then
     exception("Expecting two parameters after opcode")
   end
 end
 
+---@param _ OpRef
+---@return number?
 function Assert.one_or_two(_)
   if #_ < 1 then
     exception("Expecting at least one parameters after opcode")
@@ -63,6 +68,8 @@ function Assert.one_or_two(_)
   return #_
 end
 
+---@param _ OpRef
+---@return number?
 function Assert.two_or_three(_)
   if #_ ~= 2 and #_ ~= 3 then
     exception("Expecting two or three parameters after opcode")
@@ -70,6 +77,8 @@ function Assert.two_or_three(_)
   return #_
 end
 
+---@param _ OpRef
+---@return number?
 function Assert.two_or_more(_)
   if #_ < 2 then
     exception("Expecting at least two parameters after opcode")
@@ -77,12 +86,15 @@ function Assert.two_or_more(_)
   return #_
 end
 
+---@param _ OpRef
 function Assert.three(_)
   if #_ ~= 3 then
     exception("Expecting three parameters after opcode")
   end
 end
 
+---@param _ OpRef
+---@return number?
 function Assert.three_or_four(_)
   if #_ ~= 3 and #_ ~= 4 then
     exception("Expecting three or four parameters after opcode")
@@ -90,6 +102,8 @@ function Assert.three_or_four(_)
   return #_
 end
 
+---@param _ OpRef
+---@param valid OpRefType[]
 function Assert.type(_, valid)
   -- wire, register, memory
   for i,v in ipairs(valid) do
@@ -122,6 +136,7 @@ function Assert.type(_, valid)
   expecting(_, "parameter to be a "..(table.concat(valid, ' or ')))
 end
 
+---@param ... OpRef
 function Assert.is_reference(...)
   for _,v in ipairs(table.pack(...)) do
     if not (v.type == 'register' and v.addr ~= nil) then
@@ -136,6 +151,7 @@ function Assert.is_reference(...)
   end
 end
 
+---@param ... OpRef_MemoryBank
 function Assert.with_memory_bank(...)
   for _,v in ipairs(table.pack(...)) do
     if not (v.bank ~= nil and v.type == 'memory') then
@@ -144,6 +160,7 @@ function Assert.with_memory_bank(...)
   end
 end
 
+---@param ... OpRef
 function Assert.is_memory_bank(...)
   for _,v in ipairs(table.pack(...)) do
     if not (v.addr == nil and v.bank ~= nil and v.type == 'memory') then
@@ -152,6 +169,7 @@ function Assert.is_memory_bank(...)
   end
 end
 
+---@param ... OpRef_Channel
 function Assert.is_channel_readable(...)
   for _,v in ipairs(table.pack(...)) do
     if not (v.type == 'memory' and v.bank ~= nil and v.addr == nil) then -- is_memory_bank
@@ -164,6 +182,7 @@ function Assert.is_channel_readable(...)
   end
 end
 
+---@param ... OpRef_Channel
 function Assert.is_channel_writable(...)
   for _,v in ipairs(table.pack(...)) do
     if not (v.type == 'memory' and v.bank ~= nil and v.addr == nil) then

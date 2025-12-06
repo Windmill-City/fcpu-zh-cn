@@ -6,14 +6,19 @@ local ioChannel
 local ioWire = {}
 
 -- Output wire access
+
+---@return Signal
 local function output_get(index)
   local signal = get_ctrl_slot_signal(output_control, index)
   return Emitter.make_signal(signal.signal, signal.count)
 end
 
+---@param index integer
+---@param signal OpRef_Constant?
 local function output_set(index, signal)
   Assert.check(1 <= index and index <= get_ctrl_signals_limit(output_control), "Output cell index is out of range")
   if signal and signal.count and signal.count ~= 0 and signal.signal then
+    ---@cast signal Signal
     Assert.check(math.abs(signal.count) ~= 1/0, "Division by zero")
     set_ctrl_slot_signal(output_control, index, signal)
   else
@@ -23,6 +28,9 @@ local function output_set(index, signal)
 end
 
 -- General wire manipulation
+
+---@param address OpRef_Wire
+---@return Signal
 function ioWire.get(address)
   if address.type == 'wire' and address.color == 'out' then
     local addr = ioRegister.addr_deref(address)
@@ -40,6 +48,8 @@ function ioWire.get(address)
   return NULL_SIGNAL
 end
 
+---@param address OpRef_Wire
+---@param signal OpRef_Constant?
 function ioWire.set(address, signal)
   if address.type == 'wire' and address.color == 'out' then
     local addr = ioRegister.addr_deref(address)
@@ -51,6 +61,8 @@ function ioWire.set(address, signal)
   end
 end
 
+---@param color 'red' | 'green' | 'lognet'
+---@param signal_to_find SignalID
 function ioWire.find_signal(color, signal_to_find)
   local network = state.cache.wires[color]
   if signal_to_find then
@@ -66,8 +78,9 @@ function ioWire.find_signal(color, signal_to_find)
   end
 end
 
+---@param color 'red' | 'green' | 'lognet'
 function ioWire.count(color)
-  return state.cache.wires[color] and state.cache.wires[color].signals and #state.cache.wires[color].signals or 0
+  return state.cache.wires[color] and table_size(state.cache.wires[color].signals) or 0
 end
 
 

@@ -14,6 +14,8 @@ REG_CNM = MC_REGS_RO_MSLOT
 -- }
 
 -- Registers
+---@param index integer
+---@return integer
 local function register_getreadonly(index)
   if index == REG_IP then
     return state.instruction_pointer
@@ -41,6 +43,8 @@ local function register_getreadonly(index)
   end
 end
 
+---@param index integer
+---@return Signal
 local function register_getraw(index)
   Assert.check_range(index, MC_REGS_EXT, 'register')
   if state.regs[index] and not state.regs[index].count then
@@ -56,6 +60,8 @@ local function register_setraw(index, signal)
 end
 
 
+---@param address OpRef_Address
+---@return integer
 function ioRegister.addr_deref(address)
   Assert.check(address.addr ~= nil, "Invalid address")
   if address.pointer then
@@ -66,6 +72,8 @@ function ioRegister.addr_deref(address)
   end
 end
 
+---@param index_expr OpRef_Register
+---@return OpRef_Constant
 function ioRegister.get(index_expr)
   Assert.check(index_expr.type == 'register', "Register expected")
   local addr = ioRegister.addr_deref(index_expr)
@@ -78,6 +86,8 @@ function ioRegister.get(index_expr)
   end
 end
 
+---@param index_expr OpRef_Register
+---@param value OpRef_Constant
 function ioRegister.set(index_expr, value)
   Assert.check(index_expr.type == 'register', "Register expected")
   local addr = ioRegister.addr_deref(index_expr)
@@ -85,6 +95,8 @@ function ioRegister.set(index_expr, value)
   register_setraw(addr, signal)
 end
 
+---@param index_expr OpRef_Register
+---@param count int32
 function ioRegister.set_count(index_expr, count)
   local value = ioRegister.get(index_expr)
   Assert.check(count == count, "Division by zero")

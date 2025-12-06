@@ -125,7 +125,11 @@ local function parse(tokens)
     if t == 'virtual-signal' then
       t = 'virtual'
     end
-    return Emitter.make_signal({type = t, name = n, quality = q}, c)
+    if c == '' then
+      return Emitter.make_type({type = t, name = n, quality = q})
+    else
+      return Emitter.make_signal({type = t, name = n, quality = q}, c)
+    end
   end
   local parseRegister = function(name, alias)
     local address = parseAddress(alias or name)

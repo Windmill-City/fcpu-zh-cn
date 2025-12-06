@@ -6,6 +6,7 @@ local MemoryView = require("src/gui/memory")
 
 -------------------------------------------------------------------------------------------------------
 
+---@param signal SignalFilter
 function GUI_signalToSpritePath(player_data, signal)
   if signal then
     local path
@@ -30,6 +31,7 @@ function GUI_signalToSpritePath(player_data, signal)
   end
 end
 
+---@param signal OpRef_ValueOrString
 function GUI_signalToTooltip(signal, prefix)
   local str = signal.count or ''
   if signal.str then

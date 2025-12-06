@@ -31,6 +31,7 @@ function ioLognet.find_item(signal_to_find)
   end
 end
 
+---@return integer
 function ioLognet.content_size()
   return state.cache.wires.lognet and table_size(state.cache.wires.lognet.signals) or 0
 end

@@ -6,6 +6,10 @@ local ioMemory = {}
 
 
 -- Memory
+
+---@param address OpRef_MemoryBank
+---@param addr integer?
+---@param signal Signal?
 local function memory_setraw(address, addr, signal)
   local control = ioChannel.write_control(address)
   Assert.check(control ~= nil, "Trying to access nil memory channel")
@@ -16,6 +20,7 @@ local function memory_setraw(address, addr, signal)
       control.add_section()
     end
   else
+    ---@cast addr -?
     control.enabled = true
     Assert.check_range(addr, get_ctrl_signals_count(control), 'memory')
     if signal and signal.count then
@@ -28,6 +33,9 @@ local function memory_setraw(address, addr, signal)
   end
 end
 
+---@param address OpRef_Memory
+---@param type SignalID
+---@return Signal
 local function memory_getraw(address, type)
   local network = ioChannel.read_network(address)
   local value = network and network.get_signal(type)
@@ -37,6 +45,8 @@ local function memory_getraw(address, type)
   return NULL_SIGNAL
 end
 
+---@param address OpRef_MemoryBank
+---@return table<integer, string>, table<string, integer>
 local function memory_map(address)
   Assert.with_memory_bank(address)
   state.memmap[address.channel] = state.memmap[address.channel] or { i2s = {}, s2i = {} }
@@ -46,6 +56,9 @@ end
 
 ------------------------------------------------------
 
+---@param address OpRef_MemoryBank
+---@param type SignalID
+---@return integer
 function ioMemory.address_of(address, type)
   local i2s, s2i = memory_map(address)
   local hash = hash_FromSignalType(type)
@@ -59,6 +72,8 @@ function ioMemory.address_of(address, type)
   return addr
 end
 
+---@param address OpRef_MemoryBank
+---@return integer
 function ioMemory.first_free_index(address)
   local ctrl = ioChannel.write_control(address)
   local index = ctrl.sections[1].filters_count + 1
@@ -73,12 +88,16 @@ function ioMemory.first_free_index(address)
   Assert.exception('Scalar memory block is full already (max '.. (index - 1) ..' items)')
 end
 
+---@param address OpRef_MemoryBank
+---@return integer
 function ioMemory.size(address, scalar)
   local ctrl = ioChannel.read_network(address)
   local signals = ctrl and ctrl.signals
   return signals and #signals or 0
 end
 
+---@param address OpRef_Memory
+---@return Signal
 function ioMemory.get(address)
   Assert.with_memory_bank(address)
   local addr = ioRegister.addr_deref(address)
@@ -103,6 +122,8 @@ function ioMemory.get(address)
   return NULL_SIGNAL
 end
 
+---@param address OpRef_Memory
+---@param signal OpRef_Constant
 function ioMemory.set(address, signal)
   Assert.type(signal, {'signal'})
   Assert.with_memory_bank(address)
@@ -163,6 +184,7 @@ function ioMemory.set(address, signal)
   ioChannel.GuiCache_Invalidate(address.channel, 5)
 end
 
+---@param address? OpRef_MemoryBank
 function ioMemory.clear(address)
   if address == nil or address.bank == nil then
     state.memmap = {}

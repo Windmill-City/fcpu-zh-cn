@@ -107,8 +107,9 @@ end
 
 
 -- Multiplex Helper Functions
----@param _ OpRef
----@param types string[]?
+---@param _ OpRef_Address | OpRef_Constant
+---@param types OpRefType[]?
+---@return OpRef_Constant
 function io.getsignal(_, types)
   if not types then
     types = {'signal', 'register', 'wire', 'lognet'}
@@ -116,37 +117,47 @@ function io.getsignal(_, types)
   Assert.type(_, types)
   local signal = nil
   if _.type == 'wire' or _.type == 'input' then
+    ---@cast _ OpRef_Wire
     signal = io.wire_get(_)
   elseif _.type == 'lognet' then
+    ---@cast _ OpRef_LogNet
     signal = io.lognet_get(_)
   elseif _.type == 'register' then
+    ---@cast _ OpRef_Register
     signal = io.register_get(_)
   elseif _.type == 'memory' then
+    ---@cast _ OpRef_Memory
     signal = io.memory_get(_)
   elseif _.type == 'signal' or _.type == 'type' or _.type == 'value' then
+    ---@cast _ OpRef_Constant
     signal = _
   elseif _.type == 'string' then
+    ---@cast _ OpRef_String
     Assert.exception('not supported yet')
   else
-    if _ then
-      Assert.exception('unexpected '.. ((_.name and '"'.. _.name ..'"') or _.type or ' lexem'))
-    else
-      Assert.exception('trying to retrieve nil signal')
-    end
+    ---@cast _ any
+    local msg = (_ and 'unexpected '.. ((_.name and '"'.. _.name ..'"') or _.type or ' lexem')) or 'trying to retrieve nil signal'
+    Assert.exception(msg)
   end
   return signal
 end
 
+---@param _ OpRef_Address
+---@param signal OpRef_Constant
+---@param types OpRefType[]?
 function io.setsignal(_, signal, types)
   if not types then
     types = {'register', 'wire'}
   end
   Assert.type(_, types)
   if _.type == 'wire' then
+    ---@cast _ OpRef_Wire
     io.wire_set(_, signal)
   elseif _.type == 'register' then
+    ---@cast _ OpRef_Register
     io.register_set(_, signal)
   elseif _.type == 'memory' then
+    ---@cast _ OpRef_Memory
     io.memory_set(_, signal)
     --Assert.exception('Memory cell could not be changed. Not supported yet.')
   elseif _.type == 'output' then
@@ -157,6 +168,9 @@ function io.setsignal(_, signal, types)
 end
 
 
+---@param _ OpRef_Address | OpRef_Constant
+---@param types OpRefType[]?
+---@return number | string | ?
 function io.getvalue(_, types)
   if _.type == 'value' then
     local t = types and Assert.type(_, types)
@@ -176,6 +190,9 @@ function io.getvalue(_, types)
   end
 end
 
+---@param _ OpRef_Address
+---@param count integer
+---@param types OpRefType[]?
 function io.setvalue(_, count, types)
   -- TODO: optimize
   local signal = io.getsignal(_, types)
@@ -185,9 +202,10 @@ function io.setvalue(_, count, types)
 end
 
 
+---@param types OpRefType[]?
 function io.gettype(_, types)
   local signal = io.getsignal(_, types)
-  if type(signal) ~= 'table' then 
+  if type(signal) ~= 'table' then
     Assert.exception('trying to retrieve nil type')
   end
 ---@diagnostic disable-next-line: need-check-nil
@@ -202,6 +220,7 @@ function io.settype(_, sigtype, types)
 end
 
 
+---@param types OpRefType[]?
 function io.getquality(_, types)
   local signal = io.getsignal(_, types)
   if type(signal) ~= 'table' then
@@ -211,6 +230,7 @@ function io.getquality(_, types)
   return signal.signal.quality or 'normal'
 end
 
+---@param types OpRefType[]?
 function io.setquality(_, sigtier, types)
   -- TODO: optimize
   local signal = io.getsignal(_, types)
