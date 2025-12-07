@@ -53,6 +53,9 @@ end
 -- Does not create new copies of Factorio objects.
 -- @tparam table tbl The table to make a copy of.
 -- @treturn table The copied table.
+---@generic T
+---@param tbl T
+---@return T
 function flib_table.deep_copy(tbl)
   local lookup_table = {}
   local function _copy(object)

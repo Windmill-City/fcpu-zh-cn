@@ -181,7 +181,7 @@ local function CreateWidget_Main(rootGui)
                 {type="flow", name="inner", save_as="gui_breakpoints", direction="vertical",
                   style_mods={
                     width = 44,
-                    height = 2568 * 2,
+                    height = 20 * MC_LINES,
                     horizontally_stretchable=true,
                     top_padding=4,
                   },
@@ -192,7 +192,7 @@ local function CreateWidget_Main(rootGui)
                 {type="text-box", name="program-input", style="fcpu_program_input",
                   style_mods={
                     width = fcpu_gui_editor_width,
-                    height = 2568 * 2 + 5,
+                    height = 20 * MC_LINES + 21, -- + 2568 * 2 + 5,
                     vertically_stretchable=false,
                     rich_text_setting=defines.rich_text_setting.enabled
                   },
@@ -206,7 +206,7 @@ local function CreateWidget_Main(rootGui)
               horizontal_scroll_policy="auto",
               style_mods={
                 width = fcpu_gui_editor_width,
-                height = 2568 * 2,
+                height = 20 * MC_LINES + 20,
                 horizontally_squashable=true,
                 horizontally_stretchable=true,
                 vertically_squashable=true,

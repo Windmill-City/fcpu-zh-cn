@@ -53,6 +53,8 @@ local function register_getraw(index)
   return state.regs[index]
 end
 
+---@param index integer
+---@param signal Signal
 local function register_setraw(index, signal)
   Assert.check_range(index, MC_REGS_EXT, 'register')
   Assert.check(math.abs(signal.count or 0) ~= 1 / 0, "Division by zero")

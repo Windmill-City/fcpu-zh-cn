@@ -104,7 +104,7 @@ function Controller.compile(state)
     state.ics_stack = {}
   end
 
-  if not Compiler.build(state, HdlBuilder, state.modified) then
+  if not Compiler.build(state, HdlBuilder, state.modified) and state.modified then
     Controller.set_error_message(state, nil)
   end
 
@@ -399,13 +399,17 @@ local function power_percents(cpu)
 end
 
 function Controller.do_power_check(state, proc)
-  if 10 < game.tick - state.power_probe_tick then
+  local wasBO = false
+  if 15 < game.tick - state.power_probe_tick then
+    wasBO = state.power_level <= MC_BROWNOUT_LEVEL
     state.power_level = power_percents(state.entity)
     state.power_probe_tick = game.tick
   end
   if state.power_level <= MC_BROWNOUT_LEVEL then
     script.raise_event(Controller.event_error, {['entity'] = state.entity, message = {'gui-fcpu.power-level-brownout', MC_BROWNOUT_LEVEL * 100}})
     return
+  elseif wasBO then
+    Controller.set_error_message(state, nil)
   end
 
   proc(state)
