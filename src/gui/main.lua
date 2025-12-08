@@ -38,15 +38,19 @@ local function FormatBreakpointTitle(state, i)
   if i < 10 then line = "  "..i elseif i < 100 then line = " "..i end
   line = '[font=fcpu-mono]'..line..'[/font]'
 
-  if state and i == state.error_line then
-    line = '[color=1,0.4,0.4]'..line..'⚠[/color]'
-  elseif state and i == state.instruction_pointer then
+  if not state then
+    return ' '.. line ..' '
+  end
+
+  if i == state.instruction_pointer then
     line = '[color=blue]'..line..'➧[/color]'
+  elseif i == state.error_line then
+    line = '[color=1,0.4,0.4]'..line..'⚠[/color]'
   else
     line = line..' '
   end
 
-  if state and state.breakpoints[i] then
+  if state.breakpoints[i] then
     --line = '[img=fcpu-breakpoint-on]'.. line
     line = '[color=1,0.4,0.4]●[/color]'..line
   else
