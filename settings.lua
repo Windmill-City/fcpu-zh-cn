@@ -43,5 +43,14 @@ data:extend({
     minimum_value = 100,
     maximum_value = 1000,
     allowed_values = { 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000 }
+  },
+  {
+    type = "int-setting",
+    name = "fcpu-program-lines",
+    setting_type = "startup",
+    default_value = 256,
+    minimum_value = 64,
+    maximum_value = 999,
+    allowed_values = { 64, 128, 256, 512, 999 }
   }
 })

@@ -31,8 +31,9 @@ function GUI_signalToSpritePath(player_data, signal)
   end
 end
 
----@param signal OpRef_ValueOrString
+---@param signal OpRef_Constant
 function GUI_signalToTooltip(signal, prefix)
+  ---@type string | number
   local str = signal.count or ''
   if signal.str then
     str = '\''.. signal.str ..'\''
