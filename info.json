@@ -2,7 +2,7 @@
   "name": "fcpu",
   "version": "0.4.40",
   "title": "fCPU",
-  "description": "Factorio Customizable Processing Unit.",
+  "description": "Factorio Customizable Processing Unit.\nAllow to write any logic on low level machine code.\nThe fCPU acts like a programmable microcontroller with a vector coprocessor that supports many useful instructions.",
   "author": "KonStg & Krul",
   "contact": "https://discord.gg/vPnDPhV",
   "homepage": "https://boosty.to/konstg",
@@ -25,6 +25,6 @@
       "version": "powershell -ExecutionPolicy Unrestricted .vscode/event_version.ps1",
       "compile": "powershell -ExecutionPolicy Unrestricted .vscode/event_compile.ps1"
     },
-    "sync_portal_details": false
+    "sync_portal_details": true
   }
 }
