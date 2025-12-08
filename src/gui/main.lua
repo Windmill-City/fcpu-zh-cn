@@ -264,9 +264,10 @@ local function GuiWidgetUpdatePinButton(player, force)
   end
 end
 
-local function GuiWidgetVisible(player_data, rootGui)
-  if rootGui then
+local function GuiWidgetVisible(player, player_data, visible)
+  if visible then
     if not player_data.gui_fcpu then
+      local rootGui = player.gui.screen
       local elems = CreateWidget_Main(rootGui)
       inplace_dictionary_combine(
         player_data,
@@ -275,10 +276,12 @@ local function GuiWidgetVisible(player_data, rootGui)
       )
     end
     player_data.gui_fcpu.visible = true
-  else
-    --player_data.gui_fcpu = nil
-    --rootGui["fcpu-widget"].destroy()
+  elseif visible == false then
     player_data.gui_fcpu.visible = false
+  else
+    local rootGui = player.gui.screen
+    player_data.gui_fcpu = nil
+    rootGui["fcpu-widget"].destroy()
   end
 end
 
@@ -293,13 +296,13 @@ function GuiWidgetOpen(player, entity)
         player_data.gui_pinned_location = player_data.gui_fcpu.location
       end
     end
-    GuiWidgetVisible(player_data, false)
+    GuiWidgetVisible(player, player_data, false)
   end
   if not state then
     return
   end
 
-  GuiWidgetVisible(player_data, rootGui)
+  GuiWidgetVisible(player, player_data, true)
   if player_data.gui_pinned then
     if player_data.gui_fcpu and player_data.gui_fcpu.valid then
       player_data.gui_fcpu.location = player_data.gui_pinned_location
@@ -342,8 +345,9 @@ end
 local function UpdateWidget_Breakpoints(player_data, state, initial)
   local gui_cache = state.gui_cache
   if gui_cache then
+    local gui_elements = player_data.gui_breakpoints.children
     local update_line = function(i)
-      local line = player_data.gui_breakpoints.children[i]
+      local line = gui_elements[i]
       if line then
         line.caption = FormatBreakpointTitle(state, i)
       end
@@ -454,24 +458,30 @@ function GuiWidgetClose(player_index, skip_if_pinned, silent)
     if player_data.gui_pinned then
       player_data.gui_pinned_location = player_data.gui_fcpu.location
     end
-    GuiWidgetVisible(player_data, false)
+    GuiWidgetVisible(player, player_data, false)
     player_data.current_fcpu = nil
   end
 end
 
-function GuiEntityCloseWidget(unit_number)
+function GuiEntityCloseWidget(unit_number, force_destroy)
   for player_index, player in pairs(game.players) do
     local player_data = get_player_data(player_index)
     if not (player_data.current_fcpu and player_data.current_fcpu.valid)
     or player_data.current_fcpu.unit_number == unit_number
+    or unit_number == nil
     then
       if player_data.gui_fcpu and player_data.gui_fcpu.valid then
         if player_data.gui_pinned then
           player_data.gui_pinned_location = player_data.gui_fcpu.location
         end
-        GuiWidgetVisible(player_data, false)
+        if force_destroy then
+          GuiWidgetVisible(player, player_data, nil)
+        else
+          GuiWidgetVisible(player, player_data, false)
+        end
       end
       player_data.current_fcpu = nil
+      player_data.current_gui_cache = nil
     end
   end
 end

@@ -282,6 +282,7 @@ script.on_configuration_changed(function(e)
   if migration.on_config_changed(e, migrations, nil, e) then
     gui.check_filter_validity()
   end
+  GuiEntityCloseWidget(nil, true)
   Compatibility.on_configuration_changed(e)
 end)
 
