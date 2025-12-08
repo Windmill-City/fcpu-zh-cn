@@ -264,6 +264,24 @@ local function GuiWidgetUpdatePinButton(player, force)
   end
 end
 
+local function GuiWidgetVisible(player_data, rootGui)
+  if rootGui then
+    if not player_data.gui_fcpu then
+      local elems = CreateWidget_Main(rootGui)
+      inplace_dictionary_combine(
+        player_data,
+        elems,
+        player_data.gui_pinned and player_data.gui_pinned_memory and MemoryView.CreateWidget(elems.gui_fcpu["fcpu-panels"]) or {}
+      )
+    end
+    player_data.gui_fcpu.visible = true
+  else
+    --player_data.gui_fcpu = nil
+    --rootGui["fcpu-widget"].destroy()
+    player_data.gui_fcpu.visible = false
+  end
+end
+
 function GuiWidgetOpen(player, entity)
   local player_data = get_player_data(player.index)
   local state = get_fcpu_state(entity)
@@ -275,19 +293,13 @@ function GuiWidgetOpen(player, entity)
         player_data.gui_pinned_location = player_data.gui_fcpu.location
       end
     end
-    player_data.gui_fcpu = nil
-    rootGui["fcpu-widget"].destroy()
+    GuiWidgetVisible(player_data, false)
   end
   if not state then
     return
   end
 
-  local elems = CreateWidget_Main(rootGui)
-  inplace_dictionary_combine(
-    player_data,
-    elems,
-    player_data.gui_pinned and player_data.gui_pinned_memory and MemoryView.CreateWidget(elems.gui_fcpu["fcpu-panels"]) or {}
-  )
+  GuiWidgetVisible(player_data, rootGui)
   if player_data.gui_pinned then
     if player_data.gui_fcpu and player_data.gui_fcpu.valid then
       player_data.gui_fcpu.location = player_data.gui_pinned_location
@@ -328,23 +340,24 @@ function GuiWidgetOpen(player, entity)
 end
 
 local function UpdateWidget_Breakpoints(player_data, state, initial)
-  if state.gui_cache then
+  local gui_cache = state.gui_cache
+  if gui_cache then
     local update_line = function(i)
       local line = player_data.gui_breakpoints.children[i]
       if line then
         line.caption = FormatBreakpointTitle(state, i)
       end
     end
-    if initial or state.gui_cache.invalid_lines == nil then
+    if initial or gui_cache.invalid_lines == nil then
       for i = 1,MC_LINES do
         update_line(i)
       end
     else
-      for k,_ in pairs(state.gui_cache.invalid_lines) do
+      for k,_ in pairs(gui_cache.invalid_lines) do
         update_line(k)
       end
     end
-    state.gui_cache.invalid_lines = {}
+    gui_cache.invalid_lines = {}
   end
 end
 
@@ -441,8 +454,7 @@ function GuiWidgetClose(player_index, skip_if_pinned, silent)
     if player_data.gui_pinned then
       player_data.gui_pinned_location = player_data.gui_fcpu.location
     end
-    player_data.gui_fcpu.destroy()
-    player_data.gui_fcpu = nil
+    GuiWidgetVisible(player_data, false)
     player_data.current_fcpu = nil
   end
 end
@@ -457,8 +469,7 @@ function GuiEntityCloseWidget(unit_number)
         if player_data.gui_pinned then
           player_data.gui_pinned_location = player_data.gui_fcpu.location
         end
-        player_data.gui_fcpu.destroy()
-        player_data.gui_fcpu = nil
+        GuiWidgetVisible(player_data, false)
       end
       player_data.current_fcpu = nil
     end

@@ -520,8 +520,8 @@ end
 -------------------------------------------------------------------------------------------------------
 
 function Controller.GuiCache_InvalidateLine(state, line)
-  if state.gui_cache then
-    if line and state.gui_cache.invalid_lines then
+  if state.gui_cache and line then
+    if state.gui_cache.invalid_lines then
       -- do not add cache until gui initialize it
       state.gui_cache.invalid_lines[line] = true
     else
