@@ -686,6 +686,9 @@ See: https://mods.factorio.com/mod/fcpu/faq and [Discord channel](https://discor
 # Roadmap & TODOs
 See [here](https://boosty.to/konstg)
 
+# Localization
+If you would like to help with the fCPU localization, [here](https://crowdin.com/editor/fcpu/all/) is the Crowdin project
+
 
 # Dear supporters
 

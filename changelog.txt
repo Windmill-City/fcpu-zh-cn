@@ -3,6 +3,7 @@ Version: 0.4.40
 Date: ????
   Features:
     - Added support for BlueprintTools mod (https://mods.factorio.com/mod/fcpu/discussion/6061063a592a2c1abb035404). fCPU should handle wire swapping seamlessly.
+    - Crowdin.com integration.
   Changes:
     - Removed support for legacy Factorio versions.
   Bugfixes:

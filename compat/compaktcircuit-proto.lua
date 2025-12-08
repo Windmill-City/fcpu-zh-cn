@@ -24,6 +24,8 @@ local function tune_for_compaktcircuit(packed_entity)
   packed_entity.circuit_wire_connection_points = { wire_conn, wire_conn, wire_conn, wire_conn }
   packed_entity.draw_circuit_wires = false
   packed_entity.created_smoke = nil
+  packed_entity.localised_name = { 'entity-name.'.. packed_entity.name }
+  packed_entity.localised_description = { 'entity-description.'.. packed_entity.name }
 end
 
 local fcpu = data.raw['arithmetic-combinator']['fcpu']
@@ -34,8 +36,8 @@ if MC_DEBUG then
 end
 
 local packed_entity = table.deepcopy(fcpu)
+tune_for_compaktcircuit(packed_entity)
 packed_entity.name = 'fcpu-packed'
 packed_entity.circuit_wire_max_distance = 10000
 
-tune_for_compaktcircuit(packed_entity)
 data:extend { packed_entity }

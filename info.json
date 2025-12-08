@@ -21,8 +21,10 @@
   "package": {
     "ignore": [ "tests/**", "*.psd", "todos.md"],
     "scripts": {
+      "prepublish": "python .vscode/factorio-crowdin-sync",
       "version": "powershell -ExecutionPolicy Unrestricted .vscode/event_version.ps1",
       "compile": "powershell -ExecutionPolicy Unrestricted .vscode/event_compile.ps1"
-    }
+    },
+    "sync_portal_details": false
   }
 }

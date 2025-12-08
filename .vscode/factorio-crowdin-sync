@@ -1,0 +1,38 @@
+#!/usr/bin/python
+
+import glob
+import subprocess
+
+
+def modify_files(transformer):
+    for filename in glob.glob("**/*.cfg", recursive=True):
+        out = []
+        with open(filename, encoding = 'utf8') as file:
+            for line in file:
+                components = line.split("=", maxsplit=1)
+                if len(components) == 2:
+                    out.append(transformer(components))
+                else:
+                    out.append(components[0].rstrip())
+            file.close()
+
+        with open(filename, "w", encoding = 'utf8') as file:
+            file.write('\n'.join(out).strip() + '\n')
+            file.close()
+
+
+# Quote
+modify_files(lambda components: '{}="{}"'.format(
+    components[0], components[1].rstrip().replace('"', '\"')))
+
+try:
+    subprocess.run(["crowdin", "push", "sources", "-b=main"])
+    subprocess.run(["crowdin", "pull", "--skip-untranslated-strings", "-b=main"])
+
+finally:
+    # Unquote
+    modify_files(lambda components: '{}={}'.format(
+        components[0], components[1].rstrip()[1:-1].replace('\\"', '"')))
+
+# Stage
+subprocess.run(["git", "add", "locale"])
