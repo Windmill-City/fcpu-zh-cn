@@ -307,12 +307,18 @@ local function readSimple(next, peek, tree, links)
     -- Test for Header
     local m, rest = match(line, PATTERN_HEADER)
     if m then
+        local replace = {
+            ['heading-1'] = 'default-large-bold',
+            ['heading-2'] = 'heading-1',
+            ['heading-3'] = 'heading-2',
+        }
+        local heading = "heading-" .. #m
         tree[#tree + 1] = {
             NEWLINE,
             {
                 lineRead(rest),
                 type = 'font',
-                attributes = "heading-" .. #m
+                attributes = replace[heading] or heading
             },
             type = { sub = 'h'.. #m }
         }
