@@ -7,6 +7,15 @@ local builder = {}
 local Enable = 0
 local Disable = 1
 
+---@type SignalID
+local SIGNALID_FCPU_ERROR = {type='virtual', name='signal-fcpu-error'}
+---@type SignalID
+local SIGNALID_EVERY = {type='virtual', name='signal-everything'}
+---@type SignalID
+local SIGNALID_EACH = {type='virtual', name='signal-each'}
+---@type SignalID
+local SIGNALID_ANY = {type='virtual', name='signal-anything'}
+
 -------------------------------------------------------------------------------------------------------
 --- MIGRATION TO Factorio Lua API 2.0
 -------------------------------------------------------------------------------------------------------
@@ -16,6 +25,8 @@ local function connect_neighbour(source_entity, dict)
   source_connector.connect_to(target_connector, false)
 end
 
+---@param wire_type? defines.wire_type
+---@return defines.wire_connector_id?
 local function combinator_input(wire_type)
   if wire_type == defines.wire_type.green then
     return defines.wire_connector_id.combinator_input_green
@@ -26,6 +37,8 @@ local function combinator_input(wire_type)
   end
 end
 
+---@param wire_type defines.wire_type
+---@return defines.wire_connector_id?
 local function combinator_output(wire_type)
   if wire_type == defines.wire_type.green then
     return defines.wire_connector_id.combinator_output_green
@@ -36,6 +49,7 @@ local function combinator_output(wire_type)
   end
 end
 
+---@return DeciderCombinatorParameters
 local function decider_combinator_params(lapi) -- Factorio 1.0 legacy API
   return { -- https://lua-api.factorio.com/stable/concepts/DeciderCombinatorParameters.html
     conditions = {{
@@ -55,6 +69,7 @@ local function decider_combinator_params(lapi) -- Factorio 1.0 legacy API
 end
 
 -------------------------------------------------------------------------------------------------------
+---@param color defines.wire_type
 local function inverse_wire_color(color)
   return (color ~= defines.wire_type.red) and defines.wire_type.red or defines.wire_type.green
 end
@@ -86,6 +101,7 @@ local function get_debug_offset(entity, d_next_node)
   return x, y
 end
 
+---@return LuaEntity, LuaArithmeticCombinatorControlBehavior | LuaDeciderCombinatorControlBehavior | LuaSelectorCombinatorControlBehavior | LuaConstantCombinatorControlBehavior | LuaCombinatorControlBehavior
 function builder.create_node(entity, type, debug_next_node)
   local x, y = get_debug_offset(entity, debug_next_node)
   local surf = entity.surface
@@ -304,11 +320,11 @@ local function verify_channel(state, ics_name, debug_i)
     ics.out = ent_mem
 
     ctrl_mem.parameters = decider_combinator_params({
-      first_signal = {type='virtual', name='signal-fcpu-error'},
+      first_signal = SIGNALID_FCPU_ERROR,
       second_signal = nil,
       constant = 0,
       comparator = "=",
-      output_signal = {type='virtual', name='signal-everything'},
+      output_signal = SIGNALID_EVERY,
       copy_count_from_input = true
     })
 
@@ -417,11 +433,11 @@ function builder.create_merger_cell(entity, input_a, input_b)
   local proxy, control_proxy = builder.create_node(entity, 'decider')
 
   control_proxy.parameters = decider_combinator_params({
-    first_signal = {type='virtual', name='signal-fcpu-error'},
+    first_signal = SIGNALID_FCPU_ERROR,
     second_signal = nil,
     constant = 0,
     comparator = "=",
-    output_signal = {type='virtual', name='signal-everything'},
+    output_signal = SIGNALID_EVERY,
     copy_count_from_input = true
   })
 
@@ -466,52 +482,52 @@ function builder.create_filter_cell(entity, input_src, input_msk)
   local d3, control_d3 = builder.create_node(entity, 'decider')
 
   control_a1.parameters = {
-    first_signal = {type='virtual', name='signal-each'},
+    first_signal = SIGNALID_EACH,
     second_signal = nil,
     first_constant  = nil,
     second_constant = -1,
     operation  = '*',
-    output_signal = {type='virtual', name='signal-each'}
+    output_signal = SIGNALID_EACH
   }
   control_a2.parameters = {
-    first_signal = {type='virtual', name='signal-each'},
+    first_signal = SIGNALID_EACH,
     second_signal = nil,
     first_constant  = nil,
     second_constant = -2147483648,
     operation  = '+',
-    output_signal = {type='virtual', name='signal-each'}
+    output_signal = SIGNALID_EACH
   }
   control_a3.parameters = {
-    first_signal = {type='virtual', name='signal-each'},
+    first_signal = SIGNALID_EACH,
     second_signal = nil,
     first_constant  = nil,
     second_constant = 2147483647,
     operation  = 'AND',
-    output_signal = {type='virtual', name='signal-each'}
+    output_signal = SIGNALID_EACH
   }
 
   control_d1.parameters = decider_combinator_params({
-    first_signal = {type='virtual', name='signal-each'},
+    first_signal = SIGNALID_EACH,
     second_signal = nil,
     constant = 0,
     comparator = "<",
-    output_signal = {type='virtual', name='signal-each'},
+    output_signal = SIGNALID_EACH,
     copy_count_from_input = false
   })
   control_d2.parameters = decider_combinator_params({
-    first_signal = {type='virtual', name='signal-each'},
+    first_signal = SIGNALID_EACH,
     second_signal = nil,
     constant = 0,
     comparator = "<",
-    output_signal = {type='virtual', name='signal-each'},
+    output_signal = SIGNALID_EACH,
     copy_count_from_input = true
   })
   control_d3.parameters = decider_combinator_params({
-    first_signal = {type='virtual', name='signal-each'},
+    first_signal = SIGNALID_EACH,
     second_signal = nil,
     constant = -2147483648,
     comparator = "=",
-    output_signal = {type='virtual', name='signal-each'},
+    output_signal = SIGNALID_EACH,
     copy_count_from_input = true
   })
 
@@ -617,7 +633,7 @@ local function builder_generate_run(index, delay, ics)
   return actions
 end
 
-local function builder_generate_retain(index, delay, ics)
+--[[local function builder_generate_retain(index, delay, ics)
   local actions = {}
   if ics ~= ics_prev then
     -- old ic: disable kout
@@ -627,7 +643,7 @@ local function builder_generate_retain(index, delay, ics)
   actions[#actions+1] = {action='tune', ic=ics.kaux, value=Enable, delay = delay}
   actions[#actions+1] = {action='tune', ic=ics.kaux, value=Disable, delay = delay + 1}
   return actions
-end
+end]]
 
 local function generate_deffer(ics, index, delay)
   return {
@@ -655,11 +671,11 @@ function builder.create_memory_cell(entity, input_a)
 
   for _,c in ipairs({control_key, control_out, control_aux}) do
     c.parameters = decider_combinator_params({
-      first_signal = {type='virtual', name='signal-fcpu-error'},
+      first_signal = SIGNALID_FCPU_ERROR,
       second_signal = nil,
       constant = 1,
       comparator = "=", -- < ≤ ≠ = ≥ >
-      output_signal = {type='virtual', name='signal-everything'},
+      output_signal = SIGNALID_EVERY,
       copy_count_from_input = true
     })
   end
@@ -719,12 +735,12 @@ function builder.create_arithmetic_cell(entity, input_a, input_b, operation)
   local x, control_x = builder.create_node(entity, 'arithmetic')
 
   control_x.parameters = {
-    first_signal = {type='virtual', name='signal-each'},
     second_signal = nil,
+    first_signal = SIGNALID_EACH,
     first_constant  = nil,
     second_constant = constant,
     operation  = operation,
-    output_signal = {type='virtual', name='signal-each'}
+    output_signal = SIGNALID_EACH
   }
 
   connect_neighbour(x, {
@@ -751,11 +767,11 @@ function builder.create_decider_cell(entity, input, signal, operation)
   local x, control_x = builder.create_node(entity, 'decider')
 
   control_x.parameters = decider_combinator_params({
-    first_signal = {type='virtual', name='signal-each'},
+    first_signal = SIGNALID_EACH,
     second_signal = nil,
     constant = 0,
     comparator = operation,
-    output_signal = {type='virtual', name='signal-each'},
+    output_signal = SIGNALID_EACH,
     copy_count_from_input = true
   })
 
@@ -777,6 +793,8 @@ local function append_ics(ics, merger)
   end
 end
 
+
+---@return [LuaEntity, defines.wire_type, defines.wire_connector_id]
 local function connect_input_from(state, address, default_color)
   Assert.is_channel_readable(address)
   if address.type == 'memory' or address.type == 'channel' then
@@ -817,11 +835,11 @@ local function connect_output_to(state, ics, address)
       local proxy, control_proxy = builder.create_node(entity, 'decider')
 
       control_proxy.parameters = decider_combinator_params({
-        first_signal = {type='virtual', name='signal-fcpu-error'},
+        first_signal = SIGNALID_FCPU_ERROR,
         second_signal = nil,
         constant = 0,
         comparator = "=",
-        output_signal = {type='virtual', name='signal-everything'},
+        output_signal = SIGNALID_EVERY,
         copy_count_from_input = true
       })
 

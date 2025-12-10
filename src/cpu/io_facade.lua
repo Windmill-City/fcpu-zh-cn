@@ -191,7 +191,7 @@ function io.getvalue(_, types)
 end
 
 ---@param _ OpRef_Address
----@param count integer
+---@param count integer | string | ?
 ---@param types OpRefType[]?
 function io.setvalue(_, count, types)
   -- TODO: optimize
