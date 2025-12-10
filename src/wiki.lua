@@ -13,3 +13,10 @@ if have_informatron or have_booktorio then
 
   Compatibility.wiki_register(sections, fulltext)
 end
+
+---@param e {player_index:int32, old_locale:string, name:string, tick:int32}
+function on_player_locale_changed(e)
+  local player = game.players[e.player_index]
+end
+
+script.on_event(defines.events.on_player_locale_changed, on_player_locale_changed)
