@@ -61,16 +61,16 @@ The processor executes instructions from a written program in turn, line by line
 
 ### Registers
 
-There are 8 generic purpose read/write registers, named **reg1**, ... **reg8** or alias **r1**, ... **r8**.  
-Each register store signal type and numeric value (floating point numbers are supported).  
+There are 8 generic purpose read/write registers, named **reg1**, ... **reg8** or alias **r1**, ... **r8**.
+Each register store signal type and numeric value (floating point numbers are supported).
 For example `mov reg2 10[item=iron-plate]`, this instruction assigns to **reg2** value of *10* and type of *[item=iron-plate]*.  
 
 Besides general purpose registers there are some read only registers:  
 
-- **ipt**: current instruction line numer  
-- **clk**: clock, value increases every tick  
-- **cnr**, **cng**: signals number on red `cnr` or green `cng` input wire  
-- **cnl**: count of a various items in `lognet`, not a sum of its values  
+- **ipt**: current instruction line numer
+- **clk**: clock, value increases every tick
+- **cnr**, **cng**: signals number on red `cnr` or green `cng` input wire
+- **cnl**: count of a various items in `lognet`, not a sum of its values
 - **cnm1**, ..., **cnm4**: signals number in memory  
 
 Output registers (write only):
@@ -80,20 +80,20 @@ Output registers (write only):
 
 ### Memory
 
-For processing several signals at the same time, the fCPU provides a vector coprocessor that handles SIMD instructions.  
-Unlike scalar operations, which process a limited number of signals at a time, vector operations can process hundreds of signals in the same amount of time.  
+For processing several signals at the same time, the fCPU provides a vector coprocessor that handles SIMD instructions.
+Unlike scalar operations, which process a limited number of signals at a time, vector operations can process hundreds of signals in the same amount of time.
 fCPU Memory is an analogue of registers but for vector instructions.  
 
-There are 4 memory channels available for use.  
-Each channel consists of multiple memory cells.  
-Each cell stores a signal type and a numeric value.  
-Memory channels are addressed: `mem1`, ...,` mem4`.  
+There are 4 memory channels available for use.
+Each channel consists of multiple memory cells.
+Each cell stores a signal type and a numeric value.
+Memory channels are addressed: `mem1`, ...,` mem4`.
 To access one cell: `mem2[44]` or `mem1@3` (see Arrays)  
 
 
 ### Logistic network (LogNet)
 
-Acts as a single memory channel, except that it is read-only and other obvious limitations.  
+Acts as a single memory channel, except that it is read-only and other obvious limitations.
 `lgn` channel could be `xmov`'ed into memory channel for manipulations.  
 
 
@@ -133,7 +133,7 @@ This approach is also could be used with `red`, `green` input wires and memory c
 
 
 ## Control signals, interruptions
-You could control fCPU state by wires, not only manually through game GUI.  
+You could control fCPU state by wires, not only manually through game GUI.
 There are some signals for it:
 * `[virtual-signal=signal-fcpu-halt]`: Halt program execution.
 * `[virtual-signal=signal-fcpu-run]`: Continue running program.
@@ -146,7 +146,7 @@ If fCPU encounter error in program it will output `[virtual-signal=signal-fcpu-e
 
 ## Mnemonics
 
-Instructions which can be executed one by one on per frame basis.  
+Instructions which can be executed one by one on per frame basis.
 Each instruction take one or more operands and modify them or state of fCPU.  
 
 **Legend**
@@ -165,241 +165,241 @@ Each instruction take one or more operands and modify them or state of fCPU.
 - **L**, label: instruction label (`:labelname`)
 - **S**, string: used in utility mnemonics (`'rotation_speed'`)
 
-`...` - one or more, could be specified multiple times with space separator.  
+`...` - one or more, could be specified multiple times with space separator.
 `?` - optional, may be specified.  
 
 ### Common
 
-* `nop`  
+* `nop`
   No operation.
 
-* `clr`  
+* `clr`
   Clear all registers, memory channels and output.
 
-* `clr` reg  
+* `clr` reg
   Clear all registers.
 
-* `clr` out  
+* `clr` out
   Clear all output values.
 
-* `clr` mem  
+* `clr` mem
   Clear all memory channels.
 
-* `clr` dst...[**R**/**M**/**O**]  
+* `clr` dst...[**R**/**M**/**O**]
   Clear specified registers, memory channels or output wires (`mem3`, `r2`, `out4`).
 
-* `mov` dst...[**R**/**O**] src[**V**/**T**/**VT**/**R**]  
-  Copy signal from source to destination.  
+* `mov` dst...[**R**/**O**] src[**V**/**T**/**VT**/**R**]
+  Copy signal from source to destination.
   *dst... = src*
 
-* `ssv` dst...[**R**/**O**] val[**V**/**R**]  
-  Set signal value.  
+* `ssv` dst...[**R**/**O**] val[**V**/**R**]
+  Set signal value.
   *dst... = val*
 
-* `sst` dst...[**R**/**O**] type[**T**/**R**]  
-  Set signal type.  
+* `sst` dst...[**R**/**O**] type[**T**/**R**]
+  Set signal type.
   *dst... = type*
 
-* `ssq` dst...[**R**/**O**] quality[**T**/**Q**/**R**]  
-  Set signal quality.  
+* `ssq` dst...[**R**/**O**] quality[**T**/**Q**/**R**]
+  Set signal quality.
   *dst... = quality*
 
-* `fid` dst[**R**/**O**] src[**I**/**M**] type[**T**/**R**]  
+* `fid` dst[**R**/**O**] src[**I**/**M**] type[**T**/**R**]
   Find *type* in *src* (memory or red/green input wire), then assign *dst* to signal type and number value.
 
-* `idx` dst[**R**] src[**I**/**M**] type[**T**/**R**]  
+* `idx` dst[**R**] src[**I**/**M**] type[**T**/**R**]
   Find *type* in *src* (memory or red/green input wire), then assing *dst* to the index of memory cell or input wire location.
 
-* `fir` dst[**R**/**O**] type[**T**/**R**]  
-  `fig` dst[**R**/**O**] type[**T**/**R**]  
+* `fir` dst[**R**/**O**] type[**T**/**R**]
+  `fig` dst[**R**/**O**] type[**T**/**R**]
   Shorthands for `fid ... red ...` and `fid ... green ...`.
 
 ### Quality
 
-* `qn` dst[**R**/**O**] type[**T**/**R**/**I**]  
-  Quality as a number (normal=1, uncommon=2, rare=3, epic=4, legendary=5).  
+* `qn` dst[**R**/**O**] type[**T**/**R**/**I**]
+  Quality as a number (normal=1, uncommon=2, rare=3, epic=4, legendary=5).
   *dst = quality_of(type)*
 
 
 ### Swap
 
-* `swp` reg1[**R**] reg2[**R**]  
+* `swp` reg1[**R**] reg2[**R**]
   Swap signals in registers or memory cells.
-* `swpt` reg1[**R**] reg2[**R**]  
+* `swpt` reg1[**R**] reg2[**R**]
   Swap signal types in registers or memory cells.
-* `swpv` reg1[**R**] reg2[**R**]  
+* `swpv` reg1[**R**] reg2[**R**]
   Swap signal values in registers or memory cells.
-* `swpq` reg1[**R**] reg2[**R**]  
+* `swpq` reg1[**R**] reg2[**R**]
   Swap signal quality in registers or memory cells.
 
 
 ### Arithmetic
 
-* `add` dst[**R**] src?[**V**/**R**] val[**V**/**R**]  
-  *dst = src + val* (if src is specified)  
-  *dst = dst + val*  
-* `sub` dst[**R**] src?[**V**/**R**] val[**V**/**R**]  
-  *dst = src - val* (if src is specified)  
-  *dst = dst - val*  
-* `mul` dst[**R**] src?[**V**/**R**] val[**V**/**R**]  
-  *dst = src \* val* (if src is specified)  
-  *dst = dst \* val*  
-* `div` dst[**R**] src?[**V**/**R**] val[**V**/**R**]  
-  *dst = src / val* (if src is specified)  
-  *dst = dst / val*  
-* `mod` dst[**R**] src?[**V**/**R**] val[**V**/**R**]  
-  *dst = src % val* (if src is specified)  
-  *dst = dst % val*  
-* `pow` dst[**R**] src?[**V**/**R**] val[**V**/**R**]  
-  *dst = src ^ val* (if src is specified)  
+* `add` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
+  *dst = src + val* (if src is specified)
+  *dst = dst + val*
+* `sub` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
+  *dst = src - val* (if src is specified)
+  *dst = dst - val*
+* `mul` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
+  *dst = src \* val* (if src is specified)
+  *dst = dst \* val*
+* `div` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
+  *dst = src / val* (if src is specified)
+  *dst = dst / val*
+* `mod` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
+  *dst = src % val* (if src is specified)
+  *dst = dst % val*
+* `pow` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
+  *dst = src ^ val* (if src is specified)
   *dst = dst ^ val*  
 
-* `inc` dst[**R**]  
+* `inc` dst[**R**]
   *dst = dst + 1*
-* `dec` dst[**R**]  
+* `dec` dst[**R**]
   *dst = dst - 1*
 
-* `subi` dst[**R**] val[**V**/**R**]  
+* `subi` dst[**R**] val[**V**/**R**]
   *dst = val - dst*
-* `divi` dst[**R**] val[**V**/**R**]  
+* `divi` dst[**R**] val[**V**/**R**]
   *dst = val / dst*
-* `modi` dst[**R**] val[**V**/**R**]  
+* `modi` dst[**R**] val[**V**/**R**]
   *dst = val % dst*
-* `powi` dst[**R**] val[**V**/**R**]  
+* `powi` dst[**R**] val[**V**/**R**]
   *dst = val ^ dst*
 
-* `rnd` dst[**R**] min[**V**/**R**] max[**V**/**R**]  
+* `rnd` dst[**R**] min[**V**/**R**] max[**V**/**R**]
   Assigns into *dst* a pseudo-random value in range [*min* to *max*] (inclusive).  
 
-* `fract` reg[**R**]  
-  Get the fraction part of a real number in register.  
-* `floor` reg[**R**]  
-  Get the greatest integer less than or equal to real number in register.  
-* `round` reg[**R**]  
-  Get the closest integer to real number in register.  
-* `ceil` reg[**R**]  
+* `fract` reg[**R**]
+  Get the fraction part of a real number in register.
+* `floor` reg[**R**]
+  Get the greatest integer less than or equal to real number in register.
+* `round` reg[**R**]
+  Get the closest integer to real number in register.
+* `ceil` reg[**R**]
   Get the lowest integer greater than or equal to real number in register.  
 
-* `dig` dst[**R**] num[**V**/**R**]  
-  Get digit *num*ber from *dest*inatination and write to dst.  
+* `dig` dst[**R**] num[**V**/**R**]
+  Get digit *num*ber from *dest*inatination and write to dst.
   *dst = dst / 10^num % 10*
-* `dis` dst[**R**] num[**V**/**R**] val[**V**/**R**]  
-  Set digit to *val*ue at *num*ber in *dest*inatination.  
+* `dis` dst[**R**] num[**V**/**R**] val[**V**/**R**]
+  Set digit to *val*ue at *num*ber in *dest*inatination.
   *dst = dst + (val % 10 - dst / 10^num % 10) * 10^num*
 
 
 ### Trigonometry
 
-* `cos` dst[**R**] src[**V**/**R**]  
+* `cos` dst[**R**] src[**V**/**R**]
   *dst = cos(src)*
-* `sin` dst[**R**] src[**V**/**R**]  
+* `sin` dst[**R**] src[**V**/**R**]
   *dst = sin(src)*
-* `tan` dst[**R**] src[**V**/**R**]  
+* `tan` dst[**R**] src[**V**/**R**]
   *dst = tan(src)*
-* `atan2` dst[**R**] y[**V**/**R**] x[**V**/**R**]  
+* `atan2` dst[**R**] y[**V**/**R**] x[**V**/**R**]
   *dst = atan2(y, x)*
-* `sqrt` dst[**R**] src[**V**/**R**]  
+* `sqrt` dst[**R**] src[**V**/**R**]
   *dst = sqrt(src)*
-* `exp` dst[**R**] src[**V**/**R**]  
+* `exp` dst[**R**] src[**V**/**R**]
   *dst = exp(src)*
-* `ln` dst[**R**] src[**V**/**R**]  
+* `ln` dst[**R**] src[**V**/**R**]
   *dst = ln(src)*
 
 
 ### Bitwise
 
-* `band` dst[**R**] src?[**V**/**R**] val[**V**/**R**]  
-  AND.  
+* `band` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
+  AND.
   *dst = src & val* (if src is specified)
   *dst = dst & val*
 
-* `bor` dst[**R**] src?[**V**/**R**] val[**V**/**R**]  
-  OR.  
+* `bor` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
+  OR.
   *dst = src | val* (if src is specified)
   *dst = dst | val*
 
-* `bxor` dst[**R**] src?[**V**/**R**] val[**V**/**R**]  
-  XOR.  
+* `bxor` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
+  XOR.
   *dst = src ^ val* (if src is specified)
   *dst = dst ^ val*
 
-* `bnot` dst[**R**] src?[**R**]  
-  NOT.  
+* `bnot` dst[**R**] src?[**R**]
+  NOT.
   *dst = ~src* (if src is specified)
   *dst = ~dst*
 
-* `bsl` dst[**R**] src?[**V**/**R**] val[**V**/**R**]  
-  Shift left.  
+* `bsl` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
+  Shift left.
   *dst = src << val* (if src is specified)
   *dst = dst << val*
 
-* `bsr` dst[**R**] src?[**V**/**R**] val[**V**/**R**]  
-  Shift right.  
+* `bsr` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
+  Shift right.
   *dst = src >> val* (if src is specified)
   *dst = dst >> val*
 
-* `brl` dst[**R**] src?[**V**/**R**] val[**V**/**R**]  
-  Rotate left.  
+* `brl` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
+  Rotate left.
   *dst = src rot<< val* (if src is specified)
   *dst = dst rot<< val*
 
-* `brr` dst[**R**] src?[**V**/**R**] val[**V**/**R**]  
-  Rotate right.  
+* `brr` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
+  Rotate right.
   *dst = src rot>> val* (if src is specified)
   *dst = dst rot>> val*
 
 
 ### Flow control
 
-* `lea` dst[**R**/**O**] addr[**L**]  
+* `lea` dst[**R**/**O**] addr[**L**]
   Load label *addr*ess into *dst*.
 
-* `jmp` addr[**V**/**A**/**L**/**R**]  
+* `jmp` addr[**V**/**A**/**L**/**R**]
   Jump to address or label.
 
-* `jmp` addr[**V**/**A**/**L**/**R**] offset[**V**/**R**]  
-  Jump to address + offset or label + offset.  
+* `jmp` addr[**V**/**A**/**L**/**R**] offset[**V**/**R**]
+  Jump to address + offset or label + offset.
   For example: `jmp ipt -2`, jump at two lines before current instruction (`ipt`).
 
-* `hlt`  
+* `hlt`
   *Halt* program execution until it will be resumed by player or by *Run* signal from any **i**nput wire.
 
-* `slp` cnt[**V**/**R**]  
-  Sleep for specified ticks count.  
+* `slp` cnt[**V**/**R**]
+  Sleep for specified ticks count.
   fCPU do not handle interruptions while sleeping.  
 
 #### Block execution until condition met
-Instructions execute the next line immediately after them (in the same tick) as soon as the condition is met.  
-This allows them to be used to copy the input signal that triggered continuation.  
-For example:  
+Instructions execute the next line immediately after them (in the same tick) as soon as the condition is met.
+This allows them to be used to copy the input signal that triggered continuation.
+For example:
 ```
 mov r1 0[virtual-signal=signal-green]
 btrc r1
 xmov m1 red
 ```
 
-* `bkr` cnt[**V**/**R**]  
-  `bkg` cnt[**V**/**R**]  
-  `bkl` cnt[**V**/**R**]  
+* `bkr` cnt[**V**/**R**]
+  `bkg` cnt[**V**/**R**]
+  `bkl` cnt[**V**/**R**]
   Block until there are at least *cnt* signals on *r*ed/*g*reen wires or *l*ognet.
 
-* `btr` type[**T**/**R**]  
-  `btg` type[**T**/**R**]  
-  `bti` type[**T**/**R**]  
-  `btl` type[**T**/**R**]  
+* `btr` type[**T**/**R**]
+  `btg` type[**T**/**R**]
+  `bti` type[**T**/**R**]
+  `btl` type[**T**/**R**]
   Block until signal type found on *r*ed/*g*reen/both_*i*nput wires or *l*ognet.
 
-* `btrc` reg[**R**]  
-  `btgc` reg[**R**]  
-  `btic` reg[**R**]  
-  `btlc` reg[**R**]  
-  Block while reference *reg*ister have same type-value as in *r*ed/*g*reen/both_*i*nput wires or *l*ognet.  
+* `btrc` reg[**R**]
+  `btgc` reg[**R**]
+  `btic` reg[**R**]
+  `btlc` reg[**R**]
+  Block while reference *reg*ister have same type-value as in *r*ed/*g*reen/both_*i*nput wires or *l*ognet.
   After red/green/input or *l*ognet value were changed, assign new value to *register* and continue execution.
 
 
 ### Testing operands values
 
-If test succeeded, then the following instruction will be executed.  
+If test succeeded, then the following instruction will be executed.
 You may add `jmp :label` to implement branching. For Example:
 ```
 clr
@@ -410,43 +410,43 @@ jmp :counter
 ; r1 now equal to 10
 ```
 
-* `teq` a[**V**/**S**/**R**] b[**V**/**S**/**R**]  
-  Equal.  
+* `teq` a[**V**/**S**/**R**] b[**V**/**S**/**R**]
+  Equal.
   *a == b*
 
-* `tne` a[**V**/**S**/**R**] b[**V**/**S**/**R**]  
-  Not equal.  
+* `tne` a[**V**/**S**/**R**] b[**V**/**S**/**R**]
+  Not equal.
   *a != b*
 
-* `tgt` a[**V**/**S**/**R**] b[**V**/**S**/**R**]  
-  Greater than.  
+* `tgt` a[**V**/**S**/**R**] b[**V**/**S**/**R**]
+  Greater than.
   *a > b*
 
-* `tlt` a[**V**/**S**/**R**] b[**V**/**S**/**R**]  
-  Less than.  
+* `tlt` a[**V**/**S**/**R**] b[**V**/**S**/**R**]
+  Less than.
   *a < b*
 
-* `tge` a[**V**/**S**/**R**] b[**V**/**S**/**R**]  
-  Greater or equal than.  
+* `tge` a[**V**/**S**/**R**] b[**V**/**S**/**R**]
+  Greater or equal than.
   *a >= b*
 
-* `tle` a[**V**/**S**/**R**] b[**V**/**S**/**R**]  
-  Less or equal than.  
+* `tle` a[**V**/**S**/**R**] b[**V**/**S**/**R**]
+  Less or equal than.
   *a <= b*
 
 
 ### Testing operands types
 
-* `tas` a[**T**/**R**] b[**T**/**R**]  
+* `tas` a[**T**/**R**] b[**T**/**R**]
   Types are same.  
 
-* `tad` a[**T**/**R**] b[**T**/**R**]  
+* `tad` a[**T**/**R**] b[**T**/**R**]
   Types are different.  
 
 
 ### Branching
 
-This is the same as testing and then immediately jump if test succeeded.  
+This is the same as testing and then immediately jump if test succeeded.
 The mnemonics same as in testing cases, but with `b` instead of `t` and uses extra operand for jump address.  
 
 ```
@@ -457,68 +457,68 @@ blt r1 10 :counter
 ; r1 now equal to 10
 ```
 
-* `beq` a[**V**/**S**/**R**] b[**V**/**S**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]  
-  Equal.  
+* `beq` a[**V**/**S**/**R**] b[**V**/**S**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]
+  Equal.
   If *a == b* then `jmp addr offset`
 
-* `bne` a[**V**/**S**/**R**] b[**V**/**S**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]  
-  Not equal.  
+* `bne` a[**V**/**S**/**R**] b[**V**/**S**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]
+  Not equal.
   If *a != b* then `jmp addr offset`
 
-* `bgt` a[**V**/**S**/**R**] b[**V**/**S**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]  
-  Greater than.  
+* `bgt` a[**V**/**S**/**R**] b[**V**/**S**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]
+  Greater than.
   If *a > b* then `jmp addr offset`
 
-* `blt` a[**V**/**S**/**R**] b[**V**/**S**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]  
-  Less than.  
+* `blt` a[**V**/**S**/**R**] b[**V**/**S**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]
+  Less than.
   If *a < b* then `jmp addr offset`
 
-* `bge` a[**V**/**S**/**R**] b[**V**/**S**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]  
-  Greater or equal than.  
+* `bge` a[**V**/**S**/**R**] b[**V**/**S**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]
+  Greater or equal than.
   If *a >= b* then `jmp addr offset`
 
-* `ble` a[**V**/**S**/**R**] b[**V**/**S**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]  
-  Less or equal than.  
+* `ble` a[**V**/**S**/**R**] b[**V**/**S**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]
+  Less or equal than.
   If *a <= b* then `jmp addr offset`
 
-* `bas` a[**T**/**R**] b[**T**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]  
+* `bas` a[**T**/**R**] b[**T**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]
   Branch if types are same.  
 
-* `bad` a[**T**/**R**] b[**T**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]  
+* `bad` a[**T**/**R**] b[**T**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]
   Branch if types are different.  
 
 
 ### Utility mnemonics
 * `ugpf` dst[**R**] name[**T**/**R**] field[**S**]
-  *Utility Get Prototype Field*  
-  Find prototype with *name* and assign *dst* to *field* value (only numbers supported).  
+  *Utility Get Prototype Field*
+  Find prototype with *name* and assign *dst* to *field* value (only numbers supported).
   This instruction sequentially checks fields in:
     1. https://lua-api.factorio.com/latest/LuaItemPrototype.html
     2. https://lua-api.factorio.com/latest/LuaEntityPrototype.html
-  For example:  
+  For example:
   - `ugpf r1 [item=inserter] 'inserter_stack_size_bonus'`
   - `ugpf r2 [item=copper-ore] 'stack_size'` (this is a same as `uiss r1 [item=copper-ore]`)
   - `ugpf r3 [item=buffer-chest] 'get_inventory_size(defines.inventory.item_main)'`
 
-  You may use dot `.` for diving inside this prototypes.  
-  To check if the item is a science pack use this example:  
+  You may use dot `.` for diving inside this prototypes.
+  To check if the item is a science pack use this example:
   - `ugpf r1 [item=automation-science-pack] 'subgroup.name'`
     `beq r1 'science-pack' :yeah_science_btch`
 
 
-* `uiss` dst[**R**] type[**T**/**R**]  
-  **DEPRECATED: please use `ugpf dst type 'stack_size'`**  
-  *Utility Item Stack Size*  
+* `uiss` dst[**R**] type[**T**/**R**]
+  **DEPRECATED: please use `ugpf dst type 'stack_size'`**
+  *Utility Item Stack Size*
   Assign stack size to *dst* for specified item *type*.  
 
 
 
 ## SIMD instructions
-Until now you can control fCPU with one instructon per game cycle and operate with a couple signals per instruction.  
-But it is not a limit. fCPU supports _Single Instruction Multiple Data_ mnemonics, which means that you could do much more efficient work per instruction and so per one game tick.  
+Until now you can control fCPU with one instructon per game cycle and operate with a couple signals per instruction.
+But it is not a limit. fCPU supports _Single Instruction Multiple Data_ mnemonics, which means that you could do much more efficient work per instruction and so per one game tick.
 SIMD instructions process several signals in parallel at once, unlike scalar instructions.  
 
-When working with SIMD instructions, the following features should be considered:  
+When working with SIMD instructions, the following features should be considered:
 - SIMD instructions do not costs additional time for handling, so UPS friendly
 - Some vector instructions are executed for more than 1 tick (`xmov mem1 red` takes 3 ticks for populating `mem1` channel with data from `red` wire)
 - Retrieving effective data from affected memory is possible only after completion of a vector instruction
@@ -571,58 +571,58 @@ When working with SIMD instructions, the following features should be considered
 
 ### SIMD Comparison
 
-Compares each signal value in memory with operand specified and pass it to destination if condition met.  
+Compares each signal value in memory with operand specified and pass it to destination if condition met.
 In two operand version *src* is the same as a *dst*.  
 
-* `xceq` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]  
-  Equal.  
+* `xceq` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
+  Equal.
   *dst(each) = src(each), if src(each) == val*
 
-* `xcne` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]  
-  Not equal.  
+* `xcne` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
+  Not equal.
   *dst(each) = src(each), if src(each) != val*
 
-* `xcgt` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]  
-  Greater than.  
+* `xcgt` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
+  Greater than.
   *dst(each) = src(each), if src(each) > val*
 
-* `xclt` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]  
-  Less than.  
+* `xclt` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
+  Less than.
   *dst(each) = src(each), if src(each) < val*
 
-* `xcge` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]  
-  Greater or equal than.  
+* `xcge` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
+  Greater or equal than.
   *dst(each) = src(each), if src(each) >= val*
 
-* `xcle` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]  
-  Less or equal than.  
+* `xcle` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
+  Less or equal than.
   *dst(each) = src(each), if src(each) <= val*
 
 
 ### SIMD Bitwise
 
 * `xand` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
-  AND.  
+  AND.
   *dst(each) = dst & val* 
   *dst(each) = src & val* (if src specified)
 
 * `xor`  dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
-  OR.  
+  OR.
   *dst(each) = dst | val* 
   *dst(each) = src | val* (if src specified)
 
 * `xxor` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
-  XOR.  
+  XOR.
   *dst(each) = dst ^ val* 
   *dst(each) = src ^ val* (if src specified)
 
 * `xsl`  dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
-  Shift left.  
+  Shift left.
   *dst(each) = dst << val* 
   *dst(each) = src << val* (if src specified)
 
 * `xsr`  dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
-  Shift right.  
+  Shift right.
   *dst(each) = dst >> val* 
   *dst(each) = src >> val* (if src specified)
 
@@ -653,7 +653,7 @@ To get around this, fCPU uses a trick - it partially compiles the written progra
 
 Unlike registers, which are implemented as ordinary variables and always retain their indices, the memory for SIMD commands is also implemented using vanilla combinators.  
 
-Here comes the most important thing:  
+Here comes the most important thing:
 To modify the memory, you need to subtract old value and add a new one for same signal type.
 Like any other vanilla combinator operation, this breaks the signal indices.  
 
