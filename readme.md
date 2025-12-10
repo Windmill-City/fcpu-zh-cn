@@ -542,7 +542,7 @@ When working with SIMD instructions, the following features should be considered
 
 * `xflt` dst[**M**/**O**] src?[**I**/**M**/**N**] mask[**I**/**M**/**N**]
   Copy all the signals from *src* to *dst* having *mask* as whitelist.
-  *Internal design by https://www.reddit.com/user/Halke1986/*
+  *Internal design by [Halke1986](https://www.reddit.com/user/Halke1986/)*
 
 * `xadd` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
   *dst(each) = dst + val* 
