@@ -1,14 +1,14 @@
 local io
 
 
-local function vector_scalar_op()
+local function vector_arithmetic_op()
   return function(_, ics)
     local src = (#_ == 3 and _[3]) or _[2]
 
-    if ics and ics.x then
+    if ics and ics.x and src.type ~= 'wire' and src.type ~= 'memory' then
       local control = ics.x.get_or_create_control_behavior()
       local params = control.parameters
-      params.second_constant = io.getvalue(src, {'value', 'register', 'input'})
+      params.second_constant = io.getvalue(src, {'value', 'register', 'input', 'memory'})
       control.parameters = params -- https://lua-api.factorio.com/stable/concepts/ArithmeticCombinatorParameters.html
     end
   end
@@ -18,7 +18,7 @@ local function vector_compare_op()
   return function(_, ics)
     local src = (#_ == 3 and _[3]) or _[2]
 
-    if ics and ics.x then
+    if ics and ics.x and src.type ~= 'wire' then
       local control = ics.x.get_or_create_control_behavior()
       local params = control.parameters
       params.conditions[1].constant = io.getvalue(src, {'value', 'register', 'input'})
@@ -46,18 +46,18 @@ local opcodes_vx = {
   xuni = function(_, ics)end,
   xflt = function(_, ics)end,
 
-  xadd = vector_scalar_op(),
-  xsub = vector_scalar_op(),
-  xmul = vector_scalar_op(),
-  xdiv = vector_scalar_op(),
-  xmod = vector_scalar_op(),
-  xpow = vector_scalar_op(),
+  xadd = vector_arithmetic_op(),
+  xsub = vector_arithmetic_op(),
+  xmul = vector_arithmetic_op(),
+  xdiv = vector_arithmetic_op(),
+  xmod = vector_arithmetic_op(),
+  xpow = vector_arithmetic_op(),
 
-  xand = vector_scalar_op(),
-  xor  = vector_scalar_op(),
-  xxor = vector_scalar_op(),
-  xsl  = vector_scalar_op(),
-  xsr  = vector_scalar_op(),
+  xand = vector_arithmetic_op(),
+  xor  = vector_arithmetic_op(),
+  xxor = vector_arithmetic_op(),
+  xsl  = vector_arithmetic_op(),
+  xsr  = vector_arithmetic_op(),
 
   xclt = vector_compare_op(),
   xcle = vector_compare_op(),

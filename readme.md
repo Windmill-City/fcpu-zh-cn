@@ -534,37 +534,37 @@ When working with SIMD instructions, the following features should be considered
   *dst(each) = src(each)*
 
 * `emit` dst[**M**] val...[**V**/**T**/**VT**/**R**]
-  Append *val*ues to *dst* memory (with random ordering until v0.5.0).  
+  Append *val*ues to *dst* memory (with random ordering until v0.5.0).
 
 * `xuni` dst[**M**/**O**] a[**I**/**M**/**N**] b[**I**/**M**/**N**]
-  Merge two memory channels into unite one.  
+  Merge two memory channels into unite one.
   *dst(each) = a(each) + b(each)*
 
 * `xflt` dst[**M**/**O**] src?[**I**/**M**/**N**] mask[**I**/**M**/**N**]
   Copy all the signals from *src* to *dst* having *mask* as whitelist.
   *Internal design by [Halke1986](https://www.reddit.com/user/Halke1986/)*
 
-* `xadd` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
-  *dst(each) = dst + val* 
+* `xadd` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**/**I**/**M**]
+  *dst(each) = dst + val*
   *dst(each) = src + val* (if src specified)
 
-* `xsub` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
+* `xsub` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**/**I**/**M**]
   *dst(each) = dst - val*
   *dst(each) = src - val* (if src specified)
 
-* `xmul` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
+* `xmul` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**/**I**/**M**]
   *dst(each) = dst \* val*
   *dst(each) = src \* val* (if src specified)
 
-* `xdiv` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
+* `xdiv` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**/**I**/**M**]
   *dst(each) = dst / val*
   *dst(each) = src / val* (if src specified)
 
-* `xmod` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
+* `xmod` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**/**I**/**M**]
   *dst(each) = dst % val*
   *dst(each) = src % val* (if src specified)
 
-* `xpow` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
+* `xpow` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**/**I**/**M**]
   *dst(each) = dst ^ val*
   *dst(each) = src ^ val* (if src specified)
 

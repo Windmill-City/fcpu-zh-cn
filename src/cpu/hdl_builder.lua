@@ -37,6 +37,15 @@ local function combinator_input(wire_type)
   end
 end
 
+---@param wire_type? defines.wire_type
+---@return CircuitNetworkSelection
+local function select_wire_networks(wire_type)
+  return {
+    red = wire_type ~= defines.wire_type.green,
+    green = wire_type ~= defines.wire_type.red,
+  }
+end
+
 ---@param wire_type defines.wire_type
 ---@return defines.wire_connector_id?
 local function combinator_output(wire_type)
@@ -57,13 +66,13 @@ local function decider_combinator_params(lapi) -- Factorio 1.0 legacy API
       second_signal = lapi.second_signal,
       constant = lapi.constant,
       comparator = lapi.comparator,
-      first_signal_networks = { red=true, green=true, },
-      second_signal_networks = { red=true, green=true, }
+      first_signal_networks = select_wire_networks(),
+      second_signal_networks = select_wire_networks(),
     }},
     outputs = {{
       signal = lapi.output_signal,
       copy_count_from_input = lapi.copy_count_from_input,
-      networks = { red=true, green=true, }
+      networks = select_wire_networks(),
     }}
   }
 end
@@ -723,25 +732,9 @@ end
 
 
 function builder.create_arithmetic_cell(entity, input_a, input_b, operation)
-  local constant
-  if input_b then
-    if type(input_b) == 'number' then
-      constant = input_b
-    else
-      Assert.todo()
-    end
-  end
+  local type_b = type(input_b)
 
   local x, control_x = builder.create_node(entity, 'arithmetic')
-
-  control_x.parameters = {
-    second_signal = nil,
-    first_signal = SIGNALID_EACH,
-    first_constant  = nil,
-    second_constant = constant,
-    operation  = operation,
-    output_signal = SIGNALID_EACH
-  }
 
   connect_neighbour(x, {
     source_circuit_id = combinator_input(input_a.wire),
@@ -749,15 +742,31 @@ function builder.create_arithmetic_cell(entity, input_a, input_b, operation)
     target_entity = input_a.entity,
     wire = input_a.wire,
   })
-  if input_b ~= nil and constant == nil then
-    local inv_a_wire = inverse_wire_color(input_a.wire)
-    connect_neighbour(control_x, {
-      source_circuit_id = combinator_input(inv_a_wire),
-      target_circuit_id = input_a.port,
-      target_entity = input_a.entity,
-      wire = inv_a_wire,
+  local net_a = select_wire_networks(input_a.wire)
+  local net_b
+
+  if input_b ~= nil and type_b ~= 'number' then
+    --local inv_a_wire = inverse_wire_color(input_a.wire)
+    local wire_b = input_b.wire --inv_a_wire
+    connect_neighbour(x, {
+      source_circuit_id = combinator_input(wire_b),
+      target_circuit_id = input_b.port,
+      target_entity = input_b.entity,
+      wire = wire_b,
     })
+    net_b = select_wire_networks(wire_b)
   end
+
+  control_x.parameters = {
+    first_signal = SIGNALID_EACH,
+    second_signal = net_b and SIGNALID_EACH or nil,
+    first_constant  = nil,
+    second_constant = type_b == 'number' and input_b or nil,
+    operation  = operation,
+    output_signal = SIGNALID_EACH,
+    first_signal_networks = net_a,
+    second_signal_networks = net_b,
+  }
 
   return x
 end
@@ -883,15 +892,17 @@ end
 
 -------------------------------------------------------------------------------------------------------
 
-local function vector_scalar_op(operation)
+local function vector_arithmetic_op(operation)
   return function(state, _)
     local three = Assert.two_or_three(_) == 3
+    local idx_a = three and 2 or 1
+    local idx_b = three and 3 or 2
 
-    local input = connect_input_from(state, (three and _[2]) or _[1])
-    local value = nil
+    local input_a = connect_input_from(state, _[idx_a])
+    local input_b = _[idx_b].type ~= 'value' and connect_input_from(state, _[idx_b]) or nil
 
-    local x = builder.create_arithmetic_cell(state.entity, input, value, operation)
-    local inv_wire = inverse_wire_color(input.wire)
+    local x = builder.create_arithmetic_cell(state.entity, input_a, input_b, operation)
+    local inv_wire = inverse_wire_color(input_a.wire)
     local ics = builder.create_memory_cell(state.entity, {
       entity = x,
       wire = inv_wire,
@@ -1061,18 +1072,18 @@ local ops = {
     return ics_name, ics, deffer
   end,
 
-  xadd = vector_scalar_op('+'),
-  xsub = vector_scalar_op('-'),
-  xmul = vector_scalar_op('*'),
-  xdiv = vector_scalar_op('/'),
-  xmod = vector_scalar_op('%'),
-  xpow = vector_scalar_op('^'),
+  xadd = vector_arithmetic_op('+'),
+  xsub = vector_arithmetic_op('-'),
+  xmul = vector_arithmetic_op('*'),
+  xdiv = vector_arithmetic_op('/'),
+  xmod = vector_arithmetic_op('%'),
+  xpow = vector_arithmetic_op('^'),
 
-  xand = vector_scalar_op('AND'),
-  xor  = vector_scalar_op('OR'),
-  xxor = vector_scalar_op('XOR'),
-  xsl  = vector_scalar_op('<<'),
-  xsr  = vector_scalar_op('>>'),
+  xand = vector_arithmetic_op('AND'),
+  xor  = vector_arithmetic_op('OR'),
+  xxor = vector_arithmetic_op('XOR'),
+  xsl  = vector_arithmetic_op('<<'),
+  xsr  = vector_arithmetic_op('>>'),
 
   xclt = vector_decide_op('<'),
   xcle = vector_decide_op('≤'),

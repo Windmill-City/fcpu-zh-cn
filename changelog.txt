@@ -2,6 +2,7 @@
 Version: 0.4.41
 Date: ????
   Changes:
+    - Support Vector x Vector operations in x* mnemonics. Allow input or memory src operand.
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.40
 Date: 2025-12-08
