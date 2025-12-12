@@ -1,8 +1,7 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.44
 Date: ????
-  Bugfixes:
-    - Missed rare valid condition check (https://mods.factorio.com/mod/fcpu/discussion/693c37fb5ec67d0da895c875).
+  Changes:
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.43
 Date: 2025-12-13
@@ -16,6 +15,7 @@ Date: 2025-12-13
     - [a]  and [/a] strings in wiki.
     - fCPU icon for a utility entity.
     - Per player locale support for Informatron.
+    - Missed rare valid condition check (https://mods.factorio.com/mod/fcpu/discussion/693c37fb5ec67d0da895c875).
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.42
 Date: 2025-12-12
