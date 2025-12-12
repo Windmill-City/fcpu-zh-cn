@@ -239,6 +239,16 @@ function io.setquality(_, sigtier, types)
   io.setsignal(_, signal, types)
 end
 
+---@param label string
+---@return integer
+function io.find_label(label)
+  for line_num, node in ipairs(State.current.program_ast) do
+    if node.type == 'label' and node.label == label then
+      return line_num + 1
+    end
+  end
+  Assert.exception("Label '".. label .."' could not be found.")
+end
 
 -- Setup and Binding to state
 function io.bind(state_)

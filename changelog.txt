@@ -3,6 +3,8 @@ Version: 0.4.43
 Date: ????
   Features:
     - Scroll current instruction in view.
+  Bugfixes:
+    - Undefined label handling.
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.42
 Date: 2025-12-12

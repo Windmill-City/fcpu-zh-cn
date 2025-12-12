@@ -22,18 +22,19 @@ local standard_op3 = function(_)
   Assert.type(_b, StandartSourceTypes)
   return _dst, _a, _b
 end
-local jump_op = function(addr, offset)
-  Assert.type(addr, {'label', 'value', 'register'})
+local jump_op = function(address, offset)
+  Assert.type(address, {'label', 'value', 'register'})
   if offset then
     Assert.type(offset, {'value', 'register'})
     offset = io.getvalue(offset) or 0
   else
     offset = 0
   end
-  if addr.type == 'label' then
-    return { type = 'jump', val = offset, label = addr.label }
+  if address.type == 'label' then
+    local addr = io.find_label(address.label) + (offset or 0)
+    return { type = 'jump', val = addr }
   else
-    return { type = 'jump', val = io.getvalue(addr) + offset }
+    return { type = 'jump', val = io.getvalue(address) + offset }
   end
 end
 
@@ -637,14 +638,7 @@ local opcodes = {
     Assert.is_reference(_[1])
     local label = _[2]
     Assert.type(label, {'label'})
-    local addr = io.for_entity(function(entity, state)
-      for line_num, node in ipairs(state.program_ast) do
-        if node and node.type == 'label' and node.label == label.label then
-          return line_num + 1
-        end
-      end
-    end)
-    Assert.check(addr ~= nil, 'Undefined label')
+    local addr = io.find_label(label.label)
     io.register_set_count(_[1], addr)
   end,
   jmp = function(_)

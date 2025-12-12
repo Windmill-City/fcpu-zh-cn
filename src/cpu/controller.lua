@@ -343,16 +343,7 @@ function Controller.tick(state)
         elseif result.type == 'sleep' then
           Controller.sleep(state, result.val)
         elseif result.type == 'jump' then
-          if result.label then
-            for line_num, node in ipairs(state.program_ast) do
-              if node.type == 'label' and node.label == result.label then
-                Controller.set_program_counter(state, line_num + 1 + (result.val or 0))
-                break
-              end
-            end
-          else
-            Controller.set_program_counter(state, result.val)
-          end
+          Controller.set_program_counter(state, result.val)
         elseif result.type == 'block' then
           -- FIXME: should take into account the fcpu_maximum_updates_per_tick limit!
           -- Do nothing, keeping the instruction_pointer the same.
