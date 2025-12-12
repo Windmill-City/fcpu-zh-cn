@@ -16,9 +16,12 @@ end
 ---@param signal_id SignalID
 ---@return string
 function hash_FromSignalType(signal_id)
-  local q = signal_id.quality and (signal_id.quality ~= 'normal') and ','..signal_id.quality or ''
-  local hash = signal_id and (signal_id.type or 'item') ..'='.. signal_id.name .. q
-  return hash
+  if signal_id then
+    local q = signal_id.quality and (signal_id.quality ~= 'normal') and ','..signal_id.quality or ''
+    local hash = (signal_id.type or 'item') ..'='.. signal_id.name .. q
+    return hash
+  end
+  return nil
 end
 
 ---@param hash string
