@@ -481,4 +481,11 @@ return {
       state.cache.control.output = state.program_ics.output.value.get_control_behavior()
     end)
   end,
+
+  ["0.4.42"] = function()
+    local player = game.players[1]
+    if player then
+      storage.gui_locale = switch_locale(player.locale)
+    end
+  end,
 }

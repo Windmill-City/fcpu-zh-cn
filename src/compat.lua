@@ -1,4 +1,5 @@
 Compatibility = {}
+-- Compatibility['mod_name'] = <expot_table>
 
 if mods then
   -- Prototype phase
@@ -38,6 +39,7 @@ elseif script and script.active_mods then
     end
   end
 
+  -- Compatibility[handler_name] = aggregate(handler_name, ( export_table['mod_name'], ... ))
   setmetatable(Compatibility, {
     __index = function(self, key)
       local handler = handlers[key]

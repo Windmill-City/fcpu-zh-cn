@@ -1,7 +1,17 @@
 chcp 65001
 
-$Original = Get-Content -Path readme.md -Raw -Encoding UTF8
-$Result = 'return [==[' + $Original + ']==]'
+function Convert-ToLuaReturn {
+    param(
+        [string]$InputPath,
+        [string]$OutputPath
+    )
 
-$Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
-[System.IO.File]::WriteAllLines("src/wiki/readme.src.lua", $Result, $Utf8NoBomEncoding)
+    $Original = Get-Content -Path $InputPath -Raw -Encoding UTF8
+    $Result = 'return [==[' + $Original + ']==]'
+
+    $Utf8NoBomEncoding = New-Object System.Text.UTF8Encoding $False
+    [System.IO.File]::WriteAllLines($OutputPath, $Result, $Utf8NoBomEncoding)
+}
+
+Convert-ToLuaReturn "readme.md" "src/wiki/readme.en.src.lua"
+Convert-ToLuaReturn "readme.ru.md" "src/wiki/readme.ru.src.lua"

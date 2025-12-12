@@ -1,4 +1,4 @@
-# fCPU
+return [==[# fCPU
 
 ## Specs
 
@@ -713,3 +713,4 @@ If you would like to help with the fCPU localization, [here](https://crowdin.com
 [![Boosty](https://upload.wikimedia.org/wikipedia/commons/9/92/Boosty_logo.svg)](https://boosty.to/konstg/donate)
 
 [comment]: <> (md2frt-skip-section-end)
+]==]

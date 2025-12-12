@@ -23,7 +23,9 @@ local function fcpu_load_docs(sections, force)
 
     for _, v in ipairs(sections) do
       number = number + 1
-      local id = string.gsub(string.lower(v.header), '[^%w]+', '-')
+      local id = string.lower(v.header)
+      -- local lh = string.lower(v.header)
+      -- local id = string.gsub(lh, '[^%w]+', '-')
       if id ~= 'fcpu' then
         local top = stack[#stack]
         if not top then
@@ -92,6 +94,12 @@ end
 
 local function fcpu_wiki_informatron_register(sections, fulltext)
   Text_readme = fulltext
+
+  if remote.interfaces["fcpu"] then
+    fcpu_load_docs(sections, true)
+    return
+  end
+
   fcpu_load_docs(sections)
 
   remote.add_interface("fcpu", {

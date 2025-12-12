@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.42
 Date: ????
+  Features:
+    - 'ru' in-game wiki locale (thanks to ArsStels for translation).
   Bugfixes:
     - '[font=heading-2]' font error in Informatron.
 ---------------------------------------------------------------------------------------------------
