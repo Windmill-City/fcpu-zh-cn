@@ -3,6 +3,8 @@ Version: 0.4.43
 Date: ????
   Features:
     - Scroll current instruction in view.
+  Changes:
+    - Allow recipes in signals.
   Bugfixes:
     - Undefined label handling.
 ---------------------------------------------------------------------------------------------------
