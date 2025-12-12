@@ -1,6 +1,8 @@
 local wiki_pages
 
-local function fcpu_wiki_booktorio_register(sections, fulltext)
+local function fcpu_wiki_booktorio_register(locale_renderer)
+  local sections, fulltext = locale_renderer()
+
   if wiki_pages == nil then
     local topics = {}
     for _, v in ipairs(sections) do

@@ -498,5 +498,7 @@ return {
       GuiWidgetClose(player.index)
       GuiEntityCloseWidget(nil, true)
     end)
+
+    storage.gui_locale = nil
   end,
 }
