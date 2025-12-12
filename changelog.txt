@@ -9,6 +9,7 @@ Date: ????
     - Undefined label handling.
     - nil addressing for empty signal.
     - [a]  and [/a] strings in wiki.
+    - fCPU icon for a utility entity.
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.42
 Date: 2025-12-12

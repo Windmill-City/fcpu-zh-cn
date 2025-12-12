@@ -121,6 +121,8 @@ local hdl_lognet_fcpu = table.shallow_merge(table.deep_copy(data.raw['roboport']
   allow_copy_paste = false,
   create_ghost_on_death = false,
 
+  localised_name = { 'entity-name.fcpu' },
+
   energy_source = {
     type = "void",
     usage_priority = "primary-input"
