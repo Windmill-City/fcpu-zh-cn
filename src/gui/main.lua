@@ -270,7 +270,7 @@ end
 
 local function GuiWidgetVisible(player, player_data, visible)
   if visible then
-    if not player_data.gui_fcpu then
+    if not (player_data.gui_fcpu and player_data.gui_fcpu.valid) then
       local rootGui = player.gui.screen
       local elems = CreateWidget_Main(rootGui)
       inplace_dictionary_combine(

@@ -1,6 +1,11 @@
 ---------------------------------------------------------------------------------------------------
-Version: 0.4.43
+Version: 0.4.44
 Date: ????
+  Bugfixes:
+    - Missed rare valid condition check (https://mods.factorio.com/mod/fcpu/discussion/693c37fb5ec67d0da895c875).
+---------------------------------------------------------------------------------------------------
+Version: 0.4.43
+Date: 2025-12-13
   Features:
     - Scroll current instruction in view.
   Changes:
