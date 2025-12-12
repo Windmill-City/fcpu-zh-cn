@@ -488,4 +488,15 @@ return {
       storage.gui_locale = switch_locale(player.locale)
     end
   end,
+
+  ["0.4.43"] = function()
+    foreach_player(function(player, player_data)
+      --if not player_data.gui_scroll_panel then
+      --  player_data.gui_scroll_panel = player_data.gui_fcpu.children[2].children[1].children[5]
+      --end
+
+      GuiWidgetClose(player.index)
+      GuiEntityCloseWidget(nil, true)
+    end)
+  end,
 }

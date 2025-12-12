@@ -47,6 +47,32 @@ function GUI_signalToTooltip(signal, prefix)
   end
 end
 
+local function GUI_scroll_to_line(player_data, line)
+  if not GuiWidgetIsVisible(player_data) then
+    return
+  end
+
+  if not player_data.gui_scroll_panel then
+    player_data.gui_scroll_panel = player_data.gui_fcpu.children[2].children[1].children[5]
+  end
+
+  if player_data.gui_scroll_panel and player_data.gui_scroll_panel.valid then
+    if player_data.gui_breakpoints and player_data.gui_breakpoints.valid then
+      local lineBP = player_data.gui_breakpoints.children[line]
+      if lineBP then
+        player_data.gui_scroll_panel.scroll_to_element(lineBP, 'top-third')
+      end
+    end
+  end
+end
+
+function GUI_auto_scroll_to_line(player_index, line)
+  if settings.get_player_settings(player_index)["fcpu-gui-editor-autoscroll"].value then
+    local player_data = get_player_data(player_index)
+    GUI_scroll_to_line(player_data, line)
+  end
+end
+
 --[[function GUI_lognetTooltip(index, item, count)
   if item and count then
     return '['.. index ..'] = '.. count ..'[item='.. item ..']'
@@ -75,17 +101,19 @@ end
 
 local ControlHandlers = {}
 
-ControlHandlers['fcpu-debug-reset'] = GUI_mixPlayerData(function(player_data, state)
+ControlHandlers['fcpu-debug-reset'] = GUI_mixPlayerData(function(player_data, state, event)
   GUI_reset_error_message(player_data)
   Controller.set_error_message(state, nil)
   Controller.compile(state)
   Controller.halt(state, true)
+  GUI_auto_scroll_to_line(event.player_index, state.instruction_pointer)
 end)
 
-ControlHandlers['fcpu-debug-stop'] = GUI_mixPlayerData(function(player_data, state)
+ControlHandlers['fcpu-debug-stop'] = GUI_mixPlayerData(function(player_data, state, event)
   Controller.compile(state)
   Controller.set_program_counter(state, 1)
   Controller.halt(state)
+  GUI_auto_scroll_to_line(event.player_index, state.instruction_pointer)
 end)
 
 ControlHandlers['fcpu-debug-start'] = GUI_mixPlayerData(function(player_data, state)
@@ -94,17 +122,19 @@ ControlHandlers['fcpu-debug-start'] = GUI_mixPlayerData(function(player_data, st
   Controller.run(state)
 end)
 
-ControlHandlers['fcpu-debug-restart'] = GUI_mixPlayerData(function(player_data, state)
+ControlHandlers['fcpu-debug-restart'] = GUI_mixPlayerData(function(player_data, state, event)
   Controller.halt(state)
   Controller.set_program_counter(state, 1)
   Controller.run(state)
+  GUI_auto_scroll_to_line(event.player_index, state.instruction_pointer)
 end)
 
-ControlHandlers['fcpu-debug-pause'] = GUI_mixPlayerData(function(player_data, state)
+ControlHandlers['fcpu-debug-pause'] = GUI_mixPlayerData(function(player_data, state, event)
   if Controller.is_running(state) then
     Controller.compile(state)
     Controller.halt(state)
   end
+  GUI_auto_scroll_to_line(event.player_index, state.instruction_pointer)
 end)
 
 ControlHandlers['fcpu-debug-step-over'] = GUI_mixPlayerData(function(player_data, state)

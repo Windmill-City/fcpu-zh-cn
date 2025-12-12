@@ -18,6 +18,7 @@ local Controller = {}
 
 Controller.event_error = script.generate_event_name()
 Controller.event_halt = script.generate_event_name()
+Controller.event_autoscroll = script.generate_event_name()
 
 function Controller.init(mc)
   local control = mc.get_or_create_control_behavior()
@@ -385,6 +386,7 @@ function Controller.tick(state)
 
     if state.do_step and state.program_state == PSTATE_RUNNING then
       Controller.halt(state)
+      Controller.Gui_AutoscrollToIpt(state)
     end
   elseif state.program_state == PSTATE_SLEEPING then
     storage.running[state.index] = nil
@@ -531,6 +533,11 @@ function Controller.GuiCache_InvalidateLine(state, line)
   end
 end
 
+function Controller.Gui_AutoscrollToIpt(state)
+  local line = state.instruction_pointer
+  script.raise_event(Controller.event_autoscroll, {['entity'] = state.entity, ['line'] = line})
+end
+
 function Controller.update_ip(state)
   --local control = state.cache.control.indication
   --local param = control.parameters
@@ -541,6 +548,7 @@ function Controller.update_ip(state)
   if state.breakpoints[state.instruction_pointer] then
     Controller.halt(state)
     state.program_state = PSTATE_BREAKPOINT
+    Controller.Gui_AutoscrollToIpt(state)
   end
 end
 

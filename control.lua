@@ -106,16 +106,27 @@ local function on_tick(event)
   end
 end
 
-local function on_error(event)
-  local entity = event.entity
+local function PlayerWithCurrentEnumerate(entity, proc)
   for _, player in pairs(game.players) do
     local player_data = get_player_data(player.index)
     if player_data.gui_fcpu and player_data.gui_fcpu.valid then
       if Entity._are_equal(entity, player_data.current_fcpu) then
-        player_data.gui_error_message.caption = event.message or ""
+        proc(player_data, player.index)
       end
     end
   end
+end
+
+local function on_error(event)
+  PlayerWithCurrentEnumerate(event.entity, function(player_data)
+    player_data.gui_error_message.caption = event.message or ""
+  end)
+end
+
+local function on_autoscroll(event)
+  PlayerWithCurrentEnumerate(event.entity, function(player_data, player_index)
+    GUI_auto_scroll_to_line(player_index, event.line)
+  end)
 end
 
 
@@ -252,6 +263,7 @@ end
 -------------------------------------------------------------------------------------------------------
 
 script.on_event(Controller.event_error, on_error)
+script.on_event(Controller.event_autoscroll, on_autoscroll)
 script.on_event(defines.events.on_tick, on_tick)
 script.on_event(defines.events.on_runtime_mod_setting_changed, UpdateModSetting)
 

@@ -179,7 +179,7 @@ local function CreateWidget_Main(rootGui)
           },
 
           -- Editor
-          {type="scroll-pane", horizontal_scroll_policy="auto", style="scroll_pane_in_shallow_frame", children={
+          {type="scroll-pane", save_as="gui_scroll_panel", horizontal_scroll_policy="auto", style="scroll_pane_in_shallow_frame", children={
             {type="flow", name="inner", direction="horizontal",
               children={
                 {type="flow", name="inner", save_as="gui_breakpoints", direction="vertical",
@@ -287,6 +287,10 @@ local function GuiWidgetVisible(player, player_data, visible)
     player_data.gui_fcpu = nil
     rootGui["fcpu-widget"].destroy()
   end
+end
+
+function GuiWidgetIsVisible(player_data)
+  return player_data.gui_fcpu and player_data.gui_fcpu.valid and player_data.gui_fcpu.visible
 end
 
 function GuiWidgetOpen(player, entity)
