@@ -549,9 +549,21 @@ local function renderTree(tree, links, accum)
         if open == 'a' and not attribs.href then attribs.href = links[lower(tree[1] or '')] or '' end
         if open == 'img' and not attribs.src then attribs.src = links[lower(attribs.alt or '')] or '' end
 
+        local is_table = type(attribs) == 'table'
+
+        if open == 'a' and is_table and attribs.href then
+            open = nil
+            close = nil
+            attribs = {}
+            -- open = 'url'
+            -- close = 'url'
+            -- attribs = attribs.href
+            -- is_table = false
+        end
+
         local attribstr
-        if 0 < #attribs then
-            if type(attribs) == 'table' then
+        if 0 < (is_table and table_size(attribs) or #attribs) then
+            if is_table then
                 attribstr = ' '.. renderAttributes(attribs)
             else
                 attribstr = '='.. attribs
