@@ -482,13 +482,6 @@ return {
     end)
   end,
 
-  ["0.4.42"] = function()
-    local player = game.players[1]
-    if player then
-      storage.gui_locale = switch_locale(player.locale)
-    end
-  end,
-
   ["0.4.43"] = function()
     foreach_player(function(player, player_data)
       --if not player_data.gui_scroll_panel then
