@@ -80,7 +80,8 @@ end
 
 ---@param color 'red' | 'green' | 'lognet'
 function ioWire.count(color)
-  return state.cache.wires[color] and table_size(state.cache.wires[color].signals) or 0
+  local wire = state.cache.wires[color]
+  return wire and wire.signals and table_size(wire.signals) or 0 
 end
 
 
