@@ -714,10 +714,14 @@ local opcodes = {
 
     local getFieldValue = function(var, field)
       local bak
-      for v, b in string.gmatch(field, '([^%.()]+)([()]?)') do
-        if type(var[v]) == 'function' and b == '(' then
+      for v, b in string.gmatch(field, '([^%.()]+)([()]*)') do
+        if v and type(var[v]) == 'function' and b:sub(1, 1) == '(' then
           bak = var[v]
-          var = _G
+          if b == '()' then
+            var = bak()
+          else
+            var = _G
+          end
         else
           var = var[v]
           if b == ')' then
