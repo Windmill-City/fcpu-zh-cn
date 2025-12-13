@@ -269,6 +269,7 @@ local function GuiWidgetUpdatePinButton(player, force)
 end
 
 local function GuiWidgetVisible(player, player_data, visible)
+  visible = visible or (visible == false and nil)
   if visible then
     if not (player_data.gui_fcpu and player_data.gui_fcpu.valid) then
       local rootGui = player.gui.screen
