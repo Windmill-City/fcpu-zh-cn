@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.46
-Date: ????
+Date: 2025-12-13
   Bugfixes:
     - `qn` raw quality type handling.
     - `ugpf` for 'get_inserter_rotation_speed()'.
