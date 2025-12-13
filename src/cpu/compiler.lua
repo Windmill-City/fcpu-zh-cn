@@ -113,7 +113,7 @@ local function parse(tokens)
   end
   local parseSignal = function()
     local token = consume()
-    local pattern_quality = '(-?[%d%.]*)%[([%a%-]+)[=%-]([%a%d%-_:]+),quality=([%a]+)%]'
+    local pattern_quality = '(-?[%d%.]*)%[([%a%-]+)[=%-]([%a%d%-_:]+),quality=([%a%d%-_]+)%]'
     local pattern_no_qual = '(-?[%d%.]*)%[([%a%-]+)[=%-]([%a%d%-_:,]+)%]'
     local c, t, n, q = string.match(token, pattern_quality)
     if not t then

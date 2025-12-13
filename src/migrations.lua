@@ -24,6 +24,13 @@ local function foreach_player(proc)
   end
 end
 
+local function recreate_gui()
+  foreach_player(function(player, player_data)
+    GuiWidgetClose(player.index)
+    GuiEntityCloseWidget(nil, true)
+  end)
+end
+
 local function replace_word(str, pattern, target)
   return string.sub(string.gsub(' '..str..' ', '([^%w])'..pattern..'([^%w])', '%1'..target..'%2'), 2, -2)
 end

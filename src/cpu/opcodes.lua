@@ -627,10 +627,8 @@ local opcodes = {
     Assert.two(_)
     Assert.type(_[1], {'register', 'output'})
     local _type = io.gettype(_[2], {'type', 'input', 'register'})
-    local q2i = {
-      normal = 1, uncommon = 2, rare = 3, epic = 4, legendary = 5
-    }
-    io.register_set(_[1], {signal=_type, count=(_type and q2i[_type.quality or 'normal'] or 1)})
+    local proto = prototypes.quality[_type.quality or 'normal']
+    io.register_set(_[1], {signal=_type, count=(_type and proto and proto.level or 1)})
   end,
 
   lea = function(_)
