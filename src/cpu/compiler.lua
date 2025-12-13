@@ -119,7 +119,7 @@ local function parse(tokens)
     if not t then
       c, t, n = string.match(token, pattern_no_qual)
     end
-    if t and not (t == 'item' or t == 'fluid' or t == 'virtual-signal' or t == 'recipe') then
+    if t and not (t == 'item' or t == 'fluid' or t == 'virtual-signal' or t == 'recipe' or t == 'quality') then
       Assert.exception("Signal with type '".. (t or 'nil') .."' is not supported")
     end
     if t == 'virtual-signal' then

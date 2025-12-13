@@ -626,8 +626,8 @@ local opcodes = {
     Assert.mod_enabled('quality')
     Assert.two(_)
     Assert.type(_[1], {'register', 'output'})
-    local _type = io.gettype(_[2], {'type', 'input', 'register'})
-    local proto = prototypes.quality[_type.quality or 'normal']
+    local _type = io.gettype(_[2], {'type', 'signal', 'input', 'register'})
+    local proto = prototypes.quality[_type.type == 'quality' and _type.name or _type.quality or 'normal']
     io.register_set(_[1], {signal=_type, count=(_type and proto and proto.level or 1)})
   end,
 
