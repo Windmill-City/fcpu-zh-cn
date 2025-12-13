@@ -38,3 +38,4 @@ finally:
 
 # Stage
 subprocess.run(["git", "add", "locale"])
+subprocess.run(["git", "add", "wiki"])

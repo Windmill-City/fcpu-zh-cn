@@ -688,7 +688,7 @@ See [here](https://boosty.to/konstg)
 
 # Localization
 If you would like to help with the fCPU localization, [here](https://crowdin.com/editor/fcpu/all/) is the Crowdin project
-* ru (updated in v0.4.42) by ArsStels
+* ru (updated in v0.4.45) by ArsStels
 
 
 # Dear supporters
