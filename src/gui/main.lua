@@ -403,7 +403,7 @@ function GuiWidgetUpdate(player_data, state, initial)
       if reg then
         local button = player_data.gui_inspector['reg'..i..'-inspect']
         button.sprite = GUI_signalToSpritePath(player_data, reg.signal)
-        button.quality = reg.signal and reg.signal.name and reg.signal.quality
+        button.quality = reg.signal and reg.signal.name and prototypes.quality[reg.signal.quality] and reg.signal.quality
         button.number = reg.count
         if isRunning then
           button.tooltip = 'r'..i

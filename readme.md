@@ -216,8 +216,10 @@ Each instruction take one or more operands and modify them or state of fCPU.
 
 ### Quality
 
+See https://lua-api.factorio.com/latest/prototypes/QualityPrototype.html#level
+
 * `qn` dst[**R**/**O**] type[**T**/**R**/**I**]
-  Quality as a number (normal=1, uncommon=2, rare=3, epic=4, legendary=5).
+  Quality level as a number (normal=0, uncommon=1, rare=2, epic=3, legendary=5).
   *dst = quality_of(type)*
 
 
