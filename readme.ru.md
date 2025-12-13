@@ -696,6 +696,7 @@ If you would like to help with the fCPU localization, [here](https://crowdin.com
 
 # Dear supporters
 
+* tenim (v0.4.43-44 updates)
 * Sakari (v0.4.31 update)
 * masterkrovel (v0.4.14 update)
 * Spencer Nelson (v0.4.14 update)
