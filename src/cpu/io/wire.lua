@@ -39,7 +39,7 @@ function ioWire.get(address)
     Assert.todo()
   end
   if not state.cache.wires[address.color] then
-    Assert.exception("Tried to access " .. address.color .. " wire when it is not connected")
+    Assert.exception(Errors.NotConnectedWire(address.color))
   end
   if state.cache.wires[address.color].signals then
     local addr = ioRegister.addr_deref(address)
@@ -72,7 +72,7 @@ function ioWire.find_signal(color, signal_to_find)
     elseif color == 'input' then
       count = state.entity.get_signal(signal_to_find, defines.wire_connector_id.combinator_input_red, defines.wire_connector_id.combinator_input_green)
     else
-      Assert.exception("Tried to access " .. color .. " wire while it is not connected")
+      Assert.exception(Errors.NotConnectedWire(color))
     end
     return count
   end

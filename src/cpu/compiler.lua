@@ -120,7 +120,7 @@ local function parse(tokens)
       c, t, n = string.match(token, pattern_no_qual)
     end
     if t and not (t == 'item' or t == 'fluid' or t == 'virtual-signal' or t == 'recipe' or t == 'quality') then
-      Assert.exception("Signal with type '".. (t or 'nil') .."' is not supported")
+      Assert.exception(Errors.TypeIsNotSupported(t or 'nil'))
     end
     if t == 'virtual-signal' then
       t = 'virtual'
@@ -151,7 +151,7 @@ local function parse(tokens)
       elseif w == 'l' then
         return Emitter.make_special_register_ro(REG_CNL)
       end
-      Assert.exception('Unknown register `'..name..'`')
+      Assert.exception(Error.UnknownRegister(name))
     end
   end
   local parseMemory = function(name, alias)

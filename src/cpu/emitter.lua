@@ -118,7 +118,7 @@ local Emitter = {
   make_value = function(numstr)
     local number = tonumber(numstr)
     if number == nil then
-      Assert.exception("Can't parse number '".. numstr .."'")
+      Assert.exception(Errors.CantParseNumber(numstr))
     end
     return { type = 'value', count = number } ---@type OpRef_Number
   end,
@@ -141,7 +141,7 @@ local Emitter = {
   make_signal = function(signal_id, countstr)
     local count = tonumber(countstr)
     if count == nil then
-      Assert.exception("Can't parse number '".. (countstr or 'nil') .."'")
+      Assert.exception(Errors.CantParseNumber(countstr or 'nil'))
     end
     return { type = 'signal', signal = signal_id, count = count or 0 } ---@type OpRef_Signal
   end,

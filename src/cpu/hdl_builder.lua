@@ -809,6 +809,9 @@ local function connect_input_from(state, address, default_color)
   if address.type == 'memory' or address.type == 'channel' then
     local ics_name = address.channel
     local ics = state.program_ics[ics_name]
+    if not ics then
+      Assert.exception(address.type == 'memory' and Errors.UnknownMemoryBank(ics_name) or Errors.UnknownChannel(ics_name))
+    end
     return {
       entity = ics.out,
       wire = default_color or defines.wire_type.red,

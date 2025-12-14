@@ -39,7 +39,7 @@ local function register_getreadonly(index)
     local address = Emitter.make_memory_bank('mem', index - REG_CNM + 1)
     return io.memory_size(address) or 0
   else
-    Assert.exception('Unknown register with internal index ' .. index)
+    Assert.exception(Errors.UnknownRegisterWithIndex(index))
   end
 end
 

@@ -691,12 +691,6 @@ local opcodes = {
   uiss = function(_) -- Utility Item Stack Size
     Assert.two(_)
     local signal = io.gettype(_[2], {'type', 'register'})
-    --if signal.type ~= 'item' then
-    --  io.setsignal(_[1], NULL_SIGNAL)
-    --  --local str = signalToStr(signal)
-    --  --Assert.exception('Expecting `[item=...]` signal type, got \''.. str ..'\'.')
-    --  return
-    --end
     local proto = prototypes.item[signal.name]
     Assert.check(proto ~= nil, 'Unknown item name specified.')
     io.setsignal(_[1], { signal=signal, count=proto.stack_size })

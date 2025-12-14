@@ -11,13 +11,13 @@ function ioChannel.write_control(address)
     if ics.value and ics.value.valid then
       return ics.value.get_control_behavior()
     else
-      Assert.exception("Memory channel does not support writing")
+      Assert.exception(Error.WritingUnsupported())
     end
   elseif address.type == 'wire' then
     if address.color == 'out' then
       return output_control
     end
-    Assert.exception("Could not write to " .. address.color .. " input wire")
+    Assert.exception(Errors.WritingToUnknownWire(address.color))
   else
     Assert.todo()
   end
@@ -32,9 +32,9 @@ function ioChannel.read_network(address)
       return network
     else
       if address.type == 'memory' then
-        Assert.exception("Memory bank ".. address.channel .." does not exists")
+        Assert.exception(Errors.UnknownMemoryBank(address.channel))
       else
-        Assert.exception("Channel ".. address.channel .." does not exists")
+        Assert.exception(Errors.UnknownChannel(address.channel))
       end
     end
   elseif address.type == 'wire' then
@@ -43,7 +43,7 @@ function ioChannel.read_network(address)
       return network
     end
     if not state.cache.wires[address.color] then
-      Assert.exception("Tried to access " .. address.color .. " wire when it is not connected")
+      Assert.exception(Errors.NotConnectedWire(address.color))
     end
     return state.cache.wires[address.color]
   else

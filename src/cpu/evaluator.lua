@@ -32,7 +32,7 @@ local function eval(ast, ics)
       if ops[_.name] then
         return ops[_.name](_.expr)
       else
-        Assert.exception('Unknown opcode: '.._.name)
+        Assert.exception(Errors.UnknownOpcode(_.name))
       end
     elseif _.type == 'ic' then
       if ops_vx[_.name] then
@@ -42,7 +42,7 @@ local function eval(ast, ics)
         end
         return result
       else
-        Assert.exception('Unknown opcode: '.._.name)
+        Assert.exception(Errors.UnknownOpcode(_.name))
       end
     elseif _.type == 'nop' or _.type == 'label' then
       -- do nothing
@@ -51,21 +51,21 @@ local function eval(ast, ics)
     elseif _.type == 'value' or _.type == 'string' then
       return _.str or _.count
     else
-      Assert.exception('Unable to parse code '.. serpent.block(_))
+      Assert.exception(Errors.UnableToParse(serpent.block(_)))
     end
   end
 
   if ast then
     local result = node(ast)
     if type(result) == 'number' then
-      Assert.exception('Expected an opcode but instead read an integer.')
+      Assert.exception(Errors.ExpectedOpcodeButRead(type(result)))
     end
     return result
   end
 end
 
 function eval_debug(ast, ics)
-  if MC_DEBUG then
+  if MC_DEBUG and false then
     return true, eval(ast, ics) -- forces scenario crash on any exception
   end
   return pcall(eval, ast, ics)

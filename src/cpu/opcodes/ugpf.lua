@@ -160,12 +160,12 @@ end
 local function ugpf(type_name, name, quality, query)
   local protolist = prototypes[type_name]
   if not protolist then
-    Assert.exception('Unknown prototype group '.. type_name ..' specified.')
+    Assert.exception(Errors.UnknownPrototypeGroup(type_name))
   end
 
   local proto = protolist[name]
   if not proto then
-    Assert.exception('Unknown prototype '.. name ..' specified.')
+    Assert.exception(Errors.UnknownPrototype(name))
   end
   
   local success, value = pcall(eval_chain, proto, query, quality)

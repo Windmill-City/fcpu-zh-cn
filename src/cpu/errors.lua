@@ -1,0 +1,22 @@
+local Errors = {
+    TypeIsNotSupported = function(t) return "Signal with type '".. t .."' is not supported" end,
+    UnknownRegister = function(name) return 'Unknown register `'..name..'`' end,
+    CantParseNumber = function(numstr) return "Can't parse number '".. numstr .."'" end,
+    UnknownOpcode = function(name) return 'Unknown opcode: '.. name end,
+    UnableToParse = function(str) return 'Unable to parse code '.. str end,
+    ExpectedOpcodeButRead = function(t) return 'Expected an opcode but instead read a '.. t ..'.' end,
+    WritingUnsupported = function(a) return "Memory channel does not support writing" end,
+    UnexpectedType = function(name) return 'Unexpected type: '.. name end,
+    ReadingNil = function(name) return 'Trying to retrieve nil '.. name end,
+    UnknownLabel = function(label) return "Label '".. label .."' could not be found." end,
+    WritingToUnknownWire = function(wire) return "Could not write to " .. wire .. " input wire" end,
+    UnknownMemoryBank = function(bank) return "Memory bank ".. bank .." does not exists" end,
+    UnknownChannel = function(channel) return "Channel ".. channel .." does not exists" end,
+    NotConnectedWire = function(wire) return "Tried to access " .. wire .. " wire while it is not connected" end,
+    NotConnectedLognet = function() return "Tried to access logistic network while it is unreachable" end,
+    ScalarMemoryFull = function(n) return 'Scalar memory block is full already (max '.. n ..' items)' end,
+    UnknownRegisterWithIndex = function(index) return 'Unknown register with internal index ' .. index end,
+    UnknownPrototypeGroup = function(type_name) return 'Unknown prototype group '.. type_name ..' specified.' end,
+    UnknownPrototype = function(name) return 'Unknown prototype '.. name ..' specified.' end,
+}
+return Errors

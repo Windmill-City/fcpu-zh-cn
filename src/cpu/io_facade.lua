@@ -133,7 +133,7 @@ function io.getsignal(_, types)
     signal = _
   elseif _.type == 'string' then
     ---@cast _ OpRef_String
-    Assert.exception('not supported yet')
+    Assert.todo('getting string value')
   else
     ---@cast _ any
     local msg = (_ and 'unexpected '.. ((_.name and '"'.. _.name ..'"') or _.type or ' lexem')) or 'trying to retrieve nil signal'
@@ -159,11 +159,10 @@ function io.setsignal(_, signal, types)
   elseif _.type == 'memory' then
     ---@cast _ OpRef_Memory
     io.memory_set(_, signal)
-    --Assert.exception('Memory cell could not be changed. Not supported yet.')
   elseif _.type == 'output' then
     Assert.todo()
   else
-    Assert.exception('unhandled')
+    Assert.exception(Error.UnexpectedType(_.type or 'nil'))
   end
 end
 
@@ -186,7 +185,7 @@ function io.getvalue(_, types)
         return value
       end
     end
-    Assert.exception('trying to retrieve nil count')
+    Assert.exception(Error.ReadingNil('count'))
   end
 end
 
@@ -206,7 +205,7 @@ end
 function io.gettype(_, types)
   local signal = io.getsignal(_, types)
   if type(signal) ~= 'table' or signal.signal == nil then
-    Assert.exception('trying to retrieve nil type')
+    Assert.exception(Error.ReadingNil('type'))
   end
 ---@diagnostic disable-next-line: need-check-nil
   return signal.signal
@@ -224,7 +223,7 @@ end
 function io.getquality(_, types)
   local signal = io.getsignal(_, types)
   if type(signal) ~= 'table' then
-    Assert.exception('trying to retrieve nil quality')
+    Assert.exception(Error.ReadingNil('quality'))
   end
 ---@diagnostic disable-next-line: need-check-nil
   return signal.signal.quality or 'normal'
@@ -247,7 +246,7 @@ function io.find_label(label)
       return line_num + 1
     end
   end
-  Assert.exception("Label '".. label .."' could not be found.")
+  Assert.exception(Error.UnknownLabel(label))
 end
 
 -- Setup and Binding to state

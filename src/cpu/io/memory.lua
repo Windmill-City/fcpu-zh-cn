@@ -85,7 +85,7 @@ function ioMemory.first_free_index(address)
 --      return v.index
 --    end
 --  end
-  Assert.exception('Scalar memory block is full already (max '.. (index - 1) ..' items)')
+  Assert.exception(Errors.ScalarMemoryFull(index - 1))
 end
 
 ---@param address OpRef_MemoryBank

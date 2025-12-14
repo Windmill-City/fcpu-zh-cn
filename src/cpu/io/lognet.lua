@@ -6,7 +6,7 @@ local ioLognet = {}
 local function lognet_getchannel_contents()
   local lognet = state.cache.wires.lognet
   if not lognet then
-    Assert.exception("Tried to access logistic network while it is unreachable")
+    Assert.exception(Errors.NotConnectedLognet())
   end
   return lognet.signals
 end
@@ -24,7 +24,7 @@ function ioLognet.find_item(signal_to_find)
   if signal_to_find then
     local lognet = state.cache.wires.lognet
     if not lognet then
-      Assert.exception("Tried to access logistic network while it is unreachable")
+      Assert.exception(Errors.NotConnectedLognet())
     end
     local count = lognet.get_signal(signal_to_find)
     return count
