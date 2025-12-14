@@ -18,6 +18,21 @@ local Errors = {
   UnknownRegisterWithIndex = function(index) return { 'fcpu-errors.unknown-register-with-index', index } end,
   UnknownPrototypeGroup = function(type_name) return { 'fcpu-errors.unknown-prototype-group', type_name } end,
   UnknownPrototype = function(name) return { 'fcpu-errors.unknown-prototype', name } end,
+
+  ExpectingGot = function(msg, type) return { 'fcpu-errors.expecting-got', msg, type } end,
+  NotImplemented = function(msg) return { 'fcpu-errors.not-implemented', msg } end,
+  ConditionNotMet = function() return { 'fcpu-errors.condition-not-met' } end,
+  OpcodeUnavailable = function(modname) return { 'fcpu-errors.opcode-unavailable', modname } end,
+  Expecting_1 = function() return { 'fcpu-errors.expecting-1' } end,
+  Expecting_2 = function() return { 'fcpu-errors.expecting-2' } end,
+  Expecting_ge1 = function() return { 'fcpu-errors.expecting-ge1' } end,
+  Expecting_le2 = function() return { 'fcpu-errors.expecting-le2' } end,
+  Expecting_2or3 = function() return { 'fcpu-errors.expecting-2or3' } end,
+  Expecting_ge2 = function() return { 'fcpu-errors.expecting-ge2' } end,
+  Expecting_3 = function() return { 'fcpu-errors.expecting-3' } end,
+  Expecting_3or4 = function() return { 'fcpu-errors.expecting-3or4' } end,
+  NoAddress =    function(name) return { 'fcpu-errors.no-address', name } end,
+  InvalidAddress = function(name, index, max) return { 'fcpu-errors.invalid-address', name, index, max } end,
 }
 
 return Errors

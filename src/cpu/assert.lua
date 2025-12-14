@@ -9,7 +9,7 @@ local function exception(e)
 end
 
 local function expecting(address, msg)
-  error('@Expecting '.. msg ..', got '.. (address.type or '<nil>'), 2)
+  error(Errors.ExpectingGot(msg, address.type or 'nil'), 2)
 end
 
 -- Assertion Helper Functions
@@ -22,7 +22,7 @@ function Assert.deprecated(since_ver, ...)
 end
 
 function Assert.todo(msg)
-  exception("NOT IMPLEMENTED".. (msg and (': '..msg) or ''))
+  exception(Errors.NotImplemented(msg and (': '..msg) or ''))
 end
 
 function Assert.check(b, ...)
@@ -30,7 +30,7 @@ function Assert.check(b, ...)
     if ... and 0 < #... then
       exception(...)
     else
-      error('Assertion failed: condition not met', 2)
+      error(Errors.ConditionNotMet(), 2)
     end
   end
 end
@@ -38,21 +38,21 @@ end
 ---@param modname string
 function Assert.mod_enabled(modname)
   if not script.active_mods[modname] then
-    exception("Opcode is unavailable while mod ".. modname .." is disabled")
+    exception(Errors.OpcodeUnavailable(modname))
   end
 end
 
 ---@param _ OpRef
 function Assert.one(_)
   if #_ ~= 1 then
-    exception("Expecting one parameter after opcode")
+    exception(Errors.Expecting_1())
   end
 end
 
 ---@param _ OpRef
 function Assert.two(_)
   if #_ ~= 2 then
-    exception("Expecting two parameters after opcode")
+    exception(Errors.Expecting_2())
   end
 end
 
@@ -60,10 +60,10 @@ end
 ---@return number?
 function Assert.one_or_two(_)
   if #_ < 1 then
-    exception("Expecting at least one parameters after opcode")
+    exception(Errors.Expecting_ge1())
   end
   if 2 < #_ then
-    exception("Expecting no more than two parameters after opcode")
+    exception(Errors.Expecting_lt2())
   end
   return #_
 end
@@ -72,7 +72,7 @@ end
 ---@return number?
 function Assert.two_or_three(_)
   if #_ ~= 2 and #_ ~= 3 then
-    exception("Expecting two or three parameters after opcode")
+    exception(Errors.Expecting_2or3())
   end
   return #_
 end
@@ -81,7 +81,7 @@ end
 ---@return number?
 function Assert.two_or_more(_)
   if #_ < 2 then
-    exception("Expecting at least two parameters after opcode")
+    exception(Errors.Expecting_ge2())
   end
   return #_
 end
@@ -89,7 +89,7 @@ end
 ---@param _ OpRef
 function Assert.three(_)
   if #_ ~= 3 then
-    exception("Expecting three parameters after opcode")
+    exception(Errors.Expecting_3())
   end
 end
 
@@ -97,7 +97,7 @@ end
 ---@return number?
 function Assert.three_or_four(_)
   if #_ ~= 3 and #_ ~= 4 then
-    exception("Expecting three or four parameters after opcode")
+    exception(Errors.Expecting_3or4())
   end
   return #_
 end
@@ -197,10 +197,10 @@ end
 
 function Assert.check_range(index, max, name)
   if index == nil then
-    exception('No '.. name ..' address specified.')
+    exception(Errors.NoAddress(name))
   end
   if index < 1 or index > max then
-    exception('Invalid '.. name ..' address: '..index..'. Out of range [1..'.. max ..']')
+    exception(Errors.InvalidAddress(name, index, max))
   end
 end
 
