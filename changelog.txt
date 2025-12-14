@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.48
-Date: ????
+Date: 2025-12-14
   Changes:
     - `qn` mnemonic now returns quality level (https://lua-api.factorio.com/latest/prototypes/QualityPrototype.html#level).
     - Better `ugpf` parsing, works with quality.
