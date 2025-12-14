@@ -5,7 +5,7 @@ local Assert = {}
 --- we can substring the message to only display the error message and not the stack-trace
 --- to the user.
 local function exception(e)
-  error('@'..e, 2)
+  error(e, 2)
 end
 
 local function expecting(address, msg)

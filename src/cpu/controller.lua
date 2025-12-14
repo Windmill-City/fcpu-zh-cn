@@ -121,7 +121,13 @@ function Controller.set_error_message(state, err_message)
     script.raise_event(Controller.event_error, {['entity'] = state.entity})
   else
     state.error_line = state.instruction_pointer
-    state.error_message = {"gui-fcpu.program_error", state.instruction_pointer, err_message}
+    if type(err_message) == 'table' then
+      state.error_message = err_message
+    else
+      local start_index = string.find(err_message, '@') or 0
+      local error = string.sub(err_message, start_index+1, -1)
+      state.error_message = {"gui-fcpu.program_error", state.instruction_pointer, error}
+    end
     Controller.GuiCache_InvalidateLine(state, state.error_line)
     script.raise_event(Controller.event_error, {['entity'] = state.entity, message = state.error_message})
   end

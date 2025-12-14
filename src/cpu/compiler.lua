@@ -256,10 +256,7 @@ local function compiler_compile(lines)
     local status, result = pcall(parse, tokenize(line))
     --local status, result = true, parse(tokenize(line))
     if not status then
-      local error = ''..result
-      local start_index = string.find(error, '@') or 0
-      error = string.sub(error, start_index+1, -1)
-      ast[i] = { type='error', error=error }
+      ast[i] = { type='error', error=''..result }
     else
       ast[i] = result
     end
@@ -297,8 +294,6 @@ function Compiler.build(state, hdlBuilder, force)
         local status, result, deffer = pcall(construct, k, v)
         --local status, result, deffer = construct(k, v)
         if not status then
-          local start_index = string.find(result, '@') or 0
-          result = string.sub(result, start_index+1, -1)
           state.program_ast[k] = { type='error', error=result }
           hdlError = true
         else

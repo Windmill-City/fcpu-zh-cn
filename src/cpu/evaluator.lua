@@ -75,10 +75,6 @@ function Evaluator.eval(ast, ics, state)
   State.bind(state)
 
   local status, results = eval_debug(ast, ics)
-  if not status then
-    local start_index = string.find(results, '@') or 0
-    results = string.sub(results, start_index+1, -1)
-  end
   return status, results
 end
 
