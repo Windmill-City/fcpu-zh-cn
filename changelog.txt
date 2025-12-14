@@ -3,6 +3,7 @@ Version: 0.4.49
 Date: ????
   Bugfixes:
     - undo/redo issue in empty world.
+    - crash after disabling quality mod.
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.48
 Date: 2025-12-14

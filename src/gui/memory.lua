@@ -305,7 +305,7 @@ local function SetCell(player_data, cell, signal, idx, format, style)
     local sprite = GUI_signalToSpritePath(player_data, signal.signal)
 
     cell.sprite = sprite
-    cell.quality = signal.signal and signal.signal.name and signal.signal.quality
+    cell.quality = signal.signal and signal.signal.name and prototypes.quality[signal.signal.quality] and signal.signal.quality
     cell.visible = true
 
     cell.style = idx and style.index or style.readonly
