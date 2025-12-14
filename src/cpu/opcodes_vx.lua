@@ -72,7 +72,7 @@ local opcodes_vx = {
     Assert.type(_[2], {'memory', 'input'})
 
     local signals = io.channel_signals(_[2])
-    Assert.check(signals ~= nil, "Input channel is unavailable")
+    Assert.check(signals ~= nil, Errors.InputChannelUnavailable)
 
     local m
     for _,v in ipairs(signals) do
@@ -89,7 +89,7 @@ local opcodes_vx = {
     Assert.type(_[2], {'memory', 'input'})
 
     local signals = io.channel_signals(_[2])
-    Assert.check(signals ~= nil, "Input channel is unavailable")
+    Assert.check(signals ~= nil, Errors.InputChannelUnavailable)
 
     local m
     for _,v in ipairs(signals) do
@@ -106,7 +106,7 @@ local opcodes_vx = {
     Assert.type(_[2], {'memory', 'input'})
 
     local signals = io.channel_signals(_[2])
-    Assert.check(signals ~= nil, "Input channel is unavailable")
+    Assert.check(signals ~= nil, Errors.InputChannelUnavailable)
 
     local s = 0
     local c = 0
@@ -128,7 +128,7 @@ local opcodes_vx = {
     Assert.type(_[2], {'memory', 'input'})
 
     local signals = io.channel_signals(_[2])
-    Assert.check(signals ~= nil, "Input channel is unavailable")
+    Assert.check(signals ~= nil, Errors.InputChannelUnavailable)
 
     local m, i
     for k,v in ipairs(signals) do
@@ -146,7 +146,7 @@ local opcodes_vx = {
     Assert.type(_[2], {'memory', 'input'})
 
     local signals = io.channel_signals(_[2])
-    Assert.check(signals ~= nil, "Input channel is unavailable")
+    Assert.check(signals ~= nil, Errors.InputChannelUnavailable)
 
     local m, i
     for k,v in ipairs(signals) do

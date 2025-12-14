@@ -25,9 +25,16 @@ function Assert.todo(msg)
   exception(Errors.NotImplemented(msg and (': '..msg) or ''))
 end
 
+---@param b boolean
+---@param ... function | string
 function Assert.check(b, ...)
   if not b then
-    if ... and 0 < #... then
+    local pk = table.pack(...)
+    if type(pk[1]) == 'function' then
+      local fn = table.remove(pk, 1)
+      local loc = fn(table.unpack(pk))
+      exception(loc)
+    elseif ... and 0 < #... then
       exception(...)
     else
       error(Errors.ConditionNotMet(), 2)

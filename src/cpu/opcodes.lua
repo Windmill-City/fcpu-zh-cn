@@ -110,7 +110,7 @@ local btc_mnemonics_impl = function(_, getCurrentSignal)
   Assert.one(_)
   local oldSig = io.register_get(_[1])
   local type = oldSig.signal
-  Assert.check(type, 'Type should be specified for reference signal')
+  Assert.check(type, Errors.TypeShouldBeSpecified)
   local newCnt = getCurrentSignal(type)
   if newCnt == oldSig.count then
     return {type = 'block'}
@@ -439,7 +439,7 @@ local opcodes = {
     Assert.type(_max, {'register', 'value', 'input'})
     local min = io.getvalue(_min)
     local range  = io.getvalue(_max) - min + 1
-    Assert.check(0 <= range, "Minimum limit should be less or queal than the maximum limit")
+    Assert.check(0 <= range, Errors.MinLtMax)
     local r = min + (math.random() * range)
     io.register_set_count(_dst, r)
   end,
@@ -692,7 +692,7 @@ local opcodes = {
     Assert.two(_)
     local signal = io.gettype(_[2], {'type', 'register'})
     local proto = prototypes.item[signal.name]
-    Assert.check(proto ~= nil, 'Unknown item name specified.')
+    Assert.check(proto ~= nil, Errors.UnknownItemName)
     io.setsignal(_[1], { signal=signal, count=proto.stack_size })
   end,
 

@@ -4,7 +4,7 @@ local ICStack = {}
 -- ICs
 function ICStack.get_node(name)
   local ics = state.program_ics[name] or state.program_ics[state.ics_stack[name]]
-  Assert.check(ics, 'Unknown channel '.. name)
+  Assert.check(ics, Errors.UnknownChannel, name)
   return ics
 end
 

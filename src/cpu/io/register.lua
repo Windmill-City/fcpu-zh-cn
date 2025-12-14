@@ -57,7 +57,7 @@ end
 ---@param signal Signal
 local function register_setraw(index, signal)
   Assert.check_range(index, MC_REGS_EXT, 'register')
-  Assert.check(math.abs(signal.count or 0) ~= 1 / 0, "Division by zero")
+  Assert.check(math.abs(signal.count or 0) ~= 1 / 0, Errors.DivisionByZero)
   state.regs[index] = signal
 end
 
@@ -65,7 +65,7 @@ end
 ---@param address OpRef_Address
 ---@return integer
 function ioRegister.addr_deref(address)
-  Assert.check(address.addr ~= nil, "Invalid address")
+  Assert.check(address.addr ~= nil, Errors.InvalidNilAddress)
   if address.pointer then
     Assert.check(address.addr <= MC_REGS_EXT)
     return register_getraw(address.addr).count
@@ -77,7 +77,7 @@ end
 ---@param index_expr OpRef_Register
 ---@return OpRef_Constant
 function ioRegister.get(index_expr)
-  Assert.check(index_expr.type == 'register', "Register expected")
+  Assert.check(index_expr.type == 'register', Errors.RegisterExpected)
   local addr = ioRegister.addr_deref(index_expr)
   if MC_REGS_EXT < addr then
     local result = table.deep_copy(NULL_SIGNAL)
@@ -91,7 +91,7 @@ end
 ---@param index_expr OpRef_Register
 ---@param value OpRef_Constant
 function ioRegister.set(index_expr, value)
-  Assert.check(index_expr.type == 'register', "Register expected")
+  Assert.check(index_expr.type == 'register', Errors.RegisterExpected)
   local addr = ioRegister.addr_deref(index_expr)
   local signal = table.deep_copy(value)
   register_setraw(addr, signal)
@@ -101,7 +101,7 @@ end
 ---@param count int32
 function ioRegister.set_count(index_expr, count)
   local value = ioRegister.get(index_expr)
-  Assert.check(count == count, "Division by zero")
+  Assert.check(count == count, Errors.DivisionByZero)
   value.count = count
   ioRegister.set(index_expr, value)
 end

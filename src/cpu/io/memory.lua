@@ -12,7 +12,7 @@ local ioMemory = {}
 ---@param signal Signal?
 local function memory_setraw(address, addr, signal)
   local control = ioChannel.write_control(address)
-  Assert.check(control ~= nil, "Trying to access nil memory channel")
+  Assert.check(control ~= nil, Errors.NilChannel)
   if addr == nil and signal == nil then
     -- Clear entire memory
     control.enabled = false
@@ -24,8 +24,8 @@ local function memory_setraw(address, addr, signal)
     control.enabled = true
     Assert.check_range(addr, get_ctrl_signals_count(control), 'memory')
     if signal and signal.count then
-      Assert.check(signal.signal ~= nil, "Signal type should be specified when assigning to a memory cell")
-      Assert.check(math.abs(signal.count) ~= 1 / 0, "Division by zero")
+      Assert.check(signal.signal ~= nil, Errors.NeedSignalid)
+      Assert.check(math.abs(signal.count) ~= 1 / 0, Errors.DivisionByZero)
       set_ctrl_slot_signal(control, addr, signal)
     else
       set_ctrl_slot_signal(control, addr, nil)

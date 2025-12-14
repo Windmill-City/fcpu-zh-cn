@@ -33,6 +33,19 @@ local Errors = {
   Expecting_3or4 = function() return { 'fcpu-errors.expecting-3or4' } end,
   NoAddress =    function(name) return { 'fcpu-errors.no-address', name } end,
   InvalidAddress = function(name, index, max) return { 'fcpu-errors.invalid-address', name, index, max } end,
+
+  DivisionByZero = function() return { 'fcpu-errors.division-by-zero' } end,
+  RegisterExpected = function() return { 'fcpu-errors.register-expected' } end,
+  OutOfRange_Output = function() return { 'fcpu-errors.out-of-range-output' } end,
+  InputChannelUnavailable = function() return { 'fcpu-errors.input-channel-unavailable' } end,
+
+  StringNotTerminated = function() return { 'fcpu-errors.string-not-terminated' } end,
+  TypeShouldBeSpecified = function() return { 'fcpu-errors.type-should-be-specified' } end,
+  MinLtMax = function() return { 'fcpu-errors.min-lt-max' } end,
+  UnknownItemName = function() return { 'fcpu-errors.unknown-item-name' } end,
+  NilChannel = function() return { 'fcpu-errors.nil-channel' } end,
+  NeedSignalid = function() return { 'fcpu-errors.need-signalid' } end,
+  InvalidNilAddress = function() return { 'fcpu-errors.invalid-nil-address' } end,
 }
 
 return Errors

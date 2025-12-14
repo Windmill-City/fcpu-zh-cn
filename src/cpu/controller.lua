@@ -124,8 +124,9 @@ function Controller.set_error_message(state, err_message)
     if type(err_message) == 'table' then
       state.error_message = err_message
     else
-      local start_index = string.find(err_message, '@') or 0
-      local error = string.sub(err_message, start_index+1, -1)
+      local error = tostring(err_message)
+      local start_index = string.find(error, '@') or 0
+      error = string.sub(error, start_index+1, -1)
       state.error_message = {"gui-fcpu.program_error", state.instruction_pointer, error}
     end
     Controller.GuiCache_InvalidateLine(state, state.error_line)

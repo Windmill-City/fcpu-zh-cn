@@ -91,7 +91,7 @@ local function parse(tokens)
     local n = 0
     while n == 0 or n % 2 ~= 0 do
       local s = consume()
-      Assert.check(s ~= nil, 'String is not terminated')
+      Assert.check(s ~= nil, Errors.StringNotTerminated)
       for i = 1, #s do
         local c = string.sub(s, i, i)
         if c == '\'' then

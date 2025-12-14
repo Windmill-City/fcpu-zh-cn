@@ -16,10 +16,10 @@ end
 ---@param index integer
 ---@param signal OpRef_Constant?
 local function output_set(index, signal)
-  Assert.check(1 <= index and index <= get_ctrl_signals_limit(output_control), "Output cell index is out of range")
+  Assert.check(1 <= index and index <= get_ctrl_signals_limit(output_control), Errors.OutOfRange_Output)
   if signal and signal.count and signal.count ~= 0 and signal.signal then
     ---@cast signal Signal
-    Assert.check(math.abs(signal.count) ~= 1/0, "Division by zero")
+    Assert.check(math.abs(signal.count) ~= 1/0, Errors.DivisionByZero)
     set_ctrl_slot_signal(output_control, index, signal)
   else
     set_ctrl_slot_signal(output_control, index, nil)
