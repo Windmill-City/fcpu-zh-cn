@@ -42,10 +42,10 @@ local function FormatBreakpointTitle(state, i)
     return ' '.. line ..' '
   end
 
-  if i == state.instruction_pointer then
-    line = '[color=blue]'..line..'➧[/color]'
-  elseif i == state.error_line then
+  if i == state.error_line then
     line = '[color=1,0.4,0.4]'..line..'⚠[/color]'
+  elseif i == state.instruction_pointer then
+    line = '[color=blue]'..line..'➧[/color]'
   else
     line = line..' '
   end
