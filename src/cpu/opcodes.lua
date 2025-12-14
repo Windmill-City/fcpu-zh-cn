@@ -197,6 +197,8 @@ local ics_clear = function(channel)
   return action
 end
 
+ugpf = require('src/cpu/opcodes/ugpf')
+
 local opcodes = {
 -- S: Signal
 -- T: signal type
@@ -703,44 +705,9 @@ local opcodes = {
   ugpf = function(_) -- Utility Get Prototype Field
     Assert.three(_)
     local signal = io.gettype(_[2], {'type', 'register'})
-    --if signal.type ~= 'item' then
-    --  io.setsignal(_[1], NULL_SIGNAL)
-    --  return
-    --end
-    local proto = prototypes.item[signal.name]
-    if proto == nil then
-      Assert.exception('Unknown prototype '.. signal.name ..' specified.')
-    end
-
-    local getFieldValue = function(var, field)
-      local bak
-      for v, b in string.gmatch(field, '([^%.()]+)([()]*)') do
-        if v and type(var[v]) == 'function' and b:sub(1, 1) == '(' then
-          bak = var[v]
-          if b == '()' then
-            var = bak()
-          else
-            var = _G
-          end
-        else
-          var = var[v]
-          if b == ')' then
-            Assert.check(bak, 'Unmatched brace found')
-            var = bak(var)
-            bak = nil
-          end
-        end
-      end
-      return tonumber(var) or var
-    end
-
     local field = io.getvalue(_[3])
-
-    local success, value = pcall(getFieldValue, proto, field)
-    if not success then
-      success, value = pcall(getFieldValue, proto.place_result, field)
-    end
-    Assert.check(success, value)
+    local quality = signal.quality or 'normal'
+    local value = ugpf('item', signal.name, quality, field)
 
     local t = type(value)
     if t == 'number' then
