@@ -23,7 +23,14 @@ end
 
 local function register_undo_tags(state)
   for _, player in pairs(game.players) do
-    player.undo_redo_stack.set_undo_tag(1, 1, 'fcpu', create_fcpu_tag_for(state))
+    local stack = player.undo_redo_stack
+    -- at least one element in undo stack
+    local count = stack.get_undo_item_count()
+    if count > 0 then
+        local last_item_index = 1 -- the latest
+        --local actions = stack.get_undo_item(last_item_index)
+        player.undo_redo_stack.set_undo_tag(1, 1, 'fcpu', create_fcpu_tag_for(state))
+    end
   end
 end
 
