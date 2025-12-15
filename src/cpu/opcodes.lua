@@ -706,6 +706,8 @@ local opcodes = {
     local t = type(value)
     if t == 'number' then
       io.setsignal(_[1], { signal=signal, count=value })
+    elseif t == 'boolean' then
+      io.setsignal(_[1], { signal=signal, count=value and 1 or 0 })
     elseif t == 'string' then
       io.setsignal(_[1], { signal=signal, str=value })
     else
