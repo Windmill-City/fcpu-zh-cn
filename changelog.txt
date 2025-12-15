@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.51
-Date: ????
+Date: 2025-12-15
   Changes:
     - `ugpf` with boolean property return integer 1 (`ugpf r5 [item=steel-chest] 'is_entity_with_owner'`).
   Bugfixes:
