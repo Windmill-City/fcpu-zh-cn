@@ -1,6 +1,6 @@
 {
   "name": "fcpu",
-  "version": "0.4.51",
+  "version": "0.4.52",
   "title": "fCPU",
   "description": "Factorio Customizable Processing Unit.\nAllow to write any logic on low level machine code.\nThe fCPU acts like a programmable microcontroller with a vector coprocessor that supports many useful instructions.",
   "author": "KonStg & Krul",
