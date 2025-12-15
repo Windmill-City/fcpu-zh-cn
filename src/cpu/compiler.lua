@@ -256,7 +256,7 @@ local function compiler_compile(lines)
     local status, result = pcall(parse, tokenize(line))
     --local status, result = true, parse(tokenize(line))
     if not status then
-      ast[i] = { type='error', error=''..result }
+      ast[i] = { type='error', error=result }
     else
       ast[i] = result
     end
