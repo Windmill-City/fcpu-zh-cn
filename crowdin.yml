@@ -11,3 +11,9 @@ files:
 
     ## Auto section split
     #scheme: "/%original_file_name%/%file_section%.ini"
+
+  - source: /locale/en/errors.cfg
+    dest: fcpu/errors.ini
+    translation: /locale/%two_letters_code%/%original_file_name%
+    type: ini
+    update_option: update_as_unapproved
