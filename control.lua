@@ -118,20 +118,23 @@ local function PlayerWithCurrentEnumerate(entity, proc)
     local player_data = get_player_data(player.index)
     if player_data.gui_fcpu and player_data.gui_fcpu.valid then
       if Entity._are_equal(entity, player_data.current_fcpu) then
-        proc(player_data, player.index)
+        proc(player.index, player_data, state)
       end
     end
   end
 end
 
 local function on_error(event)
-  PlayerWithCurrentEnumerate(event.entity, function(player_data)
+  PlayerWithCurrentEnumerate(event.entity, function(player_index, player_data)
     player_data.gui_error_message.caption = event.message or ""
+    if event.line then
+      GUI_auto_scroll_to_line(player_index, event.line)
+    end
   end)
 end
 
 local function on_autoscroll(event)
-  PlayerWithCurrentEnumerate(event.entity, function(player_data, player_index)
+  PlayerWithCurrentEnumerate(event.entity, function(player_index)
     GUI_auto_scroll_to_line(player_index, event.line)
   end)
 end

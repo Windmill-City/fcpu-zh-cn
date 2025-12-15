@@ -130,7 +130,7 @@ function Controller.set_error_message(state, err_message)
       state.error_message = {"gui-fcpu.program_error", state.instruction_pointer, error}
     end
     Controller.GuiCache_InvalidateLine(state, state.error_line)
-    script.raise_event(Controller.event_error, {['entity'] = state.entity, message = state.error_message})
+    script.raise_event(Controller.event_error, {['entity'] = state.entity, ['message'] = state.error_message, ['line'] = state.error_line})
   end
 end
 
@@ -407,7 +407,7 @@ function Controller.do_power_check(state, proc)
     state.power_probe_tick = game.tick
   end
   if state.power_level <= MC_BROWNOUT_LEVEL then
-    script.raise_event(Controller.event_error, {['entity'] = state.entity, message = {'gui-fcpu.power-level-brownout', MC_BROWNOUT_LEVEL * 100}})
+    script.raise_event(Controller.event_error, {['entity'] = state.entity, ['message'] = {'gui-fcpu.power-level-brownout', MC_BROWNOUT_LEVEL * 100}})
     return
   elseif wasBO then
     Controller.set_error_message(state, nil)
@@ -421,7 +421,7 @@ function Controller.do_power_check(state, proc)
       if not state.need_sync then
         Controller.sleep(state, invLevel * 60 * (1 - MC_BROWNOUT_LEVEL), true)
       end
-      script.raise_event(Controller.event_error, {['entity'] = state.entity, message = {'gui-fcpu.power-level-low', state.power_level * 100}})
+      script.raise_event(Controller.event_error, {['entity'] = state.entity, ['message'] = {'gui-fcpu.power-level-low', state.power_level * 100}})
     end
   end
 end
