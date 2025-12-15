@@ -344,14 +344,18 @@ function MemoryView.UpdateFromTable(player_data, signals, format, sparse, memmap
   -- order is different than in Factorio
   local remap, first, last = PrepareRemap(signals, memmap and memmap.s2i)
   local i2s = memmap and memmap.i2s or {}
+  local cells_n = table_size(cells)
 
   -- add extra
-  for i = table_size(cells) + 1, math.max(MC_MEMORY_SLOTS_MIN, last) do
+  local new_cn = 0
+  for i = cells_n + 1, math.max(MC_MEMORY_SLOTS_MIN, last) do
     gui.build(player_data.gui_memory_cells, {
       gui.templates.channel_cell('index-'..i, {visible=false})
     })
+    new_cn = new_cn + 1
   end
   cells = player_data.gui_memory_cells.children
+  cells_n = cells_n + new_cn
 
   -- clean beginning
   CleanCellRange(cells, 1, first - 1, style.empty);
@@ -370,8 +374,10 @@ function MemoryView.UpdateFromTable(player_data, signals, format, sparse, memmap
   CleanCellRange(cells, idx, MC_MEMORY_SLOTS_MIN, style.empty)
 
   -- hide others
-  while idx <= table_size(cells) and cells[idx] and cells[idx].visible do
-    cells[idx].visible = false
+  while idx <= cells_n and cells[idx] do
+    if cells[idx].visible then
+      cells[idx].visible = false
+    end
     idx = idx + 1
   end
 end
