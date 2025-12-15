@@ -269,7 +269,7 @@ local function GuiWidgetUpdatePinButton(player, force)
 end
 
 local function GuiWidgetVisible(player, player_data, visible)
-  visible = visible or (visible == false and nil)
+  visible = visible == true or nil -- HACK: force close widget. some issues with handlers and flib061 https://mods.factorio.com/mod/fcpu/discussion/693c37fb5ec67d0da895c875
   if visible then
     if not (player_data.gui_fcpu and player_data.gui_fcpu.valid) then
       local rootGui = player.gui.screen
