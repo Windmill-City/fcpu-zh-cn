@@ -51,6 +51,24 @@ local ret_op = function()
   return jump_op(address, 1)
 end
 
+local enter_op = function(local_size)
+  local bpa = {type = 'register', addr = REG_BP, pointer = false}
+  local spa = {type = 'register', addr = REG_SP, pointer = false}
+  io.stack_push(io.register_get(bpa))
+  local sp = io.getvalue(spa)
+  io.register_set_count(bpa, sp)
+  sp = sp - local_size
+  io.register_set_count(spa, sp)
+end
+local leave_op = function()
+  local bpa = {type = 'register', addr = REG_BP, pointer = false}
+  local spa = {type = 'register', addr = REG_SP, pointer = false}
+  local bp = io.register_get(bpa)
+  io.register_set(spa, bp)
+  io.register_set(bpa, io.stack_pop())
+  return ret_op()
+end
+
 local test_mnemonics = function(condition)
   return function(_)
     Assert.two(_)
@@ -665,6 +683,14 @@ local opcodes = {
   end,
   ret = function(_)
     return ret_op()
+  end,
+  enter = function(_)
+    Assert.one(_)
+    local local_size = io.getvalue(_[1])
+    enter_op(local_size)
+  end,
+  leave = function(_)
+    leave_op()
   end,
   hlt = function(_)
     return { type = 'halt' }
