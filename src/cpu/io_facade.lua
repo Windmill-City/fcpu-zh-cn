@@ -48,6 +48,7 @@ io.ics_each_ast = ICStack.ics_each_ast
 io.stack_push = ioStack.push
 io.stack_pop = ioStack.pop
 io.stack_clear = ioStack.clear
+io.stack_set_pointer = ioStack.set_pointer
 
 
 -- Channel

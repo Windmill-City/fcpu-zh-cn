@@ -10,6 +10,8 @@ REG_CNR = MC_REGS_RO_FIRST + 1
 REG_CNG = MC_REGS_RO_FIRST + 2
 REG_CLK = MC_REGS_RO_FIRST + 3
 REG_CNL = MC_REGS_RO_FIRST + 4
+REG_SP = MC_REGS_RO_FIRST + 5
+REG_BP = MC_REGS_RO_FIRST + 6
 REG_CNM = MC_REGS_RO_MSLOT
 -- }
 
@@ -35,9 +37,26 @@ local function register_get_internal(index)
     return state.clock
   elseif index == REG_CNL then
     return io.lognet_content_size()
+  elseif index == REG_SP then
+    return state.stack_pointer
+  elseif index == REG_BP then
+    return state.base_pointer
   elseif REG_CNM <= index then
     local address = Emitter.make_memory_bank('mem', index - REG_CNM + 1)
     return io.memory_size(address) or 0
+  else
+    Assert.exception(Errors.UnknownRegisterWithIndex(index))
+  end
+end
+
+---@param index integer
+---@param count integer
+local function register_set_internal(index, count)
+  Assert.check(count == count, Errors.DivisionByZero)
+  if index == REG_SP then
+    io.stack_set_pointer(count)
+  elseif index == REG_BP then
+    state.base_pointer = count
   else
     Assert.exception(Errors.UnknownRegisterWithIndex(index))
   end
@@ -93,8 +112,12 @@ end
 function ioRegister.set(index_expr, value)
   Assert.check(index_expr.type == 'register', Errors.RegisterExpected)
   local addr = ioRegister.addr_deref(index_expr)
-  local signal = table.deep_copy(value)
-  register_setraw(addr, signal)
+  if MC_REGS_EXT < addr then
+    register_set_internal(addr, value.count)
+  else
+    local signal = table.deep_copy(value)
+    register_setraw(addr, signal)
+  end
 end
 
 ---@param index_expr OpRef_Register

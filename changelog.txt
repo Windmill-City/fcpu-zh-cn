@@ -9,6 +9,7 @@ Date: 2025-12-17
     - LIFO Stack for subprograms (thanks to Danbopes).
     - New `push`, `pop` mnemonics.
     - New `call`, `ret` mnemonics.
+    - New registers `sp`, `bp`.
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.51
 Date: 2025-12-15

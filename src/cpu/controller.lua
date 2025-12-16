@@ -75,6 +75,10 @@ function Controller.init_registers(state)
   if not state.clock then
     state.clock = 0
   end
+  if not state.stack_pointer then
+    state.stack_pointer = MC_STACK_SIZE
+    state.base_pointer = state.stack_pointer
+  end
 end
 
 function Controller.update_program_text(state, program_text)

@@ -140,6 +140,10 @@ local function parse(tokens)
       return Emitter.make_special_register_ro(REG_IP)
     elseif name == 'clk' then
       return Emitter.make_special_register_ro(REG_CLK)
+    elseif name == 'sp' then
+      return Emitter.make_special_register_ro(REG_SP)
+    elseif name == 'bp' then
+      return Emitter.make_special_register_ro(REG_BP)
     elseif string.sub(name, 1, 2) == 'cn' then
       local w, i = string.match(name, 'cn([rglm])(%d*)')
       if w == 'm' and i ~= nil then

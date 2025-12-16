@@ -516,4 +516,11 @@ return {
       end
     end)
   end,
+
+  ["0.4.53"] = function()
+    foreach_fcpu(function(fcpu, state)
+      state.stack_pointer = MC_STACK_SIZE
+      state.base_pointer = state.stack_pointer
+    end)
+  end,
 }
