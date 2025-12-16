@@ -46,6 +46,10 @@ local Errors = {
   NilChannel = function() return { 'fcpu-errors.nil-channel' } end,
   NeedSignalid = function() return { 'fcpu-errors.need-signalid' } end,
   InvalidNilAddress = function() return { 'fcpu-errors.invalid-nil-address' } end,
+
+  StackUnderflow = function() return { 'fcpu-errors.stack-underflow' } end,
+  StackOverflow = function() return { 'fcpu-errors.stack-overflow' } end,
+  StackOOB = function() return { 'fcpu-errors.stack-out-of-bounds' } end,
 }
 
 return Errors

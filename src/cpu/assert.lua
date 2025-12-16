@@ -77,6 +77,15 @@ end
 
 ---@param _ OpRef
 ---@return number?
+function Assert.one_or_more(_)
+  if #_ < 1 then
+    exception(Errors.Expecting_ge1())
+  end
+  return #_
+end
+
+---@param _ OpRef
+---@return number?
 function Assert.two_or_three(_)
   if #_ ~= 2 and #_ ~= 3 then
     exception(Errors.Expecting_2or3())

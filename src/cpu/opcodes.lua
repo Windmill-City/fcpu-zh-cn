@@ -25,8 +25,10 @@ end
 local jump_op = function(address, offset)
   Assert.type(address, {'label', 'value', 'register'})
   if offset then
-    Assert.type(offset, {'value', 'register'})
-    offset = io.getvalue(offset) or 0
+    if type(offset) ~= 'number' then
+      Assert.type(offset, {'value', 'register'})
+      offset = io.getvalue(offset) or 0
+    end
   else
     offset = 0
   end
@@ -38,21 +40,15 @@ local jump_op = function(address, offset)
   end
 end
 
-local call_op = function(addr, offset)
+local call_op = function(address, offset)
   local ip = io.register_get({type = 'register', addr = REG_IP, pointer = false})
-  io.stack_push({type = 'jump', val = ip.count})
-
-  return jump_op(addr, offset)
+  io.stack_push(ip)
+  return jump_op(address, offset)
 end
-
 local ret_op = function()
-  local jump = io.stack_pop()
-
-  if not jump or jump.type ~= "jump" then
-    Assert.exception("Current stack item is not a jump")
-  end
-
-  return { type = 'jump', val = jump.val + 1 }
+  local address = io.stack_pop()
+  address.type = 'value' -- HACK
+  return jump_op(address, 1)
 end
 
 local test_mnemonics = function(condition)
@@ -665,29 +661,27 @@ local opcodes = {
   end,
   call = function(_)
     Assert.one_or_two(_)
-    return jts_op(_[1], _[2])
+    return call_op(_[1], _[2])
   end,
   ret = function(_)
-    return rts_op()
+    return ret_op()
   end,
   hlt = function(_)
     return { type = 'halt' }
   end,
   push = function(_)
-    Assert.one(_)
-    local sig = io.getsignal(_[#_], {'value', 'type', 'signal', 'input', 'register'})
-    io.stack_push({ type = 'signal', signal = sig })
+    local cnt = Assert.one_or_more(_)
+    for i = 1,cnt do
+      local sig = io.getsignal(_[i], {'value', 'type', 'signal', 'register', 'input'})
+      io.stack_push(sig)
+    end
   end,
   pop = function(_)
-    Assert.one(_)
-
-    local val = io.stack_pop()
-
-    if not val or val.type ~= "signal" then
-      Assert.exception("Current stack item is not a signal")
+    local cnt = Assert.one_or_more(_)
+    for i = 1,cnt do
+      local val = io.stack_pop()
+      io.setsignal(_[i], val.signal)
     end
-
-    io.setsignal(_[1], val.signal, {'register', 'wire'})
   end,
   slp = function(_)
     Assert.one(_)

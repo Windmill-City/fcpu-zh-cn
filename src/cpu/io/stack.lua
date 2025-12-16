@@ -1,23 +1,32 @@
 local state
 local Stack = {}
 
--- ICs
+-- Stack LIFO
 function Stack.push(val)
-  state.heap[#state.heap+1] = val
+  local index = #state.reg_stack + 1
+  Assert.check(index <= MC_STACK_SIZE, Errors.StackOverflow)
+  state.reg_stack[index] = val
 end
 
 function Stack.pop()
-  Assert.check(#state.heap > 0, "Stack is empty")
-  local val = table.remove(state.heap, #state.heap)
-  return val
+  local index = #state.reg_stack
+  Assert.check(1 <= index, Errors.StackUnderflow)
+  return table.remove(state.reg_stack, index)
+end
+
+function Stack.get(index)
+  local size = #state.reg_stack
+  Assert.check(size < 1, Errors.StackUnderflow)
+  Assert.check(1 <= index and index <= size, Errors.StackOOB, index, size)
+  return state.reg_stack[size + 1 - index]
 end
 
 function Stack.size()
-  return #state.heap
+  return #state.reg_stack
 end
 
 function Stack.clear()
-  state.heap = {}
+  state.reg_stack = {}
 end
 
 function Stack.bind(state_)

@@ -501,4 +501,19 @@ return {
 
     storage.gui_locale = nil
   end,
+
+  ["0.4.52"] = function()
+    foreach_fcpu(function(fcpu, state)
+      state.reg_stack = {}
+    end)
+    foreach_player(function(player, player_data)
+      if player_data.gui_memory_channel then
+        local index = player_data.gui_memory_channel.selected_index
+        if 1 < index then
+          -- shift channel drop-down after stack view
+          player_data.gui_memory_channel.selected_index = index + 1
+        end
+      end
+    end)
+  end,
 }

@@ -45,6 +45,7 @@ function Controller.init(mc)
     memmap = { i2s = {}, s2i = {} },
     breakpoints = {},
     instruction_pointer = 1,
+    reg_stack = {},
   }
   Controller.invalidate_cache(state)
   Controller.init_registers(state)

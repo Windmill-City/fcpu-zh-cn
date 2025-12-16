@@ -5,6 +5,7 @@ MC_OUTPUT = 256
 MC_LINES = settings.startup['fcpu-program-lines'].value
 MC_REGS = 8 -- used for GUI preview
 MC_REGS_EXT = 64
+MC_STACK_SIZE = 4096
 MC_REGS_RO_FIRST = 1000
 MC_REGS_RO_MSLOT = 2000
 MC_MEMORY_CHANNELS = 4

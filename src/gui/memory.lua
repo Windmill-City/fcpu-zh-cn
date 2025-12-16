@@ -81,6 +81,12 @@ local function ioRegisters_GUI_Update(player_data, state, force)
   return true
 end
 
+local function ioStack_GUI_Update(player_data, state, force)
+  -- Stack
+  MemoryView.UpdateFromTable(player_data, state.reg_stack, 0, false, nil, true)
+  return true
+end
+
 local function ioWire_GUI_Update_cl(wire_connector)
   -- Input wires
   return function(player_data, state, force)
@@ -140,6 +146,7 @@ end
 
 local ChannelsInfo = {
   { title = { 'gui-fcpu-memviewer.channel-registers' }, handler = ioRegisters_GUI_Update },
+  { title = { 'gui-fcpu-memviewer.channel-stack' }, handler = ioStack_GUI_Update },
   { title = { 'gui-fcpu-memviewer.channel-input-red' }, handler = ioWire_GUI_Update_cl(defines.wire_connector_id.combinator_input_red) },
   { title = { 'gui-fcpu-memviewer.channel-input-green' }, handler = ioWire_GUI_Update_cl(defines.wire_connector_id.combinator_input_green) },
   { title = { 'gui-fcpu-memviewer.channel-input-lognet' }, handler = ioChannel_GUI_Update_cl('lognet') },
@@ -174,7 +181,7 @@ function MemoryView.CreateWidget(rootGui)
     {type="frame", name="fcpu-memory-view", save_as="gui_memory_view", style="entity_frame", style_mods={ minimal_width=364 }, direction="vertical", children={
       {template="heading_3", caption={"gui-fcpu-memviewer.memory-channel"}},
       {type="flow", name="fcpu-panels", direction="horizontal", style_mods={ vertical_align='center' }, children={
-        {type='drop-down', save_as='gui_memory_channel', items={ table.unpack(memchannels) }, selected_index=1, handlers="memory.channel_switch"},
+        {type='drop-down', save_as='gui_memory_channel', items=memchannels, selected_index=1, handlers="memory.channel_switch"},
         {template="pushers.horizontal"},
         {type='checkbox', save_as='gui_memory_autoselect', state=false, caption={'gui-fcpu-memviewer.autoselect-channel'}, tooltip={"gui-fcpu-memviewer.autoselect-channel-tooltip"}, handlers="memory.channel_autoselect"},
       }},
@@ -293,9 +300,10 @@ local function CleanCellRange(cells, first, last, style)
   end
 end
 
+---@param signal Signal | LogisticFilter
 local function SetCell(player_data, cell, signal, idx, format, style)
   if signal and cell then
-    if not signal.signal then
+    if not signal.signal and signal.value then
       signal = {
         count = signal.min,
         signal = signal.value
@@ -325,7 +333,7 @@ local function SetCell(player_data, cell, signal, idx, format, style)
   end
 end
 
-function MemoryView.UpdateFromTable(player_data, signals, format, sparse, memmap)
+function MemoryView.UpdateFromTable(player_data, signals, format, sparse, memmap, rev)
   local cells = player_data.gui_memory_cells.children
   if not cells then
     return
@@ -363,7 +371,13 @@ function MemoryView.UpdateFromTable(player_data, signals, format, sparse, memmap
 
   -- show and setup visible
   for k,signal in pairs(remap) do
-    if SetCell(player_data, cells[k], signal, i2s[k] and k or (format == 0) and k, format, style) then
+    local i
+    if rev then
+      i = last + 1 - k
+    else
+      i = k
+    end
+    if SetCell(player_data, cells[i], signal, (i2s[k] or format == 0) and k, format, style) then
       idx = k + 1
     elseif not sparse then
       break
