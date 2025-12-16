@@ -10,6 +10,7 @@
 * in-game debugger with breakpoints
 * 256 instructions for whole program
 * 64 general purpose registers
+* 4096 LIFO stack for subprogram calls
 * 4 memory channels for vector processing
 * integrated access to the logistic network
 * 50+ opcodes
@@ -72,10 +73,27 @@ Besides general purpose registers there are some read only registers:
 - **cnr**, **cng**: signals number on red `cnr` or green `cng` input wire
 - **cnl**: count of a various items in `lognet`, not a sum of its values
 - **cnm1**, ..., **cnm4**: signals number in memory  
+- **sp**, **bp**: Stack Pointer, Base Pointer  
 
 Output registers (write only):
 
 - **out1**, ..., **out256**: output registers (only integer values)
+
+
+### Stack
+
+The stack grows **downwards in memory** (from higher addresses to lower addresses).
+If you want to know how much space left, use `sp` register (`mov r1 sp`).
+- Type: LIFO (Last In, First Out)
+- Size: 4096
+
+Use `push` and `pop` mnemonics to write and read from stack.
+`push r1 r2 r3` shorthand for
+```
+push r1
+push r2
+push r3
+```
 
 
 ### Memory
@@ -290,6 +308,13 @@ See https://lua-api.factorio.com/latest/prototypes/QualityPrototype.html#level
   *dst = dst + (val % 10 - dst / 10^num % 10) * 10^num*
 
 
+### Stack
+
+* `push` src...[**V**/**T**/**VT**/**R**]
+
+* `pop` dst...[**R**/**O**]
+
+
 ### Trigonometry
 
 * `cos` dst[**R**] src[**V**/**R**]
@@ -369,6 +394,18 @@ See https://lua-api.factorio.com/latest/prototypes/QualityPrototype.html#level
 * `slp` cnt[**V**/**R**]
   Sleep for specified ticks count.
   fCPU do not handle interruptions while sleeping.  
+
+* `call` addr[**V**/**A**/**L**/**R**] offset[**V**/**R**]
+  Push current instruction pointer to stack and jump to address + offset or label + offset.
+  Same as:
+  ```
+  push ipt
+  jmp addr offset
+  ```
+
+* `ret`
+  Pop address from stack and jump to it.
+
 
 #### Block execution until condition met
 Instructions execute the next line immediately after them (in the same tick) as soon as the condition is met.
