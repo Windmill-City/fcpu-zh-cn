@@ -169,7 +169,7 @@ function io.setsignal(_, signal, types)
   elseif _.type == 'output' then
     Assert.todo()
   else
-    Assert.exception(Error.UnexpectedType(_.type or 'nil'))
+    Assert.exception(Errors.UnexpectedType(_.type or 'nil'))
   end
 end
 
@@ -192,7 +192,7 @@ function io.getvalue(_, types)
         return value
       end
     end
-    Assert.exception(Error.ReadingNil('count'))
+    Assert.exception(Errors.ReadingNil('count'))
   end
 end
 
@@ -212,7 +212,7 @@ end
 function io.gettype(_, types)
   local signal = io.getsignal(_, types)
   if type(signal) ~= 'table' or signal.signal == nil then
-    Assert.exception(Error.ReadingNil('type'))
+    Assert.exception(Errors.ReadingNil('type'))
   end
 ---@diagnostic disable-next-line: need-check-nil
   return signal.signal
@@ -230,7 +230,7 @@ end
 function io.getquality(_, types)
   local signal = io.getsignal(_, types)
   if type(signal) ~= 'table' then
-    Assert.exception(Error.ReadingNil('quality'))
+    Assert.exception(Errors.ReadingNil('quality'))
   end
 ---@diagnostic disable-next-line: need-check-nil
   return signal.signal.quality or 'normal'
@@ -253,7 +253,7 @@ function io.find_label(label)
       return line_num + 1
     end
   end
-  Assert.exception(Error.UnknownLabel(label))
+  Assert.exception(Errors.UnknownLabel(label))
 end
 
 -- Setup and Binding to state

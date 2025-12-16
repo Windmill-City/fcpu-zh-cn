@@ -136,11 +136,11 @@ local function parse(tokens)
     return Emitter.make_register(name, address)
   end
   local parseReadOnlyRegister = function(name)
-    if string.find(name, 'ipt') then
+    if name == 'ipt' then
       return Emitter.make_special_register_ro(REG_IP)
-    elseif string.find(name, 'clk') then
+    elseif name == 'clk' then
       return Emitter.make_special_register_ro(REG_CLK)
-    else
+    elseif string.sub(name, 1, 2) == 'cn' then
       local w, i = string.match(name, 'cn([rglm])(%d*)')
       if w == 'm' and i ~= nil then
         return Emitter.make_special_register_ro(REG_CNM + tonumber(i) - 1)
@@ -151,7 +151,7 @@ local function parse(tokens)
       elseif w == 'l' then
         return Emitter.make_special_register_ro(REG_CNL)
       end
-      Assert.exception(Error.UnknownRegister(name))
+      Assert.exception(Errors.UnknownRegister(name))
     end
   end
   local parseMemory = function(name, alias)
@@ -232,9 +232,13 @@ local function parse(tokens)
           return parseRegister('reg')
         elseif string.find(token, 'r@?%d') == 1 then
           return parseRegister('reg', 'r')
-        elseif has_pattern(token, {'ipt', 'cnr', 'cng', 'clk', 'cnl', 'cnm%d'}) then
-          return parseReadOnlyRegister(consume())
         else
+          local roRegister = parseReadOnlyRegister(peek())
+          if roRegister then
+            consume()
+            return roRegister
+          end
+
           return parseOp()
         end
       end

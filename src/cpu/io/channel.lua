@@ -11,7 +11,7 @@ function ioChannel.write_control(address)
     if ics.value and ics.value.valid then
       return ics.value.get_control_behavior()
     else
-      Assert.exception(Error.WritingUnsupported())
+      Assert.exception(Errors.WritingUnsupported())
     end
   elseif address.type == 'wire' then
     if address.color == 'out' then

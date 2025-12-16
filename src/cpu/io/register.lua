@@ -16,7 +16,7 @@ REG_CNM = MC_REGS_RO_MSLOT
 -- Registers
 ---@param index integer
 ---@return integer
-local function register_getreadonly(index)
+local function register_get_internal(index)
   if index == REG_IP then
     return state.instruction_pointer
   elseif index == REG_CNR then
@@ -81,7 +81,7 @@ function ioRegister.get(index_expr)
   local addr = ioRegister.addr_deref(index_expr)
   if MC_REGS_EXT < addr then
     local result = table.deep_copy(NULL_SIGNAL)
-    result.count = register_getreadonly(addr)
+    result.count = register_get_internal(addr)
     return result
   else
     return table.deep_copy(register_getraw(addr))
@@ -98,11 +98,11 @@ function ioRegister.set(index_expr, value)
 end
 
 ---@param index_expr OpRef_Register
----@param count int32
+---@param count integer
 function ioRegister.set_count(index_expr, count)
   local value = ioRegister.get(index_expr)
   Assert.check(count == count, Errors.DivisionByZero)
-  value.count = count
+  value.count = count --[[@as int32 ]]
   ioRegister.set(index_expr, value)
 end
 
