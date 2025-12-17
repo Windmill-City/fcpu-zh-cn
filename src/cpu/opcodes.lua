@@ -54,6 +54,9 @@ end
 local enter_op = function(local_size)
   local bpa = {type = 'register', addr = REG_BP, pointer = false}
   local spa = {type = 'register', addr = REG_SP, pointer = false}
+  -- push bp
+  -- mov bp sp
+  -- sub sp size
   io.stack_push(io.register_get(bpa))
   local sp = io.getvalue(spa)
   io.register_set_count(bpa, sp)
@@ -61,6 +64,8 @@ local enter_op = function(local_size)
   io.register_set_count(spa, sp)
 end
 local leave_op = function()
+  -- mov sp pb
+  -- pop bp
   local bpa = {type = 'register', addr = REG_BP, pointer = false}
   local spa = {type = 'register', addr = REG_SP, pointer = false}
   local bp = io.register_get(bpa)
@@ -690,7 +695,7 @@ local opcodes = {
     enter_op(local_size)
   end,
   leave = function(_)
-    leave_op()
+    return leave_op()
   end,
   hlt = function(_)
     return { type = 'halt' }
@@ -706,7 +711,7 @@ local opcodes = {
     local cnt = Assert.one_or_more(_)
     for i = 1,cnt do
       local val = io.stack_pop()
-      io.setsignal(_[i], val.signal)
+      io.setsignal(_[i], val)
     end
   end,
   slp = function(_)

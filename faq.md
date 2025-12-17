@@ -28,3 +28,38 @@ jmp :loop
 ## Example 2 (complex system for train management by Cid0rz)
 
 https://github.com/cid0rz/CTS-Cidorz-Train-System
+
+
+## Example 3 (recursion)
+```
+clr
+mov r1 10        ; n = 10
+call :fib        ; fib(10)
+hlt
+
+; int fib(int n)
+; r1 = n
+; return r1
+;
+:fib
+enter 0
+    ble r1 1 :fib_base
+
+    push r1
+    ; fib(n-1)
+    dec r1
+    call :fib
+    mov r2 r1     ; r2 = fib(n-1)
+    pop r1
+
+    push r2
+    ; fib(n-2)
+    sub r1 2
+    call :fib
+    pop r2
+
+    ; fib(n) = fib(n-1) + fib(n-2)
+    add r1 r2
+:fib_base
+leave
+```
