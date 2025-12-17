@@ -15,3 +15,4 @@ function Convert-ToLuaReturn {
 
 Convert-ToLuaReturn "readme.md" "src/wiki/readme.en.src.lua"
 Convert-ToLuaReturn "readme.ru.md" "src/wiki/readme.ru.src.lua"
+git add src/wiki/*.lua
