@@ -6,13 +6,11 @@ return [==[# fCPU
 * Поддерживает копирование и вставку
 * Поддерживает мультиплеер
 * Поддерживает качество ([virtual-signal=signal-any-quality])
-* Поддерживает внутриигровые вики `Informatron` и `Booktorio`
-  - `https://mods.factorio.com/mod/informatron`
-  - `https://mods.factorio.com/mod/Booktorio`
-
+* Поддерживает внутриигровые вики [Informatron](https://mods.factorio.com/mod/informatron) и [Booktorio](https://mods.factorio.com/mod/Booktorio)
 * Внутриигровой отладчик с точками остановки
 * 256 инструкций для всей программы (**доступно 64-999 в настройках мода**)
 * До 64 регистров общего назначения
+* Стек LIFO размером 4096 для вызова подпрограмм
 * До 4 канала памяти для векторной обработки
 * Интегрированный доступ к логистической сети ([item=roboport])
 * 50+ опкодов
@@ -42,8 +40,8 @@ fCPU - это комбинатор, который включает в себя:
 Например: `mov out1 123[item=copper-ore]`, здесь `mov` - мнемоника,  `out1` - первый операнд, `123[item=copper-ore]` - второй операнд.
 Эта инструкция указывает процессору послать сигнал `[item=copper-ore]` с номером `123` на провода ([item=red-wire]/[item=green-wire]), подключенные к выходу.
 
-Мнемоники - это сокращенные названия операций, которые процессор понимает и знает, как их выполнять.
-Операнды - это аргументы операций. Они используются для указания значений, над которыми будет выполняться операция.
+**Мнемоники** - это сокращенные названия операций, которые процессор понимает и знает, как их выполнять.
+**Операнды** - это аргументы операций. Они используются для указания значений, над которыми будет выполняться операция.
 
 В качестве операндов могут использоваться следующие значения:
 
@@ -80,6 +78,22 @@ fCPU - это комбинатор, который включает в себя:
 - **out1**, ..., **out256**: выходные регистры (только целочисленные значения)
 
 
+### Стек
+
+Объем памяти стека увеличивается ** в сторону уменьшения** (с более высоких адресов на более низкие).
+Если вы хотите узнать, сколько места осталось, используйте регистр `sp` (`mov r1 sp`).
+- Тип: LIFO (Last In, First Out / **входит последним, выходит первым**)
+- Размер: 4096
+
+Используйте `push` (толкать) и `pop` (тянуть) мнемоники чтобы записать и прочитать со стека.
+`push r1 r2 r3` - сокращение от:
+```
+push r1
+push r2
+push r3
+```
+
+
 ### Память
 
 Для одновременной обработки нескольких сигналов в fCPU предусмотрен векторный сопроцессор, который обрабатывает SIMD-инструкции.  
@@ -109,7 +123,7 @@ fCPU - это комбинатор, который включает в себя:
 * **memC@R** (**mem1@3**, **mem4@8**, и т.д... `R` - индекс регистра)
 * **lgn@R** (**lgn@2**, **logi@8**, и т.д... `R` индекс регистра))
 
-Это позволяет использовать их как индексы массива.  
+Это позволяет использовать их как индексы **массива**.  
 
 Например:
 ```
@@ -219,6 +233,8 @@ mov r4 m3@5 # r4 будет равен mem3[5]
 
 ### Качество
 
+Смотрите https://lua-api.factorio.com/latest/prototypes/QualityPrototype.html#level
+
 * `qn` dst[**R**/**O**] type[**T**/**R**/**I**]  
   Качество это число (нормальноe `[quality=normal]`=1, необычное `[quality=uncommon]`=2, редкое`[quality=rare]`=3, эпическое `[quality=epic]`=4, легендарное `[quality=legendary]`=5).  
   *dst = качество(type)*
@@ -289,6 +305,13 @@ mov r4 m3@5 # r4 будет равен mem3[5]
 * `dis` dst[**R**] num[**V**/**R**] val[**V**/**R**]  
   Установить цифру *val* на позицию *num* в *dst*.
   *dst = dst + (val % 10 - dst / 10^num % 10) * 10^num*
+
+
+### Стeк
+
+* `push` src...[**V**/**T**/**VT**/**R**]
+
+* `pop` dst...[**R**/**O**]
 
 
 ### Тригонометрия
@@ -370,6 +393,18 @@ mov r4 m3@5 # r4 будет равен mem3[5]
 * `slp` cnt[**V**/**R**]  
   Засыпание на указанное количество тиков.  
   fCPU не обрабатывает прерывания во время сна.
+
+* `call` addr[**V**/**A**/**L**/**R**] offset[**V**/**R**]
+  Поставьте указатель текущей инструкции в стек и перейдите к adress + offset или label + offset.
+  То же, что:
+  ```
+  push ipt
+  jmp addr offset
+  ```
+
+* `ret`
+  Достать адрес из стека и перейти туда.
+
 
 #### Блокировать выполнение до выполнения условия
 Инструкции выполняют следующую за ними строку (в том же тике), как только выполняется условие.  
@@ -501,7 +536,7 @@ blt r1 10 :counter
   Например:
   - `ugpf r1 [item=inserter] 'inserter_stack_size_bonus'`
   - `ugpf r2 [item=copper-ore] 'stack_size'` (this is a same as `uiss r1 [item=copper-ore]`)
-  - `ugpf r3 [item=passive-provider-chest] 'get_inventory_size(defines.inventory.item_main)'`
+  - `ugpf r3 [item=buffer-chest] 'get_inventory_size(defines.inventory.item_main)'`
 
   Вы можете использовать точку `.` для погружения внутрь этого прототипа.  
   Чтобы проверить, является ли предмет научным пакетом, воспользуйтесь следующим примером:
@@ -691,7 +726,7 @@ See [here](https://boosty.to/konstg)
 
 # Localization
 If you would like to help with the fCPU localization, [here](https://crowdin.com/editor/fcpu/all/) is the Crowdin project
-* ru (updated in v0.4.45) by ArsStels
+* ru (updated in v0.4.55) by ArsStels
 
 
 # Dear supporters
@@ -714,7 +749,7 @@ If you would like to help with the fCPU localization, [here](https://crowdin.com
 
 
 # Support fCPU
-[![Boosty](https://static.boosty.to/assets/images/boostyLogo.660f9.svg)](https://boosty.to/konstg/donate)
+[![Boosty](https://upload.wikimedia.org/wikipedia/commons/9/92/Boosty_logo.svg)](https://boosty.to/konstg/donate)
 
 [comment]: <> (md2frt-skip-section-end)
 ]==]
