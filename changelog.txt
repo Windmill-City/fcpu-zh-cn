@@ -3,6 +3,7 @@ Version: 0.4.56
 Date: ????
   Bugfixes:
     - Saves < v0.4.52 with opened gui.
+    - Docs: missing text before [a] tags.
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.55
 Date: 2025-12-17

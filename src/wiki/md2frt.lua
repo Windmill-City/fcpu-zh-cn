@@ -137,7 +137,10 @@ end
 
 local function linkEscape(str, t)
     local nomatches = true
-    for m1, m2, m3, m4 in gmatch(str, '(!?)%[([^%]]+)%]%(([^%)]*)%)([^!%[]*)') do
+    for m0, m1, m2, m3, m4 in gmatch(str, '([^!%[]*)(!?)%[([^%]]+)%]%(([^%)]*)%)([^!%[]*)') do
+        if m0 and 0 < #m0 then
+            t[#t + 1] = {m0}
+        end
         if nomatches then externalLinkEscape(match(m1, '^(.-)!?$'), t); nomatches = false end
         if byte(m1, #m1) == byte '!' then
             t[#t + 1] = {type = 'img', attributes = {
