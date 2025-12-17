@@ -41,8 +41,8 @@ An instruction consists of mnemonics and operands.
 For example: `mov out1 123[item=copper-ore]`, here `mov` is a mnemonic,` out1` is the first operand, `123[item=copper-ore]` is the second operand.
 This instruction tells the processor to send signal `[item=copper-ore]` with number `123` on to wires connected to the output.
 
-Mnemonics are abbreviated names of operations that the processor understands and knows how to execute.
-Operands are arguments to operations. They are used to indicate the values ​​on which an operation will be performed.
+**Mnemonics** are abbreviated names of operations that the processor understands and knows how to execute.
+**Operands** are arguments to operations. They are used to indicate the values ​​on which an operation will be performed.
 
 The following can be used as operands:
 
@@ -72,8 +72,8 @@ Besides general purpose registers there are some read only registers:
 - **clk**: clock, value increases every tick
 - **cnr**, **cng**: signals number on red `cnr` or green `cng` input wire
 - **cnl**: count of a various items in `lognet`, not a sum of its values
-- **cnm1**, ..., **cnm4**: signals number in memory  
-- **sp**, **bp**: Stack Pointer, Base Pointer  
+- **cnm1**, ..., **cnm4**: signals number in memory
+- **sp**, **bp**: Stack Pointer, Base Pointer
 
 Output registers (write only):
 
@@ -308,7 +308,7 @@ See https://lua-api.factorio.com/latest/prototypes/QualityPrototype.html#level
   *dst = dst + (val % 10 - dst / 10^num % 10) * 10^num*
 
 
-### Stack
+### Stack manipulation
 
 * `push` src...[**V**/**T**/**VT**/**R**]
 
@@ -727,7 +727,7 @@ See [here](https://boosty.to/konstg)
 
 # Localization
 If you would like to help with the fCPU localization, [here](https://crowdin.com/editor/fcpu/all/) is the Crowdin project
-* ru (updated in v0.4.45) by ArsStels
+* ru (updated in v0.4.55) by ArsStels
 
 
 # Dear supporters
