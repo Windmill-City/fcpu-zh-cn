@@ -507,7 +507,7 @@ return {
       state.reg_stack = {}
     end)
     foreach_player(function(player, player_data)
-      if player_data.gui_memory_channel then
+      if player_data.gui_memory_channel and player_data.gui_memory_channel.valid then
         local index = player_data.gui_memory_channel.selected_index
         if 1 < index then
           -- shift channel drop-down after stack view
