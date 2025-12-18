@@ -42,6 +42,9 @@
 ---@class (exact) OpRef_Register : OpRef_Address
 ---@field type 'register'
 
+---@class (exact) OpRef_Stack : OpRef_Address
+---@field type 'stack'
+
 ---@class (exact) OpRef_Special : OpRef_Register
 ---@field special boolean
 
@@ -70,6 +73,7 @@
 ---|'lognet'
 ---|'reference'
 ---|'register'
+---|'stack'
 ---|'channel'
 ---|'memory'
 ---|'wire'
@@ -86,6 +90,7 @@
 ---| OpRef_LogNet
 ---| OpRef_Reference
 ---| OpRef_Register
+---| OpRef_Stack
 ---| OpRef_Channel
 ---| OpRef_MemoryBank
 ---| OpRef_Memory
@@ -172,6 +177,13 @@ local Emitter = {
   ---@return OpRef_Register
   make_register = function(name, ref) -- +[reference]
     return { type = 'register', addr = ref.addr, pointer = ref.pointer } ---@type OpRef_Register
+  end,
+
+  ---@param name string?
+  ---@param ref OpRef_Reference
+  ---@return OpRef_Stack
+  make_stack = function(name, ref) -- +[reference]
+    return { type = 'stack', addr = ref.addr, pointer = ref.pointer } ---@type OpRef_Stack
   end,
 
   ---@param name string

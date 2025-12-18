@@ -135,6 +135,10 @@ local function parse(tokens)
     local address = parseAddress(alias or name)
     return Emitter.make_register(name, address)
   end
+  local parseStack = function(name, alias)
+    local address = parseAddress(alias or name)
+    return Emitter.make_stack(name, address)
+  end
   local parseReadOnlyRegister = function(name)
     if name == 'ipt' then
       return Emitter.make_special_register_ro(REG_IP)
@@ -236,6 +240,12 @@ local function parse(tokens)
           return parseRegister('reg')
         elseif string.find(token, 'r@?%d') == 1 then
           return parseRegister('reg', 'r')
+
+        elseif string.find(token, 'var') then
+          return parseStack('var')
+        elseif string.find(token, 'v@?%d') == 1 then
+          return parseStack('var', 'v')
+
         else
           local roRegister = parseReadOnlyRegister(peek())
           if roRegister then
