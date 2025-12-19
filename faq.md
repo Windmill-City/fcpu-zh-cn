@@ -32,34 +32,28 @@ https://github.com/cid0rz/CTS-Cidorz-Train-System
 
 ## Example 3 (recursion)
 ```
-clr
-mov r1 10        ; n = 10
-call :fib        ; fib(10)
+mov r1 5
+call :fib
 hlt
+jmp 1
 
-; int fib(int n)
-; r1 = n
-; return r1
-;
+; r1 = fib(r1)
 :fib
-enter 0
-    ble r1 1 :fib_base
+  ble r1 1 :fib_base
 
-    push r1
-    ; fib(n-1)
+  push r1
     dec r1
     call :fib
-    mov r2 r1     ; r2 = fib(n-1)
-    pop r1
+    mov r2 r1 ; r2 = fib(n-1)
+  pop r1
 
-    push r2
-    ; fib(n-2)
+  push r2
     sub r1 2
-    call :fib
-    pop r2
+    call :fib ; r1 = fib(n-2)
+  pop r2
 
-    ; fib(n) = fib(n-1) + fib(n-2)
-    add r1 r2
-:fib_base
-leave
+  ; fib(n) = fib(n-1) + fib(n-2)
+  add r1 r2
+:fib_end
+ret
 ```

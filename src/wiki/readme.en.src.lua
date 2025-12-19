@@ -10,7 +10,7 @@ return [==[# fCPU
 * in-game debugger with breakpoints
 * 256 instructions for whole program
 * 64 general purpose registers
-* 4096 LIFO stack for subprogram calls
+* 4096 LIFO stack for subprogram calls and local variables
 * 4 memory channels for vector processing
 * integrated access to the logistic network
 * 50+ opcodes
@@ -50,6 +50,7 @@ The following can be used as operands:
   `123` - signal value represented by number
   `[item=copper-ore]` - type can be represented by pictogram or text
 - **Register**: this is a special cell that store the transmitted signal indefinitely (`reg1`, `r2`, ...)
+- **Local**: this is a special local cell that store the transmitted signal inside procedure call (`var1`, `v2`, ...)
 - **Memory** channel: one memory channel consists of multiple cells (array) that store the signal indefinitely (`mem1`, `m2`, ...)
 - **LogNet** channel: receives content of a logistic network this fCPU is placed in (`lgn[1]`, `lgn@2`, `logi[34]`, ...)
 - **Input** wire: you can receive signals on wires connected to a combinator's input (`red`,` green`, `red1`, `green@3`, ...)
@@ -93,6 +94,80 @@ Use `push` and `pop` mnemonics to write and read from stack.
 push r1
 push r2
 push r3
+```
+
+
+### Procedures
+
+Procedure support through the `call`, `ret`, `enter`, and `leave` mnemonics, with semantics closely resembling x86.
+
+`call` saves the return address by pushing it onto the stack, then transfers control to the target label or address. This allows nested and recursive procedure calls.
+Same as:
+```
+  push ipt
+  jmp addr offset
+```
+
+`ret` completes a procedure by popping the return address from the stack and resuming execution at that location.
+Same as:
+```
+  pop <temp>
+  jmp <temp>
+```
+
+`enter` initializes a new stack frame for a procedure. It pushes the current base pointer onto the stack and sets a new base pointer, optionally reserving space for local variables.
+Same as:
+```
+  push bp        ; save previous base pointer `bp`
+  mov  bp, sp    ; set new stack frame base `sp`
+  sub  sp, size  ; allocate space for local variables
+```
+
+`leave` reverses the effect of `enter` by restoring the previous base pointer and adjusting the stack pointer, effectively destroying the current stack frame before returning.
+Same as:
+```
+  mov  sp, bp    ; discard local variables
+  pop  bp        ; restore previous base pointer `bp`
+```
+
+Stack diagram after some procedure calls.
+```
+4096
+| ...         |
+| older  ipt  | `call :fn1`
+|             | `enter 3`
+| old    bp   |
+|        var1 | <-- old bp - 1
+| ...         |
+|        var3 | <-- old bp - 3
+| ...         |
+| old    ipt  | `call :fnN`
+|             | `enter 1`
+| actual bp   | <-- `bp`
+|        var1 | <-- bp - 1
+|             | <-- `sp`
+| ...         |
+1
+```
+
+
+
+### Local variables
+
+Local variables stored on top of a stack and will be unavailable after `leave` .
+To create procedure stack frame for variables use `enter 123`.
+
+For example:
+```
+exampleVars:
+enter 3
+  mov var1 1
+  mov var2 2
+  mov var3 3
+  mov r4 v1
+  mov r5 v2
+  mov r6 v3
+leave
 ```
 
 
@@ -173,7 +248,7 @@ Each instruction take one or more operands and modify them or state of fCPU.
 * **T**, type: signal type, supports specifying quality (`[item=iron-ore]`, `[item=copper-plate,quality=rare]`)
 * **Q**, quality: signal quality only (`'epic'`, `[quality=legendary]`) _WIP_
 * **VT**, signal: consists of **V**alue and **T**ype (`123[item=copper-ore]`, `456[item=iron-plate,quality=uncommon]`)
-* **R**, register: (`reg1`, `r3`, ..., `reg8` or `r@4` notation, or one memory cell `m1[23]` or one input wire signal `red34`, `green@3`)
+* **R**, reference: register, memory cell, local variable (`reg1`, `r3`, ..., `reg8` or `r@4` notation, or one memory cell `m1[23]`, or one input wire signal `red34`, `green@3`, or local variable `var1`, `v2`, ...)
 * **M**, memory: channel (`mem1`, `m2`, ..., `mem4`)
 * **N**, lognet: channel (`lgn`, `logi`, `lnc`)
 * **I**, wire: input wire (`red`, `green`)
@@ -397,14 +472,15 @@ See https://lua-api.factorio.com/latest/prototypes/QualityPrototype.html#level
 
 * `call` addr[**V**/**A**/**L**/**R**] offset[**V**/**R**]
   Push current instruction pointer to stack and jump to address + offset or label + offset.
-  Same as:
-  ```
-  push ipt
-  jmp addr offset
-  ```
 
 * `ret`
   Pop address from stack and jump to it.
+
+* `enter` count[**V**]
+  Reserve space for local variables on the stack.
+
+* `leave`
+  Discard local variables on a the stack.
 
 
 #### Block execution until condition met
@@ -543,12 +619,6 @@ blt r1 10 :counter
   To check if the item is a science pack use this example:
   - `ugpf r1 [item=automation-science-pack] 'subgroup.name'`
     `beq r1 'science-pack' :yeah_science_btch`
-
-
-* `uiss` dst[**R**] type[**T**/**R**]
-  **DEPRECATED: please use `ugpf dst type 'stack_size'`**
-  *Utility Item Stack Size*
-  Assign stack size to *dst* for specified item *type*.  
 
 
 
