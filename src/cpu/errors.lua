@@ -49,7 +49,7 @@ local Errors = {
 
   StackUnderflow = function() return { 'fcpu-errors.stack-underflow' } end,
   StackOverflow = function() return { 'fcpu-errors.stack-overflow' } end,
-  StackOOB = function() return { 'fcpu-errors.stack-out-of-bounds' } end,
+  StackOOB = function(index, size) return { 'fcpu-errors.stack-out-of-bounds', index, size } end,
 }
 
 return Errors

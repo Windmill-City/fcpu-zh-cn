@@ -340,7 +340,7 @@ local opcodes = {
   ssq = function(_) -- ssq dst...[R] quality[T/Q/S/R/I]
     Assert.mod_enabled('quality')
     Assert.two_or_more(_)
-    local sigtier = io.getquality(_[#_], {'type', 'quality', 'signal', 'register', 'input'})
+    local sigtier = io.getquality(_[#_], {'type', 'signal', 'register', 'input'})
     for i = 1, #_ - 1 do
       io.setquality(_[i], sigtier, {'register', 'output'})
     end
