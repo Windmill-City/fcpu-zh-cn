@@ -49,6 +49,8 @@ io.stack_push = ioStack.push
 io.stack_pop = ioStack.pop
 io.stack_clear = ioStack.clear
 io.stack_set_pointer = ioStack.set_pointer
+io.stack_get = ioStack.get
+io.stack_set = ioStack.set
 
 
 -- Channel
@@ -124,21 +126,24 @@ function io.getsignal(_, types)
   end
   Assert.type(_, types)
   local signal = nil
-  if _.type == 'wire' or _.type == 'input' then
+  if _.type == 'register' then
+    ---@cast _ OpRef_Register
+    signal = io.register_get(_)
+  elseif _.type == 'stack' then
+    ---@cast _ OpRef_Stack
+    signal = io.stack_get(_)
+  elseif _.type == 'signal' or _.type == 'type' or _.type == 'value' then
+    ---@cast _ OpRef_Constant
+    signal = _
+  elseif _.type == 'wire' or _.type == 'input' then
     ---@cast _ OpRef_Wire
     signal = io.wire_get(_)
   elseif _.type == 'lognet' then
     ---@cast _ OpRef_LogNet
     signal = io.lognet_get(_)
-  elseif _.type == 'register' then
-    ---@cast _ OpRef_Register
-    signal = io.register_get(_)
   elseif _.type == 'memory' then
     ---@cast _ OpRef_Memory
     signal = io.memory_get(_)
-  elseif _.type == 'signal' or _.type == 'type' or _.type == 'value' then
-    ---@cast _ OpRef_Constant
-    signal = _
   elseif _.type == 'string' then
     ---@cast _ OpRef_String
     Assert.todo('getting string value')
@@ -167,6 +172,9 @@ function io.setsignal(_, signal, types)
   elseif _.type == 'memory' then
     ---@cast _ OpRef_Memory
     io.memory_set(_, signal)
+  elseif _.type == 'stack' then
+    ---@cast _ OpRef_Stack
+    io.stack_set(_, signal)
   elseif _.type == 'output' then
     Assert.todo()
   else
@@ -267,6 +275,7 @@ function io.setup(emitter_, controller_)
   Emitter = emitter_
 
   ioRegister.setup(Emitter, io)
+  ioStack.setup(ioRegister)
   ioChannel.setup(ICStack)
   ioMemory.setup(Emitter, ioRegister, ioChannel)
   ioLognet.setup(ioRegister)
