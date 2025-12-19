@@ -71,7 +71,7 @@ local leave_op = function()
   local bp = io.register_get(bpa)
   io.register_set(spa, bp)
   io.register_set(bpa, io.stack_pop())
-  return ret_op()
+  return nil --ret_op()
 end
 
 local test_mnemonics = function(condition)

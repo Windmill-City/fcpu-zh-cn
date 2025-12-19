@@ -4,6 +4,7 @@ Date: ????
   Features:
     - Local variables on stack `var1`, 'v789', etc... (use with `enter`/`leave`).
   Changes:
+    - `leave` no longer performs an implicit `ret`.
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.56
 Date: 2025-12-17
