@@ -143,7 +143,7 @@ function Assert.type(_, valid)
         Assert.todo()
         return
       end
-    elseif v == 'register' and _.type == 'memory' and _.addr ~= nil then
+    elseif v == 'register' and (_.type == 'memory' and _.addr ~= nil or _.type == 'stack') then
       return
     elseif v == 'signal' and (_.signal == nil and _.type == nil and _.count == 0 or _.signal ~= nil and _.count ~= nil) then
       return
