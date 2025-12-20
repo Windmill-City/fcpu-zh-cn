@@ -100,6 +100,7 @@ push r3
 ### Procedures
 
 Procedure support through the `call`, `ret`, `enter`, and `leave` mnemonics, with semantics closely resembling x86.
+`bp` stores the address of the beginning of the current function's stack frame, enabling access to local variables.
 
 `call` saves the return address by pushing it onto the stack, then transfers control to the target label or address. This allows nested and recursive procedure calls.
 Same as:
@@ -797,7 +798,7 @@ See [here](https://boosty.to/konstg)
 
 # Localization
 If you would like to help with the fCPU localization, [here](https://crowdin.com/editor/fcpu/all/) is the Crowdin project
-* ru (updated in v0.4.55) by ArsStels
+* ru (updated in v0.4.58) by ArsStels
 
 
 # Dear supporters
