@@ -623,7 +623,7 @@ local function builder_generate_clr(index, delay, ics)
     {action='tune', ic=ics.kaux, value=Enable, delay = delay},
     {action='tune', ic=ics.kaux, value=Disable, delay = delay + 1},
   -- wait for clear
-    --{action='sync', index=index, delay=delay + 2},
+    --{action='sync', index=index, delay=delay + 2}, -- will be synced in `clr`
   }
   return actions
 end

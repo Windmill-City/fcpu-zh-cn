@@ -22,18 +22,19 @@ local function ioChannel_GUI_Validate(player_data, state, channel, force)
   end
 
   local sync_delay = TestImpl(force)
-  local notSync = 0 < sync_delay
+  local waiting = 0 < sync_delay
+  local static = sync_delay < 0
 
   if player_data.gui_memory_sync_label then
-    player_data.gui_memory_sync_label.caption = {"gui-fcpu-memviewer.memory-view-sync", (notSync and ' in '..sync_delay or '')}
+    player_data.gui_memory_sync_label.caption = {"gui-fcpu-memviewer.memory-view-sync", (waiting and ' in '..sync_delay or '')}
   end
   if player_data.gui_memory_sync_sprite then
     player_data.gui_memory_sync_sprite.sprite =
     state.need_sync and 'flib_indicator_red'
-    or notSync and 'flib_indicator_black'
+    or waiting and 'flib_indicator_black'
     or 'flib_indicator_green'
   end
-  return (sync_delay < 0) and not force
+  return static and not force
 end
 
 -------------------------------------------------------------------------------------------------------
