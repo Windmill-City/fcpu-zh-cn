@@ -57,3 +57,7 @@ jmp 1
 :fib_end
 ret
 ```
+
+## Example 4 (by cb750mark)
+
+[Memory and I/O Bus](https://forums.factorio.com/viewtopic.php?p=686490) for fCPU
