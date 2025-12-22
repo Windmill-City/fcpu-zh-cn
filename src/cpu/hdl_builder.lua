@@ -902,10 +902,10 @@ local function vector_arithmetic_op(operation)
     local idx_b = three and 3 or 2
 
     local input_a = connect_input_from(state, _[idx_a])
-    local input_b = _[idx_b].type ~= 'value' and connect_input_from(state, _[idx_b]) or nil
+    local inv_wire = inverse_wire_color(input_a.wire)
+    local input_b = _[idx_b].type ~= 'value' and connect_input_from(state, _[idx_b], inv_wire) or nil
 
     local x = builder.create_arithmetic_cell(state.entity, input_a, input_b, operation)
-    local inv_wire = inverse_wire_color(input_a.wire)
     local ics = builder.create_memory_cell(state.entity, {
       entity = x,
       wire = inv_wire,
