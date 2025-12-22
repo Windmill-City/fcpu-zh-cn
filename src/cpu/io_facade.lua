@@ -221,7 +221,8 @@ end
 function io.gettype(_, types)
   local signal = io.getsignal(_, types)
   if type(signal) ~= 'table' or signal.signal == nil then
-    Assert.exception(Errors.ReadingNil('type'))
+    --Assert.exception(Errors.ReadingNil('type'))
+    return nil
   end
 ---@diagnostic disable-next-line: need-check-nil
   return signal.signal
