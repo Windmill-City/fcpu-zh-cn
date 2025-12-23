@@ -166,6 +166,13 @@ local function advance(state, inc)
   Controller.set_program_counter(state, state.instruction_pointer + (inc or 1))
 end
 
+local function handle_single_step(state)
+  if state.do_step and state.program_state == PSTATE_RUNNING then
+    Controller.halt(state)
+    Controller.Gui_AutoscrollToIpt(state)
+  end
+end
+
 local function run_deffer_command(op)
   debug_assert(not op.at or op.at + op.delay == game.tick, "Out of order deffered action executed")
 
@@ -187,6 +194,7 @@ local function run_deffer_command(op)
       state.sync_clock = state.clock
       state.clock = state.clock + op.delay
       advance(state)
+      handle_single_step(state)
     end
   elseif op.action == 'disable' then
     if op.ic and op.ic.valid then
@@ -386,11 +394,10 @@ function Controller.tick(state)
           advance(state)
         end
       end
-    end
 
-    if state.do_step and state.program_state == PSTATE_RUNNING then
-      Controller.halt(state)
-      Controller.Gui_AutoscrollToIpt(state)
+      if not state.need_sync then
+        handle_single_step(state)
+      end
     end
   elseif state.program_state == PSTATE_SLEEPING then
     storage.running[state.index] = nil
