@@ -222,12 +222,12 @@ local function run_deffer_command(op)
   end
 end
 
-function Controller.add_deferred(state, deffer)
+function Controller.add_deferred(state, defer)
   local will_sync = false
   --local got_sync = false
-  --local cnt = #deffer
+  --local cnt = #defer
   -- only numeric indices, skip named one!
-  for i, op in ipairs(deffer) do
+  for i, op in ipairs(defer) do
     if op.delay == 0 then
       run_deffer_command(op)
     else
@@ -380,14 +380,14 @@ function Controller.tick(state)
           if not sync_wait then
             advance(state)
           end
-        elseif result.type == 'deffer' then
-          if not Controller.add_deferred(state, result.deffer) then
+        elseif result.type == 'defer' then
+          if not Controller.add_deferred(state, result.defer) then
             advance(state)
           end
         end
       else
-        if ast and ast.deffer then
-          if not Controller.add_deferred(state, ast.deffer.run) then
+        if ast and ast.defer then
+          if not Controller.add_deferred(state, ast.defer.run) then
             advance(state)
           end
         else

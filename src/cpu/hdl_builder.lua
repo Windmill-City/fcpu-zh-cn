@@ -289,7 +289,7 @@ function builder.clone_to(src_state, dst_state)
     end
   end
 
-  -- fix ast deffer
+  -- fix ast defer
   local remap_index = { [src_state.index] = dst_state.index }
   local visited = {}
   dst_state.program_ast = deep_replace_ic(dst_state.program_ast, remap_ic, remap_index, visited)
@@ -929,8 +929,8 @@ local function vector_arithmetic_op(operation)
 
     local ics_name = connect_output_to(state, ics, _[1])
 
-    local deffer = generate_deffer(ics, state.index, 1)
-    --[[local deffer = {
+    local defer = generate_deffer(ics, state.index, 1)
+    --[[local defer = {
       run = {
         {action='tune', ic=ics.kin, value=0, delay = 0},
         {action='tune', ic=ics.kout, value=1, delay = 0},
@@ -944,7 +944,7 @@ local function vector_arithmetic_op(operation)
       },
     }]]
 
-    return ics_name, ics, deffer
+    return ics_name, ics, defer
   end
 end
 
@@ -966,7 +966,7 @@ local function vector_decide_op(operation)
 
     local ics_name = connect_output_to(state, ics, _[1])
 
-    --[[local deffer = {
+    --[[local defer = {
       run = {
         {action='tune', ic=ics.kin, value=0, delay = 0},
         {action='tune', ic=ics.kout, value=1, delay = 0},
@@ -979,9 +979,9 @@ local function vector_decide_op(operation)
         {action='tune', ic=ics.kout, value=0, delay = 1},
       },
     }]]
-    local deffer = generate_deffer(ics, state.index, 1)
+    local defer = generate_deffer(ics, state.index, 1)
 
-    return ics_name, ics, deffer
+    return ics_name, ics, defer
   end
 end
 
@@ -999,7 +999,7 @@ local ops = {
 
     local ics_name = connect_output_to(state, ics, _[1])
 
-    --[[local deffer = {
+    --[[local defer = {
       run = {
         {action='tune', ic=ics.kin, value=0, delay = 0},
         {action='tune', ic=ics.kout, value=1, delay = 0},
@@ -1012,9 +1012,9 @@ local ops = {
         {action='tune', ic=ics.kout, value=0, delay = 1},
       },
     }]]
-    local deffer = generate_deffer(ics, state.index, 0)
+    local defer = generate_deffer(ics, state.index, 0)
 
-    return ics_name, ics, deffer
+    return ics_name, ics, defer
   end,
 
   xuni = function(state, _)
@@ -1036,7 +1036,7 @@ local ops = {
 
     local ics_name = connect_output_to(state, ics, _[1])
 
-    --[[local deffer = {
+    --[[local defer = {
       run = {
         {action='tune', ic=ics.kin, value=0, delay = 1},
         {action='tune', ic=ics.kout, value=1, delay = 1},
@@ -1049,9 +1049,9 @@ local ops = {
         {action='tune', ic=ics.kout, value=0, delay = 1},
       },
     }]]
-    local deffer = generate_deffer(ics, state.index, 1)
+    local defer = generate_deffer(ics, state.index, 1)
 
-    return ics_name, ics, deffer
+    return ics_name, ics, defer
   end,
 
   xflt = function(state, _)
@@ -1071,7 +1071,7 @@ local ops = {
 
     local ics_name = connect_output_to(state, ics, _[1])
 
-    --[[local deffer = {
+    --[[local defer = {
       run = {
         {action='tune', ic=ics.kin, value=0, delay = 0},
         {action='tune', ic=ics.kout, value=2, delay = 2},
@@ -1084,9 +1084,9 @@ local ops = {
         {action='tune', ic=ics.kout, value=0, delay = 1},
       },
     }]]
-    local deffer = generate_deffer(ics, state.index, 2)
+    local defer = generate_deffer(ics, state.index, 2)
 
-    return ics_name, ics, deffer
+    return ics_name, ics, defer
   end,
 
   xadd = vector_arithmetic_op('+'),
@@ -1116,12 +1116,12 @@ function builder.construct(ast, state_)
   if ops and ops[ast.name] then
     _destroy_on_error = {}
     get_debug_offset(state.entity, true)
-    local status, name, ics, deffer = pcall(ops[ast.name], state, ast.expr)
+    local status, name, ics, defer = pcall(ops[ast.name], state, ast.expr)
     if not status then
       builder.destroy_ics(_destroy_on_error)
       error(name)
     else
-      return name, ics, deffer
+      return name, ics, defer
     end
   end
 end

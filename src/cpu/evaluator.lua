@@ -11,8 +11,8 @@ State.onBind(io.bind)
 local function update_ics_stack(push_ics)
   for _,v in ipairs(push_ics) do
     local ast = io.get_node_ast(v.name)
-    if ast and ast.deffer and ast.deffer.clr then
-      io.add_deferred(ast.deffer.clr)
+    if ast and ast.defer and ast.defer.clr then
+      io.add_deferred(ast.defer.clr)
     end
     if string.sub(v.name, 1, 3) == 'mem' then
       local bank = string.sub(v.name, 4, -1)

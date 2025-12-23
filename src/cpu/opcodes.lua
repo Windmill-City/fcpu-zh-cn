@@ -674,7 +674,7 @@ local opcodes = {
     Assert.type(_[1], {'type'})
     Assert.check(_[1].signal.type == 'item' and (_[1].signal.name == 'uranium-fuel-cell' or _[1].signal.name == 'atomic-bomb'), 'Argument is pretty impoverished. Please, use enriched one!')
     return io.for_entity(function(entity)
-      return {type='deffer', deffer={
+      return {type='defer', defer={
         {action='exec', delay=0,  proc='game.print', args={'[color=red]fCPU core melting down... Better RUN![/color]'}},
         {action='exec', delay=100, proc='game.print', args={'[color=yellow]5[/color]'}},
         {action='exec', delay=160, proc='game.print', args={'[color=yellow]4[/color]'}},

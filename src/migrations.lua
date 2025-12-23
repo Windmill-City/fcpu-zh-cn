@@ -527,5 +527,13 @@ return {
   ["0.4.61"] = function()
     storage.deferred = storage.deffered
     storage.deffered = nil
+    foreach_fcpu(function(fcpu, state)
+      for _,v in pairs(state.program_ast) do
+        if v.deffer then
+          v.defer = v.deffer
+          v.deffer = nil
+        end
+      end
+    end)
   end,
 }

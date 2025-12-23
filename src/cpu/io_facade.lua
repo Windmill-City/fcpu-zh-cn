@@ -27,8 +27,8 @@ function io.for_entity(proc)
   return proc(State.current.entity, State.current)
 end
 
-function io.add_deferred(deffer)
-  Controller.add_deferred(State.current, deffer)
+function io.add_deferred(defer)
+  Controller.add_deferred(State.current, defer)
 end
 
 
@@ -111,8 +111,8 @@ function io.output_clear()
 
   -- Vector output
   local ast = io.get_node_ast('output')
-  if ast and ast.deffer and ast.deffer.clr then
-    return { type = 'deffer', deffer = ast.deffer.clr }
+  if ast and ast.defer and ast.defer.clr then
+    return { type = 'defer', defer = ast.defer.clr }
   end
 end
 

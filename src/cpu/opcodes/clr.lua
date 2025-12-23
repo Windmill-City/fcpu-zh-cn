@@ -1,10 +1,10 @@
 local function clr_cl(io)
   local ics_clear = function(channel)
-    local action = { type = 'deffer', deffer = {} }
+    local action = { type = 'defer', defer = {} }
     local ClearIC = function(ast)
-      if ast.deffer and ast.deffer.clr then
-        for _, v in ipairs(ast.deffer.clr) do
-          action.deffer[#action.deffer + 1] = v
+      if ast.defer and ast.defer.clr then
+        for _, v in ipairs(ast.defer.clr) do
+          action.defer[#action.defer + 1] = v
         end
       end
     end
@@ -54,19 +54,19 @@ local function clr_cl(io)
     end
     -- TODO: implement return {type='actions', ...}
     if 0 < #actions then
-      local d = {type='deffer', deffer={}}
+      local d = {type='defer', defer={}}
       local s = 0
       for _, a in ipairs(actions) do
-        if a and a.deffer then
-          for _, v in ipairs(a.deffer) do
+        if a and a.defer then
+          for _, v in ipairs(a.defer) do
             if s < v.delay then
               s = v.delay
             end
-            table.insert(d.deffer, v)
+            table.insert(d.defer, v)
           end
         end
       end
-      table.insert(d.deffer, {action='sync', delay=s + 1, index=State.current.index})
+      table.insert(d.defer, {action='sync', delay=s + 1, index=State.current.index})
       return d
     end
   end
