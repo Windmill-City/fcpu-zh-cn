@@ -295,7 +295,21 @@ function builder.clone_to(src_state, dst_state)
   dst_state.program_ast = deep_replace_ic(dst_state.program_ast, remap_ic, remap_index, visited)
 
   if dst_state.need_sync then
-    dst_state.sync_clock = dst_state.sync_clock or dst_state.clock - 5 -- HACK big value
+    local heap = storage.deferred.heap
+
+    local dupes = {}
+    for _, ret in ipairs(heap) do
+      local _, val = ret[1], ret[2]
+      if val.action == 'sync' and val.index == src_state.index then
+        local idx = #dupes + 1
+        dupes[idx] = table.deep_copy(val)
+        dupes[idx].index = dst_state.index
+      end
+    end
+
+    for _, v in ipairs(dupes) do
+      Heap.put(storage.deferred, v.at + v.delay, v)
+    end
   end
 
   return true

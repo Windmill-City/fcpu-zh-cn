@@ -523,4 +523,9 @@ return {
       state.base_pointer = state.stack_pointer
     end)
   end,
+
+  ["0.4.61"] = function()
+    storage.deferred = storage.deffered
+    storage.deffered = nil
+  end,
 }

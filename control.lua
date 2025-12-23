@@ -290,7 +290,7 @@ script.on_init(function()
   storage.destroy = {}
   storage.fcpus = {}
   storage.running = {}
-  storage.deffered = Heap.new()
+  storage.deferred = Heap.new()
   Compatibility.on_init()
 end)
 script.on_load(function()

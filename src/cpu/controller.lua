@@ -174,7 +174,7 @@ local function handle_single_step(state)
 end
 
 local function run_deffer_command(op)
-  debug_assert(not op.at or op.at + op.delay == game.tick, "Out of order deffered action executed")
+  debug_assert(not op.at or op.at + op.delay == game.tick, "Out of order deferred action executed")
 
   if op.action == 'wake' then
     local state = storage.fcpus[op.index]
@@ -234,7 +234,7 @@ function Controller.add_deferred(state, deffer)
       local t = table.deep_copy(op)
       local at_tick = game.tick + t.delay
       t.at = game.tick
-      Heap.put(storage.deffered, at_tick, t)
+      Heap.put(storage.deferred, at_tick, t)
       will_sync = will_sync or (t.action == 'sync')
     end
     --got_sync = got_sync or op.action == 'sync' or not got_sync and i == cnt
@@ -246,12 +246,12 @@ end
 function Controller.do_deferred()
   local handled_this_frame = 0
   while true do
-    local p = Heap.priority(storage.deffered)
+    local p = Heap.priority(storage.deferred)
     if not p or game.tick < p then
       break
     end
-    local at_tick, op = Heap.pop(storage.deffered)
-    assert(at_tick == game.tick, "Found missed deffered action")
+    local at_tick, op = Heap.pop(storage.deferred)
+    assert(at_tick == game.tick, "Found missed deferred action")
     run_deffer_command(op)
     handled_this_frame = handled_this_frame + 1
   end
