@@ -184,21 +184,18 @@ function ioMemory.set(address, signal)
   ioChannel.GuiCache_Invalidate(address.channel, 1)
 end
 
----@param address? OpRef_MemoryBank
-function ioMemory.clear(address)
-  if address == nil or address.bank == nil then
-    state.memmap = {}
-
-    for i = 1, MC_MEMORY_CHANNELS do
-      ioMemory.clear(Emitter.make_memory_bank('mem', i))
-    end
-  else
-    Assert.is_memory_bank(address)
-    memory_setraw(address, nil, nil)
-    ioChannel.GuiCache_Invalidate(address.channel, 3)
-
-    state.memmap[address.channel] = { i2s = {}, s2i = {} }
+function ioMemory.clear_all()
+  state.memmap = {}
+  for i = 1, MC_MEMORY_CHANNELS do
+    ioMemory.clear(Emitter.make_memory_bank('mem', i))
   end
+end
+
+function ioMemory.clear(address)
+  Assert.is_memory_bank(address)
+  memory_setraw(address, nil, nil)
+  state.memmap[address.channel] = { i2s = {}, s2i = {} }
+  ioChannel.GuiCache_Invalidate(address.channel, 3)
 end
 
 function ioMemory.bind(state_)

@@ -64,6 +64,7 @@ io.channel_address_of = ioChannel.address_of
 io.memory_get = ioMemory.get
 io.memory_set = ioMemory.set
 io.memory_clear = ioMemory.clear
+io.memory_clear_all = ioMemory.clear_all
 io.memory_address_of = ioMemory.address_of
 io.memory_free_index = ioMemory.first_free_index
 io.memory_size = ioMemory.size
