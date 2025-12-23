@@ -78,7 +78,7 @@ Besides general purpose registers there are some read only registers:
 
 Output registers (write only):
 
-- **out1**, ..., **out256**: output registers (only integer values)
+- **out1**, ..., **out256**: output registers (only integer values with signal id, all untyped or zero-valued signals will be deleted)
 
 
 ### Stack

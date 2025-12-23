@@ -5,8 +5,8 @@ While the demo content and example programs still in development, you can start 
 
 ## Tutorial videos
 
-- Very good tutorials was made by [BLU12 Gaming](https://www.youtube.com/channel/UCfb9HEuH1Fhio4MDsgEMoeA), see his YouTube channel.
-- [DocJade programmed a single assembler with fCPU to beat Factorio](https://www.youtube.com/watch?v=z-2_x7baynI).
+- Very good tutorials was made by [BLU12 Gaming](https://www.youtube.com/playlist?list=PLUS7abK0FzfUuL9Aurv9HbTBQqIfAzQfw), see his YouTube channel.
+- [DocJade](https://www.youtube.com/watch?v=z-2_x7baynI) programmed a single assembler with fCPU to beat Factorio.
 
 ## Example 1
 
