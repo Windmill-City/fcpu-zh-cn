@@ -5,43 +5,44 @@ local MemoryView = {}
 
 local function ioChannel_GUI_Validate(player_data, state, channel, force)
   local UpdateMinDelay = 0
-  local TestImpl = function(force)
-    player_data.gui_cache = player_data.gui_cache or {}
-    if player_data.gui_cache.memory_changed == nil or force then
-      player_data.gui_cache.memory_changed = {}
-    end
 
-    local pmc = player_data.gui_cache.memory_changed[channel]
-    local smc = state.gui_cache.memory_changed[channel]
-
-    if not (pmc and smc) or (UpdateMinDelay <= smc - pmc) and (smc <= game.tick) then
-      player_data.gui_cache.memory_changed[channel] = game.tick
-      smc = 0
-    end
-    return smc - game.tick
+  player_data.gui_cache = player_data.gui_cache or {}
+  if player_data.gui_cache.memory_changed == nil or force then
+    player_data.gui_cache.memory_changed = {}
   end
 
-  local sync_delay = TestImpl(force)
-  local waiting = 0 < sync_delay
-  local static = sync_delay < 0
+  local pmc = player_data.gui_cache.memory_changed[channel]
+  local smc = state.gui_cache.memory_changed[channel]
+  local tick = game.tick
+
+  if not (pmc and smc) or (UpdateMinDelay <= smc - pmc) and (smc <= tick) then
+    if not state.need_sync then
+      player_data.gui_cache.memory_changed[channel] = storage.gui_update_on_tick
+    end
+    smc = tick
+  end
+
+  local sync_delay = smc - tick + 1
+  local waiting = tick <= smc
+  local cursync = tick == pmc
 
   if player_data.gui_memory_sync_label then
     player_data.gui_memory_sync_label.caption = {"gui-fcpu-memviewer.memory-view-sync", (waiting and ' in '..sync_delay or '')}
   end
   if player_data.gui_memory_sync_sprite then
     player_data.gui_memory_sync_sprite.sprite =
-    state.need_sync and 'flib_indicator_red'
+    (state.need_sync and Controller.is_running(state)) and 'flib_indicator_red'
     or waiting and 'flib_indicator_black'
     or 'flib_indicator_green'
   end
-  return static and not force
+  return cursync or force
 end
 
 -------------------------------------------------------------------------------------------------------
 
 local function ioChannel_GUI_Update_cl(channel)
   return function(player_data, state, force)
-    if ioChannel_GUI_Validate(player_data, state, channel, force) then
+    if not ioChannel_GUI_Validate(player_data, state, channel, force) then
       return true
     end
     -- Memory channels

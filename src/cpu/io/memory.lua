@@ -181,7 +181,7 @@ function ioMemory.set(address, signal)
   s2i[hash] = addr -- always in sync
   memory_setraw(address, addr, newValue)
 
-  ioChannel.GuiCache_Invalidate(address.channel, 5)
+  ioChannel.GuiCache_Invalidate(address.channel, 1)
 end
 
 ---@param address? OpRef_MemoryBank
@@ -195,7 +195,7 @@ function ioMemory.clear(address)
   else
     Assert.is_memory_bank(address)
     memory_setraw(address, nil, nil)
-    ioChannel.GuiCache_Invalidate(address.channel, 5)
+    ioChannel.GuiCache_Invalidate(address.channel, 3)
 
     state.memmap[address.channel] = { i2s = {}, s2i = {} }
   end
