@@ -782,6 +782,10 @@ Like any other vanilla combinator operation, this breaks the signal indices.
 
 [comment]: <> (md2frt-skip-section-begin)
 
+## Known issues:
+- When you use `xmov out mem*`, the internal circuitry simply connects the memory cell to the output wiring. This means the output is unbuffered and all changes to that `mem*` will be immediately transfered to the output.
+Therefore, when you clear memory that is mapped to an output, the output is cleared as well.
+
 # Examples
 See: https://mods.factorio.com/mod/fcpu/faq and [Discord channel](https://discord.gg/pCTz9hW)
 
