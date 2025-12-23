@@ -298,8 +298,10 @@ script.on_load(function()
   Compatibility.on_load()
 end)
 script.on_configuration_changed(function(e)
-  if MC_DEBUG and migrations.debug_force then
-    migrations[migrations.debug_force]()
+  if script.level then
+    local current_version = script.active_mods.fcpu
+    migration.run(storage.old_version or '0.4.59', migrations, nil)
+    storage.old_version = current_version
   end
   if migration.on_config_changed(e, migrations, nil, e) then
     gui.check_filter_validity()

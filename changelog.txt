@@ -2,12 +2,9 @@
 Version: 0.4.63
 Date: ????
   Changes:
+    - Added scenario migrations (lower version v0.4.59).
 ---------------------------------------------------------------------------------------------------
 Version: 0.4.62
-Date: 2025-12-23
-  Changes:
----------------------------------------------------------------------------------------------------
-Version: 0.4.61
 Date: 2025-12-23
   Bugfixes:
     - vec-x-vec mnemonics with `red` as a second operand (#24).
