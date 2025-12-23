@@ -817,7 +817,7 @@ local function append_ics(ics, merger)
 end
 
 
----@return [LuaEntity, defines.wire_type, defines.wire_connector_id]
+---@return {entity:LuaEntity, wire:defines.wire_type, port:defines.wire_connector_id}
 local function connect_input_from(state, address, default_color)
   Assert.is_channel_readable(address)
   if address.type == 'memory' or address.type == 'channel' then
@@ -912,12 +912,15 @@ end
 local function vector_arithmetic_op(operation)
   return function(state, _)
     local three = Assert.two_or_three(_) == 3
-    local idx_a = three and 2 or 1
-    local idx_b = three and 3 or 2
+    local address_a = _[three and 2 or 1]
+    local address_b = _[three and 3 or 2]
 
-    local input_a = connect_input_from(state, _[idx_a])
+    Assert.check(address_a.type ~= 'wire' or address_b.color ~= address_a.color, "Can't do operation on same wire color")
+    local inv_b = address_b.type == 'wire' and inverse_wire_color(defines.wire_type[address_b.color])
+
+    local input_a = connect_input_from(state, address_a, inv_b)
     local inv_wire = inverse_wire_color(input_a.wire)
-    local input_b = _[idx_b].type ~= 'value' and connect_input_from(state, _[idx_b], inv_wire) or nil
+    local input_b = address_b.type ~= 'value' and connect_input_from(state, address_b, inv_wire) or nil
 
     local x = builder.create_arithmetic_cell(state.entity, input_a, input_b, operation)
     local ics = builder.create_memory_cell(state.entity, {
