@@ -226,7 +226,10 @@ function io.gettype(_, types)
     return nil
   end
 ---@diagnostic disable-next-line: need-check-nil
-  return signal.signal
+  return signal.signal and {
+    name = signal.signal.name,
+    type = signal.signal.type or 'item',
+  }
 end
 
 function io.settype(_, sigtype, types)
