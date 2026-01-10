@@ -229,6 +229,7 @@ function io.gettype(_, types)
   return signal.signal and {
     name = signal.signal.name,
     type = signal.signal.type or 'item',
+    quality = signal.signal.quality
   }
 end
 
@@ -246,7 +247,10 @@ function io.getquality(_, types)
   if type(signal) ~= 'table' then
     Assert.exception(Errors.ReadingNil('quality'))
   end
----@diagnostic disable-next-line: need-check-nil
+  if signal.signal.type == 'quality' then
+    return signal.signal.name
+  end
+  ---@diagnostic disable-next-line: need-check-nil
   return signal.signal.quality or 'normal'
 end
 
