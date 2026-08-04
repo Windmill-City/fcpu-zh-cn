@@ -656,7 +656,7 @@ blt r1 10 :counter
 - `dst[]`、`src[]`: 有序内存(数组)*尚未实现*
 
 
-## 常用指令
+## 常用 SIMD 指令
 
 * `xmov` dst[**M**/**O**] src[**I**/**M**/**N**]
   *dst([virtual-signal=signal-each]) = src([virtual-signal=signal-each])*
@@ -697,7 +697,7 @@ blt r1 10 :counter
   *dst([virtual-signal=signal-each]) = src ^ val*(如果指定了 src)
 
 
-## 比较
+## SIMD 比较
 
 将内存中每个信号的值与指定操作数比较, 满足条件的信号才会写入目标
 在双操作数版本中, *src* 与 *dst* 相同
@@ -727,7 +727,7 @@ blt r1 10 :counter
   *dst([virtual-signal=signal-each]) = src([virtual-signal=signal-each]), 如果 src([virtual-signal=signal-each]) <= val*
 
 
-## 位运算
+## SIMD 位运算
 
 * `xand` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
   与(AND)
@@ -755,7 +755,7 @@ blt r1 10 :counter
   *dst([virtual-signal=signal-each]) = src >> val*(如果指定了 src)
 
 
-## 统计
+## SIMD 统计
 
 * `xmin` dst[**R**/**O**] src[**I**/**M**/**N**]
   在 `src` 中找出最小信号并复制到 `dst`
