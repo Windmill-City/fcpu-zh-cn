@@ -136,13 +136,14 @@ xuni m2 red green ; 把红、绿两条输入合并进 m2
 输出端口用于把信号发出去，只能写。写入输出寄存器后，信号会同时出现在红、绿两条输出线上：
 
 ```
-mov out1 123[item=copper-ore]  ; 输出 123 个铜矿
-ssv out2 5                     ; 只改数值，输出数值 5
-sst out3 [item=iron-plate]     ; 只改类型
-clr out                        ; 清空所有输出
+mov out1 123[item=copper-ore]    ; 输出 123 个铜矿
+ssv out2 5        ; 只改数值，输出数值 5
+sst out3 [item=iron-plate]       ; 只改类型
+clr out           ; 清空所有输出
 ```
 
-输出寄存器用数字编号，编号也可以由寄存器提供（`out@4` 表示把第 r4 个输出寄存器作为目标）。旧式写法 `out`（不带数字）已废弃，等价于 `out1`。
+输出寄存器用数字编号，编号也可以由寄存器提供（`out@4` 表示把第 r4 个输出寄存器作为目标）。
+旧式写法 `out`（不带数字）已废弃，等价于 `out1`。
 
 输出寄存器只接受带类型的整数值，数值为零或没有类型的信号会被丢弃。
 
@@ -199,7 +200,7 @@ jmp 临时
 ```
 push bp        ; 保存上一个基址指针 bp
 mov  bp, sp    ; 把新栈帧的基址设为当前栈指针
-sub  sp, 数量  ; 为局部变量分配空间
+sub  sp, 数量   ; 为局部变量分配空间
 ```
 
 `leave`：撤销 `enter` 的操作。先丢弃局部变量，再恢复上一个基址指针，在返回前清除当前栈帧。
@@ -728,7 +729,7 @@ blt r1 10 :counter
 类型不同时跳转。
 
 
-# 其他指令
+# 原型指令
 
 `ugpf 目标[引用] 名称[类型/引用] 字段[字符串]`
 *Utility Get Prototype Field（读取原型字段）*
@@ -745,7 +746,7 @@ ugpf r2 [item=copper-ore] 'stack_size'   ; 等价于 uiss r1 [item=copper-ore]
 ugpf r3 [item=buffer-chest] 'get_inventory_size(defines.inventory.item_main)'
 ```
 
-还可以用点号 `.` 深入访问原型内部的字段。例如判断某物品是不是科技包：
+还可以用点号 `.` 访问原型内部的字段。例如判断某物品是不是科技包：
 
 ```
 ugpf r1 [item=automation-science-pack] 'subgroup.name'
