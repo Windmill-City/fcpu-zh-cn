@@ -1,4 +1,4 @@
-return [==[# fCPU
+return [==[# 程控运算器
 
 ## 特性
 
