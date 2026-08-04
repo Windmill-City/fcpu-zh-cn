@@ -410,7 +410,6 @@ mov r4 m3@5 # r4 将等于 mem3[5]
 ## 栈操作
 
 `push` src...[**V**/**T**/**VT**/**R**]
-
 `pop` dst...[**R**/**O**]
 
 
@@ -418,22 +417,18 @@ mov r4 m3@5 # r4 将等于 mem3[5]
 
 `cos` dst[**R**] src[**V**/**R**]
 *dst = cos(src)*
-
 `sin` dst[**R**] src[**V**/**R**]
 *dst = sin(src)*
-
 `tan` dst[**R**] src[**V**/**R**]
 *dst = tan(src)*
-
 `atan2` dst[**R**] y[**V**/**R**] x[**V**/**R**]
 *dst = atan2(y, x)*
-
 `sqrt` dst[**R**] src[**V**/**R**]
+
 *dst = sqrt(src)*
-
 `exp` dst[**R**] src[**V**/**R**]
-*dst = exp(src)*
 
+*dst = exp(src)*
 `ln` dst[**R**] src[**V**/**R**]
 *dst = ln(src)*
 
@@ -514,14 +509,17 @@ mov r4 m3@5 # r4 将等于 mem3[5]
 
 ## 阻塞
 
-条件满足后, 紧随其后的下一条指令会在同一 tick 内立即执行
+阻塞指令的条件满足后, 紧随其后的下一条指令会在同一 tick 内立即执行
 因此, 它们可以用于把触发继续执行的输入信号原样复制到输出
+
 例如:
 ```
 mov r1 0[virtual-signal=signal-green]
 btrc r1
 xmov m1 red
 ```
+
+指令:
 
 `bkr` cnt[**V**/**R**]
 `bkg` cnt[**V**/**R**]
@@ -555,6 +553,8 @@ tlt r1 10
 jmp :counter
 ; r1 现在等于 10
 ```
+
+指令:
 
 `teq` a[**V**/**S**/**R**] b[**V**/**S**/**R**]
 相等
@@ -603,6 +603,8 @@ blt r1 10 :counter
 ; r1 现在等于 10
 ```
 
+指令:
+
 `beq` a[**V**/**S**/**R**] b[**V**/**S**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]
 相等
 如果 *a == b* 则 `jmp addr offset`
@@ -640,16 +642,16 @@ blt r1 10 :counter
 *获取 Prototype 字段*
 按名称 *name* 查找 Prototype, 并把字段 *field* 的值赋给 *dst*(仅支持数字字段)
 该指令依次在以下 Prototype 中检查字段:
-  - https://lua-api.factorio.com/latest/LuaItemPrototype.html
-  - https://lua-api.factorio.com/latest/LuaEntityPrototype.html
+  https://lua-api.factorio.com/latest/LuaItemPrototype.html
+  https://lua-api.factorio.com/latest/LuaEntityPrototype.html
 例如:
-- `ugpf r1 [item=inserter] 'inserter_stack_size_bonus'`
-- `ugpf r2 [item=copper-ore] 'stack_size'`(这与 `uiss r1 [item=copper-ore]` 相同)
-- `ugpf r3 [item=buffer-chest] 'get_inventory_size(defines.inventory.item_main)'`
+  `ugpf r1 [item=inserter] 'inserter_stack_size_bonus'`
+  `ugpf r2 [item=copper-ore] 'stack_size'`(这与 `uiss r1 [item=copper-ore]` 相同)
+  `ugpf r3 [item=buffer-chest] 'get_inventory_size(defines.inventory.item_main)'`
 
 你还可以用点号 `.` 访问这些 Prototype 内部的字段
 要检查物品是否为科技包, 请使用此示例:
-- `ugpf r1 [item=automation-science-pack] 'subgroup.name'`
+  `ugpf r1 [item=automation-science-pack] 'subgroup.name'`
   `beq r1 'science-pack' :yeah_science_btch`
 
 
@@ -660,16 +662,16 @@ blt r1 10 :counter
 与标量指令每次只处理一个信号不同, SIMD 指令会一次并行处理多个信号
 
 使用 SIMD 指令时, 应考虑以下特性:
-- SIMD 指令不额外占用处理时间, 对 UPS 友好
-- 部分向量指令需要多个 tick 才能执行完毕(`xmov mem1 red` 需要 3 个 tick 才能把 `red` 端口的数据载入 `mem1` 通道)
-- 必须等向量指令执行完毕后, 才能从受影响的内存中读取有效数据
+  SIMD 指令不额外占用处理时间, 对 UPS 友好
+  部分向量指令需要多个 tick 才能执行完毕(`xmov mem1 red` 需要 3 个 tick 才能把 `red` 端口的数据载入 `mem1` 通道)
+  必须等向量指令执行完毕后, 才能从受影响的内存中读取有效数据
 
 **图例**
 `dst()`、`src()`: 无序内存(集合)
 `dst[]`、`src[]`: 有序内存(数组)*尚未实现*
 
 
-## 常用 SIMD 指令
+## SIMD 常用
 
 `xmov` dst[**M**/**O**] src[**I**/**M**/**N**]
 *dst([virtual-signal=signal-each]) = src([virtual-signal=signal-each])*
@@ -801,9 +803,7 @@ Factorio 线缆可同时承载数百个信号, 但信号本身没有顺序, 索�
 - 与其他原版运算器操作一样, 这会打乱信号的索引
 
 
-# 用户界面
-
-## 快捷键
+# 快捷键
 
 * **F5** = 运行
 * **Shift** + **F5** = 停止
