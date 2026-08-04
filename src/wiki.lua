@@ -5,7 +5,7 @@ if have_informatron or have_booktorio then
   local ReadmeL10n = {
     ['en'] = require('src/wiki/readme.en.src.lua'),
     ['ru'] = require('src/wiki/readme.ru.src.lua'),
-    ['zh'] = require('src/wiki/readme.zh.src.lua'),
+    ['zh-CN'] = require('src/wiki/readme.zh.src.lua'),
   }
   local md2frt = require('src/wiki/md2frt')
 
