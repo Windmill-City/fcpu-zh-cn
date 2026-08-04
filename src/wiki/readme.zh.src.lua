@@ -59,7 +59,7 @@ return [==[
 - **输入端口**: `red`, `green`, `red1`, `green@3`, ...
 - **输出端口**: `out1`, `out2`, ..., `out256`
 - **地址**: 行号 `34`
-- **跳转标签**: `:label`, `:anyname`, ...
+- **标签**: `:label`, `:anyname`, ...
 
 运算器会按顺序逐行执行程序中的指令
 
@@ -96,9 +96,11 @@ return [==[
 ## 栈
 
 栈在内存中**向下增长**(从高地址到低地址)
-想知道还剩多少空间? 读取 `sp` 寄存器即可(`mov r1 sp`)
 - 类型: LIFO(后进先出)
 - 大小: 4096
+
+想知道还剩多少空间?
+读取 `sp` 寄存器即可(`mov r1 sp`)
 
 使用 `push` 和 `pop` 指令压栈和弹栈:
 `push r1 r2 r3`
@@ -112,7 +114,7 @@ push r3
 
 ## 函数
 
-通过 `call`、`ret`、`enter`、`leave` 指令支持函数, 语义类似 x86 汇编
+通过 `call`、`ret`、`enter`、`leave` 指令来实现函数功能, 语义类似 x86 汇编
 
 `bp`: 存储当前函数栈帧起始处的地址, 从而可以访问局部变量
 
@@ -146,8 +148,9 @@ push r3
 ```
 
 多次函数调用之后的栈示意图:
-```
+
 4096
+```
 | ...         |
 | older  ipt  | `call :fn1`
 |             | `enter 3`
@@ -162,15 +165,17 @@ push r3
 |        var1 | <-- bp - 1
 |             | <-- `sp`
 | ...         |
-1
 ```
+1
 
 
 
 ## 局部变量
 
 局部变量存放在栈顶, 执行 `leave` 之后便无法访问
-想为变量建立函数栈帧? 使用 `enter <size>` 即可
+
+想为变量建立函数栈帧?
+使用 `enter <size>` 即可
 
 例如:
 ```
@@ -201,6 +206,7 @@ leave
 ## 物流网络
 
 它相当于一个额外的内存单元, 区别在于它是只读的
+
 `lgn` 通道可以通过 `xmov` 移入内存单元进行操作
 
 
@@ -250,7 +256,7 @@ mov r4 m3@5 # r4 将等于 mem3[5]
 * `[virtual-signal=signal-fcpu-halt]`: 暂停
 * `[virtual-signal=signal-fcpu-run]`: 继续
 * `[virtual-signal=signal-fcpu-step]`: 单步
-* `[virtual-signal=signal-fcpu-sleep]`: 休眠 (在休眠模式下 程控运算器 不处理中断)
+* `[virtual-signal=signal-fcpu-sleep]`: 休眠
 * `[virtual-signal=signal-fcpu-jump]`: 跳转
 
 如果程序运行出错, 程控运算器 会输出 `[virtual-signal=signal-fcpu-error]` 信号, 其值即为出错行号
@@ -258,248 +264,255 @@ mov r4 m3@5 # r4 将等于 mem3[5]
 
 # 指令
 
-这些指令按 tick 逐条执行。每条指令接受一个或多个操作数, 并修改这些操作数或 程控运算器 的状态
+这些指令按 tick 逐条执行
+每条指令接受一个或多个操作数
 
 **图例**
 
-* **V**, 值: 范围在 [-2^31..2^31) 内的整数常量(`-3500`)
-* **T**, 类型: 信号类型, 支持指定品质(`[item=iron-ore]`、`[item=copper-plate,quality=rare]`)
-* **Q**, 品质: 只表示信号品质(`'epic'`、`[quality=legendary]`) _WIP_
-* **VT**, 信号: 由**值**和**类型**组成(`123[item=copper-ore]`、`456[item=iron-plate,quality=uncommon]`)
-* **R**, 引用: 寄存器、内存单元、局部变量(`reg1`、`r3`、...、`reg8`;`r@4` 间接记法;单个内存单元 `m1[23]`;单个输入信号 `red34`、`green@3`;局部变量 `var1`、`v2` 等)
-* **M**, 内存: 通道(`mem1`、`m2`、...、`mem4`)
-* **N**, 物流网络: 通道(`lgn`、`logi`、`lnc`)
-* **I**, 端口: 输入端口(`red`、`green`)
-* **O**, 端口: 输出缓冲(`out1`、`out2`、...、`out256`、`out`)
-
-- **A**, 地址: 指令地址(`5`)
-- **L**, 标签: 指令标签(`:labelname`)
-- **S**, 字符串: 用于工具类助记符(`'rotation_speed'`)
+**V**, 值: 范围在 [-2^31..2^31) 内的整数常量(`-3500`)
+**T**, 类型: 信号类型, 支持指定品质(`[item=iron-ore]`、`[item=copper-plate,quality=rare]`)
+**Q**, 品质: 只表示信号品质(`'epic'`、`[quality=legendary]`) _WIP_
+**VT**, 信号: 由**值**和**类型**组成(`123[item=copper-ore]`、`456[item=iron-plate,quality=uncommon]`)
+**R**, 引用: 寄存器、内存单元、局部变量(`reg1`、`r3`、...、`reg8`、`r@4`;`m1[23]`;`red34`、`green@3`;`var1`、`v2`)
+**M**, 内存: 通道(`mem1`、`m2`、...、`mem4`)
+**N**, 物流网络: 通道(`lgn`、`logi`、`lnc`)
+**I**, 端口: 输入端口(`red`、`green`)
+**O**, 端口: 输出端口(`out1`、`out2`、...、`out256`、`out`)
+**A**, 地址: 行号(`5`)
+**L**, 标签: (`:labelname`)
+**S**, 字符串: (`'rotation_speed'`)
 
 `...` - 一个或多个, 可重复指定, 以空格分隔
 `?` - 可选参数, 可以省略
 
 ## 常用
 
-* `nop`
-  空操作
+`nop`
+空操作
 
-* `clr`
-  清除所有寄存器、内存单元和输出
+`clr`
+清除所有寄存器、内存单元和输出
 
-* `clr` reg
-  清除所有寄存器
+`clr` reg
+清除所有寄存器
 
-* `clr` out
-  清除所有输出值
+`clr` out
+清除所有输出值
 
-* `clr` mem
-  清除所有内存单元
+`clr` mem
+清除所有内存单元
 
-* `clr` dst...[**R**/**M**/**O**]
-  清除指定的寄存器、内存单元或输出端口(`mem3`、`r2`、`out4`)
+`clr` dst...[**R**/**M**/**O**]
+清除指定的寄存器、内存单元或输出端口(`mem3`、`r2`、`out4`)
 
-* `mov` dst...[**R**/**O**] src[**V**/**T**/**VT**/**R**]
-  将信号从源复制到目标
-  *dst... = src*
+`mov` dst...[**R**/**O**] src[**V**/**T**/**VT**/**R**]
+将信号从源复制到目标
+*dst... = src*
 
-* `ssv` dst...[**R**/**O**] val[**V**/**R**]
-  设置信号值
-  *dst... = val*
+`ssv` dst...[**R**/**O**] val[**V**/**R**]
+设置信号值
+*dst... = val*
 
-* `sst` dst...[**R**/**O**] type[**T**/**R**]
-  设置信号类型
-  *dst... = type*
+`sst` dst...[**R**/**O**] type[**T**/**R**]
+设置信号类型
+*dst... = type*
 
-* `ssq` dst...[**R**/**O**] quality[**T**/**Q**/**R**]
-  设置信号品质
-  *dst... = quality*
+`ssq` dst...[**R**/**O**] quality[**T**/**Q**/**R**]
+设置信号品质
+*dst... = quality*
 
-* `fid` dst[**R**/**O**] src[**I**/**M**] type[**T**/**R**]
-  在 *src*(内存或红/绿输入端口)中查找 *type* 对应的信号, 并将其类型和数值赋给 *dst*
+`fid` dst[**R**/**O**] src[**I**/**M**] type[**T**/**R**]
+在 *src*(内存或红/绿输入端口)中查找 *type* 对应的信号, 并将其类型和数值赋给 *dst*
 
-* `idx` dst[**R**] src[**I**/**M**] type[**T**/**R**]
-  在 *src*(内存或红/绿输入端口)中查找 *type* 对应的信号, 并将其在内存或输入端口中的位置索引赋给 *dst*
+`idx` dst[**R**] src[**I**/**M**] type[**T**/**R**]
+在 *src*(内存或红/绿输入端口)中查找 *type* 对应的信号, 并将其在内存或输入端口中的位置索引赋给 *dst*
 
-* `fir` dst[**R**/**O**] type[**T**/**R**]
-  `fig` dst[**R**/**O**] type[**T**/**R**]
-  `fid ... red ...` 与 `fid ... green ...` 的简写
+`fir` dst[**R**/**O**] type[**T**/**R**]
+`fig` dst[**R**/**O**] type[**T**/**R**]
+`fid ... red ...` 与 `fid ... green ...` 的简写
 
 ## 品质
 
 参见 https://lua-api.factorio.com/latest/prototypes/QualityPrototype.html#level
 
-* `qn` dst[**R**/**O**] type[**T**/**R**/**I**]
-  品质等级对应的数字(普通=0、罕见=1、稀有=2、史诗=3、传奇=5)
-  *dst = type 的品质*
+`qn` dst[**R**/**O**] type[**T**/**R**/**I**]
+品质等级对应的数字(普通=0、罕见=1、稀有=2、史诗=3、传奇=5)
+*dst = type 的品质*
 
 
 ## 交换
 
-* `swp` reg1[**R**] reg2[**R**]
-  交换寄存器或内存单元中的信号
-* `swpt` reg1[**R**] reg2[**R**]
-  交换寄存器或内存单元中的信号类型
-* `swpv` reg1[**R**] reg2[**R**]
-  交换寄存器或内存单元中的信号值
-* `swpq` reg1[**R**] reg2[**R**]
-  交换寄存器或内存单元中的信号品质
+`swp` reg1[**R**] reg2[**R**]
+交换寄存器或内存单元中的信号
+`swpt` reg1[**R**] reg2[**R**]
+交换寄存器或内存单元中的信号类型
+`swpv` reg1[**R**] reg2[**R**]
+交换寄存器或内存单元中的信号值
+`swpq` reg1[**R**] reg2[**R**]
+交换寄存器或内存单元中的信号品质
 
 
 ## 算术
 
-* `add` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
-  *dst = src + val*(如果指定了 src)
-  *dst = dst + val*
-* `sub` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
-  *dst = src - val*(如果指定了 src)
-  *dst = dst - val*
-* `mul` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
-  *dst = src \* val*(如果指定了 src)
-  *dst = dst \* val*
-* `div` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
-  *dst = src / val*(如果指定了 src)
-  *dst = dst / val*
-* `mod` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
-  *dst = src % val*(如果指定了 src)
-  *dst = dst % val*
-* `pow` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
-  *dst = src ^ val*(如果指定了 src)
-  *dst = dst ^ val*  
+`add` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
+*dst = src + val*(如果指定了 src)
+*dst = dst + val*
+`sub` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
+*dst = src - val*(如果指定了 src)
+*dst = dst - val*
+`mul` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
+*dst = src \* val*(如果指定了 src)
+*dst = dst \* val*
+`div` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
+*dst = src / val*(如果指定了 src)
+*dst = dst / val*
+`mod` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
+*dst = src % val*(如果指定了 src)
+*dst = dst % val*
+`pow` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
+*dst = src ^ val*(如果指定了 src)
+*dst = dst ^ val*  
 
-* `inc` dst[**R**]
-  *dst = dst + 1*
-* `dec` dst[**R**]
-  *dst = dst - 1*
+`inc` dst[**R**]
+*dst = dst + 1*
+`dec` dst[**R**]
+*dst = dst - 1*
 
-* `subi` dst[**R**] val[**V**/**R**]
-  *dst = val - dst*
-* `divi` dst[**R**] val[**V**/**R**]
-  *dst = val / dst*
-* `modi` dst[**R**] val[**V**/**R**]
-  *dst = val % dst*
-* `powi` dst[**R**] val[**V**/**R**]
-  *dst = val ^ dst*
+`subi` dst[**R**] val[**V**/**R**]
+*dst = val - dst*
+`divi` dst[**R**] val[**V**/**R**]
+*dst = val / dst*
+`modi` dst[**R**] val[**V**/**R**]
+*dst = val % dst*
+`powi` dst[**R**] val[**V**/**R**]
+*dst = val ^ dst*
 
-* `rnd` dst[**R**] min[**V**/**R**] max[**V**/**R**]
-  在 [*min*, *max*] 范围内(含端点)生成一个伪随机值并赋给 *dst*
+`rnd` dst[**R**] min[**V**/**R**] max[**V**/**R**]
+在 [*min*, *max*] 范围内(含端点)生成一个伪随机值并赋给 *dst*
 
-* `fract` reg[**R**]
-  取寄存器中实数的小数部分
-* `floor` reg[**R**]
-  取不超过寄存器中实数的最大整数
-* `round` reg[**R**]
-  取最接近寄存器中实数的整数
-* `ceil` reg[**R**]
-  取不小于寄存器中实数的最小整数
+`fract` reg[**R**]
+取寄存器中实数的小数部分
+`floor` reg[**R**]
+取不超过寄存器中实数的最大整数
+`round` reg[**R**]
+取最接近寄存器中实数的整数
+`ceil` reg[**R**]
+取不小于寄存器中实数的最小整数
 
-* `dig` dst[**R**] num[**V**/**R**]
-  取出 *dst* 中第 *num* 位数字并写回 *dst*
-  *dst = dst / 10^num % 10*
-* `dis` dst[**R**] num[**V**/**R**] val[**V**/**R**]
-  将 *dst* 中第 *num* 位的数字设为 *val*
-  *dst = dst + (val % 10 - dst / 10^num % 10) * 10^num*
+`dig` dst[**R**] num[**V**/**R**]
+取出 *dst* 中第 *num* 位数字并写回 *dst*
+*dst = dst / 10^num % 10*
+`dis` dst[**R**] num[**V**/**R**] val[**V**/**R**]
+将 *dst* 中第 *num* 位的数字设为 *val*
+*dst = dst + (val % 10 - dst / 10^num % 10) * 10^num*
 
 
 ## 栈操作
 
-* `push` src...[**V**/**T**/**VT**/**R**]
-* `pop` dst...[**R**/**O**]
+`push` src...[**V**/**T**/**VT**/**R**]
+
+`pop` dst...[**R**/**O**]
 
 
 ## 三角函数
 
-* `cos` dst[**R**] src[**V**/**R**]
-  *dst = cos(src)*
-* `sin` dst[**R**] src[**V**/**R**]
-  *dst = sin(src)*
-* `tan` dst[**R**] src[**V**/**R**]
-  *dst = tan(src)*
-* `atan2` dst[**R**] y[**V**/**R**] x[**V**/**R**]
-  *dst = atan2(y, x)*
-* `sqrt` dst[**R**] src[**V**/**R**]
-  *dst = sqrt(src)*
-* `exp` dst[**R**] src[**V**/**R**]
-  *dst = exp(src)*
-* `ln` dst[**R**] src[**V**/**R**]
-  *dst = ln(src)*
+`cos` dst[**R**] src[**V**/**R**]
+*dst = cos(src)*
+
+`sin` dst[**R**] src[**V**/**R**]
+*dst = sin(src)*
+
+`tan` dst[**R**] src[**V**/**R**]
+*dst = tan(src)*
+
+`atan2` dst[**R**] y[**V**/**R**] x[**V**/**R**]
+*dst = atan2(y, x)*
+
+`sqrt` dst[**R**] src[**V**/**R**]
+*dst = sqrt(src)*
+
+`exp` dst[**R**] src[**V**/**R**]
+*dst = exp(src)*
+
+`ln` dst[**R**] src[**V**/**R**]
+*dst = ln(src)*
 
 
 ## 位运算
 
-* `band` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
-  与(AND)
-  *dst = src & val*(如果指定了 src)
-  *dst = dst & val*
+`band` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
+与(AND)
+*dst = src & val*(如果指定了 src)
+*dst = dst & val*
 
-* `bor` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
-  或(OR)
-  *dst = src | val*(如果指定了 src)
-  *dst = dst | val*
+`bor` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
+或(OR)
+*dst = src | val*(如果指定了 src)
+*dst = dst | val*
 
-* `bxor` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
-  异或(XOR)
-  *dst = src ^ val*(如果指定了 src)
-  *dst = dst ^ val*
+`bxor` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
+异或(XOR)
+*dst = src ^ val*(如果指定了 src)
+*dst = dst ^ val*
 
-* `bnot` dst[**R**] src?[**R**]
-  非(NOT)
-  *dst = ~src*(如果指定了 src)
-  *dst = ~dst*
+`bnot` dst[**R**] src?[**R**]
+非(NOT)
+*dst = ~src*(如果指定了 src)
+*dst = ~dst*
 
-* `bsl` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
-  左移
-  *dst = src << val*(如果指定了 src)
-  *dst = dst << val*
+`bsl` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
+左移
+*dst = src << val*(如果指定了 src)
+*dst = dst << val*
 
-* `bsr` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
-  右移
-  *dst = src >> val*(如果指定了 src)
-  *dst = dst >> val*
+`bsr` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
+右移
+*dst = src >> val*(如果指定了 src)
+*dst = dst >> val*
 
-* `brl` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
-  循环左移
-  *dst = src rot<< val*(如果指定了 src)
-  *dst = dst rot<< val*
+`brl` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
+循环左移
+*dst = src rot<< val*(如果指定了 src)
+*dst = dst rot<< val*
 
-* `brr` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
-  循环右移
-  *dst = src rot>> val*(如果指定了 src)
-  *dst = dst rot>> val*
+`brr` dst[**R**] src?[**V**/**R**] val[**V**/**R**]
+循环右移
+*dst = src rot>> val*(如果指定了 src)
+*dst = dst rot>> val*
 
 
 # 流程控制
 
-* `lea` dst[**R**/**O**] addr[**L**]
-  将标签 *addr* 加载到 *dst*
+`lea` dst[**R**/**O**] addr[**L**]
+将标签 *addr* 加载到 *dst*
 
-* `jmp` addr[**V**/**A**/**L**/**R**]
-  跳转到地址或标签
+`jmp` addr[**V**/**A**/**L**/**R**]
+跳转到地址或标签
 
-* `jmp` addr[**V**/**A**/**L**/**R**] offset[**V**/**R**]
-  跳转到地址 + 偏移量或标签 + 偏移量
-  例如: `jmp ipt -2`, 跳转到当前指令(`ipt`)前两行
+`jmp` addr[**V**/**A**/**L**/**R**] offset[**V**/**R**]
+跳转到地址 + 偏移量或标签 + 偏移量
+例如: `jmp ipt -2`, 跳转到当前指令(`ipt`)前两行
 
-* `hlt`
-  *暂停*程序执行, 直到玩家或任意输入端口的 *Run* 信号将其恢复
+`hlt`
+*暂停*程序执行, 直到玩家或任意输入端口的 *Run* 信号将其恢复
 
-* `slp` cnt[**V**/**R**]
-  休眠指定的 tick 数
-  休眠期间 程控运算器 不处理中断
+`slp` cnt[**V**/**R**]
+休眠指定的 tick 数
+休眠期间 程控运算器 不处理中断
 
-* `call` addr[**V**/**A**/**L**/**R**] offset[**V**/**R**]
-  将当前指令指针压入栈, 并跳转到地址 + 偏移量或标签 + 偏移量
+`call` addr[**V**/**A**/**L**/**R**] offset[**V**/**R**]
+将当前指令指针压入栈, 并跳转到地址 + 偏移量或标签 + 偏移量
 
-* `ret`
-  从栈中弹出地址并跳转到该地址
+`ret`
+从栈中弹出地址并跳转到该地址
 
-* `enter` count[**V**]
-  在栈上为局部变量预留空间
+`enter` count[**V**]
+在栈上为局部变量预留空间
 
-* `leave`
-  丢弃栈上的局部变量
+`leave`
+丢弃栈上的局部变量
 
-## 阻塞执行
+## 阻塞
 
 条件满足后, 紧随其后的下一条指令会在同一 tick 内立即执行
 因此, 它们可以用于把触发继续执行的输入信号原样复制到输出
@@ -510,23 +523,23 @@ btrc r1
 xmov m1 red
 ```
 
-* `bkr` cnt[**V**/**R**]
-  `bkg` cnt[**V**/**R**]
-  `bkl` cnt[**V**/**R**]
-  阻塞, 直到红/绿端口或物流网络上至少有 *cnt* 个信号
+`bkr` cnt[**V**/**R**]
+`bkg` cnt[**V**/**R**]
+`bkl` cnt[**V**/**R**]
+阻塞, 直到红/绿端口或物流网络上至少有 *cnt* 个信号
 
-* `btr` type[**T**/**R**]
-  `btg` type[**T**/**R**]
-  `bti` type[**T**/**R**]
-  `btl` type[**T**/**R**]
-  阻塞, 直到红、绿、双输入端口或物流网络上出现该信号类型
+`btr` type[**T**/**R**]
+`btg` type[**T**/**R**]
+`bti` type[**T**/**R**]
+`btl` type[**T**/**R**]
+阻塞, 直到红、绿、双输入端口或物流网络上出现该信号类型
 
-* `btrc` reg[**R**]
-  `btgc` reg[**R**]
-  `btic` reg[**R**]
-  `btlc` reg[**R**]
-  当引用*寄存器*与红、绿、双输入端口或物流网络上的类型-值相同时保持阻塞
-  一旦红/绿/输入端口或物流网络的值发生变化, 就把新值赋给*寄存器*并继续执行
+`btrc` reg[**R**]
+`btgc` reg[**R**]
+`btic` reg[**R**]
+`btlc` reg[**R**]
+当引用*寄存器*与红、绿、双输入端口或物流网络上的类型-值相同时保持阻塞
+一旦红/绿/输入端口或物流网络的值发生变化, 就把新值赋给*寄存器*并继续执行
 
 
 ## 比较数值
@@ -543,38 +556,38 @@ jmp :counter
 ; r1 现在等于 10
 ```
 
-* `teq` a[**V**/**S**/**R**] b[**V**/**S**/**R**]
-  相等
-  *a == b*
+`teq` a[**V**/**S**/**R**] b[**V**/**S**/**R**]
+相等
+*a == b*
 
-* `tne` a[**V**/**S**/**R**] b[**V**/**S**/**R**]
-  不相等
-  *a != b*
+`tne` a[**V**/**S**/**R**] b[**V**/**S**/**R**]
+不相等
+*a != b*
 
-* `tgt` a[**V**/**S**/**R**] b[**V**/**S**/**R**]
-  大于
-  *a > b*
+`tgt` a[**V**/**S**/**R**] b[**V**/**S**/**R**]
+大于
+*a > b*
 
-* `tlt` a[**V**/**S**/**R**] b[**V**/**S**/**R**]
-  小于
-  *a < b*
+`tlt` a[**V**/**S**/**R**] b[**V**/**S**/**R**]
+小于
+*a < b*
 
-* `tge` a[**V**/**S**/**R**] b[**V**/**S**/**R**]
-  大于或等于
-  *a >= b*
+`tge` a[**V**/**S**/**R**] b[**V**/**S**/**R**]
+大于或等于
+*a >= b*
 
-* `tle` a[**V**/**S**/**R**] b[**V**/**S**/**R**]
-  小于或等于
-  *a <= b*
+`tle` a[**V**/**S**/**R**] b[**V**/**S**/**R**]
+小于或等于
+*a <= b*
 
 
 ## 比较类型
 
-* `tas` a[**T**/**R**] b[**T**/**R**]
-  类型相同
+`tas` a[**T**/**R**] b[**T**/**R**]
+类型相同
 
-* `tad` a[**T**/**R**] b[**T**/**R**]
-  类型不同
+`tad` a[**T**/**R**] b[**T**/**R**]
+类型不同
 
 
 ## 分支
@@ -590,54 +603,54 @@ blt r1 10 :counter
 ; r1 现在等于 10
 ```
 
-* `beq` a[**V**/**S**/**R**] b[**V**/**S**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]
-  相等
-  如果 *a == b* 则 `jmp addr offset`
+`beq` a[**V**/**S**/**R**] b[**V**/**S**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]
+相等
+如果 *a == b* 则 `jmp addr offset`
 
-* `bne` a[**V**/**S**/**R**] b[**V**/**S**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]
-  不相等
-  如果 *a != b* 则 `jmp addr offset`
+`bne` a[**V**/**S**/**R**] b[**V**/**S**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]
+不相等
+如果 *a != b* 则 `jmp addr offset`
 
-* `bgt` a[**V**/**S**/**R**] b[**V**/**S**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]
-  大于
-  如果 *a > b* 则 `jmp addr offset`
+`bgt` a[**V**/**S**/**R**] b[**V**/**S**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]
+大于
+如果 *a > b* 则 `jmp addr offset`
 
-* `blt` a[**V**/**S**/**R**] b[**V**/**S**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]
-  小于
-  如果 *a < b* 则 `jmp addr offset`
+`blt` a[**V**/**S**/**R**] b[**V**/**S**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]
+小于
+如果 *a < b* 则 `jmp addr offset`
 
-* `bge` a[**V**/**S**/**R**] b[**V**/**S**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]
-  大于或等于
-  如果 *a >= b* 则 `jmp addr offset`
+`bge` a[**V**/**S**/**R**] b[**V**/**S**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]
+大于或等于
+如果 *a >= b* 则 `jmp addr offset`
 
-* `ble` a[**V**/**S**/**R**] b[**V**/**S**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]
-  小于或等于
-  如果 *a <= b* 则 `jmp addr offset`
+`ble` a[**V**/**S**/**R**] b[**V**/**S**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]
+小于或等于
+如果 *a <= b* 则 `jmp addr offset`
 
-* `bas` a[**T**/**R**] b[**T**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]
-  类型相同时分支
+`bas` a[**T**/**R**] b[**T**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]
+类型相同时分支
 
-* `bad` a[**T**/**R**] b[**T**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]
-  类型不同时分支
+`bad` a[**T**/**R**] b[**T**/**R**] addr[**V**/**A**/**L**/**R**] offset?[**V**/**R**]
+类型不同时分支
 
 
 # 其他指令
 
-* `ugpf` dst[**R**] name[**T**/**R**] field[**S**]
-  *获取 Prototype 字段*
-  按名称 *name* 查找 Prototype, 并把字段 *field* 的值赋给 *dst*(仅支持数字字段)
-  该指令依次在以下 Prototype 中检查字段:
-    1. https://lua-api.factorio.com/latest/LuaItemPrototype.html
-    2. https://lua-api.factorio.com/latest/LuaEntityPrototype.html
-  例如:
-  - `ugpf r1 [item=inserter] 'inserter_stack_size_bonus'`
-  - `ugpf r2 [item=copper-ore] 'stack_size'`(这与 `uiss r1 [item=copper-ore]` 相同)
-  - `ugpf r3 [item=buffer-chest] 'get_inventory_size(defines.inventory.item_main)'`
+`ugpf` dst[**R**] name[**T**/**R**] field[**S**]
+*获取 Prototype 字段*
+按名称 *name* 查找 Prototype, 并把字段 *field* 的值赋给 *dst*(仅支持数字字段)
+该指令依次在以下 Prototype 中检查字段:
+  - https://lua-api.factorio.com/latest/LuaItemPrototype.html
+  - https://lua-api.factorio.com/latest/LuaEntityPrototype.html
+例如:
+- `ugpf r1 [item=inserter] 'inserter_stack_size_bonus'`
+- `ugpf r2 [item=copper-ore] 'stack_size'`(这与 `uiss r1 [item=copper-ore]` 相同)
+- `ugpf r3 [item=buffer-chest] 'get_inventory_size(defines.inventory.item_main)'`
 
-  你还可以用点号 `.` 访问这些 Prototype 内部的字段
-  要检查物品是否为科技包, 请使用此示例:
-  - `ugpf r1 [item=automation-science-pack] 'subgroup.name'`
-    `beq r1 'science-pack' :yeah_science_btch`
+你还可以用点号 `.` 访问这些 Prototype 内部的字段
+要检查物品是否为科技包, 请使用此示例:
+- `ugpf r1 [item=automation-science-pack] 'subgroup.name'`
+  `beq r1 'science-pack' :yeah_science_btch`
 
 
 # SIMD 指令
@@ -652,49 +665,49 @@ blt r1 10 :counter
 - 必须等向量指令执行完毕后, 才能从受影响的内存中读取有效数据
 
 **图例**
-- `dst()`、`src()`: 无序内存(集合)
-- `dst[]`、`src[]`: 有序内存(数组)*尚未实现*
+`dst()`、`src()`: 无序内存(集合)
+`dst[]`、`src[]`: 有序内存(数组)*尚未实现*
 
 
 ## 常用 SIMD 指令
 
-* `xmov` dst[**M**/**O**] src[**I**/**M**/**N**]
-  *dst([virtual-signal=signal-each]) = src([virtual-signal=signal-each])*
+`xmov` dst[**M**/**O**] src[**I**/**M**/**N**]
+*dst([virtual-signal=signal-each]) = src([virtual-signal=signal-each])*
 
-* `emit` dst[**M**] val...[**V**/**T**/**VT**/**R**]
-  把*值*追加到 *dst* 内存中(在 v0.5.0 之前为随机顺序)
+`emit` dst[**M**] val...[**V**/**T**/**VT**/**R**]
+把*值*追加到 *dst* 内存中(在 v0.5.0 之前为随机顺序)
 
-* `xuni` dst[**M**/**O**] a[**I**/**M**/**N**] b[**I**/**M**/**N**]
-  将两个内存单元合并为一个
-  *dst([virtual-signal=signal-each]) = a([virtual-signal=signal-each]) + b([virtual-signal=signal-each])*
+`xuni` dst[**M**/**O**] a[**I**/**M**/**N**] b[**I**/**M**/**N**]
+将两个内存单元合并为一个
+*dst([virtual-signal=signal-each]) = a([virtual-signal=signal-each]) + b([virtual-signal=signal-each])*
 
-* `xflt` dst[**M**/**O**] src?[**I**/**M**/**N**] mask[**I**/**M**/**N**]
-  把 *src* 中与 *mask* 白名单匹配的信号全部复制到 *dst*
-  *内部设计由 [Halke1986](https://www.reddit.com/user/Halke1986/) 提供*
+`xflt` dst[**M**/**O**] src?[**I**/**M**/**N**] mask[**I**/**M**/**N**]
+把 *src* 中与 *mask* 白名单匹配的信号全部复制到 *dst*
+*内部设计由 [Halke1986](https://www.reddit.com/user/Halke1986/) 提供*
 
-* `xadd` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**/**I**/**M**]
-  *dst([virtual-signal=signal-each]) = dst + val*
-  *dst([virtual-signal=signal-each]) = src + val*(如果指定了 src)
+`xadd` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**/**I**/**M**]
+*dst([virtual-signal=signal-each]) = dst + val*
+*dst([virtual-signal=signal-each]) = src + val*(如果指定了 src)
 
-* `xsub` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**/**I**/**M**]
-  *dst([virtual-signal=signal-each]) = dst - val*
-  *dst([virtual-signal=signal-each]) = src - val*(如果指定了 src)
+`xsub` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**/**I**/**M**]
+*dst([virtual-signal=signal-each]) = dst - val*
+*dst([virtual-signal=signal-each]) = src - val*(如果指定了 src)
 
-* `xmul` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**/**I**/**M**]
-  *dst([virtual-signal=signal-each]) = dst \* val*
-  *dst([virtual-signal=signal-each]) = src \* val*(如果指定了 src)
+`xmul` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**/**I**/**M**]
+*dst([virtual-signal=signal-each]) = dst \* val*
+*dst([virtual-signal=signal-each]) = src \* val*(如果指定了 src)
 
-* `xdiv` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**/**I**/**M**]
-  *dst([virtual-signal=signal-each]) = dst / val*
-  *dst([virtual-signal=signal-each]) = src / val*(如果指定了 src)
+`xdiv` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**/**I**/**M**]
+*dst([virtual-signal=signal-each]) = dst / val*
+*dst([virtual-signal=signal-each]) = src / val*(如果指定了 src)
 
-* `xmod` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**/**I**/**M**]
-  *dst([virtual-signal=signal-each]) = dst % val*
-  *dst([virtual-signal=signal-each]) = src % val*(如果指定了 src)
+`xmod` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**/**I**/**M**]
+*dst([virtual-signal=signal-each]) = dst % val*
+*dst([virtual-signal=signal-each]) = src % val*(如果指定了 src)
 
-* `xpow` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**/**I**/**M**]
-  *dst([virtual-signal=signal-each]) = dst ^ val*
-  *dst([virtual-signal=signal-each]) = src ^ val*(如果指定了 src)
+`xpow` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**/**I**/**M**]
+*dst([virtual-signal=signal-each]) = dst ^ val*
+*dst([virtual-signal=signal-each]) = src ^ val*(如果指定了 src)
 
 
 ## SIMD 比较
@@ -702,72 +715,72 @@ blt r1 10 :counter
 将内存中每个信号的值与指定操作数比较, 满足条件的信号才会写入目标
 在双操作数版本中, *src* 与 *dst* 相同
 
-* `xceq` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
-  相等
-  *dst([virtual-signal=signal-each]) = src([virtual-signal=signal-each]), 如果 src([virtual-signal=signal-each]) == val*
+`xceq` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
+相等
+*dst([virtual-signal=signal-each]) = src([virtual-signal=signal-each]), 如果 src([virtual-signal=signal-each]) == val*
 
-* `xcne` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
-  不相等
-  *dst([virtual-signal=signal-each]) = src([virtual-signal=signal-each]), 如果 src([virtual-signal=signal-each]) != val*
+`xcne` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
+不相等
+*dst([virtual-signal=signal-each]) = src([virtual-signal=signal-each]), 如果 src([virtual-signal=signal-each]) != val*
 
-* `xcgt` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
-  大于
-  *dst([virtual-signal=signal-each]) = src([virtual-signal=signal-each]), 如果 src([virtual-signal=signal-each]) > val*
+`xcgt` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
+大于
+*dst([virtual-signal=signal-each]) = src([virtual-signal=signal-each]), 如果 src([virtual-signal=signal-each]) > val*
 
-* `xclt` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
-  小于
-  *dst([virtual-signal=signal-each]) = src([virtual-signal=signal-each]), 如果 src([virtual-signal=signal-each]) < val*
+`xclt` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
+小于
+*dst([virtual-signal=signal-each]) = src([virtual-signal=signal-each]), 如果 src([virtual-signal=signal-each]) < val*
 
-* `xcge` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
-  大于或等于
-  *dst([virtual-signal=signal-each]) = src([virtual-signal=signal-each]), 如果 src([virtual-signal=signal-each]) >= val*
+`xcge` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
+大于或等于
+*dst([virtual-signal=signal-each]) = src([virtual-signal=signal-each]), 如果 src([virtual-signal=signal-each]) >= val*
 
-* `xcle` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
-  小于或等于
-  *dst([virtual-signal=signal-each]) = src([virtual-signal=signal-each]), 如果 src([virtual-signal=signal-each]) <= val*
+`xcle` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
+小于或等于
+*dst([virtual-signal=signal-each]) = src([virtual-signal=signal-each]), 如果 src([virtual-signal=signal-each]) <= val*
 
 
 ## SIMD 位运算
 
-* `xand` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
-  与(AND)
-  *dst([virtual-signal=signal-each]) = dst & val* 
-  *dst([virtual-signal=signal-each]) = src & val*(如果指定了 src)
+`xand` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
+与(AND)
+*dst([virtual-signal=signal-each]) = dst & val* 
+*dst([virtual-signal=signal-each]) = src & val*(如果指定了 src)
 
-* `xor`  dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
-  或(OR)
-  *dst([virtual-signal=signal-each]) = dst | val* 
-  *dst([virtual-signal=signal-each]) = src | val*(如果指定了 src)
+`xor`  dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
+或(OR)
+*dst([virtual-signal=signal-each]) = dst | val* 
+*dst([virtual-signal=signal-each]) = src | val*(如果指定了 src)
 
-* `xxor` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
-  异或(XOR)
-  *dst([virtual-signal=signal-each]) = dst ^ val* 
-  *dst([virtual-signal=signal-each]) = src ^ val*(如果指定了 src)
+`xxor` dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
+异或(XOR)
+*dst([virtual-signal=signal-each]) = dst ^ val* 
+*dst([virtual-signal=signal-each]) = src ^ val*(如果指定了 src)
 
-* `xsl`  dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
-  左移
-  *dst([virtual-signal=signal-each]) = dst << val* 
-  *dst([virtual-signal=signal-each]) = src << val*(如果指定了 src)
+`xsl`  dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
+左移
+*dst([virtual-signal=signal-each]) = dst << val* 
+*dst([virtual-signal=signal-each]) = src << val*(如果指定了 src)
 
-* `xsr`  dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
-  右移
-  *dst([virtual-signal=signal-each]) = dst >> val* 
-  *dst([virtual-signal=signal-each]) = src >> val*(如果指定了 src)
+`xsr`  dst[**M**/**O**] src?[**I**/**M**/**N**] val[**V**/**R**]
+右移
+*dst([virtual-signal=signal-each]) = dst >> val* 
+*dst([virtual-signal=signal-each]) = src >> val*(如果指定了 src)
 
 
 ## SIMD 统计
 
-* `xmin` dst[**R**/**O**] src[**I**/**M**/**N**]
-  在 `src` 中找出最小信号并复制到 `dst`
-* `xmax` dst[**R**/**O**] src[**I**/**M**/**N**]
-  在 `src` 中找出最大信号并复制到 `dst`
-* `xavg` dst[**R**/**O**] src[**I**/**M**/**N**]
-  计算 `src` 中信号的平均值并赋给 `dst`
+`xmin` dst[**R**/**O**] src[**I**/**M**/**N**]
+在 `src` 中找出最小信号并复制到 `dst`
+`xmax` dst[**R**/**O**] src[**I**/**M**/**N**]
+在 `src` 中找出最大信号并复制到 `dst`
+`xavg` dst[**R**/**O**] src[**I**/**M**/**N**]
+计算 `src` 中信号的平均值并赋给 `dst`
 
-* `xmini` dst[**R**/**O**] src[**I**/**M**/**N**]
-  在 `src` 中找出最小信号, 并将其索引赋给 `dst`
-* `xmaxi` dst[**R**/**O**] src[**I**/**M**/**N**]
-  在 `src` 中找出最大信号, 并将其索引赋给 `dst`
+`xmini` dst[**R**/**O**] src[**I**/**M**/**N**]
+在 `src` 中找出最小信号, 并将其索引赋给 `dst`
+`xmaxi` dst[**R**/**O**] src[**I**/**M**/**N**]
+在 `src` 中找出最大信号, 并将其索引赋给 `dst`
 
 
 # 内存
