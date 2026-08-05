@@ -2,45 +2,33 @@ local LocaleRenderer
 local LocaleCache = {}
 
 local font_map = function(section)
-  local m = {
-    '',
-    '',
-    '',
-  }
-  local level = math.max(1, math.min(section.level - 0, #m))
-  return m[level] .. section.header
+  return section.header
 end
 
 -- TODO: optimize odd manipulations
 local function fcpu_load_docs(locale, sections)
   local cache = LocaleCache[locale]
 
-  if not (cache == nil or cache.wiki_menu == nil or cache.wiki_pages == nil) then
-    return
-  end
-
   cache.wiki_menu = {}
   cache.wiki_pages = {}
 
-  local number = 0
   local stack = {}
+  local home_id
 
   for _, v in ipairs(sections) do
-    number = number + 1
     local id = string.lower(v.header)
-    -- local lh = string.lower(v.header)
-    -- local id = string.gsub(lh, '[^%w]+', '-')
-    if id ~= 'fcpu' then
-      local top = stack[#stack]
-      if not top then
-        stack[#stack + 1] = { id = id, l = v.level }
-      elseif top.l == v.level then
-        stack[#stack + 1] = { id = id, l = v.level }
-      elseif top.l < v.level then
-        top[#top + 1] = { id = id, l = v.level }
-      else
-        stack[#stack] = nil
+    local top = stack[#stack]
+    if not top then
+      stack[#stack + 1] = { id = id, l = v.level }
+      if tonumber(v.level) == 1 and not home_id then
+        home_id = id
       end
+    elseif top.l == v.level then
+      stack[#stack + 1] = { id = id, l = v.level }
+    elseif top.l < v.level then
+      top[#top + 1] = { id = id, l = v.level }
+    else
+      stack[#stack] = nil
     end
     cache.wiki_pages[id] = {
       title = font_map(v),
@@ -61,6 +49,7 @@ local function fcpu_load_docs(locale, sections)
   end
 
   cache.wiki_menu = unmap(stack)
+  cache.wiki_home = home_id
 end
 
 local function verify_parsed(locale)
@@ -75,10 +64,7 @@ local function verify_parsed(locale)
 end
 
 local function locale_cache_for_player(player_index)
-  local player = game.players[player_index]
-  local locale = player and player.locale or 'en'
-  local cache = verify_parsed(locale)
-  return cache
+  return verify_parsed(game.players[player_index].locale)
 end
 
 local function fcpu_menu(player_index)
@@ -98,16 +84,14 @@ end
 
 local function fcpu_page_content(page_name, player_index, element)
   local cache = locale_cache_for_player(player_index)
-  if cache.wiki_pages[page_name] then
-    local content = cache.wiki_pages[page_name].content
 
+  if page_name == "fcpu" then
+    local home = cache.wiki_home and cache.wiki_pages[cache.wiki_home]
     element.add{type="picture", name="image_1", sprite="fcpu-zh-cn-thumbnail"}
-
-    if page_name == "fcpu" then
-        element.add{type="label", name="text_2", caption=cache.wiki_readme}
-    elseif content then
-      element.add{type="label", name="text_content", caption=content}
-    end
+    element.add{type="label", name="text_2", caption=home and home.content or cache.wiki_readme}
+  elseif cache.wiki_pages[page_name] then
+    element.add{type="picture", name="image_1", sprite="fcpu-zh-cn-thumbnail"}
+    element.add{type="label", name="text_content", caption=cache.wiki_pages[page_name].content}
   end
 
   if page_name == "penguin" then

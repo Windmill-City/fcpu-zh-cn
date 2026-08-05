@@ -2,7 +2,7 @@
 -- 本模组在 fCPU 之后加载，重新注册 fCPU 的 "fcpu" remote interface，
 -- 使 Informatron 渲染简体中文维基，而非 fCPU 自带的英文内容。
 
-local active_mods = script.active_mods or {}
+local active_mods = script.active_mods
 
 local have_informatron = active_mods['informatron']
 
@@ -13,8 +13,6 @@ if have_informatron then
   local RenderedCache = {}
 
   local function locale_renderer(locale)
-    locale = locale or 'en'
-
     if not RenderedCache[locale] then
       local fulltext, mdstate = md2frt.render(ReadmeZh)
       local sections = md2frt.renderSections(mdstate)
