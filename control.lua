@@ -8,7 +8,7 @@ local have_informatron = active_mods['informatron']
 
 if have_informatron then
   local md2frt = require('wiki/md2frt')
-  local ReadmeZh = require('wiki/readme.zh')
+  local ReadmeZh = require('wiki/readme_zh')
 
   local function locale_renderer(locale)
     local fulltext, mdstate = md2frt.render(ReadmeZh)
