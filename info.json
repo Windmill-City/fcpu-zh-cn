@@ -1,7 +1,7 @@
 {
   "name": "fcpu-zh-cn",
   "version": "1.0.0",
-  "title": "fCPU 简体中文汉化 [ZH-CN]",
+  "title": "fCPU 简体中文汉化",
   "description": "fCPU 的简体中文本地化补丁。\n以独立模组形式提供简体中文翻译，便于维护与更新。\n\n安装后覆盖 fCPU 界面文本，并让 Informatron 游戏内维基显示简体中文内容。",
   "author": "Windmill_City",
   "factorio_version": "2.0",
