@@ -276,6 +276,7 @@ local function readSimple(next, peek, tree)
             code[#code + 1] = peek()
             code[#code + 1] = NEWLINE
         end
+        tree[#tree + 1] = NEWLINE
         return next()
     end
 
