@@ -1,10 +1,6 @@
 local LocaleRenderer
 local LocaleCache = {}
 
-local font_map = function(section)
-  return section.header
-end
-
 -- TODO: optimize odd manipulations
 local function fcpu_load_docs(locale, sections)
   local cache = LocaleCache[locale]
@@ -31,7 +27,7 @@ local function fcpu_load_docs(locale, sections)
       stack[#stack] = nil
     end
     cache.wiki_pages[id] = {
-      title = font_map(v),
+      title = v.header,
       content = v.content
     }
   end
