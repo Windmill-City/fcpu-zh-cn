@@ -33,7 +33,21 @@ $LASTEXITCODE = 0
 if (-not (Test-Path -LiteralPath $distDir)) {
     New-Item -ItemType Directory -Path $distDir | Out-Null
 }
-Compress-Archive -Path $stageDir -DestinationPath $zipPath -Force
+
+if (Test-Path -LiteralPath $zipPath) {
+    Remove-Item -LiteralPath $zipPath -Force
+}
+
+Push-Location $env:TEMP | Out-Null
+try {
+    tar -a -c -f $zipPath $folderName
+    if ($LASTEXITCODE -ne 0) {
+        throw "tar failed with exit code $LASTEXITCODE"
+    }
+}
+finally {
+    Pop-Location
+}
 Remove-Item -LiteralPath $stageDir -Recurse -Force
 
 Write-Host "Built $zipPath"
