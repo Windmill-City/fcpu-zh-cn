@@ -1,6 +1,6 @@
 {
   "name": "fcpu-zh-cn",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "title": "fCPU 简体中文补丁",
   "description": "fCPU 的简体中文补丁\n\nfCPU 提供一个程控运算器，能够使用简单汇编语言处理游戏内信号。\n\n安装后覆盖 fCPU 界面文本，并让 Informatron 游戏内维基显示简体中文内容。",
   "author": "Windmill_City",
