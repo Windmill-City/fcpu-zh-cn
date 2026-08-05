@@ -101,7 +101,7 @@ local function fcpu_page_content(page_name, player_index, element)
   if cache.wiki_pages[page_name] then
     local content = cache.wiki_pages[page_name].content
 
-    element.add{type="button", name="image_1", style="fcpu_image_thumbnail"}
+    element.add{type="picture", name="image_1", sprite="fcpu-zh-cn-thumbnail"}
 
     if page_name == "fcpu" then
         element.add{type="label", name="text_2", caption=cache.wiki_readme}
@@ -113,7 +113,7 @@ local function fcpu_page_content(page_name, player_index, element)
   if page_name == "penguin" then
     element.add{type="label", name="text_1", caption={"fcpu.page_penguin_text_1"}}
     local image_container = element.add{type="frame", name="image_1", style="informatron_image_container", direction="vertical"}
-    image_container.add{type="button", name="image_1", style="fcpu_image_thumbnail"}
+    image_container.add{type="picture", name="image_1", sprite="fcpu-zh-cn-thumbnail"}
   end
 end
 
