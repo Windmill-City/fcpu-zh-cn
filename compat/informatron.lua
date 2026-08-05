@@ -86,10 +86,9 @@ end
 -- 渲染页面内容到 Informatron 的 GUI 元素上
 local function fcpu_page_content(docs, page_name, element)
   if page_name == "fcpu" then
-    -- 首页：显示首页章节内容，缺省时回退到全文
-    local home = docs.wiki_home and docs.wiki_pages[docs.wiki_home]
+    -- 首页：显示整个文档的全文内容
     element.add{type="button", name="image_1", style="fcpu-zh-cn-thumbnail"}
-    element.add{type="label", name="text_2", caption=home and home.content or docs.wiki_readme}
+    element.add{type="label", name="text_2", caption=docs.wiki_readme}
   elseif docs.wiki_pages[page_name] then
     -- 普通页面：显示对应章节正文
     element.add{type="button", name="image_1", style="fcpu-zh-cn-thumbnail"}
