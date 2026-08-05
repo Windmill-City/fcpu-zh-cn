@@ -10,22 +10,13 @@ if have_informatron then
   local md2frt = require('wiki/md2frt')
   local ReadmeZh = require('wiki/readme.zh')
 
-  local RenderedCache = {}
-
   local function locale_renderer(locale)
-    if not RenderedCache[locale] then
-      local fulltext, mdstate = md2frt.render(ReadmeZh)
-      local sections = md2frt.renderSections(mdstate)
+    local fulltext, mdstate = md2frt.render(ReadmeZh)
+    local sections = md2frt.renderSections(mdstate)
 
-      RenderedCache[locale] = {
-        ['fulltext'] = fulltext,
-        ['sections'] = sections,
-      }
-    end
-
-    return RenderedCache[locale].sections, RenderedCache[locale].fulltext
+    return sections, fulltext
   end
 
-  -- Informatron：覆盖 fCPU 注册的 "fcpu" 接口（本模组加载更晚，接口方法以后注册者为准）
+  -- Informatron：覆盖 fCPU 注册的 "fcpu" 接口
   require('compat/informatron').wiki_register(locale_renderer)
 end
