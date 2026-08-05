@@ -10,6 +10,7 @@
   "factorio_version": "2.0",
   "dependencies": [
     "base >= 2.0",
-    "fcpu >= 0.4.65"
+    "fcpu >= 0.4.65",
+    "? informatron"
   ]
 }
