@@ -88,11 +88,11 @@ local function fcpu_page_content(docs, page_name, element)
   if page_name == "fcpu" then
     -- 首页：显示首页章节内容，缺省时回退到全文
     local home = docs.wiki_home and docs.wiki_pages[docs.wiki_home]
-    element.add{type="picture", name="image_1", sprite="fcpu-zh-cn-thumbnail"}
+    element.add{type="sprite-button", name="image_1", sprite="fcpu-zh-cn-thumbnail"}
     element.add{type="label", name="text_2", caption=home and home.content or docs.wiki_readme}
   elseif docs.wiki_pages[page_name] then
     -- 普通页面：显示对应章节正文
-    element.add{type="picture", name="image_1", sprite="fcpu-zh-cn-thumbnail"}
+    element.add{type="sprite-button", name="image_1", sprite="fcpu-zh-cn-thumbnail"}
     element.add{type="label", name="text_content", caption=docs.wiki_pages[page_name].content}
   end
 
@@ -100,7 +100,7 @@ local function fcpu_page_content(docs, page_name, element)
     -- 企鹅页：附加说明文本和图片容器
     element.add{type="label", name="text_1", caption={"fcpu.page_penguin_text_1"}}
     local image_container = element.add{type="frame", name="image_1", style="informatron_image_container", direction="vertical"}
-    image_container.add{type="picture", name="image_1", sprite="fcpu-zh-cn-thumbnail"}
+    image_container.add{type="sprite-button", name="image_1", sprite="fcpu-zh-cn-thumbnail"}
   end
 end
 
@@ -109,10 +109,11 @@ local function caption_handler(data)
   return caption_override(docs_for_player(data.player_index), data.page_name)
 end
 
--- 注册"fcpu" remote 接口，覆盖 fCPU 原有的注册，使 Informatron 使用中文维基
+-- 覆盖 fCPU 已注册的 "fcpu" remote 接口，使 Informatron 使用中文维基。
 local function fcpu_wiki_informatron_register(locale_renderer)
   LocaleRenderer = locale_renderer
 
+  remote.remove_interface("fcpu")
   remote.add_interface("fcpu", {
     informatron_menu = function(data)
       return docs_for_player(data.player_index).wiki_menu
