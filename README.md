@@ -2,6 +2,9 @@
 
 本模组是 fCPU 的简体中文本地化补丁，以独立模组形式提供，便于单独维护与更新。
 
+- 仓库：<https://github.com/Windmill-City/fcpu-zh-cn>
+- 本项目基于 [MIT License](LICENSE) 发布。
+
 ## 内容
 
 - 完整汉化 fCPU 的界面文本与提示
