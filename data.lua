@@ -18,12 +18,3 @@ data.raw["gui-style"]["default"]["fcpu-zh-cn-thumbnail"] = {
   clicked_graphical_set = thumbnail_set,
   disabled_graphical_set = thumbnail_set,
 }
-
--- 开启「紧凑尺寸」设置时，把程控运算器的占地从 2x2 改成 2x1。
-if settings.startup["fcpu-zh-cn-compact-size"].value then
-  local fcpu = data.raw["entity"]["fcpu"]
-  if fcpu then
-    fcpu.collision_box = {{-0.65, -0.325}, {0.65, 0.325}}
-    fcpu.selection_box = {{-1, -0.5}, {1, 0.5}}
-  end
-end
